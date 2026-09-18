@@ -1,0 +1,18 @@
+[Unit]
+Description=ZOTHOS First-Boot Sovereign Bootstrap Provisioner
+Documentation=https://zoth.studio/docs/bootstrap
+After=network-online.target systemd-resolved.service
+Wants=network-online.target
+ConditionPathExists=!/var/lib/zothos/.bootstrap-done
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/zoth-bootstrap
+RemainAfterExit=yes
+TimeoutStartSec=600
+StandardOutput=journal+console
+StandardError=journal+console
+Environment=DEBIAN_FRONTEND=noninteractive
+
+[Install]
+WantedBy=multi-user.target

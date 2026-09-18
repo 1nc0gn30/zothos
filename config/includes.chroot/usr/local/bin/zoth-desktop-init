@@ -1,51 +1,89 @@
 #!/usr/bin/env bash
-# ==============================================================================
-#  ZOTHOS Apex Desktop Initialization Engine
-# ==============================================================================
+# =============================================================================
+#  ZOTHOS Apex Desktop Initialization Engine v2
+#  Applies theme, wallpaper, compositor, HUD, and panel on every session start
+# =============================================================================
 
-# 1. Update icon caches
-gtk-update-icon-cache -f -q /usr/share/icons/hicolor 2>/dev/null || true
+log() { echo "[zoth-desktop-init] $*"; }
+
+# ── 1. Update icon caches ──────────────────────────────────────────────────
+log "Updating icon caches..."
+gtk-update-icon-cache -f -q /usr/share/icons/hicolor       2>/dev/null || true
 gtk-update-icon-cache -f -q /usr/share/icons/Zoth-Hermetic 2>/dev/null || true
 
-# 2. Trust and mark all desktop launchers executable (prevents untrusted prompt)
+# ── 2. Trust all desktop launchers ────────────────────────────────────────
+log "Trusting desktop launchers..."
 if [[ -d "$HOME/Desktop" ]]; then
     chmod +x "$HOME"/Desktop/*.desktop 2>/dev/null || true
     for f in "$HOME"/Desktop/*.desktop; do
-        if [[ -f "$f" ]]; then
-            gio set "$f" metadata::trusted true 2>/dev/null || true
-            gio set "$f" metadata::xfce-exe-checksum "$(sha256sum "$f" 2>/dev/null | awk '{print $1}')" 2>/dev/null || true
-        fi
+        [[ -f "$f" ]] || continue
+        gio set "$f" metadata::trusted true 2>/dev/null || true
     done
 fi
 
-# 3. Ensure XFWM4 window theme and draggable settings are applied
-xfconf-query -c xfwm4 -p /general/theme -s "Zoth-Hermetic-Matrix" 2>/dev/null || true
-xfconf-query -c xfwm4 -p /general/easy_click -s "Alt" 2>/dev/null || true
-xfconf-query -c xfwm4 -p /general/button_layout -s "O|HMC" 2>/dev/null || true
-xfconf-query -c xsettings -p /Net/ThemeName -s "Zoth-Hermetic-Matrix" 2>/dev/null || true
-xfconf-query -c xsettings -p /Net/IconThemeName -s "Zoth-Hermetic" 2>/dev/null || true
-xfconf-query -c xsettings -p /Gtk/FontName -s "JetBrains Mono 10" 2>/dev/null || true
-xfconf-query -c xsettings -p /Gtk/MonospaceFontName -s "JetBrains Mono 10" 2>/dev/null || true
+# ── 3. XFCE4 theme settings ────────────────────────────────────────────────
+log "Applying ZOTHOS APEX theme..."
+xfconf-query -c xfwm4 -p /general/theme           -s "Zoth-Hermetic-Matrix" 2>/dev/null || true
+xfconf-query -c xfwm4 -p /general/easy_click      -s "Alt"                  2>/dev/null || true
+xfconf-query -c xfwm4 -p /general/button_layout   -s "O|HMC"                2>/dev/null || true
+xfconf-query -c xfwm4 -p /general/title_font      -s "JetBrains Mono Bold 9" 2>/dev/null || true
+xfconf-query -c xfwm4 -p /general/show_frame_shadow -s true                 2>/dev/null || true
 
-# 4. Set desktop wallpaper across all detected monitors in xfconf
+xfconf-query -c xsettings -p /Net/ThemeName       -s "Zoth-Hermetic-Matrix" 2>/dev/null || true
+xfconf-query -c xsettings -p /Net/IconThemeName   -s "Zoth-Hermetic"        2>/dev/null || true
+xfconf-query -c xsettings -p /Gtk/FontName        -s "JetBrains Mono 10"    2>/dev/null || true
+xfconf-query -c xsettings -p /Gtk/MonospaceFontName -s "JetBrains Mono 10"  2>/dev/null || true
+xfconf-query -c xsettings -p /Gtk/CursorThemeName -s "Adwaita"              2>/dev/null || true
+xfconf-query -c xsettings -p /Xft/DPI             -s 96                     2>/dev/null || true
+xfconf-query -c xsettings -p /Xft/Antialias       -s 1                      2>/dev/null || true
+xfconf-query -c xsettings -p /Xft/HintStyle       -s "hintfull"             2>/dev/null || true
+xfconf-query -c xsettings -p /Xft/RGBA            -s "rgb"                  2>/dev/null || true
+
+# ── 4. Wallpaper across all monitors ──────────────────────────────────────
+log "Setting wallpaper..."
 WALLPAPER="/usr/share/backgrounds/zothos/hermetic-matrix.png"
+if [[ ! -f "$WALLPAPER" ]]; then
+    WALLPAPER=$(ls /usr/share/backgrounds/zothos/*.jpg 2>/dev/null | head -1)
+fi
+
 if [[ -f "$WALLPAPER" ]]; then
+    # xfconf approach
     for prop in $(xfconf-query -c xfce4-desktop -l 2>/dev/null | grep "last-image"); do
         xfconf-query -c xfce4-desktop -p "$prop" -s "$WALLPAPER" 2>/dev/null || true
     done
     for prop in $(xfconf-query -c xfce4-desktop -l 2>/dev/null | grep "image-style"); do
         xfconf-query -c xfce4-desktop -p "$prop" -s 5 2>/dev/null || true
     done
+    # feh fallback (instant, reliable)
     feh --bg-fill "$WALLPAPER" 2>/dev/null || true
 fi
 
-# 5. Launch Desktop Telemetry HUD if not running
-if ! pgrep -f "zoth-desktop-hud" >/dev/null 2>&1; then
-    /usr/local/bin/zoth-desktop-hud &
+# ── 5. Start picom compositor ──────────────────────────────────────────────
+log "Starting compositor..."
+if ! pgrep -x picom &>/dev/null && ! pgrep -x compton &>/dev/null; then
+    PICOM_CONF="/etc/xdg/picom/picom-matrix.conf"
+    if command -v picom &>/dev/null && [[ -f "$PICOM_CONF" ]]; then
+        picom --config "$PICOM_CONF" --daemon 2>/dev/null &
+    elif command -v picom &>/dev/null; then
+        picom --backend glx --shadow --fading --blur-background --daemon 2>/dev/null &
+    elif command -v compton &>/dev/null; then
+        compton --backend glx --shadow --fading --daemon 2>/dev/null &
+    fi
 fi
 
-# 6. Reload xfdesktop and panel to render changes
-xfdesktop --reload 2>/dev/null || true
-xfce4-panel -r 2>/dev/null || true
+# ── 6. Launch HUD if not running ──────────────────────────────────────────
+log "Starting Desktop HUD..."
+if ! pgrep -f "zoth-desktop-hud" &>/dev/null; then
+    DISPLAY="${DISPLAY:-:0}" /usr/local/bin/zoth-desktop-hud &
+    disown
+fi
 
+# ── 7. Reload xfdesktop & panel ────────────────────────────────────────────
+log "Reloading XFCE desktop..."
+sleep 1
+xfdesktop --reload 2>/dev/null || true
+sleep 0.5
+
+
+log "ZOTHOS desktop initialization complete ✓"
 exit 0

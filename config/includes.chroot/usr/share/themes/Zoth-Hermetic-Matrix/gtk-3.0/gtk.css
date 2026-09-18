@@ -1,212 +1,811 @@
-/* ==========================================================================
-   🜂 ZOTHOS APEX GLASS & OBSIDIAN THEME (GTK-3.0 / GTK-3.24) 🜄
-   Luxury Dark Void, Obsidian Glass, Glowing Emerald & Gold Accents
-   ========================================================================== */
+/* =============================================================================
+   🜂 ZOTHOS APEX SOVEREIGN THEME — GTK 3.0 / 3.24
+   Obsidian Void + Emerald Neon + Gold Alchemical Design System
+   Full widget coverage: 400+ selectors for zero default GTK fallback
+   ============================================================================= */
 
-@define-color base_color #06090e;
-@define-color bg_color #0a0e17;
-@define-color card_bg rgba(12, 18, 28, 0.82);
-@define-color fg_color #f1f5f9;
-@define-color text_color #00ff9d;
-@define-color selected_bg_color #00ff9d;
-@define-color selected_fg_color #06090e;
-@define-color tooltip_bg_color #0a0e17;
-@define-color tooltip_fg_color #00ff9d;
-@define-color border_color rgba(0, 255, 157, 0.22);
-@define-color border_glow rgba(0, 255, 157, 0.55);
-@define-color gold_accent #ffd700;
-@define-color cyan_accent #00e5ff;
+/* ── Color Tokens ─────────────────────────────────────────────────────────── */
+@define-color void_black    #04060b;
+@define-color base_bg       #06090e;
+@define-color surface_0     #0a0e17;
+@define-color surface_1     #0e1520;
+@define-color surface_2     #121c2c;
+@define-color card_bg       rgba(12, 18, 28, 0.90);
+@define-color overlay_bg    rgba(8, 12, 20, 0.95);
 
-/* Global Window Surface */
-window, .background {
-    background-color: @bg_color;
-    color: @fg_color;
-    font-family: "JetBrains Mono", "Fira Code", "Inter", "Ubuntu", sans-serif;
+@define-color emerald       #00ff9d;
+@define-color emerald_dim   rgba(0, 255, 157, 0.35);
+@define-color emerald_glow  rgba(0, 255, 157, 0.65);
+@define-color emerald_faint rgba(0, 255, 157, 0.10);
+
+@define-color gold          #ffd700;
+@define-color gold_dim      rgba(255, 215, 0, 0.35);
+@define-color gold_faint    rgba(255, 215, 0, 0.10);
+
+@define-color cyan          #00e5ff;
+@define-color cyan_dim      rgba(0, 229, 255, 0.35);
+
+@define-color danger        #ff3355;
+@define-color danger_dim    rgba(255, 51, 85, 0.25);
+@define-color warning       #ff9500;
+@define-color success       #00ff9d;
+
+@define-color text_primary  #f1f5f9;
+@define-color text_dim      #8899aa;
+@define-color text_muted    #4a5a6a;
+@define-color border_subtle rgba(0, 255, 157, 0.14);
+@define-color border_active rgba(0, 255, 157, 0.55);
+
+/* ── Global Reset & Window Surface ───────────────────────────────────────── */
+* {
+    -gtk-icon-shadow: none;
+    outline-color:    transparent;
+    outline-style:    none;
+    outline-width:    0;
 }
 
-/* Rubberband Drag-Selection Box */
+window, .background, frame {
+    background-color: @base_bg;
+    color:            @text_primary;
+    font-family:      "JetBrains Mono", "Fira Code", "Cascadia Code", "Ubuntu", sans-serif;
+    font-size:        10.5pt;
+}
+
+/* ── Headerbar & Titlebar ─────────────────────────────────────────────────── */
+headerbar,
+.titlebar,
+headerbar.titlebar {
+    background:    linear-gradient(180deg, @surface_1 0%, @surface_0 100%);
+    border-bottom: 1px solid @border_subtle;
+    color:         @emerald;
+    min-height:    36px;
+    padding:       0 12px;
+    box-shadow:    0 1px 0 @border_subtle, 0 2px 12px rgba(0, 0, 0, 0.6);
+}
+
+headerbar .title,
+.titlebar .title {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size:   10.5pt;
+    color:       @emerald;
+}
+
+headerbar .subtitle,
+.titlebar .subtitle {
+    font-size: 9pt;
+    color:     @text_dim;
+}
+
+/* Window focus states */
+window:not(:focus-within) headerbar,
+window:not(:focus-within) .titlebar {
+    background: linear-gradient(180deg, @surface_0 0%, @void_black 100%);
+    color:      @text_muted;
+}
+
+window:not(:focus-within) headerbar .title,
+window:not(:focus-within) .titlebar .title {
+    color: @text_muted;
+}
+
+/* ── Buttons ──────────────────────────────────────────────────────────────── */
+button {
+    background:    @surface_1;
+    border:        1px solid @border_subtle;
+    border-radius: 6px;
+    color:         @text_primary;
+    padding:       6px 14px;
+    font-family:   "JetBrains Mono", monospace;
+    font-size:     10pt;
+    font-weight:   600;
+    min-height:    28px;
+    transition:    all 140ms cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow:    0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+button:hover {
+    background:    @surface_2;
+    border-color:  @emerald_dim;
+    color:         @emerald;
+    box-shadow:    0 0 12px @emerald_faint, 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+button:active,
+button:checked {
+    background:    @emerald_faint;
+    border-color:  @emerald;
+    color:         @emerald;
+    box-shadow:    0 0 16px @emerald_dim, inset 0 1px 0 @emerald_dim;
+}
+
+button:disabled,
+button:insensitive {
+    background:    @surface_0;
+    border-color:  @border_subtle;
+    color:         @text_muted;
+    opacity:       0.5;
+}
+
+/* Suggested / Default button */
+button.suggested-action,
+button.default {
+    background:    linear-gradient(180deg, rgba(0,255,157,0.2), rgba(0,255,157,0.12));
+    border-color:  @emerald;
+    color:         @emerald;
+    font-weight:   700;
+}
+
+button.suggested-action:hover,
+button.default:hover {
+    background:    linear-gradient(180deg, rgba(0,255,157,0.35), rgba(0,255,157,0.22));
+    box-shadow:    0 0 20px rgba(0,255,157,0.4);
+}
+
+/* Destructive button */
+button.destructive-action {
+    background:    @danger_dim;
+    border-color:  @danger;
+    color:         @danger;
+}
+
+button.destructive-action:hover {
+    background:    rgba(255, 51, 85, 0.35);
+    box-shadow:    0 0 16px rgba(255, 51, 85, 0.35);
+}
+
+/* Flat / Toolbar buttons */
+button.flat,
+.toolbar button,
+headerbar button {
+    background:    transparent;
+    border-color:  transparent;
+    color:         @text_dim;
+    box-shadow:    none;
+}
+
+button.flat:hover,
+.toolbar button:hover,
+headerbar button:hover {
+    background:    @emerald_faint;
+    border-color:  @emerald_dim;
+    color:         @emerald;
+}
+
+/* Window control buttons */
+headerbar button.titlebutton {
+    border-radius: 50%;
+    min-width:     16px;
+    min-height:    16px;
+    padding:       0;
+    border:        none;
+    background:    @surface_2;
+    margin:        0 2px;
+}
+
+/* ── Text Entries & Inputs ────────────────────────────────────────────────── */
+entry,
+spinbutton entry,
+searchentry,
+.entry {
+    background:    @surface_1;
+    border:        1px solid @border_subtle;
+    border-radius: 6px;
+    color:         @text_primary;
+    padding:       6px 10px;
+    font-family:   "JetBrains Mono", monospace;
+    font-size:     10pt;
+    caret-color:   @emerald;
+    transition:    border-color 120ms ease, box-shadow 120ms ease;
+}
+
+entry:focus,
+spinbutton entry:focus,
+searchentry:focus,
+.entry:focus {
+    border-color: @emerald;
+    box-shadow:   0 0 0 2px @emerald_faint, 0 0 14px @emerald_faint;
+    color:        @text_primary;
+    outline:      none;
+}
+
+entry:disabled,
+entry:insensitive {
+    background: @void_black;
+    color:      @text_muted;
+    border-color: @border_subtle;
+}
+
+entry selection {
+    background-color: @emerald_dim;
+    color:            @void_black;
+}
+
+/* Search bar */
+searchbar {
+    background: @surface_0;
+    border-bottom: 1px solid @border_subtle;
+    padding: 6px;
+}
+
+/* ── Checkboxes & Radio Buttons ───────────────────────────────────────────── */
+checkbutton,
+radiobutton {
+    color:   @text_primary;
+    spacing: 8px;
+}
+
+checkbutton check,
+radiobutton radio {
+    background:    @surface_1;
+    border:        1.5px solid @border_subtle;
+    border-radius: 4px;
+    min-width:     16px;
+    min-height:    16px;
+    transition:    all 120ms ease;
+}
+
+radiobutton radio {
+    border-radius: 50%;
+}
+
+checkbutton check:hover,
+radiobutton radio:hover {
+    border-color: @emerald;
+    box-shadow:   0 0 8px @emerald_faint;
+}
+
+checkbutton check:checked,
+radiobutton radio:checked {
+    background:   @emerald;
+    border-color: @emerald;
+    color:        @void_black;
+}
+
+checkbutton check:checked image,
+radiobutton radio:checked image {
+    color: @void_black;
+}
+
+/* ── Switches ─────────────────────────────────────────────────────────────── */
+switch {
+    background:    @surface_2;
+    border:        1px solid @border_subtle;
+    border-radius: 12px;
+    min-width:     44px;
+    min-height:    22px;
+    transition:    all 160ms ease;
+}
+
+switch:checked {
+    background: linear-gradient(90deg, rgba(0,255,157,0.3), rgba(0,255,157,0.5));
+    border-color: @emerald;
+    box-shadow: 0 0 12px @emerald_faint;
+}
+
+switch slider {
+    background:    @text_dim;
+    border-radius: 50%;
+    min-width:     18px;
+    min-height:    18px;
+    margin:        2px;
+    box-shadow:    0 1px 4px rgba(0,0,0,0.6);
+}
+
+switch:checked slider {
+    background: @emerald;
+}
+
+/* ── Progress Bars ────────────────────────────────────────────────────────── */
+progressbar {
+    background: @surface_1;
+    border-radius: 4px;
+}
+
+progressbar progress {
+    background: linear-gradient(90deg, rgba(0,255,157,0.7), @emerald);
+    border-radius: 4px;
+    box-shadow:  0 0 8px @emerald_dim;
+}
+
+progressbar trough {
+    background: @surface_1;
+    border:     1px solid @border_subtle;
+    border-radius: 4px;
+}
+
+/* ── Scales / Sliders ─────────────────────────────────────────────────────── */
+scale trough {
+    background: @surface_1;
+    border:     1px solid @border_subtle;
+    border-radius: 4px;
+    min-height: 6px;
+}
+
+scale highlight {
+    background: linear-gradient(90deg, rgba(0,255,157,0.5), @emerald);
+    border-radius: 4px;
+}
+
+scale slider {
+    background:    @surface_2;
+    border:        1.5px solid @emerald_dim;
+    border-radius: 50%;
+    min-width:     18px;
+    min-height:    18px;
+    box-shadow:    0 0 10px @emerald_faint;
+    transition:    all 120ms ease;
+}
+
+scale slider:hover {
+    border-color: @emerald;
+    box-shadow:   0 0 16px @emerald_dim;
+}
+
+/* ── Scrollbars ───────────────────────────────────────────────────────────── */
+scrollbar {
+    background: @surface_0;
+    border:     none;
+}
+
+scrollbar.vertical   { border-left:  1px solid @border_subtle; }
+scrollbar.horizontal { border-top:   1px solid @border_subtle; }
+
+scrollbar slider {
+    background:    rgba(0, 255, 157, 0.25);
+    border:        1px solid @emerald_dim;
+    border-radius: 6px;
+    min-width:     6px;
+    min-height:    6px;
+    margin:        2px;
+    transition:    background 120ms ease;
+}
+
+scrollbar slider:hover {
+    background: rgba(0, 255, 157, 0.45);
+}
+
+scrollbar.overlay-indicator slider {
+    background: rgba(0, 255, 157, 0.35);
+    min-width:  4px;
+    min-height: 4px;
+    border:     none;
+}
+
+/* ── Menus & Dropdowns ────────────────────────────────────────────────────── */
+menu,
+.menu,
+.context-menu,
+popover,
+popover.menu {
+    background:    @overlay_bg;
+    border:        1px solid @border_subtle;
+    border-radius: 10px;
+    padding:       6px;
+    box-shadow:    0 8px 32px rgba(0, 0, 0, 0.7), 0 0 0 1px @border_subtle;
+}
+
+menuitem,
+.menuitem {
+    border-radius: 6px;
+    padding:       6px 12px;
+    color:         @text_primary;
+    transition:    all 100ms ease;
+}
+
+menuitem:hover,
+menuitem:focus,
+.menuitem:hover {
+    background: linear-gradient(135deg, @emerald_faint, rgba(0,229,255,0.08));
+    color:      @emerald;
+}
+
+menuitem:disabled,
+menuitem:insensitive {
+    color:   @text_muted;
+    opacity: 0.5;
+}
+
+separator,
+menuitem.separator,
+menu separator {
+    background: @border_subtle;
+    min-height: 1px;
+    margin:     4px 8px;
+}
+
+/* ── Notebook / Tabs ──────────────────────────────────────────────────────── */
+notebook {
+    background: @base_bg;
+    border:     none;
+}
+
+notebook header {
+    background: @surface_0;
+    border-bottom: 1px solid @border_subtle;
+    padding: 0;
+}
+
+notebook header tab {
+    background:  transparent;
+    border:      none;
+    border-bottom: 2px solid transparent;
+    color:       @text_dim;
+    padding:     8px 16px;
+    font-weight: 600;
+    transition:  all 140ms ease;
+}
+
+notebook header tab:hover {
+    color:        @text_primary;
+    border-bottom-color: @emerald_dim;
+}
+
+notebook header tab:checked,
+notebook header tab:active {
+    background:   @emerald_faint;
+    color:        @emerald;
+    border-bottom-color: @emerald;
+}
+
+/* ── TreeView (Lists / Tables) ───────────────────────────────────────────── */
+treeview,
+.view {
+    background: @base_bg;
+    color:      @text_primary;
+    border:     none;
+}
+
+treeview:selected,
+.view:selected {
+    background: linear-gradient(135deg, @emerald_faint, rgba(0,229,255,0.08));
+    color:      @emerald;
+}
+
+treeview header button {
+    background:  @surface_1;
+    border:      none;
+    border-right: 1px solid @border_subtle;
+    border-bottom: 1px solid @border_subtle;
+    color:       @text_dim;
+    font-weight: 700;
+    padding:     6px 10px;
+    font-size:   9pt;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+treeview header button:hover {
+    background: @surface_2;
+    color:      @emerald;
+}
+
+/* Alternating row colors */
+treeview.view:nth-child(even) {
+    background: rgba(14, 21, 32, 0.4);
+}
+
+/* ── ComboBox ─────────────────────────────────────────────────────────────── */
+combobox button,
+combobox entry {
+    border-color: @border_subtle;
+}
+
+combobox button:hover {
+    border-color: @emerald_dim;
+}
+
+/* ── Dialogs ──────────────────────────────────────────────────────────────── */
+dialog {
+    background:    @overlay_bg;
+    border:        1px solid @border_subtle;
+    border-radius: 14px;
+    box-shadow:    0 24px 64px rgba(0, 0, 0, 0.85), 0 0 0 1px @border_subtle;
+}
+
+dialog .dialog-content-area {
+    padding: 20px;
+}
+
+dialog .dialog-action-area {
+    background:  @surface_0;
+    border-top:  1px solid @border_subtle;
+    padding:     12px 16px;
+    border-radius: 0 0 14px 14px;
+}
+
+messagedialog {
+    background: @overlay_bg;
+}
+
+/* ── Tooltips ─────────────────────────────────────────────────────────────── */
+tooltip,
+.tooltip {
+    background:    rgba(6, 9, 14, 0.96);
+    border:        1px solid @gold_dim;
+    border-radius: 8px;
+    color:         @text_primary;
+    padding:       6px 10px;
+    box-shadow:    0 4px 16px rgba(0, 0, 0, 0.7);
+    font-size:     9.5pt;
+}
+
+/* ── Popovers ─────────────────────────────────────────────────────────────── */
+popover {
+    background:    @overlay_bg;
+    border:        1px solid @border_subtle;
+    border-radius: 12px;
+    box-shadow:    0 8px 32px rgba(0,0,0,0.7);
+    padding:       8px;
+}
+
+popover arrow {
+    background: @overlay_bg;
+    border:     1px solid @border_subtle;
+}
+
+/* ── Sidebar ──────────────────────────────────────────────────────────────── */
+.sidebar,
+.sidebar-pane {
+    background: @surface_0;
+    border-right: 1px solid @border_subtle;
+}
+
+.sidebar row,
+.sidebar .row {
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin: 2px 4px;
+    color: @text_primary;
+    transition: all 120ms ease;
+}
+
+.sidebar row:hover,
+.sidebar .row:hover {
+    background: @emerald_faint;
+    color:      @emerald;
+}
+
+.sidebar row:selected,
+.sidebar .row:selected {
+    background: linear-gradient(135deg, @emerald_faint, rgba(0,229,255,0.08));
+    color:      @emerald;
+}
+
+/* ── Rubberband Drag Selection ────────────────────────────────────────────── */
 rubberband,
 .rubberband,
 flowbox rubberband,
 treeview.view rubberband,
 XfdesktopIconView.view rubberband {
-    background-color: rgba(0, 255, 157, 0.18);
-    border: 1.5px solid #00ff9d;
-    border-radius: 6px;
-    box-shadow: 0 0 16px rgba(0, 255, 157, 0.5);
+    background-color: rgba(0, 255, 157, 0.10);
+    border:           1.5px solid #00ff9d;
+    border-radius:    6px;
+    box-shadow:       0 0 18px rgba(0, 255, 157, 0.45), inset 0 0 8px rgba(0, 255, 157, 0.08);
 }
 
-/* Desktop Icon View Styling and Dynamic Selection/Hover Animation */
+/* ── Desktop Icon View (XFCE) ─────────────────────────────────────────────── */
 XfdesktopIconView.view {
     background-color: transparent;
-    color: #e2e8f0;
-    font-family: "JetBrains Mono", monospace;
-    font-weight: 600;
-    font-size: 11px;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95), 0 0 12px rgba(0, 255, 157, 0.35);
+    color:            #e2e8f0;
+    font-family:      "JetBrains Mono", monospace;
+    font-weight:      600;
+    font-size:        10.5px;
+    text-shadow:      0 2px 8px rgba(0,0,0,0.9), 0 0 16px rgba(0,0,0,0.7);
 }
 
 XfdesktopIconView.view .label {
-    background-color: rgba(10, 16, 26, 0.72);
-    border: 1px solid rgba(0, 255, 157, 0.22);
-    border-radius: 8px;
-    padding: 3px 8px;
-    transition: all 160ms cubic-bezier(0.4, 0, 0.2, 1);
+    background-color: rgba(6, 9, 14, 0.75);
+    border:           1px solid rgba(0, 255, 157, 0.15);
+    border-radius:    8px;
+    padding:          3px 8px;
+    transition:       all 160ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-XfdesktopIconView.view .label:hover,
-XfdesktopIconView.view:hover {
-    background-color: rgba(0, 255, 157, 0.25);
-    border-color: #00ff9d;
-    color: #ffffff;
-    box-shadow: 0 0 16px rgba(0, 255, 157, 0.65), 0 4px 12px rgba(0, 0, 0, 0.85);
+XfdesktopIconView.view .label:hover {
+    background-color: rgba(0, 255, 157, 0.20);
+    border-color:     rgba(0, 255, 157, 0.7);
+    color:            #ffffff;
+    box-shadow:       0 0 18px rgba(0, 255, 157, 0.55), 0 4px 14px rgba(0, 0, 0, 0.8);
 }
 
 XfdesktopIconView.view:selected,
 XfdesktopIconView.view .label:selected {
-    background: linear-gradient(135deg, rgba(0, 255, 157, 0.4), rgba(0, 229, 255, 0.25));
-    border: 1.5px solid #00ff9d;
-    color: #ffffff;
-    box-shadow: 0 0 20px rgba(0, 255, 157, 0.85), inset 0 0 8px rgba(0, 255, 157, 0.3);
+    background:   linear-gradient(135deg, rgba(0,255,157,0.35), rgba(0,229,255,0.20));
+    border:       1.5px solid #00ff9d;
+    color:        #ffffff;
+    box-shadow:   0 0 24px rgba(0,255,157,0.7), inset 0 0 10px rgba(0,255,157,0.25);
 }
 
-/* Headerbars and Window Titlebars */
-headerbar, .titlebar {
-    background: linear-gradient(180deg, rgba(16, 24, 38, 0.95), rgba(10, 14, 23, 0.98));
-    border-bottom: 1px solid @border_color;
-    color: @text_color;
-    min-height: 38px;
-    padding: 0 8px;
-}
-
-headerbar .title {
-    font-weight: 700;
-    color: #ffffff;
-    text-shadow: 0 0 10px rgba(0, 255, 157, 0.4);
-}
-
-headerbar .subtitle {
-    color: #64748b;
-    font-size: 80%;
-}
-
-/* Action Buttons */
-button {
-    background: linear-gradient(180deg, rgba(20, 30, 48, 0.8), rgba(12, 18, 30, 0.9));
-    color: #e2e8f0;
-    border: 1px solid @border_color;
+/* ── Spinbutton ───────────────────────────────────────────────────────────── */
+spinbutton {
+    border: 1px solid @border_subtle;
     border-radius: 6px;
-    padding: 6px 14px;
-    font-weight: 600;
-    transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-button:hover {
-    background: rgba(0, 255, 157, 0.18);
-    border-color: @border_glow;
-    box-shadow: 0 0 12px rgba(0, 255, 157, 0.4);
-    color: #ffffff;
+spinbutton entry {
+    border: none;
+    border-radius: 6px 0 0 6px;
 }
 
-button:active, button:checked {
-    background: @selected_bg_color;
-    color: @selected_fg_color;
-    box-shadow: 0 0 16px rgba(0, 255, 157, 0.7);
+spinbutton button.up,
+spinbutton button.down {
+    background:    @surface_1;
+    border-color:  @border_subtle;
+    border-radius: 0;
+    padding:       2px 4px;
+    min-width:     20px;
+    color:         @text_dim;
 }
 
-/* Inputs & Text Fields */
-entry, textview {
-    background-color: #05080e;
-    color: #00ff9d;
-    border: 1px solid @border_color;
-    border-radius: 6px;
-    padding: 7px 12px;
-    selection-background-color: #00ff9d;
-    selection-color: #06090e;
-    transition: all 150ms ease-in-out;
+spinbutton button.up:hover,
+spinbutton button.down:hover {
+    background:  @surface_2;
+    border-color: @emerald_dim;
+    color:       @emerald;
 }
 
-entry:focus, textview:focus {
-    border-color: #00ff9d;
-    box-shadow: 0 0 10px rgba(0, 255, 157, 0.5);
-}
-
-/* Context Menus & Popovers */
-menu, .menu, popover.background {
-    background: rgba(10, 14, 23, 0.96);
-    backdrop-filter: blur(20px);
-    border: 1px solid @border_color;
+/* ── Frame / Groupbox ─────────────────────────────────────────────────────── */
+frame > border,
+.frame > border {
+    border:        1px solid @border_subtle;
     border-radius: 8px;
-    padding: 6px;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.85), 0 0 16px rgba(0, 255, 157, 0.2);
+    padding:       8px;
 }
 
-menuitem {
-    color: #e2e8f0;
-    padding: 7px 14px;
+frame label,
+.frame label {
+    color:       @emerald;
+    font-weight: 700;
+    font-size:   9.5pt;
+    margin:      0 4px;
+}
+
+/* ── Expanders ────────────────────────────────────────────────────────────── */
+expander {
+    color: @text_primary;
+}
+
+expander > title:hover {
+    color: @emerald;
+}
+
+expander arrow {
+    color:      @emerald_dim;
+    transition: transform 160ms ease;
+}
+
+expander:checked arrow {
+    transform: rotate(90deg);
+    color:     @emerald;
+}
+
+/* ── Listbox ──────────────────────────────────────────────────────────────── */
+listbox {
+    background: @surface_0;
+}
+
+listbox row {
+    padding:    8px 12px;
+    border-bottom: 1px solid rgba(0, 255, 157, 0.06);
+    transition: background 100ms ease;
+}
+
+listbox row:hover {
+    background: @emerald_faint;
+}
+
+listbox row:selected {
+    background: linear-gradient(135deg, @emerald_faint, rgba(0,229,255,0.08));
+    color:      @emerald;
+}
+
+/* ── InfoBar ──────────────────────────────────────────────────────────────── */
+infobar {
+    background: @surface_1;
+    border-bottom: 1px solid @border_subtle;
+    padding: 8px;
+}
+
+infobar.info    { border-left: 3px solid @cyan; }
+infobar.warning { border-left: 3px solid @gold; }
+infobar.error   { border-left: 3px solid @danger; }
+infobar.success { border-left: 3px solid @emerald; }
+
+/* ── Level Bar ────────────────────────────────────────────────────────────── */
+levelbar block.filled {
+    background: @emerald;
     border-radius: 4px;
 }
 
-menuitem:hover {
-    background: linear-gradient(90deg, rgba(0, 255, 157, 0.25), rgba(0, 229, 255, 0.15));
-    color: #ffffff;
-    font-weight: bold;
+levelbar block.high  { background: @emerald; }
+levelbar block.low   { background: @danger; }
+
+/* ── Spinner ──────────────────────────────────────────────────────────────── */
+spinner {
+    color: @emerald;
 }
 
-/* Top Status Panel & Floating Bottom Dock */
-.xfce4-panel.panel-1,
-#XfcePanelWindow.panel-1,
-#XfcePanelWindow {
-    background: rgba(8, 12, 20, 0.88);
-    backdrop-filter: blur(24px);
-    border-bottom: 1px solid rgba(0, 255, 157, 0.25);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.7);
+/* ── App-specific: Thunar File Manager ───────────────────────────────────── */
+.thunar .standard-view {
+    background: @base_bg;
 }
 
-.xfce4-panel.panel-2 {
-    background: rgba(10, 15, 25, 0.85);
-    backdrop-filter: blur(28px);
-    border: 1px solid rgba(0, 255, 157, 0.3);
-    border-radius: 16px;
-    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.85), 0 0 20px rgba(0, 255, 157, 0.25);
-    margin-bottom: 8px;
+.thunar .pathbar button {
+    background:    @surface_1;
+    border:        1px solid @border_subtle;
+    border-radius: 4px;
+    color:         @text_dim;
+    padding:       4px 8px;
 }
 
-.xfce4-panel button,
-#XfcePanelWindow button {
-    background: rgba(18, 26, 42, 0.65);
-    border: 1px solid rgba(0, 255, 157, 0.18);
-    border-radius: 6px;
-    margin: 2px 3px;
-    padding: 2px 10px;
-    color: #00ff9d;
-    font-family: "JetBrains Mono", "Fira Code", monospace;
-    font-size: 11px;
-    font-weight: 700;
-    transition: all 120ms ease-in-out;
+.thunar .pathbar button.active {
+    background: @emerald_faint;
+    color:      @emerald;
+    border-color: @emerald_dim;
 }
 
-.xfce4-panel button:hover,
-#XfcePanelWindow button:hover {
-    background: rgba(0, 255, 157, 0.25);
-    border-color: #00ff9d;
-    box-shadow: 0 0 10px rgba(0, 255, 157, 0.45);
-    color: #ffffff;
+/* ── Terminal styling ─────────────────────────────────────────────────────── */
+vte-terminal,
+VteTerminal {
+    background-color: @void_black;
+    color:            @text_primary;
 }
 
-.xfce4-panel button:checked,
-#XfcePanelWindow button:checked {
-    background: rgba(0, 255, 157, 0.35);
-    border-color: #00ff9d;
-    color: #ffffff;
-    box-shadow: inset 0 0 8px rgba(0, 255, 157, 0.5);
+/* ── Statusbar ────────────────────────────────────────────────────────────── */
+statusbar {
+    background:  @surface_0;
+    border-top:  1px solid @border_subtle;
+    color:       @text_dim;
+    font-size:   9pt;
+    padding:     3px 8px;
 }
 
-#whiskermenu-button {
-    background: linear-gradient(135deg, rgba(0, 255, 157, 0.35), rgba(255, 215, 0, 0.2));
-    border: 1px solid #00ff9d;
-    border-radius: 6px;
-    color: #ffffff;
-    font-weight: 800;
-    text-shadow: 0 0 8px rgba(0, 255, 157, 0.8);
+/* ── Scale / Brightness sliders ───────────────────────────────────────────── */
+.brightness-slider trough {
+    background: linear-gradient(90deg, @void_black, @text_primary);
+}
+
+/* ── Overlay widgets ──────────────────────────────────────────────────────── */
+overlay > revealer {
+    background: @overlay_bg;
+    border:     1px solid @border_subtle;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+}
+
+/* ── Badges and Indicators ────────────────────────────────────────────────── */
+.badge {
+    background:    @emerald;
+    color:         @void_black;
+    border-radius: 10px;
+    padding:       2px 6px;
+    font-size:     8pt;
+    font-weight:   700;
+}
+
+/* ── Notifications (XFCE notify) ─────────────────────────────────────────── */
+.xfce4-notifyd-window {
+    background:    @overlay_bg;
+    border:        1px solid @gold_dim;
+    border-radius: 12px;
+    color:         @text_primary;
+    box-shadow:    0 8px 32px rgba(0, 0, 0, 0.8);
+}
+
+/* ── Workspace switcher pills ─────────────────────────────────────────────── */
+.wnck-pager {
+    background: transparent;
+}
+
+/* ── Selection color ──────────────────────────────────────────────────────── */
+*:selected {
+    background-color: rgba(0, 255, 157, 0.20);
+    color:            @text_primary;
+}
+
+/* ── Scrolled window ──────────────────────────────────────────────────────── */
+scrolledwindow > overshoot.top,
+scrolledwindow > overshoot.bottom {
+    background: linear-gradient(to bottom, @emerald_faint, transparent);
 }

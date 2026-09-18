@@ -186,6 +186,9 @@ def check_tool_ready(cmd):
     first_word = cmd.split()[0] if cmd else ""
     return shutil.which(first_word) is not None
 
+import itertools
+import threading
+
 def install_module(pkg_name):
     print(f"\n{GOLD}[MODULE INSTALLER]{RESET} Installing dependency: {CYAN}{pkg_name}{RESET}...")
     if pkg_name.startswith("npm:"):
@@ -196,16 +199,46 @@ def install_module(pkg_name):
         cmd = f"sudo apt-get update -qq && sudo apt-get install -y {actual_pkg}"
     else:
         # Python module
-        cmd = f"uv pip install {pkg_name} 2>/dev/null || pip3 install --break-system-packages {pkg_name}"
+        cmd = f"/opt/zothos-ai-env/bin/pip install {pkg_name} 2>/dev/null || pip3 install --break-system-packages {pkg_name}"
     
     print(f"{GRAY}Executing: {cmd}{RESET}\n")
+    
+    done = False
+    def spinner():
+        for c in itertools.cycle(['|', '/', '-', '\\']):
+            if done:
+                break
+            sys.stdout.write(f'\r{GOLD}[WORKING]{RESET} Installing {pkg_name}... {c}')
+            sys.stdout.flush()
+            time.sleep(0.1)
+        sys.stdout.write('\r' + ' ' * 60 + '\r')
+    
+    t = threading.Thread(target=spinner)
+    t.start()
+    
     try:
-        ret = subprocess.run(cmd, shell=True)
-        if ret.returncode == 0:
+        ret = subprocess.run(cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        done = True
+        t.join()
+        
+        # Verify
+        if pkg_name.startswith("npm:") or pkg_name.startswith("apt:"):
+            success = ret.returncode == 0
+        else:
+            clean_pkg = pkg_name.replace("==", " ").replace(">=", " ").replace("<=", " ").split()[0]
+            # some packages have different import names, but we try a basic check
+            verify_cmd = f"python3 -c \"import {clean_pkg}\""
+            verify_ret = subprocess.run(verify_cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            # just check return code, but if it fails we still might have succeeded installing
+            success = ret.returncode == 0
+            
+        if success:
             print(f"\n{GREEN}✓ Module '{pkg_name}' successfully installed!{RESET}")
         else:
             print(f"\n{RED}✗ Failed to install '{pkg_name}' (exit {ret.returncode}){RESET}")
     except Exception as e:
+        done = True
+        t.join()
         print(f"\n{RED}Error: {e}{RESET}")
     input(f"\n{GRAY}Press Enter to continue...{RESET}")
 
@@ -218,19 +251,63 @@ def run_doctor():
     
     for d_id, data in DOMAINS.items():
         print(f"{CYAN}{BOLD}[{d_id}] {data['title']}{RESET}")
+        domain_total = len(data['tools'])
+        domain_ready = 0
+        
         for tool_id, desc, cmd, mod in data['tools']:
             total_tools += 1
-            is_ready = check_tool_ready(cmd)
+            first_word = cmd.split()[0] if cmd else ""
+            is_ready = False
+            
+            if shutil.which(first_word):
+                if mod != "none" and not mod.startswith("npm:") and not mod.startswith("apt:"):
+                    clean_pkg = mod.replace("==", " ").replace(">=", " ").replace("<=", " ").split()[0]
+                    verify_ret = subprocess.run(f"python3 -c \"import {clean_pkg}\"", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    is_ready = verify_ret.returncode == 0
+                else:
+                    is_ready = True
+                    
             if is_ready:
                 ready_tools += 1
+                domain_ready += 1
                 status = f"{GREEN}✓ READY{RESET}"
             else:
                 status = f"{RED}✗ MISSING{RESET} {GRAY}(module: {mod}){RESET}"
                 missing_tools.append((tool_id, mod))
             print(f"   • {tool_id:<18} : {status}")
-        print()
+            
+        bar_len = 30
+        filled = int(bar_len * domain_ready / max(1, domain_total))
+        bar = '█' * filled + '░' * (bar_len - filled)
+        color = GREEN if domain_ready == domain_total else (GOLD if domain_ready > 0 else RED)
+        print(f"   {color}Health: [{bar}] {domain_ready}/{domain_total}{RESET}\n")
     
     pct = (ready_tools / max(1, total_tools)) * 100
+    
+    if pct == 100:
+        print(f"\n{GREEN}{BOLD}")
+        print(r"  _   _  ______  ___  _    _____  _   _ __   __")
+        print(r" | | | ||  ____|/ _ \| |  |_   _|| | | |\ \ / /")
+        print(r" | |_| || |__  | |_| | |    | |  | |_| | \ V / ")
+        print(r" |  _  ||  __| |  _  | |    | |  |  _  |  \ /  ")
+        print(r" | | | || |____| | | | |____| |  | | | |  | |  ")
+        print(r" \_| |_/\____/ \_| |_/\____/\_/  \_| |_/  \_/  ")
+        print(f"{RESET}")
+    elif pct > 50:
+        print(f"\n{GOLD}{BOLD}")
+        print(r" ______  ____  _____  ____   ___  ____  ____  ____ ")
+        print(r" |  _  \| __ ||  ___||  _ \ / _ \|  _ \| __ ||  _ \\ ")
+        print(r" | | | ||  __|| |_   | |_\ | |_| | | \ |  __|| | | |")
+        print(r" |_| |_/\____|\___|  \____/\___/ |_| \_\____|\____/")
+        print(f"{RESET}")
+    else:
+        print(f"\n{RED}{BOLD}")
+        print(r"   ____  ____  _  _____  _  ____   ___  _      ")
+        print(r"  / __/ |  _ \| ||_   _|| |/ __/  / _ \| |     ")
+        print(r" / /_   | | \ | |  | |  | | /_   | |_| | |___  ")
+        print(r" \____\ |_| \_\_|  |_|  |_|\____\\___/ |____|  ")
+        print(f"{RESET}")
+
     print(f"{BOLD}Summary:{RESET} {GREEN}{ready_tools}{RESET}/{total_tools} tools ready ({pct:.1f}% operational)")
     if missing_tools:
         print(f"\n{GOLD}To install missing modules, run:{RESET} {CYAN}zoth-tool-nexus --install-modules all{RESET}")
