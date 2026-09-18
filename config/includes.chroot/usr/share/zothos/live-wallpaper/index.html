@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZOTHOS // INTERACTIVE VISUAL FX ENGINE</title>
+  <title>ZOTHOS // 3D LIGHTWEIGHT THREE.JS FX ENGINE</title>
+  <!-- Local Offline Three.js & Controls -->
+  <script src="./vendor/three.min.js"></script>
+  <script src="./vendor/OrbitControls.js"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -66,7 +69,7 @@
       color: var(--fg);
     }
 
-    #canvas-container {
+    #webgl-container {
       position: absolute;
       top: 0;
       left: 0;
@@ -75,7 +78,17 @@
       z-index: 1;
     }
 
-    /* CRT Scanline & Glitch Overlay */
+    #canvas2d-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      display: none;
+    }
+
+    /* CRT Scanline & Subtle Glitch Overlay */
     .crt-overlay {
       position: absolute;
       top: 0;
@@ -84,7 +97,7 @@
       height: 100%;
       pointer-events: none;
       z-index: 2;
-      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
       background-size: 100% 3px, 4px 100%;
     }
 
@@ -140,8 +153,8 @@
     }
 
     .btn-exit {
-      background: rgba(239, 68, 68, 0.2);
-      border: 1px solid rgba(239, 68, 68, 0.6);
+      background: rgba(239, 68, 68, 0.25);
+      border: 1px solid rgba(239, 68, 68, 0.7);
       color: #fca5a5;
       padding: 8px 18px;
       border-radius: 999px;
@@ -188,14 +201,13 @@
       position: absolute;
       top: 75px;
       right: 20px;
-      width: 350px;
+      width: 360px;
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: 12px;
       backdrop-filter: blur(20px);
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), var(--glow);
       z-index: 50;
-      transition: opacity 0.2s ease, transform 0.2s ease;
     }
 
     .hud-header {
@@ -349,15 +361,19 @@
 </head>
 <body>
 
-  <!-- Background Animated Visual Canvas -->
-  <canvas id="canvas-container"></canvas>
+  <!-- WebGL Three.js Container -->
+  <div id="webgl-container"></div>
+
+  <!-- Fallback 2D Canvas Container -->
+  <canvas id="canvas2d-container"></canvas>
+
   <div class="crt-overlay"></div>
 
   <!-- Persistent Top Action Bar -->
   <div class="top-action-bar">
     <div class="brand-pill">
       <div class="pulse-dot"></div>
-      <span>ZOTHOS // FX ENGINE</span>
+      <span>ZOTHOS // 3D THREE.JS FX ENGINE</span>
     </div>
     <div class="exit-controls">
       <button class="btn-fullscreen" onclick="toggleFullscreen()" title="Toggle Fullscreen (F)">⛶ FULLSCREEN</button>
@@ -368,16 +384,17 @@
   <!-- Floating Draggable Control HUD -->
   <div class="hud-window" id="hudWindow">
     <div class="hud-header" id="hudHeader">
-      <div class="hud-title">⚡ VISUAL FILTER & MATRIX FX</div>
+      <div class="hud-title">⚡ 3D SCENE & FX CONTROLLER</div>
       <span style="font-size: 10px; color: #94a3b8;">DRAG TO MOVE</span>
     </div>
     <div class="hud-body">
       <div>
         <div class="section-title">Visual Paradigm</div>
         <div class="mode-buttons">
-          <button class="btn active" onclick="setVisualMode('matrix')">Matrix Rain</button>
-          <button class="btn" onclick="setVisualMode('sacred')">Sacred Azoth</button>
-          <button class="btn" onclick="setVisualMode('neural')">Neural Net</button>
+          <button class="btn active" onclick="setVisualMode('3d-orb')">3D Azoth Orb</button>
+          <button class="btn" onclick="setVisualMode('3d-grid')">3D Cyber Grid</button>
+          <button class="btn" onclick="setVisualMode('3d-emblem')">3D Golden Z</button>
+          <button class="btn" onclick="setVisualMode('matrix')">Matrix Rain</button>
           <button class="btn" onclick="setVisualMode('datamosh')">Datamosh</button>
         </div>
       </div>
@@ -394,18 +411,18 @@
 
       <div class="slider-group">
         <div class="slider-label">
-          <span>Glitch Intensity</span>
-          <span id="glitchVal">25%</span>
-        </div>
-        <input type="range" id="glitchSlider" min="0" max="100" value="25" oninput="updateSliders()">
-      </div>
-
-      <div class="slider-group">
-        <div class="slider-label">
           <span>Simulation Speed</span>
           <span id="speedVal">1.0x</span>
         </div>
         <input type="range" id="speedSlider" min="2" max="30" value="10" oninput="updateSliders()">
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-label">
+          <span>Particle & Glow Depth</span>
+          <span id="glowVal">100%</span>
+        </div>
+        <input type="range" id="glowSlider" min="10" max="200" value="100" oninput="updateSliders()">
       </div>
 
       <button class="btn-exit" style="width: 100%; justify-content: center; margin-top: 4px;" onclick="exitLiveWallpaper()">
@@ -416,18 +433,16 @@
 
   <!-- Bottom keyboard hints -->
   <div class="hint-bar">
-    <kbd>ESC</kbd> Exit to Desktop &nbsp;•&nbsp; <kbd>SPACE</kbd> Toggle HUD &nbsp;•&nbsp; <kbd>F</kbd> Fullscreen &nbsp;•&nbsp; <kbd>1-4</kbd> Switch Mode
+    <kbd>ESC</kbd> Exit &nbsp;•&nbsp; <kbd>SPACE</kbd> HUD &nbsp;•&nbsp; <kbd>F</kbd> Fullscreen &nbsp;•&nbsp; <kbd>1-5</kbd> Switch 3D/2D Modes &nbsp;•&nbsp; Click+Drag to Orbit 3D
   </div>
 
   <script>
     // ── EXIT HANDLING ───────────────────────────────────────────────────────
     function exitLiveWallpaper() {
-      // Clean window close / redirect or message
       if (window.opener) {
         window.close();
       } else {
         window.close();
-        // Fallback for browsers preventing window.close()
         window.location.href = "about:blank";
       }
     }
@@ -441,12 +456,14 @@
       } else if (e.key === ' ' || e.code === 'Space') {
         toggleHud();
       } else if (e.key === '1') {
-        setVisualMode('matrix');
+        setVisualMode('3d-orb');
       } else if (e.key === '2') {
-        setVisualMode('sacred');
+        setVisualMode('3d-grid');
       } else if (e.key === '3') {
-        setVisualMode('neural');
+        setVisualMode('3d-emblem');
       } else if (e.key === '4') {
+        setVisualMode('matrix');
+      } else if (e.key === '5') {
         setVisualMode('datamosh');
       }
     });
@@ -466,233 +483,374 @@
       hud.style.display = hud.style.display === 'none' ? 'block' : 'none';
     }
 
-    // ── CANVAS ENGINE ──────────────────────────────────────────────────────
-    const canvas = document.getElementById('canvas-container');
-    const ctx = canvas.getContext('2d');
-
-    let width, height;
-    function resize() {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', resize);
-    resize();
-
-    let currentMode = 'matrix';
-    let glitchIntensity = 0.25;
+    // ── 3D THREE.JS SCENE SETUP ────────────────────────────────────────────
+    let scene, camera, renderer, controls;
+    let currentMode = '3d-orb';
     let speed = 1.0;
-    let mouse = { x: width / 2, y: height / 2, down: false };
+    let glowScale = 1.0;
 
-    window.addEventListener('mousemove', (e) => {
-      mouse.x = e.clientX;
-      mouse.y = e.clientY;
-    });
-    window.addEventListener('mousedown', () => mouse.down = true);
-    window.addEventListener('mouseup', () => mouse.down = false);
+    const webglContainer = document.getElementById('webgl-container');
+    const canvas2d = document.getElementById('canvas2d-container');
+    const ctx2d = canvas2d.getContext('2d');
 
-    // ── 1. MATRIX RAIN ENGINE ──────────────────────────────────────────────
-    const chars = '0123456789ABCDEFѰ🜂🜄🜁🜃ZOTHOSNULLAIΩΨλπµ§±√';
-    const fontSize = 16;
-    let columns = Math.floor(window.innerWidth / fontSize);
-    let drops = Array(columns).fill(1);
+    // Color theme map for Three.js
+    const PALETTES = {
+      emerald: { primary: 0x00ff88, secondary: 0x00f3ff, bg: 0x02040a, particles: 0x6ee7b7 },
+      ghost:   { primary: 0xc084fc, secondary: 0xa855f7, bg: 0x07030e, particles: 0xe9d5ff },
+      gold:    { primary: 0xfbbf24, secondary: 0xf59e0b, bg: 0x0d0902, particles: 0xfef08a },
+      cyan:    { primary: 0x00f3ff, secondary: 0x38bdf8, bg: 0x020a14, particles: 0xbae6fd }
+    };
 
-    window.addEventListener('resize', () => {
-      columns = Math.floor(window.innerWidth / fontSize);
-      drops = Array(columns).fill(1);
-    });
+    let activePalette = PALETTES.emerald;
 
-    function drawMatrix() {
-      ctx.fillStyle = `rgba(2, 4, 10, ${0.08 * speed})`;
-      ctx.fillRect(0, 0, width, height);
+    // 3D Objects
+    let orbGroup, gridGroup, emblemGroup, starPoints;
 
-      const computedStyle = getComputedStyle(document.documentElement);
-      const accent = computedStyle.getPropertyValue('--accent').trim();
+    function initThree() {
+      if (!window.THREE) return false;
 
-      ctx.fillStyle = accent;
-      ctx.font = `${fontSize}px 'JetBrains Mono', monospace`;
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(activePalette.bg);
+      scene.fog = new THREE.FogExp2(activePalette.bg, 0.002);
 
-      for (let i = 0; i < drops.length; i++) {
-        const text = chars.charAt(Math.floor(Math.random() * chars.length));
-        const x = i * fontSize;
-        const y = drops[i] * fontSize;
+      camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 0, 80);
 
-        // Head glyph glows brighter
-        if (Math.random() > 0.85) {
-          ctx.fillStyle = '#ffffff';
-        } else {
-          ctx.fillStyle = accent;
-        }
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      webglContainer.appendChild(renderer.domElement);
 
-        ctx.fillText(text, x, y);
-
-        if (y > height && Math.random() > 0.975) {
-          drops[i] = 0;
-        }
-        drops[i] += speed * 0.7;
-      }
-    }
-
-    // ── 2. SACRED GEOMETRY / AZOTH ENGINE ──────────────────────────────────
-    let angle = 0;
-    function drawSacred() {
-      ctx.fillStyle = 'rgba(2, 4, 10, 0.15)';
-      ctx.fillRect(0, 0, width, height);
-
-      ctx.save();
-      ctx.translate(width / 2, height / 2);
-      angle += 0.01 * speed;
-
-      const computedStyle = getComputedStyle(document.documentElement);
-      const accent = computedStyle.getPropertyValue('--accent').trim();
-      const accent2 = computedStyle.getPropertyValue('--accent2').trim();
-
-      // Outer Ring
-      ctx.beginPath();
-      ctx.arc(0, 0, 180 + Math.sin(angle * 2) * 10, 0, Math.PI * 2);
-      ctx.strokeStyle = accent;
-      ctx.lineWidth = 2;
-      ctx.shadowBlur = 15;
-      ctx.shadowColor = accent;
-      ctx.stroke();
-
-      // Rotating Hexagons & Triangles
-      for (let k = 0; k < 3; k++) {
-        ctx.save();
-        ctx.rotate(angle * (k % 2 === 0 ? 1 : -1) + (k * Math.PI / 3));
-        ctx.beginPath();
-        for (let i = 0; i < 6; i++) {
-          const a = (i * Math.PI) / 3;
-          const r = 140 - k * 35;
-          const x = Math.cos(a) * r;
-          const y = Math.sin(a) * r;
-          if (i === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
-        }
-        ctx.closePath();
-        ctx.strokeStyle = k === 1 ? accent2 : accent;
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-        ctx.restore();
+      if (window.THREE.OrbitControls) {
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.maxDistance = 250;
+        controls.minDistance = 20;
       }
 
-      // Center Pulsing Core
-      ctx.beginPath();
-      ctx.arc(0, 0, 24 + Math.sin(angle * 4) * 8, 0, Math.PI * 2);
-      ctx.fillStyle = accent;
-      ctx.shadowBlur = 30;
-      ctx.shadowColor = accent;
-      ctx.fill();
+      // Lights
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambientLight);
 
-      ctx.restore();
+      const pointLight1 = new THREE.PointLight(activePalette.primary, 3, 200);
+      pointLight1.position.set(40, 40, 50);
+      scene.add(pointLight1);
+
+      const pointLight2 = new THREE.PointLight(activePalette.secondary, 2, 200);
+      pointLight2.position.set(-40, -40, -50);
+      scene.add(pointLight2);
+
+      buildStarfield();
+      buildOrbScene();
+      buildGridScene();
+      buildEmblemScene();
+
+      updateSceneVisibility();
+      return true;
     }
 
-    // ── 3. NEURAL NETWORK ENGINE ───────────────────────────────────────────
-    const particleCount = 70;
-    const particles = [];
-    for (let i = 0; i < particleCount; i++) {
-      particles.push({
-        x: Math.random() * window.innerWidth,
-        y: Math.random() * window.innerHeight,
-        vx: (Math.random() - 0.5) * 1.5,
-        vy: (Math.random() - 0.5) * 1.5,
-        size: Math.random() * 3 + 1
+    // 1. Particle Starfield
+    function buildStarfield() {
+      const starGeo = new THREE.BufferGeometry();
+      const starCount = 1200;
+      const starPos = new Float32Array(starCount * 3);
+
+      for (let i = 0; i < starCount * 3; i += 3) {
+        starPos[i] = (Math.random() - 0.5) * 400;
+        starPos[i + 1] = (Math.random() - 0.5) * 400;
+        starPos[i + 2] = (Math.random() - 0.5) * 400;
+      }
+
+      starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+      const starMat = new THREE.PointsMaterial({
+        size: 1.5,
+        color: activePalette.particles,
+        transparent: true,
+        opacity: 0.8
       });
+
+      starPoints = new THREE.Points(starGeo, starMat);
+      scene.add(starPoints);
     }
 
-    function drawNeural() {
-      ctx.fillStyle = 'rgba(2, 4, 10, 0.2)';
-      ctx.fillRect(0, 0, width, height);
+    // 2. 3D Alchemical Synthesis Orb & Concentric Gyro Torus Rings
+    function buildOrbScene() {
+      orbGroup = new THREE.Group();
 
-      const computedStyle = getComputedStyle(document.documentElement);
-      const color = computedStyle.getPropertyValue('--accent').trim();
+      // Core Icosahedron Orb
+      const coreGeo = new THREE.IcosahedronGeometry(14, 3);
+      const coreMat = new THREE.MeshStandardMaterial({
+        color: activePalette.primary,
+        wireframe: true,
+        emissive: activePalette.primary,
+        emissiveIntensity: 0.5,
+        roughness: 0.2
+      });
+      const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+      orbGroup.add(coreMesh);
 
-      for (let i = 0; i < particles.length; i++) {
-        let p = particles[i];
-        p.x += p.vx * speed;
-        p.y += p.vy * speed;
+      // Inner Glowing Sphere
+      const innerGeo = new THREE.SphereGeometry(8, 32, 32);
+      const innerMat = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        wireframe: false
+      });
+      const innerMesh = new THREE.Mesh(innerGeo, innerMat);
+      orbGroup.add(innerMesh);
 
-        if (p.x < 0 || p.x > width) p.vx *= -1;
-        if (p.y < 0 || p.y > height) p.vy *= -1;
+      // Concentric Rotating Torus Rings
+      const torus1Geo = new THREE.TorusGeometry(22, 0.6, 16, 100);
+      const torus1Mat = new THREE.MeshBasicMaterial({ color: activePalette.primary, wireframe: false });
+      const torus1 = new THREE.Mesh(torus1Geo, torus1Mat);
+      torus1.rotation.x = Math.PI / 4;
+      orbGroup.add(torus1);
 
-        // Mouse attraction
-        const dx = mouse.x - p.x;
-        const dy = mouse.y - p.y;
-        const mdist = Math.hypot(dx, dy);
-        if (mdist < 200) {
-          p.x += (dx / mdist) * 2;
-          p.y += (dy / mdist) * 2;
+      const torus2Geo = new THREE.TorusGeometry(26, 0.5, 16, 100);
+      const torus2Mat = new THREE.MeshBasicMaterial({ color: activePalette.secondary, wireframe: false });
+      const torus2 = new THREE.Mesh(torus2Geo, torus2Mat);
+      torus2.rotation.y = Math.PI / 3;
+      orbGroup.add(torus2);
+
+      const torus3Geo = new THREE.TorusGeometry(30, 0.4, 16, 100);
+      const torus3Mat = new THREE.MeshBasicMaterial({ color: 0xfbbf24, wireframe: false });
+      const torus3 = new THREE.Mesh(torus3Geo, torus3Mat);
+      torus3.rotation.z = Math.PI / 6;
+      orbGroup.add(torus3);
+
+      scene.add(orbGroup);
+    }
+
+    // 3. 3D Cyber Netrunner Matrix Grid
+    function buildGridScene() {
+      gridGroup = new THREE.Group();
+
+      const gridHelper = new THREE.GridHelper(300, 60, activePalette.primary, activePalette.secondary);
+      gridHelper.position.y = -25;
+      gridGroup.add(gridHelper);
+
+      // Floating holographic data cubes
+      for (let i = 0; i < 20; i++) {
+        const boxGeo = new THREE.BoxGeometry(4, 4, 4);
+        const boxMat = new THREE.MeshStandardMaterial({
+          color: activePalette.primary,
+          wireframe: true,
+          emissive: activePalette.primary,
+          emissiveIntensity: 0.6
+        });
+        const box = new THREE.Mesh(boxGeo, boxMat);
+        box.position.set(
+          (Math.random() - 0.5) * 160,
+          Math.random() * 30 - 15,
+          (Math.random() - 0.5) * 160
+        );
+        box.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
+        gridGroup.add(box);
+      }
+
+      scene.add(gridGroup);
+    }
+
+    // 4. 3D Golden Z Emblem
+    function buildEmblemScene() {
+      emblemGroup = new THREE.Group();
+
+      const zShape = new THREE.Shape();
+      zShape.moveTo(-15, 18);
+      zShape.lineTo(15, 18);
+      zShape.lineTo(15, 10);
+      zShape.lineTo(-3, -8);
+      zShape.lineTo(15, -8);
+      zShape.lineTo(15, -18);
+      zShape.lineTo(-15, -18);
+      zShape.lineTo(-15, -10);
+      zShape.lineTo(3, 8);
+      zShape.lineTo(-15, 8);
+      zShape.closePath();
+
+      const extrudeSettings = { depth: 5, bevelEnabled: true, bevelSegments: 4, steps: 2, bevelSize: 1, bevelThickness: 1 };
+      const zGeo = new THREE.ExtrudeGeometry(zShape, extrudeSettings);
+      const zMat = new THREE.MeshStandardMaterial({
+        color: 0xfbbf24,
+        metalness: 0.85,
+        roughness: 0.25,
+        emissive: 0x78350f,
+        emissiveIntensity: 0.3
+      });
+
+      const zMesh = new THREE.Mesh(zGeo, zMat);
+      zMesh.position.set(0, 0, -2.5);
+      emblemGroup.add(zMesh);
+
+      // Surrounding Hexagram Wireframe Ring
+      const hexGeo = new THREE.TorusGeometry(26, 0.6, 6, 6);
+      const hexMat = new THREE.MeshBasicMaterial({ color: activePalette.secondary, wireframe: true });
+      const hexMesh = new THREE.Mesh(hexGeo, hexMat);
+      emblemGroup.add(hexMesh);
+
+      scene.add(emblemGroup);
+    }
+
+    function updateSceneVisibility() {
+      if (!scene) return;
+      orbGroup.visible = (currentMode === '3d-orb');
+      gridGroup.visible = (currentMode === '3d-grid');
+      emblemGroup.visible = (currentMode === '3d-emblem');
+
+      if (currentMode === 'matrix' || currentMode === 'datamosh') {
+        webglContainer.style.display = 'none';
+        canvas2d.style.display = 'block';
+      } else {
+        webglContainer.style.display = 'block';
+        canvas2d.style.display = 'none';
+      }
+    }
+
+    // ── ANIMATION LOOP ─────────────────────────────────────────────────────
+    let clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const delta = clock.getDelta() * speed;
+
+      if (currentMode.startsWith('3d')) {
+        if (controls) controls.update();
+
+        if (starPoints) {
+          starPoints.rotation.y += 0.0008 * speed;
         }
 
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = color;
-        ctx.fill();
+        if (orbGroup && orbGroup.visible) {
+          orbGroup.children[0].rotation.x += 0.008 * speed;
+          orbGroup.children[0].rotation.y += 0.012 * speed;
+          orbGroup.children[2].rotation.x += 0.015 * speed;
+          orbGroup.children[3].rotation.y += 0.018 * speed;
+          orbGroup.children[4].rotation.z += 0.012 * speed;
+        }
 
-        for (let j = i + 1; j < particles.length; j++) {
-          let p2 = particles[j];
-          let dist = Math.hypot(p.x - p2.x, p.y - p2.y);
-          if (dist < 150) {
-            ctx.beginPath();
-            ctx.moveTo(p.x, p.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `rgba(0, 255, 136, ${1 - dist / 150})`;
-            ctx.lineWidth = 0.8;
-            ctx.stroke();
+        if (gridGroup && gridGroup.visible) {
+          gridGroup.children[0].position.z = (gridGroup.children[0].position.z + 0.3 * speed) % 5;
+          for (let i = 1; i < gridGroup.children.length; i++) {
+            gridGroup.children[i].rotation.x += 0.01 * speed;
+            gridGroup.children[i].rotation.y += 0.015 * speed;
           }
         }
+
+        if (emblemGroup && emblemGroup.visible) {
+          emblemGroup.rotation.y += 0.01 * speed;
+          emblemGroup.children[1].rotation.z -= 0.015 * speed;
+        }
+
+        if (renderer && scene && camera) {
+          renderer.render(scene, camera);
+        }
+      } else {
+        if (currentMode === 'matrix') drawMatrix2D();
+        else if (currentMode === 'datamosh') drawDatamosh2D();
       }
     }
 
-    // ── 4. DATAMOSH / GLITCH ENGINE ────────────────────────────────────────
-    function drawDatamosh() {
-      drawMatrix();
-      if (Math.random() < glitchIntensity * 0.5) {
+    // ── 2D CANVAS FALLBACK / MATRIX ENGINE ──────────────────────────────────
+    let drops2d = [];
+    const fontSize = 16;
+    let cols2d = 0;
+
+    function resize2D() {
+      canvas2d.width = window.innerWidth;
+      canvas2d.height = window.innerHeight;
+      cols2d = Math.floor(window.innerWidth / fontSize);
+      drops2d = Array(cols2d).fill(1);
+    }
+    window.addEventListener('resize', () => {
+      if (camera && renderer) {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+      resize2D();
+    });
+    resize2D();
+
+    const chars = '0123456789ABCDEFѰ🜂🜄🜁🜃ZOTHOSNULLAIΩΨλπµ§';
+
+    function drawMatrix2D() {
+      ctx2d.fillStyle = 'rgba(2, 4, 10, 0.08)';
+      ctx2d.fillRect(0, 0, canvas2d.width, canvas2d.height);
+
+      const computedStyle = getComputedStyle(document.documentElement);
+      const accent = computedStyle.getPropertyValue('--accent').trim();
+
+      ctx2d.font = `${fontSize}px 'JetBrains Mono', monospace`;
+
+      for (let i = 0; i < drops2d.length; i++) {
+        const text = chars.charAt(Math.floor(Math.random() * chars.length));
+        const x = i * fontSize;
+        const y = drops2d[i] * fontSize;
+
+        if (Math.random() > 0.85) ctx2d.fillStyle = '#ffffff';
+        else ctx2d.fillStyle = accent;
+
+        ctx2d.fillText(text, x, y);
+
+        if (y > canvas2d.height && Math.random() > 0.975) {
+          drops2d[i] = 0;
+        }
+        drops2d[i] += speed * 0.7;
+      }
+    }
+
+    function drawDatamosh2D() {
+      drawMatrix2D();
+      if (Math.random() < 0.3) {
         const sliceH = Math.random() * 40 + 10;
-        const sliceY = Math.random() * (height - sliceH);
+        const sliceY = Math.random() * (canvas2d.height - sliceH);
         const shift = (Math.random() - 0.5) * 50;
 
-        const imgData = ctx.getImageData(0, sliceY, width, sliceH);
-        ctx.putImageData(imgData, shift, sliceY);
+        const imgData = ctx2d.getImageData(0, sliceY, canvas2d.width, sliceH);
+        ctx2d.putImageData(imgData, shift, sliceY);
 
-        ctx.fillStyle = `rgba(0, 243, 255, 0.4)`;
-        ctx.fillRect(0, sliceY, width, 2);
+        ctx2d.fillStyle = 'rgba(0, 243, 255, 0.4)';
+        ctx2d.fillRect(0, sliceY, canvas2d.width, 2);
       }
     }
 
-    // ── MASTER RENDER LOOP ─────────────────────────────────────────────────
-    function animate() {
-      switch (currentMode) {
-        case 'matrix': drawMatrix(); break;
-        case 'sacred': drawSacred(); break;
-        case 'neural': drawNeural(); break;
-        case 'datamosh': drawDatamosh(); break;
-      }
-      requestAnimationFrame(animate);
-    }
-    animate();
-
-    // ── INTERACTIVE CONTROLS ───────────────────────────────────────────────
+    // ── CONTROLLER ACTIONS ─────────────────────────────────────────────────
     function setVisualMode(mode) {
       currentMode = mode;
       document.querySelectorAll('.mode-buttons .btn').forEach(btn => btn.classList.remove('active'));
       const buttons = Array.from(document.querySelectorAll('.mode-buttons .btn'));
-      const target = buttons.find(b => b.textContent.toLowerCase().includes(mode.substring(0, 4)));
+      const target = buttons.find(b => b.textContent.toLowerCase().includes(mode.substring(0, 3)));
       if (target) target.classList.add('active');
+      updateSceneVisibility();
     }
 
     function changeTheme(theme) {
       document.documentElement.setAttribute('data-theme', theme);
+      activePalette = PALETTES[theme] || PALETTES.emerald;
+      if (scene) {
+        scene.background.setHex(activePalette.bg);
+        scene.fog.color.setHex(activePalette.bg);
+        if (starPoints) starPoints.material.color.setHex(activePalette.particles);
+        if (orbGroup) {
+          orbGroup.children[0].material.color.setHex(activePalette.primary);
+          orbGroup.children[0].material.emissive.setHex(activePalette.primary);
+          orbGroup.children[2].material.color.setHex(activePalette.primary);
+          orbGroup.children[3].material.color.setHex(activePalette.secondary);
+        }
+      }
     }
 
     function updateSliders() {
-      glitchIntensity = document.getElementById('glitchSlider').value / 100;
-      document.getElementById('glitchVal').innerText = Math.round(glitchIntensity * 100) + '%';
-
       speed = document.getElementById('speedSlider').value / 10;
       document.getElementById('speedVal').innerText = speed.toFixed(1) + 'x';
+
+      glowScale = document.getElementById('glowSlider').value / 100;
+      document.getElementById('glowVal').innerText = Math.round(glowScale * 100) + '%';
+      if (starPoints) starPoints.material.size = 1.5 * glowScale;
     }
 
-    // ── DRAGGABLE HUD WINDOW LOGIC ─────────────────────────────────────────
+    // ── DRAGGABLE HUD ──────────────────────────────────────────────────────
     const hud = document.getElementById('hudWindow');
     const header = document.getElementById('hudHeader');
     let isDragging = false, offX = 0, offY = 0;
@@ -712,6 +870,10 @@
     });
 
     window.addEventListener('mouseup', () => isDragging = false);
+
+    // Initialize 3D Engine & Start Animation
+    initThree();
+    animate();
   </script>
 </body>
 </html>
