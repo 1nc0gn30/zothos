@@ -118,9 +118,18 @@ Accessed via CLI launcher: `zoth-ai`
 │       │   │       ├── kali.list           # Kali Rolling tool repo
 │       │   │       ├── parrot.list         # Parrot Security repo
 │       │   │       └── zothos.list         # ZOTHOS custom repo
+│       │   ├── systemd/system/
+│       │   │   └── zoth-ghost-amnesic.service # Shutdown/sleep RAM & history scrub
+│       │   ├── udev/rules.d/
+│       │   │   └── 99-zoth-panic.rules     # Unauthorized USB drop & deadman panic rule
+│       │   ├── xdg/picom/
+│       │   │   ├── picom-matrix.conf       # Dual-kawase blur & emerald phosphor glow
+│       │   │   └── picom-win11.conf        # Fluent acrylic frosted blur & soft shadow
 │       │   └── skel/                       # Default skeleton user profile
 │       │       ├── .bashrc                 # Custom prompt, aliases & fastfetch auto-run
 │       │       ├── .zshrc
+│       │       ├── .config/xfce4/panel/
+│       │       │   └── whiskermenu-win11.rc # Windows 11 start menu hierarchy
 │       │       └── Desktop/                # Pre-populated desktop shortcuts
 │       ├── opt/
 │       │   └── zoth-studio/                # Bundled Zoth Studio application & UI
@@ -128,10 +137,13 @@ Accessed via CLI launcher: `zoth-ai`
 │           ├── local/bin/                  # Master ZOTHOS CLI scripts
 │           │   ├── zoth                    # Zoth Studio sovereign CLI
 │           │   ├── zoth-ai                 # AI Command Center & Orchestrators
+│           │   ├── zoth-cockpit            # Full-screen curses interactive control cockpit
 │           │   ├── zoth-fastfetch          # Emerald Tablet system info display
 │           │   ├── zoth-ghost              # nullai.tech anti-forensics daemon
 │           │   ├── zoth-matrix-rain        # Alchemical matrix screensaver
 │           │   ├── zoth-mode               # Reality Switcher (matrix/ghost/incognito)
+│           │   ├── zoth-netkill            # Emergency iptables network killswitch
+│           │   ├── zoth-powershell         # Windows PowerShell v7 translation wrapper
 │           │   ├── zoth-quicklock          # Panic lock & RAM cache scrubber
 │           │   ├── zoth-sec                # Security tools launcher
 │           │   └── zoth-undercover         # Windows 11 camouflage switcher
@@ -145,7 +157,9 @@ Accessed via CLI launcher: `zoth-ai`
 │                   ├── Zoth-Hermetic-Matrix/
 │                   └── Zoth-Incognito-Win11/
 ├── installer/
-│   └── calamares/branding/zothos/          # Graphical disk installer branding
+│   └── calamares/                          # Graphical disk installer
+│       ├── settings.conf                   # Complete installation workflow & modules
+│       └── branding/zothos/                # ZOTHOS branding & styling
 ├── package-lists/
 │   ├── zothos-core.list.chroot             # Kernel, XFCE4, Picom, drivers
 │   └── zothos-security-kali-parrot.list.chroot # Full security toolchain
@@ -153,7 +167,8 @@ Accessed via CLI launcher: `zoth-ai`
     ├── convert-local-to-zothos.sh          # Instantly converts current host into ZOTHOS!
     ├── generate-wallpapers.py              # Procedural wallpaper engine
     ├── setup-zoth-ai-stack.sh              # One-command installer for all AI tools
-    └── test-zothos.sh                      # QEMU virtual machine test script
+    ├── test-zothos.sh                      # QEMU virtual machine test script
+    └── verify-zothos.sh                    # Automated system integrity & audit suite
 ```
 
 ---
