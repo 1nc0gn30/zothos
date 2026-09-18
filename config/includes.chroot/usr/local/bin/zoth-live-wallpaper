@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#  ZOTHOS Interactive Live Wallpaper & Visual FX Engine Launcher
+# ==============================================================================
+
+WALLPAPER_HTML="/usr/share/zothos/live-wallpaper/index.html"
+
+if [[ ! -f "$WALLPAPER_HTML" ]]; then
+    WALLPAPER_HTML="$HOME/zoth-break-screen/index.html"
+fi
+
+echo -e "\e[1;32m[*] Launching ZOTHOS Interactive Visual Engine...\e[0m"
+
+# Check if chromium or firefox is available for app mode
+if command -v chromium >/dev/null 2>&1; then
+    chromium --app="file://$WALLPAPER_HTML" --start-fullscreen --window-position=0,0 >/dev/null 2>&1 &
+elif command -v firefox-esr >/dev/null 2>&1; then
+    firefox-esr --kiosk "file://$WALLPAPER_HTML" >/dev/null 2>&1 &
+elif command -v firefox >/dev/null 2>&1; then
+    firefox --kiosk "file://$WALLPAPER_HTML" >/dev/null 2>&1 &
+else
+    xdg-open "file://$WALLPAPER_HTML" 2>/dev/null || true
+fi

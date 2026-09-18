@@ -80,6 +80,10 @@ SCRIPTS=(
     "$CHROOT/usr/local/bin/hexstrike"
     "$CHROOT/usr/local/bin/hexstrike_mcp"
     "$CHROOT/usr/local/bin/hexstrike_server"
+    "$CHROOT/usr/local/bin/zoth-agent-os"
+    "$CHROOT/usr/local/bin/zoth-agent-hud"
+    "$CHROOT/usr/local/bin/zoth-agent-layer"
+    "$CHROOT/usr/local/bin/zoth-live-wallpaper"
 )
 
 for s in "${SCRIPTS[@]}"; do
@@ -131,6 +135,8 @@ check_file "$ROOT_DIR/package-lists/zothos-security-kali-parrot.list.chroot" "Se
 check_file "$ROOT_DIR/package-lists/zothos-programming-devel.list.chroot" "Programming Devel Package List"
 check_file "$ROOT_DIR/package-lists/zothos-ai.list.chroot" "AI Arsenal Package List"
 check_file "$CHROOT/etc/zothos/mcp-servers.json" "Master MCP Server Registry"
+check_file "$CHROOT/etc/zothos/agent-permissions.json" "Agent Permission Ring Config"
+check_file "$CHROOT/usr/share/zothos/live-wallpaper/index.html" "Interactive Live Wallpaper Engine"
 check_file "$ROOT_DIR/build/build-iso.sh" "Master Build Script"
 check_executable "$ROOT_DIR/build/build-iso.sh"
 check_syntax_bash "$ROOT_DIR/build/build-iso.sh"

@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="emerald">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZOTHOS // INTERACTIVE LIVE WALLPAPER & FX</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    :root {
+      --bg: #02040a;
+      --accent: #00ff88;
+      --accent-rgb: 0, 255, 136;
+      --accent2: #00f3ff;
+      --accent2-rgb: 0, 243, 255;
+      --gold: #fbbf24;
+      --purple: #a855f7;
+      --fg: #ecfdf5;
+      --card-bg: rgba(2, 8, 18, 0.85);
+      --border: rgba(0, 255, 136, 0.4);
+      --glow: 0 0 25px rgba(0, 255, 136, 0.5);
+      --font-mono: 'JetBrains Mono', 'Share Tech Mono', monospace;
+    }
+
+    [data-theme="ghost"] {
+      --accent: #c084fc;
+      --accent-rgb: 192, 132, 252;
+      --accent2: #a855f7;
+      --fg: #faf5ff;
+      --card-bg: rgba(12, 4, 24, 0.88);
+      --border: rgba(168, 85, 247, 0.45);
+      --glow: 0 0 25px rgba(168, 85, 247, 0.55);
+    }
+
+    [data-theme="gold"] {
+      --accent: #fbbf24;
+      --accent-rgb: 251, 191, 36;
+      --accent2: #f59e0b;
+      --fg: #fefce8;
+      --card-bg: rgba(20, 14, 2, 0.88);
+      --border: rgba(251, 191, 36, 0.45);
+      --glow: 0 0 25px rgba(251, 191, 36, 0.55);
+    }
+
+    [data-theme="cyan"] {
+      --accent: #00f3ff;
+      --accent-rgb: 0, 243, 255;
+      --accent2: #38bdf8;
+      --fg: #f0fdfa;
+      --card-bg: rgba(2, 14, 28, 0.88);
+      --border: rgba(0, 243, 255, 0.45);
+      --glow: 0 0 25px rgba(0, 243, 255, 0.55);
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      font-family: var(--font-mono);
+      color: var(--fg);
+    }
+
+    #canvas-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    /* CRT Scanline & Glitch Overlay */
+    .crt-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+      background-size: 100% 3px, 4px 100%;
+    }
+
+    /* Floating Draggable Filter & Control HUD */
+    .hud-window {
+      position: absolute;
+      top: 40px;
+      right: 40px;
+      width: 360px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      backdrop-filter: blur(16px);
+      box-shadow: var(--glow), 0 20px 40px rgba(0, 0, 0, 0.8);
+      z-index: 10;
+      overflow: hidden;
+    }
+
+    .hud-header {
+      padding: 12px 16px;
+      background: rgba(0, 0, 0, 0.5);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: move;
+    }
+
+    .hud-title {
+      font-size: 12px;
+      font-weight: bold;
+      letter-spacing: 1.5px;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ai-orb {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+      animation: pulse 1.8s infinite alternate;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.85); opacity: 0.6; }
+      100% { transform: scale(1.25); opacity: 1; }
+    }
+
+    .hud-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .control-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: rgba(255, 255, 255, 0.7);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .mode-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .btn {
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn:hover {
+      background: rgba(var(--accent-rgb), 0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #000;
+      box-shadow: 0 0 12px var(--accent);
+    }
+
+    select, input[type="range"] {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 10px;
+      color: var(--fg);
+      font-family: inherit;
+      font-size: 11px;
+      outline: none;
+    }
+
+    input[type="range"] {
+      padding: 0;
+      accent-color: var(--accent);
+    }
+
+    .agent-status-badge {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: rgba(var(--accent-rgb), 0.1);
+      border: 1px dashed var(--accent);
+      border-radius: 6px;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="crt-overlay"></div>
+  <canvas id="canvas-container"></canvas>
+
+  <!-- Interactive Draggable Control HUD -->
+  <div class="hud-window" id="hudWindow">
+    <div class="hud-header" id="hudHeader">
+      <div class="hud-title">
+        <div class="ai-orb"></div>
+        ZOTHOS // FX ENGINE
+      </div>
+      <span style="font-size: 10px; color: var(--accent); opacity: 0.8;">[DRAG]</span>
+    </div>
+
+    <div class="hud-body">
+      <!-- Visual Engine Selector -->
+      <div class="control-group">
+        <div class="control-label"><span>Visual Mode</span></div>
+        <div class="mode-buttons">
+          <button class="btn active" onclick="setVisualMode('matrix')">Matrix Rain</button>
+          <button class="btn" onclick="setVisualMode('sacred')">Sacred 3D</button>
+          <button class="btn" onclick="setVisualMode('neural')">Neural Node</button>
+          <button class="btn" onclick="setVisualMode('datamosh')">Datamosh Glitch</button>
+        </div>
+      </div>
+
+      <!-- Color Theme Dropdown -->
+      <div class="control-group">
+        <div class="control-label"><span>Alchemical Color Theme</span></div>
+        <select id="themeSelect" onchange="changeTheme(this.value)">
+          <option value="emerald">Emerald Matrix (Cyber Green)</option>
+          <option value="cyan">Azoth Prime (Neon Cyan)</option>
+          <option value="ghost">NullAI Ghost (Tactical Violet)</option>
+          <option value="gold">Hermetic Crucible (Alchemical Gold)</option>
+        </select>
+      </div>
+
+      <!-- Sliders for Interactivity -->
+      <div class="control-group">
+        <div class="control-label">
+          <span>Glitch Intensity</span>
+          <span id="glitchVal">35%</span>
+        </div>
+        <input type="range" min="0" max="100" value="35" id="glitchSlider" oninput="updateSliders()">
+      </div>
+
+      <div class="control-group">
+        <div class="control-label">
+          <span>Simulation Speed</span>
+          <span id="speedVal">1.2x</span>
+        </div>
+        <input type="range" min="5" max="30" value="12" id="speedSlider" oninput="updateSliders()">
+      </div>
+
+      <!-- Live OS Agent Status Badge -->
+      <div class="agent-status-badge">
+        <span>⚡ OS Agent Core: <strong>ONLINE</strong></span>
+        <span style="color: var(--accent);">Layer 2 [CYBERPUPPET]</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas-container');
+    const ctx = canvas.getContext('2d');
+
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      initMatrix();
+    });
+
+    let currentMode = 'matrix';
+    let glitchIntensity = 0.35;
+    let speed = 1.2;
+    let mouse = { x: width / 2, y: height / 2, radius: 120 };
+
+    window.addEventListener('mousemove', (e) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    });
+
+    // ── MATRIX RAIN ENGINE ──────────────────────────────────────────────────
+    const runes = 'ｦｱｳｴｵｶｷｹｺｻｼｽｾｿﾀﾂﾃﾅﾆﾇﾈﾊﾋﾎﾏﾐﾑﾒﾓﾔﾕﾗﾘﾜ0123456789ZOTHΩΨΔΞΦΑΒΓ';
+    const fontSize = 16;
+    let columns = Math.floor(width / fontSize);
+    let drops = [];
+
+    function initMatrix() {
+      columns = Math.floor(width / fontSize);
+      drops = [];
+      for (let i = 0; i < columns; i++) {
+        drops[i] = Math.random() * -100;
+      }
+    }
+    initMatrix();
+
+    function drawMatrix() {
+      ctx.fillStyle = 'rgba(2, 4, 10, 0.12)';
+      ctx.fillRect(0, 0, width, height);
+
+      const color = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#00ff88';
+      ctx.fillStyle = color;
+      ctx.font = `${fontSize}px monospace`;
+
+      for (let i = 0; i < drops.length; i++) {
+        const char = runes[Math.floor(Math.random() * runes.length)];
+        const x = i * fontSize;
+        const y = drops[i] * fontSize;
+
+        // Mouse reactive displacement
+        const dx = x - mouse.x;
+        const dy = y - mouse.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < mouse.radius) {
+          ctx.fillStyle = '#ffffff';
+          ctx.fillText(char, x + (Math.random() - 0.5) * 8, y + (Math.random() - 0.5) * 8);
+        } else {
+          ctx.fillStyle = color;
+          ctx.fillText(char, x, y);
+        }
+
+        if (y > height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i] += speed * 0.8;
+      }
+    }
+
+    // ── SACRED GEOMETRY 3D ENGINE ──────────────────────────────────────────
+    let angle = 0;
+    function drawSacred() {
+      ctx.fillStyle = 'rgba(2, 4, 10, 0.18)';
+      ctx.fillRect(0, 0, width, height);
+
+      const cx = width / 2;
+      const cy = height / 2;
+      const color = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(angle);
+
+      // Metatron's Cube Rings
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.5;
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 15;
+
+      const r = Math.min(width, height) * 0.22;
+      for (let i = 0; i < 6; i++) {
+        const a = (i * Math.PI) / 3;
+        const nx = Math.cos(a) * r;
+        const ny = Math.sin(a) * r;
+        ctx.beginPath();
+        ctx.arc(nx, ny, r, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(nx * 0.5, ny * 0.5, r * 0.5, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 1.5, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.restore();
+      angle += 0.008 * speed;
+    }
+
+    // ── NEURAL NODE LATTICE ────────────────────────────────────────────────
+    let particles = [];
+    for (let i = 0; i < 70; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 1.5,
+        vy: (Math.random() - 0.5) * 1.5,
+        size: Math.random() * 3 + 1
+      });
+    }
+
+    function drawNeural() {
+      ctx.fillStyle = 'rgba(2, 4, 10, 0.25)';
+      ctx.fillRect(0, 0, width, height);
+
+      const color = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+
+      for (let i = 0; i < particles.length; i++) {
+        let p = particles[i];
+        p.x += p.vx * speed;
+        p.y += p.vy * speed;
+
+        if (p.x < 0 || p.x > width) p.vx *= -1;
+        if (p.y < 0 || p.y > height) p.vy *= -1;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+
+        for (let j = i + 1; j < particles.length; j++) {
+          let p2 = particles[j];
+          let dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+          if (dist < 140) {
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.strokeStyle = `rgba(0, 255, 136, ${1 - dist / 140})`;
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+          }
+        }
+      }
+    }
+
+    // ── DATAMOSH / GLITCH ENGINE ───────────────────────────────────────────
+    function drawDatamosh() {
+      drawMatrix();
+      if (Math.random() < glitchIntensity * 0.4) {
+        const sliceH = Math.random() * 40 + 10;
+        const sliceY = Math.random() * (height - sliceH);
+        const shift = (Math.random() - 0.5) * 40;
+
+        const imgData = ctx.getImageData(0, sliceY, width, sliceH);
+        ctx.putImageData(imgData, shift, sliceY);
+
+        ctx.fillStyle = `rgba(0, 243, 255, 0.3)`;
+        ctx.fillRect(0, sliceY, width, 2);
+      }
+    }
+
+    // ── MASTER RENDER LOOP ─────────────────────────────────────────────────
+    function animate() {
+      switch (currentMode) {
+        case 'matrix': drawMatrix(); break;
+        case 'sacred': drawSacred(); break;
+        case 'neural': drawNeural(); break;
+        case 'datamosh': drawDatamosh(); break;
+      }
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    // ── INTERACTIVE CONTROLS ───────────────────────────────────────────────
+    function setVisualMode(mode) {
+      currentMode = mode;
+      document.querySelectorAll('.mode-buttons .btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    function changeTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+
+    function updateSliders() {
+      glitchIntensity = document.getElementById('glitchSlider').value / 100;
+      document.getElementById('glitchVal').innerText = Math.round(glitchIntensity * 100) + '%';
+
+      speed = document.getElementById('speedSlider').value / 10;
+      document.getElementById('speedVal').innerText = speed.toFixed(1) + 'x';
+    }
+
+    // ── DRAGGABLE HUD WINDOW LOGIC ─────────────────────────────────────────
+    const hud = document.getElementById('hudWindow');
+    const header = document.getElementById('hudHeader');
+    let isDragging = false, offX = 0, offY = 0;
+
+    header.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      offX = e.clientX - hud.offsetLeft;
+      offY = e.clientY - hud.offsetTop;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (isDragging) {
+        hud.style.left = (e.clientX - offX) + 'px';
+        hud.style.top = (e.clientY - offY) + 'px';
+        hud.style.right = 'auto';
+      }
+    });
+
+    window.addEventListener('mouseup', () => isDragging = false);
+  </script>
+</body>
+</html>
