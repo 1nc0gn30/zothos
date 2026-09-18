@@ -1,0 +1,165 @@
+#!/usr/bin/env python3
+"""
+ZOTHOS 3D SPATIAL OS - Local PTY & System API Bridge Daemon
+============================================================
+Provides fast loopback endpoints for real-time telemetry, command execution,
+agent prompt routing, and 3D window orchestration.
+"""
+
+import os
+import sys
+import json
+import time
+import urllib.parse
+import subprocess
+from http.server import HTTPServer, SimpleHTTPRequestHandler
+import socketserver
+
+PORT = 8199
+USER_STATE = os.path.expanduser("~/.config/zothos/agent-layer.state")
+
+class ZothBridgeHandler(SimpleHTTPRequestHandler):
+    def end_headers(self):
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        super().end_headers()
+
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.end_headers()
+
+    def do_GET(self):
+        parsed = urllib.parse.urlparse(self.path)
+        path = parsed.path
+        params = urllib.parse.parse_qs(parsed.query)
+
+        # ── 1. Telemetry API ────────────────────────────────────────────────
+        if path == "/api/metrics":
+            data = self.get_system_metrics()
+            self.send_json(data)
+            return
+
+        # ── 2. Command Execution API ─────────────────────────────────────────
+        elif path == "/api/exec":
+            cmd = params.get('cmd', [''])[0]
+            if not cmd:
+                self.send_json({"error": "No command specified"})
+                return
+            try:
+                res = subprocess.run(
+                    cmd,
+                    shell=True,
+                    capture_output=True,
+                    text=True,
+                    timeout=15
+                )
+                self.send_json({
+                    "stdout": res.stdout,
+                    "stderr": res.stderr,
+                    "exit_code": res.returncode
+                })
+            except Exception as e:
+                self.send_json({"error": str(e), "exit_code": -1})
+            return
+
+        # ── 3. Application Launcher API ──────────────────────────────────────
+        elif path == "/api/launch":
+            app = params.get('cmd', params.get('app', ['']))[0]
+            if app:
+                subprocess.Popen(app, shell=True, env=dict(os.environ, DISPLAY=":0"))
+                self.send_json({"status": "launched", "app": app})
+            else:
+                self.send_json({"error": "No app specified"})
+            return
+
+        # ── 4. Agent Permission Layer API ───────────────────────────────────
+        elif path == "/api/layer":
+            layer = params.get('val', ['4'])[0]
+            try:
+                os.makedirs(os.path.dirname(USER_STATE), exist_ok=True)
+                with open(USER_STATE, "w") as f:
+                    f.write(str(int(layer)))
+                self.send_json({"status": "layer_updated", "layer": int(layer)})
+            except Exception as e:
+                self.send_json({"error": str(e)})
+            return
+
+        # ── 5. Agent Prompt Router ──────────────────────────────────────────
+        elif path == "/api/agent":
+            prompt = params.get('prompt', [''])[0]
+            # Route to zoth-agent-os
+            subprocess.Popen(["zoth-agent-os", prompt], env=dict(os.environ, DISPLAY=":0"))
+            self.send_json({"status": "dispatched", "prompt": prompt})
+            return
+
+        # Fallback to static file server
+        super().do_GET()
+
+    def send_json(self, data):
+        payload = json.dumps(data).encode('utf-8')
+        self.send_response(200)
+        self.send_header('Content-Type', 'application/json')
+        self.send_header('Content-Length', str(len(payload)))
+        self.end_headers()
+        self.wfile.write(payload)
+
+    def get_system_metrics(self):
+        # CPU
+        cpu_pct = 0.0
+        try:
+            with open("/proc/stat", "r") as f:
+                fields = [float(x) for x in f.readline().split()[1:8]]
+                idle = fields[3] + fields[4]
+                total = sum(fields)
+                cpu_pct = round(100.0 * (1.0 - (idle / total)), 1) if total > 0 else 0.0
+        except Exception:
+            pass
+
+        # RAM
+        ram_used_gb = 0.0
+        ram_total_gb = 0.0
+        ram_pct = 0.0
+        try:
+            mem = {}
+            with open("/proc/meminfo", "r") as f:
+                for line in f:
+                    p = line.split(":")
+                    if len(p) == 2:
+                        mem[p[0].strip()] = int(p[1].split()[0])
+            total_kb = mem.get("MemTotal", 1024)
+            avail_kb = mem.get("MemAvailable", mem.get("MemFree", 0))
+            used_kb = total_kb - avail_kb
+            ram_used_gb = round(used_kb / (1024 * 1024), 2)
+            ram_total_gb = round(total_kb / (1024 * 1024), 2)
+            ram_pct = round((used_kb / total_kb) * 100, 1)
+        except Exception:
+            pass
+
+        # Active Layer
+        layer = 4
+        if os.path.exists(USER_STATE):
+            try:
+                with open(USER_STATE, "r") as f:
+                    layer = int(f.read().strip())
+            except Exception:
+                pass
+
+        return {
+            "cpu_pct": cpu_pct,
+            "ram_used_gb": ram_used_gb,
+            "ram_total_gb": ram_total_gb,
+            "ram_pct": ram_pct,
+            "active_layer": layer,
+            "timestamp": time.time()
+        }
+
+def run_server():
+    os.chdir("/usr/share/zothos/3d-shell")
+    server = socketserver.TCPServer(("127.0.0.1", PORT), ZothBridgeHandler)
+    server.allow_reuse_address = True
+    print(f"[*] ZOTHOS 3D Spatial OS Bridge listening on http://127.0.0.1:{PORT}")
+    server.serve_forever()
+
+if __name__ == "__main__":
+    run_server()

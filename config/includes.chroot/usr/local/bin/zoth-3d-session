@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#  ZOTHOS 3D SPATIAL OS - Dedicated Session Manager
+# ==============================================================================
+
+export DISPLAY="${DISPLAY:-:0}"
+export XDG_CURRENT_DESKTOP="ZOTHOS-3D"
+export DESKTOP_SESSION="zothos-3d"
+
+echo -e "\e[1;32m[*] Initializing ZOTHOS 3D Spatial OS Session...\e[0m"
+
+# 1. Start Local API Bridge Daemon
+if ! pgrep -f "zoth-bridge" >/dev/null 2>&1; then
+    /usr/local/bin/zoth-bridge >/dev/null 2>&1 &
+fi
+
+# 2. Start Zoth Studio Hub Daemon
+if ! pgrep -f "http.server 8088" >/dev/null 2>&1; then
+    /opt/zoth-studio/launch.sh >/dev/null 2>&1 &
+fi
+
+# 3. Start Compositor
+if command -v picom >/dev/null 2>&1 && ! pgrep -x "picom" >/dev/null 2>&1; then
+    picom --config /etc/xdg/picom/picom-matrix.conf -b 2>/dev/null || true
+fi
+
+# 4. Wait for local bridge port
+sleep 1
+
+# 5. Launch Standalone Borderless 3D Spatial Shell
+SHELL_URL="http://127.0.0.1:8199/index.html"
+
+if command -v chromium >/dev/null 2>&1; then
+    exec chromium \
+        --kiosk \
+        --app="$SHELL_URL" \
+        --no-first-run \
+        --no-default-browser-check \
+        --disable-session-crashed-bubble \
+        --disable-infobars \
+        --disable-features=TranslateUI \
+        --overscroll-history-navigation=0 \
+        --disable-pinch \
+        --window-position=0,0 \
+        --window-size=1920,1080 \
+        --force-device-scale-factor=1
+elif command -v firefox-esr >/dev/null 2>&1; then
+    exec firefox-esr --kiosk "$SHELL_URL"
+elif command -v firefox >/dev/null 2>&1; then
+    exec firefox --kiosk "$SHELL_URL"
+else
+    exec xdg-open "$SHELL_URL"
+fi
