@@ -25,10 +25,19 @@ xfconf-query -c xfwm4 -p /general/button_layout -s "O|HMC" 2>/dev/null || true
 xfconf-query -c xsettings -p /Net/ThemeName -s "Zoth-Hermetic-Matrix" 2>/dev/null || true
 xfconf-query -c xsettings -p /Net/IconThemeName -s "Zoth-Hermetic" 2>/dev/null || true
 
-# 4. Set desktop wallpaper to Hermetic Matrix if default
-xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/last-image -s "/usr/share/backgrounds/zothos/hermetic-matrix.png" 2>/dev/null || true
-xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/image-style -s 5 2>/dev/null || true
-xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitorVirtual-1/workspace0/last-image -s "/usr/share/backgrounds/zothos/hermetic-matrix.png" 2>/dev/null || true
-xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitorVirtual-1/workspace0/image-style -s 5 2>/dev/null || true
+# 4. Set desktop wallpaper across all detected monitors in xfconf
+WALLPAPER="/usr/share/backgrounds/zothos/hermetic-matrix.png"
+if [[ -f "$WALLPAPER" ]]; then
+    for prop in $(xfconf-query -c xfce4-desktop -l 2>/dev/null | grep "last-image"); do
+        xfconf-query -c xfce4-desktop -p "$prop" -s "$WALLPAPER" 2>/dev/null || true
+    done
+    for prop in $(xfconf-query -c xfce4-desktop -l 2>/dev/null | grep "image-style"); do
+        xfconf-query -c xfce4-desktop -p "$prop" -s 5 2>/dev/null || true
+    done
+    feh --bg-fill "$WALLPAPER" 2>/dev/null || true
+fi
+
+# 5. Reload xfdesktop to render icons and wallpaper
+xfdesktop --reload 2>/dev/null || true
 
 exit 0
