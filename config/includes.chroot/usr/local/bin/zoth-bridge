@@ -155,7 +155,9 @@ class ZothBridgeHandler(SimpleHTTPRequestHandler):
         }
 
 def run_server():
-    os.chdir("/usr/share/zothos/3d-shell")
+    target_dir = "/opt/zoth-studio" if os.path.exists("/opt/zoth-studio") else "/usr/share/zothos"
+    if os.path.exists(target_dir):
+        os.chdir(target_dir)
     server = socketserver.TCPServer(("127.0.0.1", PORT), ZothBridgeHandler)
     server.allow_reuse_address = True
     print(f"[*] ZOTHOS 3D Spatial OS Bridge listening on http://127.0.0.1:{PORT}")

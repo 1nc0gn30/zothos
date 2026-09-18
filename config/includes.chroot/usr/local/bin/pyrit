@@ -2,15 +2,25 @@
 # ==============================================================================
 #  PyRIT - 2026 Microsoft AI Risk Identification & Red-Teaming Framework
 # ==============================================================================
-if ! command -v pyrit >/dev/null 2>&1 && [[ ! -f /opt/zothos-ai-env/bin/pyrit ]]; then
-    echo -e "\e[1;33m[*] Provisioning Microsoft PyRIT AI Red-Teaming Toolkit...\e[0m"
-    mkdir -p /opt/zothos-ai-env
-    python3 -m venv /opt/zothos-ai-env --system-site-packages 2>/dev/null || true
-    /opt/zothos-ai-env/bin/pip install --upgrade pyrit 2>/dev/null || pip install pyrit
+
+if [[ -x /opt/zothos-ai-env/bin/pyrit ]]; then
+    exec /opt/zothos-ai-env/bin/pyrit "$@"
 fi
 
-if [[ -f /opt/zothos-ai-env/bin/pyrit ]]; then
-    exec /opt/zothos-ai-env/bin/python3 -m pyrit "$@"
-else
-    python3 -m pyrit "$@" 2>/dev/null || echo -e "\e[1;31m[!] PyRIT ready in /opt/zothos-ai-env\e[0m"
+if python3 -c "import pyrit" >/dev/null 2>&1; then
+    exec python3 -m pyrit "$@"
 fi
+
+REAL_BIN=$(type -all pyrit 2>/dev/null | grep -v "/usr/local/bin/pyrit" | head -n 1 | awk '{print $NF}')
+if [[ -n "$REAL_BIN" && -x "$REAL_BIN" ]]; then
+    exec "$REAL_BIN" "$@"
+fi
+
+echo -e "\e[38;2;255;215;0m[⚡ ZOTHOS SEC]\e[0m \e[1;37mMicrosoft PyRIT AI Red-Teaming Framework not installed.\e[0m"
+echo -e "\e[38;2;0;229;255m[*] To install PyRIT now, run:\e[0m uv pip install pyrit"
+read -p "Install pyrit now? (y/N): " choice
+if [[ "$choice" =~ ^[Yy]$ ]]; then
+    uv pip install pyrit || pip3 install --break-system-packages pyrit
+    exec python3 -m pyrit "$@"
+fi
+exit 1

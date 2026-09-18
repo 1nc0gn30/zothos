@@ -281,9 +281,15 @@ class AgentHUDApp:
         threading.Thread(target=loop, daemon=True).start()
 
 def main():
-    root = tk.Tk()
-    app = AgentHUDApp(root)
-    root.mainloop()
+    try:
+        if not os.environ.get("DISPLAY"):
+            raise RuntimeError("No DISPLAY environment variable set.")
+        root = tk.Tk()
+        app = AgentHUDApp(root)
+        root.mainloop()
+    except Exception as e:
+        print(f"\033[38;2;255;215;0m[⚡ ZOTHOS AGENT]\033[0m Falling back to CLI Agent Layer mode ({e})")
+        subprocess.run(["zoth-agent-os", "status"])
 
 if __name__ == "__main__":
     main()

@@ -2,15 +2,28 @@
 # ==============================================================================
 #  ZOTHOS OpenAI Codex CLI Auto-Bootstrap & Runner
 # ==============================================================================
-set -euo pipefail
+
+if command -v codex-cli >/dev/null 2>&1 && [[ "$(which codex-cli)" != "$0" ]]; then
+    exec "$(which codex-cli)" "$@"
+fi
+
+if [[ -f "/usr/local/lib/node_modules/@openai/codex/bin/codex.js" ]]; then
+    exec node "/usr/local/lib/node_modules/@openai/codex/bin/codex.js" "$@"
+fi
 
 if [[ -f "/usr/lib/node_modules/@openai/codex/bin/codex.js" ]]; then
     exec node "/usr/lib/node_modules/@openai/codex/bin/codex.js" "$@"
-elif [[ -f "/usr/local/lib/node_modules/@openai/codex/bin/codex.js" ]]; then
-    exec node "/usr/local/lib/node_modules/@openai/codex/bin/codex.js" "$@"
-elif command -v codex >/dev/null 2>&1 && [[ "$(which codex)" != "$0" ]]; then
-    exec "$(which codex)" "$@"
-else
-    echo -e "\e[1;36m[⚡] ZOTHOS: Invoking Codex via npx...\e[0m"
-    npx @openai/codex "$@"
 fi
+
+if command -v npx >/dev/null 2>&1; then
+    exec npx @openai/codex "$@"
+fi
+
+echo -e "\e[38;2;255;215;0m[⚡ ZOTHOS AI]\e[0m \e[1;37mOpenAI Codex CLI (@openai/codex) not found.\e[0m"
+echo -e "\e[38;2;0;229;255m[*] To install Codex CLI now, run:\e[0m npm install -g @openai/codex"
+read -p "Install @openai/codex now? (y/N): " choice
+if [[ "$choice" =~ ^[Yy]$ ]]; then
+    npm install -g @openai/codex
+    exec npx @openai/codex "$@"
+fi
+exit 1
