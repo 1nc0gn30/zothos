@@ -1,0 +1,306 @@
+#!/usr/bin/env python3
+"""
+⚡ ZOTHOS Tool Nexus: Sovereign Dispatcher & 175+ Tool Orchestration Matrix
+Unified CLI & TUI interface for the 10 functional domains of ZothOS.
+"""
+
+import os
+import sys
+import shutil
+import subprocess
+import argparse
+import time
+
+DOMAINS = {
+    "1": {
+        "title": "🪐 Zoth Studio Flagships & Core Workstations",
+        "description": "Native HUDs, Cockpit, Matrix visualizers, and Agent OS control surfaces",
+        "tools": [
+            ("cyberpunk-hud", "Full-viewport 360 radar & telemetry cockpit", "zoth-agent-hud"),
+            ("cockpit", "21-Agent autonomous swarm command deck & REPL", "zoth-cockpit"),
+            ("webgen", "Multi-model prompt foundry & generator", "zoth-ai webgen"),
+            ("zoth-ghost", "NullAI Ghostmode & Anti-forensics router", "zoth-ghost"),
+            ("zoth-undercover", "Windows 11 undercover chameleon mode", "zoth-undercover"),
+            ("zoth-sec", "Offensive security & penetration testing arsenal", "zoth-sec"),
+            ("zoth-matrix", "Hermetic Matrix digital rain screensaver", "zoth-matrix-rain"),
+            ("zoth-mcp", "Model Context Protocol bridge & server registry", "zoth-mcp"),
+            ("zoth-bridge", "Multi-model streaming API gateway & proxy", "zoth-bridge"),
+            ("zoth-session", "Wayland Apex / XFCE4 desktop session switcher", "zoth-session-switch"),
+            ("zoth-fastfetch", "Alchemical system hardware & kernel telemetry", "zoth-fastfetch"),
+            ("zoth-netkill", "Emergency kernel-level network killswitch", "zoth-netkill"),
+            ("zoth-powershell", "PowerShell v7 emulation environment", "zoth-powershell"),
+            ("zoth-arsenal", "Hermes skill & tool synchronization engine", "zoth-arsenal-sync"),
+            ("zoth-agent-os", "L0-L4 Agent Kernel supervisor daemon", "zoth-agent-os"),
+        ]
+    },
+    "2": {
+        "title": "🧠 Local AI Runtimes & Inference Accelerators",
+        "description": "Zero-cloud local inference, GGUF/AWQ execution, and vision backends",
+        "tools": [
+            ("ollama", "Local LLM runtime (Llama 3, DeepSeek, Qwen)", "ollama serve"),
+            ("llama.cpp", "GGUF quantization & fast CPU/GPU inference", "llama-cli --help"),
+            ("vllm", "High-throughput continuous batching LLM server", "vllm --help"),
+            ("comfyui", "Node-based Stable Diffusion & FLUX image gen", "comfyui"),
+            ("open-webui", "Self-hosted full ChatGPT/Claude UI interface", "open-webui serve"),
+            ("litellm", "Universal proxy routing to 100+ LLM endpoints", "litellm"),
+            ("transformers", "Hugging Face model loading & pipeline toolkit", "python3 -c 'import transformers; print(transformers.__version__)'"),
+            ("torch", "PyTorch deep learning tensor computing platform", "python3 -c 'import torch; print(torch.__version__)'"),
+        ]
+    },
+    "3": {
+        "title": "🤖 Autonomous Multi-Agent Daemons & Assistants",
+        "description": "Terminal coding agents, automated reasoning swarms, and AI evaluation",
+        "tools": [
+            ("hermes", "Nous Research autonomous agent & skill system", "hermes"),
+            ("claude", "Anthropic Claude Code terminal assistant", "claude"),
+            ("codex", "OpenAI Codex CLI coding companion", "codex"),
+            ("opencode", "OpenCode open-source coding engine", "opencode"),
+            ("aider", "Terminal AI pair programmer with git integration", "aider"),
+            ("fastmcp", "Fast Model Context Protocol Python server framework", "fastmcp"),
+            ("hexstrike", "HexStrike autonomous AI pentesting daemon", "hexstrike"),
+            ("garak", "LLM vulnerability scanner & hallucination prober", "garak --help"),
+            ("pyrit", "Microsoft AI Red Team orchestrator", "pyrit"),
+        ]
+    },
+    "4": {
+        "title": "🛠️ Dev Toolchains, Runtimes & Compilers",
+        "description": "Polyglot software development environments, package managers, and debuggers",
+        "tools": [
+            ("python3", "Python 3.11+ runtime & standard libraries", "python3 --version"),
+            ("uv", "Ultra-fast Python package manager & resolver", "uv --version"),
+            ("nodejs", "Node.js JavaScript server runtime", "node --version"),
+            ("npm", "Node Package Manager", "npm --version"),
+            ("rustc", "Rust systems programming language compiler", "rustc --version"),
+            ("cargo", "Rust package manager & build tool", "cargo --version"),
+            ("go", "Golang concurrent programming language runtime", "go version"),
+            ("gcc", "GNU Compiler Collection (C/C++)", "gcc --version"),
+            ("clang", "LLVM C/C++ compiler and toolchain", "clang --version"),
+            ("neovim", "Hyperextensible Vim-based terminal IDE", "nvim --version"),
+            ("tmux", "Terminal multiplexer with pane management", "tmux -V"),
+            ("starship", "Cross-shell customizable prompt", "starship --version"),
+        ]
+    },
+    "5": {
+        "title": "🎨 3D Graphics, Generative Art & Media Production",
+        "description": "Rendering pipelines, spatial audio, vector design, and live video production",
+        "tools": [
+            ("blender", "Full 3D modeling, sculpting, and raytracing suite", "blender --version"),
+            ("ffmpeg", "Hyper-accelerated video/audio conversion engine", "ffmpeg -version"),
+            ("imagemagick", "Bitmap & vector raster image manipulation toolkit", "magick -version"),
+            ("mpv", "Minimalist high-performance video player", "mpv --version"),
+            ("gimp", "GNU Image Manipulation Program", "gimp --version"),
+            ("inkscape", "Professional vector graphics editor (SVG)", "inkscape --version"),
+            ("obs-studio", "Live streaming & multi-source video capture", "obs --version"),
+            ("p5", "Creative algorithmic & generative canvas framework", "python3 -c 'import p5'"),
+        ]
+    },
+    "6": {
+        "title": "🛡️ Penetration Testing, Red Team & Security Engineering",
+        "description": "Network scanning, packet dissection, fuzzing, and exploit development",
+        "tools": [
+            ("nmap", "Network mapper & port vulnerability scanner", "nmap --version"),
+            ("masscan", "Asynchronous ultra-fast internet port scanner", "masscan --version"),
+            ("rustscan", "Blazing fast port scanner powered by Rust", "rustscan --version"),
+            ("wireshark", "Network protocol packet dissection & capture GUI", "wireshark --version"),
+            ("tshark", "Terminal-based packet analyzer and sniffer", "tshark --version"),
+            ("ffuf", "High-speed web fuzzer for paths and parameters", "ffuf -V"),
+            ("nikto", "Web server misconfiguration and security scanner", "nikto -Version"),
+            ("sqlmap", "Automatic SQL injection & database takeover tool", "sqlmap --version"),
+            ("nuclei", "Template-driven vulnerability scanner", "nuclei -version"),
+            ("caido", "Next-generation lightweight web security proxy", "caido"),
+            ("ghidra", "NSA software reverse engineering framework", "ghidra"),
+            ("radare2", "Unix-like reverse engineering command-line toolkit", "r2 -v"),
+            ("john", "John the Ripper password hash cracker", "john"),
+            ("hashcat", "World-fastest GPU-accelerated hash cracker", "hashcat --version"),
+            ("ligolo-ng", "Simple, lightweight tunneling tool using TUN interfaces", "ligolo"),
+            ("binwalk", "Firmware extraction and binary analysis tool", "binwalk"),
+        ]
+    },
+    "7": {
+        "title": "⛓️ Web3, Smart Contracts & Blockchain Security",
+        "description": "EVM & Solana smart contract auditing, compilation, and security analysis",
+        "tools": [
+            ("solana", "Solana blockchain CLI & validator interaction tool", "solana --version"),
+            ("foundry", "Ethereum application development toolkit (forge, cast, anvil)", "forge --version"),
+            ("slither", "Static analysis framework for Solidity smart contracts", "slither --version"),
+            ("mythril", "Security analysis tool for EVM bytecode", "myth version"),
+            ("ipfs", "InterPlanetary File System peer-to-peer hypermedia", "ipfs --version"),
+        ]
+    },
+    "8": {
+        "title": "👁️ Computer Vision, OCR & Document Intelligence",
+        "description": "Neural document parsing, optical character recognition, and image feature analysis",
+        "tools": [
+            ("tesseract", "Tesseract neural optical character recognition engine", "tesseract --version"),
+            ("opencv", "Computer vision & real-time video processing library", "python3 -c 'import cv2; print(cv2.__version__)'"),
+            ("pymupdf", "High-performance PDF & XPS document parser", "python3 -c 'import fitz; print(fitz.__version__)'"),
+            ("pandoc", "Universal document converter (Markdown, Docx, LaTeX, PDF)", "pandoc --version"),
+            ("typst", "Modern markup-based typesetting system", "typst --version"),
+        ]
+    },
+    "9": {
+        "title": "🌐 Sovereign Linux Infra, Mesh Networks & Cloudflare Edge",
+        "description": "Mesh overlays, zero-trust tunnels, container runtimes, and reverse proxies",
+        "tools": [
+            ("tailscale", "Zero-config wireguard mesh overlay network", "tailscale version"),
+            ("wireguard", "Fast, modern, secure kernel VPN tunnel", "wg --version"),
+            ("docker", "Container engine & isolation supervisor", "docker --version"),
+            ("podman", "Daemonless container engine for rootless OCI pods", "podman --version"),
+            ("caddy", "Enterprise HTTP/3 web server with automatic HTTPS", "caddy version"),
+            ("nginx", "High-performance HTTP server & reverse proxy", "nginx -v"),
+            ("cloudflared", "Cloudflare Zero Trust Tunnel client", "cloudflared --version"),
+            ("postgresql", "Advanced open-source relational database", "psql --version"),
+            ("sqlite3", "Self-contained serverless SQL database engine", "sqlite3 --version"),
+            ("rclone", "Rsync for cloud storage (S3, B2, WebDAV, SFTP)", "rclone --version"),
+        ]
+    },
+    "10": {
+        "title": "📚 Knowledge Management, PKM & Technical Publishing",
+        "description": "Interlinked markdown knowledge bases, graph visualization, and technical authoring",
+        "tools": [
+            ("obsidian", "Second-brain markdown knowledge base with graph view", "obsidian"),
+            ("zathura", "Keyboard-centric document & PDF viewer", "zathura --version"),
+            ("graphviz", "Graph visualization software & DOT layout engine", "dot -V"),
+            ("flameshot", "Powerful yet simple to use screenshot software", "flameshot --version"),
+            ("tree", "Recursive directory tree viewer with depth control", "tree --version"),
+        ]
+    }
+}
+
+GREEN = "\033[38;2;0;255;157m"
+GOLD = "\033[38;2;255;215;0m"
+CYAN = "\033[38;2;0;229;255m"
+RED = "\033[38;2;255;0;85m"
+GRAY = "\033[38;2;120;120;120m"
+RESET = "\033[0m"
+BOLD = "\033[1m"
+
+def print_header():
+    os.system("clear" if os.name == "posix" else "cls")
+    print(f"{GREEN}{BOLD}══════════════════════════════════════════════════════════════════════════════{RESET}")
+    print(f"{GOLD}{BOLD}   ⚡ ZOTHOS & NULLAI: SOVEREIGN 175+ TOOL NEXUS DISPATCHER ⚡{RESET}")
+    print(f"{CYAN}   Decentralized Operating System Toolchain Matrix | Bookworm / Parrot Core{RESET}")
+    print(f"{GREEN}{BOLD}══════════════════════════════════════════════════════════════════════════════{RESET}\n")
+
+def list_all_domains():
+    print_header()
+    for d_id, data in DOMAINS.items():
+        print(f" {GOLD}[{d_id.rjust(2)}]{RESET} {BOLD}{data['title']}{RESET}")
+        print(f"      {GRAY}{data['description']}{RESET}")
+        print(f"      {CYAN}Total Tools:{RESET} {len(data['tools'])} tools registered\n")
+    print(f"{GRAY}Enter a domain number (1-10) to browse, 's' to search, 'r' to run, 'q' to quit.{RESET}")
+
+def view_domain(d_id):
+    data = DOMAINS.get(str(d_id))
+    if not data:
+        print(f"{RED}Invalid domain ID: {d_id}{RESET}")
+        return
+    print_header()
+    print(f"{GOLD}{BOLD}>>> {data['title']} <<<{RESET}")
+    print(f"{GRAY}{data['description']}{RESET}\n")
+    print(f"{'#':<4} {'TOOL ID':<18} {'STATUS':<10} {'DESCRIPTION'}")
+    print(f"{'-'*78}")
+    for idx, (tool_id, desc, cmd) in enumerate(data['tools'], 1):
+        # Check if executable exists
+        first_word = cmd.split()[0] if cmd else tool_id
+        is_installed = shutil.which(first_word) is not None
+        status_str = f"{GREEN}[READY]{RESET}" if is_installed else f"{GRAY}[SIM/SRC]{RESET}"
+        print(f"{str(idx).rjust(2)}. {CYAN}{tool_id:<18}{RESET} {status_str:<19} {desc}")
+    print(f"\n{GRAY}Enter tool # to execute, 'b' to go back, 'q' to quit.{RESET}")
+
+def execute_tool(cmd):
+    print(f"\n{GOLD}[NEXUS]{RESET} Launching: {CYAN}{cmd}{RESET}...\n")
+    try:
+        subprocess.run(cmd, shell=True)
+    except Exception as e:
+        print(f"{RED}Execution failed: {e}{RESET}")
+    input(f"\n{GRAY}Press Enter to return to Tool Nexus...{RESET}")
+
+def search_tools(query):
+    print_header()
+    print(f"{GOLD}Search Results for:{RESET} '{CYAN}{query}{RESET}'\n")
+    found = 0
+    for d_id, data in DOMAINS.items():
+        for tool_id, desc, cmd in data['tools']:
+            if query.lower() in tool_id.lower() or query.lower() in desc.lower():
+                found += 1
+                first_word = cmd.split()[0] if cmd else tool_id
+                is_installed = shutil.which(first_word) is not None
+                status = f"{GREEN}[READY]{RESET}" if is_installed else f"{GRAY}[SIM]{RESET}"
+                print(f" • {CYAN}{tool_id:<16}{RESET} {status} ({data['title'].split()[1]}): {desc}")
+    if found == 0:
+        print(f"{RED}No matching tools found.{RESET}")
+    print(f"\n{GRAY}Total matches: {found}. Press Enter to continue...{RESET}")
+    input()
+
+def interactive_tui():
+    while True:
+        list_all_domains()
+        choice = input(f"{GREEN}ZothNexus ❯ {RESET}").strip().lower()
+        if choice in ['q', 'exit']:
+            print(f"\n{GOLD}Exiting ZOTHOS Tool Nexus. Reality remains sovereign.{RESET}\n")
+            break
+        elif choice == 's':
+            q = input(f"{CYAN}Search query: {RESET}").strip()
+            if q:
+                search_tools(q)
+        elif choice in DOMAINS:
+            while True:
+                view_domain(choice)
+                sub_choice = input(f"{GREEN}{DOMAINS[choice]['title'].split()[0]} ❯ {RESET}").strip().lower()
+                if sub_choice in ['b', 'back']:
+                    break
+                elif sub_choice in ['q', 'exit']:
+                    return
+                elif sub_choice.isdigit():
+                    idx = int(sub_choice) - 1
+                    tools = DOMAINS[choice]['tools']
+                    if 0 <= idx < len(tools):
+                        execute_tool(tools[idx][2])
+                    else:
+                        print(f"{RED}Invalid selection.{RESET}")
+                        time.sleep(1)
+
+def main():
+    parser = argparse.ArgumentParser(description="ZOTHOS Sovereign 175+ Tool Nexus Dispatcher")
+    parser.add_argument("--list", action="store_true", help="List all registered tools across 10 domains")
+    parser.add_argument("--domain", type=str, help="Display tools within domain (1-10)")
+    parser.add_argument("--run", type=str, help="Directly run tool by ID")
+    parser.add_argument("--search", type=str, help="Search tools by keyword")
+    args = parser.parse_args()
+
+    if args.list:
+        for d_id, data in DOMAINS.items():
+            print(f"\n=== {data['title']} ===")
+            for tool_id, desc, cmd in data['tools']:
+                print(f"  - {tool_id:<20} : {desc}")
+        return
+
+    if args.domain:
+        if args.domain in DOMAINS:
+            data = DOMAINS[args.domain]
+            print(f"\n=== {data['title']} ===")
+            for tool_id, desc, cmd in data['tools']:
+                print(f"  - {tool_id:<20} : {desc}")
+        else:
+            print(f"Invalid domain: {args.domain}. Choose 1-10.")
+        return
+
+    if args.run:
+        target = args.run.strip()
+        for d_id, data in DOMAINS.items():
+            for tool_id, desc, cmd in data['tools']:
+                if tool_id == target:
+                    subprocess.run(cmd, shell=True)
+                    return
+        print(f"Tool '{target}' not found in registry.")
+        return
+
+    if args.search:
+        search_tools(args.search)
+        return
+
+    interactive_tui()
+
+if __name__ == "__main__":
+    main()
