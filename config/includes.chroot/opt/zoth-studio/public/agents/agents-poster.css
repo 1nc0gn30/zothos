@@ -1,0 +1,692 @@
+/* Pantheon catalog poster — editorial split + dossier roster. Loaded last. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.ambient-mesh,
+.rune-matrix-canvas,
+.hero-alchemical-canvas,
+.azoth-watermark {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+  background: var(--bg, #050508);
+  color: var(--text-body, #f1f5f9);
+}
+
+.skip,
+.skip-to-content {
+  position: absolute;
+  top: -100px;
+  left: 16px;
+  background: var(--gold, #fbbf24);
+  color: #050508;
+  padding: 10px 18px;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.82rem;
+  font-weight: 700;
+  border-radius: 8px;
+  z-index: 10000;
+  text-decoration: none;
+  transition: top 0.2s ease;
+}
+
+.skip:focus,
+.skip:focus-visible,
+.skip-to-content:focus,
+.skip-to-content:focus-visible {
+  top: 16px;
+  outline: 3px solid #ffffff;
+  outline-offset: 2px;
+}
+
+main#main-content {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Poster hero                                                                */
+/* -------------------------------------------------------------------------- */
+
+.pantheon-poster {
+  position: relative;
+  width: 100%;
+  height: calc(100svh - var(--zoth-header-h, 54px));
+  min-height: calc(100svh - var(--zoth-header-h, 54px));
+  max-height: calc(100svh - var(--zoth-header-h, 54px));
+  display: grid;
+  grid-template-columns: minmax(18rem, 36rem) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  background: var(--bg, #050508);
+  box-sizing: border-box;
+}
+
+.pantheon-poster-copy {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 16px;
+  max-width: 40rem;
+  padding: clamp(28px, 5vw, 64px) clamp(20px, 4vw, 48px) clamp(40px, 7vw, 80px);
+}
+
+.pantheon-poster .kicker,
+.pantheon-poster .agent-tag-pill {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold, #fbbf24);
+  font-weight: 700;
+  background: none;
+  border: 0;
+  border-radius: 0;
+}
+
+.pantheon-poster h1 {
+  font-family: var(--font-display, Syne, sans-serif);
+  font-size: clamp(3.1rem, 8.4vw, 6.2rem);
+  font-weight: 800;
+  line-height: 0.92;
+  letter-spacing: -0.05em;
+  max-width: none;
+  margin: 0;
+  background: none;
+  color: var(--text-primary, #fff6dc);
+  -webkit-text-fill-color: var(--text-primary, #fff6dc);
+  text-shadow: none;
+}
+
+.pantheon-poster .lede {
+  margin: 0;
+  max-width: 32rem;
+  font-size: 1.08rem;
+  line-height: 1.5;
+  color: var(--text-subhead, var(--mute, #cbd5e1));
+}
+
+.pantheon-poster-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.pantheon-poster-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 12px 20px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.pantheon-poster-actions .btn:hover {
+  text-decoration: none;
+}
+
+.pantheon-poster-actions .btn-gold {
+  background: var(--gold, #fbbf24) !important;
+  color: #050508 !important;
+  box-shadow: 0 8px 24px rgba(251, 191, 36, 0.28) !important;
+}
+
+.pantheon-poster-actions .btn-ghost {
+  background: transparent;
+  color: var(--text-primary, #fff) !important;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.16));
+}
+
+.pantheon-poster-visual {
+  position: relative;
+  z-index: 1;
+  min-height: calc(100svh - var(--zoth-header-h, 54px));
+  align-self: stretch;
+  overflow: hidden;
+  background: #050508;
+}
+
+.pantheon-poster-visual img.pantheon-azoth {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+}
+
+.pantheon-poster-visual::after {
+  display: none;
+}
+
+.pantheon-poster-credit {
+  position: absolute;
+  right: 24px;
+  bottom: 84px;
+  z-index: 3;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold, #fbbf24);
+  pointer-events: none;
+}
+
+.pantheon-poster-faces {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 18px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pantheon-poster-faces a {
+  display: block;
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.55));
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+.pantheon-poster-faces a:focus-visible {
+  outline: 2px solid var(--gold, #fbbf24);
+  outline-offset: 2px;
+}
+
+.pantheon-poster-faces img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Roster — film-cast / dossier wall                                          */
+/* -------------------------------------------------------------------------- */
+
+.pantheon-roster {
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 8px clamp(20px, 4vw, 48px) 88px;
+  box-sizing: border-box;
+}
+
+.pantheon-roster-kicker {
+  margin: 0 0 18px;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold, #fbbf24);
+  font-weight: 700;
+}
+
+.pantheon-roster .agent-filter-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 0 0 32px;
+  background: transparent !important;
+  padding: 0 0 18px !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--line, rgba(247, 244, 238, 0.12)) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.pantheon-roster .agent-filter-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pantheon-roster .agent-filter-chip {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: var(--text-dim, #94a3b8) !important;
+  padding: 8px 10px !important;
+  min-height: 40px;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.pantheon-roster .agent-filter-chip:hover {
+  color: var(--text-primary, #fff) !important;
+  background: transparent !important;
+}
+
+.pantheon-roster .agent-filter-chip.active {
+  color: var(--gold, #fbbf24) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-bottom: 1px solid var(--gold, #fbbf24) !important;
+}
+
+.pantheon-roster .agent-search-wrap {
+  min-width: 220px;
+  max-width: 340px;
+}
+
+.pantheon-roster .agent-search-input {
+  background: transparent !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--line, rgba(247, 244, 238, 0.18)) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: var(--text-primary, #fff) !important;
+  padding: 10px 8px 10px 32px;
+}
+
+.pantheon-roster .agent-search-input:focus {
+  border-bottom-color: var(--gold, #fbbf24) !important;
+  box-shadow: none !important;
+}
+
+.pantheon-roster .pantheon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: 28px 18px;
+}
+
+.pantheon-roster .pantheon-card {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.pantheon-roster .pantheon-card:hover {
+  transform: translateY(-3px);
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+
+.pantheon-roster .pantheon-card-thumb {
+  width: 100%;
+  height: auto !important;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  object-position: 50% 18%;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: #111;
+}
+
+.pantheon-roster .pantheon-card-body {
+  padding: 0 !important;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pantheon-roster .pantheon-card-name {
+  font-family: var(--font-display, Syne, sans-serif);
+  font-size: 1.02rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: var(--text-primary, #fff);
+  text-shadow: none !important;
+}
+
+.pantheon-roster .pantheon-card-role {
+  font-family: var(--font-body, Figtree, sans-serif);
+  font-size: 0.78rem;
+  font-weight: 500 !important;
+  letter-spacing: 0;
+  line-height: 1.35;
+  color: var(--text-dim, #94a3b8) !important;
+}
+
+.pantheon-roster .pantheon-card-tag,
+.pantheon-roster .pantheon-card-footer {
+  display: none;
+}
+
+.pantheon-roster .pantheon-card-desc {
+  margin: 0;
+  font-size: 0.74rem;
+  line-height: 1.4;
+  color: var(--text-dim, #94a3b8);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.pantheon-roster .agent-stats-grid {
+  margin: 0 0 28px;
+}
+
+.pantheon-roster .agent-stat-item {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0 0 12px;
+  border-bottom: 1px solid var(--line, rgba(247, 244, 238, 0.12));
+}
+
+.pantheon-sandbox {
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 4vw, 48px) 88px;
+  box-sizing: border-box;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Footer — mega structure from nav; do not flatten to a single row            */
+/* -------------------------------------------------------------------------- */
+
+footer.site {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  box-sizing: border-box;
+  display: block;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Light mode — dark ink on light paper                                       */
+/* -------------------------------------------------------------------------- */
+
+html[data-theme="light"] body {
+  background: #f7f9fc !important;
+  color: #1f2937 !important;
+}
+
+html[data-theme="light"] .pantheon-poster {
+  background: #f7f9fc;
+}
+
+html[data-theme="light"] .pantheon-poster h1 {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  background: none !important;
+  text-shadow: none !important;
+}
+
+html[data-theme="light"] .pantheon-poster .lede {
+  color: #374151 !important;
+}
+
+html[data-theme="light"] .pantheon-poster .kicker,
+html[data-theme="light"] .pantheon-poster .agent-tag-pill,
+html[data-theme="light"] .pantheon-roster-kicker,
+html[data-theme="light"] .pantheon-poster-credit {
+  color: #92400e !important;
+}
+
+html[data-theme="light"] .pantheon-poster-visual {
+  background: #111827;
+}
+
+html[data-theme="light"] .pantheon-poster-visual::after {
+  background: linear-gradient(90deg, var(--bg, #f7f9fc) 0%, transparent 16%, transparent 100%);
+}
+
+html[data-theme="light"] .pantheon-poster-actions .btn-ghost {
+  color: #111827 !important;
+  border-color: rgba(17, 24, 39, 0.16) !important;
+  background: #ffffff !important;
+}
+
+html[data-theme="light"] .pantheon-roster .agent-filter-toolbar {
+  background: transparent !important;
+  border-bottom-color: rgba(17, 24, 39, 0.12) !important;
+}
+
+html[data-theme="light"] .pantheon-roster .agent-filter-chip {
+  color: #6b7280 !important;
+  background: transparent !important;
+}
+
+html[data-theme="light"] .pantheon-roster .agent-filter-chip:hover,
+html[data-theme="light"] .pantheon-roster .agent-filter-chip.active {
+  color: #92400e !important;
+  background: transparent !important;
+}
+
+html[data-theme="light"] .pantheon-roster .agent-search-input {
+  color: #111827 !important;
+  background: transparent !important;
+  border-bottom-color: rgba(17, 24, 39, 0.18) !important;
+}
+
+html[data-theme="light"] .pantheon-roster .pantheon-card,
+html[data-theme="light"] .pantheon-roster .pantheon-card:hover {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="light"] .pantheon-roster .pantheon-card-name {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  text-shadow: none !important;
+}
+
+html[data-theme="light"] .pantheon-roster .pantheon-card-role,
+html[data-theme="light"] .pantheon-roster .pantheon-card-desc {
+  color: #4b5563 !important;
+}
+
+html[data-theme="light"] .pantheon-roster .agent-stat-item {
+  background: transparent;
+  border-bottom-color: rgba(17, 24, 39, 0.12);
+}
+
+html[data-theme="light"] .pantheon-roster .agent-stat-label {
+  color: #6b7280;
+}
+
+html[data-theme="light"] .pantheon-sandbox.detail-card {
+  background: #ffffff;
+  border-color: rgba(17, 24, 39, 0.12);
+  box-shadow: none;
+}
+
+html[data-theme="light"] .pantheon-sandbox .card-title {
+  color: #111827;
+}
+
+html[data-theme="light"] footer.site {
+  color: #374151;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Mobile — portrait on top, copy below, first screen                         */
+/* -------------------------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .pantheon-poster {
+    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: calc(100svh - var(--zoth-header-h, 54px));
+    max-height: none;
+    padding: 0;
+    gap: 0;
+    align-items: stretch;
+    align-content: start;
+  }
+
+  .pantheon-poster-visual {
+    order: -1;
+    min-height: 0;
+    height: min(42svh, 320px);
+    max-height: 42svh;
+    margin: 0;
+  }
+
+  .pantheon-poster-copy {
+    padding: 18px 20px 36px;
+    gap: 10px;
+    max-width: none;
+    justify-content: flex-start;
+  }
+
+  .pantheon-poster h1 {
+    max-width: none;
+    font-size: clamp(2.4rem, 12vw, 3.4rem);
+    white-space: normal;
+  }
+
+  .pantheon-poster .lede {
+    font-size: 0.98rem;
+  }
+
+  .pantheon-poster-credit {
+    display: none;
+  }
+
+  .pantheon-poster-faces {
+    left: 16px;
+    right: 16px;
+    bottom: 10px;
+  }
+
+  .pantheon-poster-faces a {
+    width: 38px;
+    height: 38px;
+  }
+
+  .pantheon-roster {
+    padding: 8px 20px 64px;
+  }
+
+  .pantheon-roster .pantheon-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px 14px;
+  }
+
+  .pantheon-sandbox {
+    padding: 0 20px 64px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pantheon-poster-actions .btn {
+    flex: 1 1 auto;
+  }
+
+  .pantheon-roster .agent-search-wrap {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pantheon-roster .pantheon-card {
+    transition: none;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Matrix & Gold Overrides                                                    */
+/* -------------------------------------------------------------------------- */
+
+html[data-theme="matrix"] .pantheon-poster .agent-tag-pill,
+html[data-theme="matrix"] .pantheon-roster-kicker,
+html[data-theme="matrix"] .pantheon-poster-credit {
+  color: #7dff9a !important;
+  font-family: "Share Tech Mono", monospace !important;
+}
+
+html[data-theme="matrix"] .pantheon-poster-actions .btn-gold {
+  background: #00ff66 !important;
+  box-shadow: 0 8px 24px rgba(0, 255, 102, 0.28) !important;
+}
+
+html[data-theme="matrix"] .pantheon-poster-actions .btn-ghost {
+  border-color: rgba(0, 255, 102, 0.3) !important;
+}
+
+html[data-theme="matrix"] .pantheon-roster .agent-filter-chip.active {
+  color: #00ff66 !important;
+  border-bottom-color: #00ff66 !important;
+}
+
+html[data-theme="matrix"] .pantheon-roster .agent-search-input:focus {
+  border-bottom-color: #00ff66 !important;
+}
+
+html[data-theme="matrix"] footer.site a:hover {
+  color: #9dff9d !important;
+}
+
+html[data-theme="gold"] .pantheon-poster .agent-tag-pill,
+html[data-theme="gold"] .pantheon-roster-kicker,
+html[data-theme="gold"] .pantheon-poster-credit {
+  color: #e8c872 !important;
+  font-family: "Cinzel", serif !important;
+}
+
+html[data-theme="gold"] .pantheon-poster-actions .btn-gold {
+  background: #e8c872 !important;
+  box-shadow: 0 8px 24px rgba(232, 200, 114, 0.28) !important;
+}
+
+html[data-theme="gold"] .pantheon-poster-actions .btn-ghost {
+  border-color: rgba(232, 200, 114, 0.3) !important;
+}
+
+html[data-theme="gold"] .pantheon-roster .agent-filter-chip.active {
+  color: #e8c872 !important;
+  border-bottom-color: #e8c872 !important;
+}
+
+html[data-theme="gold"] .pantheon-roster .agent-search-input:focus {
+  border-bottom-color: #e8c872 !important;
+}
+
+html[data-theme="gold"] footer.site a:hover {
+  color: #f3d27a !important;
+}

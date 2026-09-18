@@ -1,0 +1,41 @@
+---
+name: Verify Docs
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - '**'
+      - '!release-please--**'
+
+jobs:
+  verify-docs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --no-audit
+
+      - name: Install ./site dependencies
+        run: npm ci --prefix=site --no-audit
+
+      - name: Generate docs
+        run: npm run --prefix=site build
+
+      - name: Check for changes
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "No changes to docs files detected"
+          else
+            echo "Changes to docs files detected, please run 'npm run docs' to sync docs"
+            exit 1
+          fi

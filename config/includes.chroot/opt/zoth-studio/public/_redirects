@@ -1,0 +1,53 @@
+# ═══════════════════════════════════════════════════════════════
+# ZOTH STUDIO / NULLAI TECH — Netlify & Cloudflare Edge Redirects
+# ═══════════════════════════════════════════════════════════════
+
+# Domain Normalization & Aliases
+https://zoth.nealfrazier.tech/* https://zoth.nullai.tech/:splat 301!
+https://nullai.tech/studio/* https://zoth.nullai.tech/studio/:splat 301!
+
+# Studio & Tools Shortcuts
+/deck                   http://127.0.0.1:8484/                  302
+/deck/*                 http://127.0.0.1:8484/:splat            302
+/vault-ui               /vault/index.html                       301
+/ax                     /studio/ax-powerhouse.html              301
+/builder                /studio/                                301
+/composer               /studio/agent-composer.html             301
+/omnipost               /studio/omnipost.html                   301
+/consensus              /studio/consensus.html                  301
+/math                   /studio/math-pillars.html               301
+/bench                  /studio/tool-bench.html                 301
+/recon                  /studio/subsweep.html                   301
+/pets-studio            /pets/pet-model-studio.html             301
+/gallery                /assets/gallery.html                    301
+/netlify-ax             /studio/netlify-ax.html                 301
+/deploy                 /studio/netlify-ax.html                 301
+/generator              /studio/webgen.html             301
+/site-generator         /studio/webgen.html             301
+/social-wall            /social/                                301
+/wall                   /social/                                301
+/support/               /pricing/                               301
+
+# Static Assets & Canonical Documents
+/llms-full.txt          /llms.txt                               301
+/ai-plugin.json         /.well-known/ai-plugin.json             301
+
+# Fallback Clean SPA Routing
+/previews/*             /previews/:splat                        200
+/docs/*                 /docs/:splat                            200
+/studio/*               /studio/:splat                          200
+/pets/*                 /pets/:splat                            200
+/blueprints/*           /blueprints/:splat                      200
+
+# --- [ PRIVATE: NEVER SERVE ] -----------------------------------------------
+# User workspace + session data holds absolute local paths and prompt history.
+# It is served directly from public/ by default, so it must be denied here.
+/workspaces/*           /llms.txt                               410
+/data/memories.json     /llms.txt                               410
+
+# FAQ duplicate consolidation: public/faqs.html and public/faqs/index.html are
+# byte-identical orphans that nothing links to and that the sitemap previously
+# advertised. Send them to the canonical page rather than letting three URLs
+# compete. (Files are left on disk; removing them is a content decision.)
+/faqs/                  /faq.html                               301!
+/faqs.html              /faq.html                               301!

@@ -1,0 +1,800 @@
+/* Character Codex poster — full-bleed split, Azoth contain/bottom, quiet roster. */
+@import url("/assets/zoth-agent-avatars.css");
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding-top: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: var(--bg, #050508);
+  color: var(--text-body, #f1f5f9);
+  font-family: var(--font-sans, "Figtree", system-ui, sans-serif);
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+.skip-to-content {
+  position: absolute;
+  top: -100px;
+  left: 16px;
+  background: var(--gold, #fbbf24);
+  color: #050508;
+  padding: 10px 18px;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.82rem;
+  font-weight: 700;
+  border-radius: 8px;
+  z-index: 10000;
+  text-decoration: none;
+  transition: top 0.2s ease;
+}
+
+.skip-to-content:focus,
+.skip-to-content:focus-visible {
+  top: 16px;
+  outline: 3px solid #ffffff;
+  outline-offset: 2px;
+}
+
+main#main-content {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* -------------------------------------------------------------------------- */
+/* First viewport — full-bleed split. Portrait: contain / center bottom.      */
+/* Never cover-crop. Never object-position Y ≈ 18%.                           */
+/* -------------------------------------------------------------------------- */
+
+.codex-poster {
+  position: relative;
+  width: 100%;
+  min-height: calc(100svh - var(--zoth-header-h, 54px) - 108px);
+  display: grid;
+  grid-template-columns: minmax(18rem, 38rem) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  background: var(--bg, #050508);
+  box-sizing: border-box;
+}
+
+.codex-poster-copy {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 16px;
+  max-width: 40rem;
+  min-width: 0;
+  padding: clamp(28px, 5vw, 64px) clamp(20px, 4vw, 48px) clamp(96px, 12vw, 132px);
+}
+
+.codex-poster .kicker {
+  margin: 0;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold, #fbbf24);
+  font-weight: 700;
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+.codex-poster h1 {
+  font-family: var(--font-display, "Syne", sans-serif);
+  font-size: clamp(2.7rem, 6.4vw, 5.2rem);
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 0.94;
+  margin: 0;
+  max-width: 10ch;
+  color: var(--text-primary, #fff);
+  background: none !important;
+  -webkit-text-fill-color: var(--text-primary, #fff) !important;
+  text-shadow: none !important;
+  overflow-wrap: normal;
+  word-break: keep-all;
+  hyphens: none;
+}
+
+.codex-poster .lede {
+  margin: 0;
+  max-width: 32rem;
+  font-size: 1.08rem;
+  line-height: 1.5;
+  color: var(--text-subhead, var(--mute, #cbd5e1));
+}
+
+.codex-poster-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.codex-poster-actions .btn,
+.char-hero .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 12px 20px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  border: 0;
+  transition: transform 0.2s ease, filter 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.codex-poster-actions .btn:hover,
+.char-hero .btn:hover {
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+.codex-poster-actions .btn-gold,
+.char-hero .btn-gold {
+  background: var(--gold, #fbbf24) !important;
+  color: #050508 !important;
+  box-shadow: 0 8px 24px rgba(251, 191, 36, 0.28);
+}
+
+.codex-poster-actions .btn-gold:hover,
+.char-hero .btn-gold:hover {
+  filter: brightness(1.08);
+  color: #050508 !important;
+}
+
+.codex-poster-actions .btn-ghost,
+.char-hero .btn-ghost {
+  background: transparent !important;
+  color: var(--text-primary, #fff) !important;
+  border: 1.5px solid var(--line, rgba(255, 255, 255, 0.28)) !important;
+  box-shadow: none !important;
+}
+
+.codex-poster-actions .btn-ghost:hover,
+.char-hero .btn-ghost:hover {
+  border-color: var(--gold, #fbbf24);
+  color: var(--gold, #fbbf24) !important;
+}
+
+.codex-poster-figure {
+  position: relative;
+  z-index: 1;
+  min-height: calc(100svh - var(--zoth-header-h, 54px) - 108px);
+  min-width: 0;
+  align-self: stretch;
+  overflow: hidden;
+  background: #050508;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.codex-poster-figure img {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  object-fit: contain !important;
+  object-position: center bottom !important;
+  display: block;
+  background: transparent;
+}
+
+.codex-poster-credit {
+  position: absolute;
+  right: 24px;
+  bottom: 28px;
+  z-index: 2;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold, #fbbf24);
+  pointer-events: none;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Roster — quiet boxed .char-hero, cards stay the interaction                */
+/* -------------------------------------------------------------------------- */
+
+.char-roster {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 28px clamp(20px, 4vw, 48px) 96px;
+}
+
+.char-hero {
+  text-align: left;
+  margin: 0 0 28px;
+  padding: 22px 24px;
+  background: color-mix(in srgb, var(--panel, rgba(11, 15, 29, 0.55)) 88%, transparent);
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+  border-radius: 16px;
+  box-shadow: none;
+}
+
+.char-kicker {
+  display: inline-block;
+  margin: 0 0 10px;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold, #fbbf24);
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+.char-hero h2 {
+  font-family: var(--font-display, "Syne", sans-serif);
+  font-size: clamp(1.35rem, 2.4vw, 1.7rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text-primary, #fff);
+  margin: 0 0 8px;
+  background: none;
+  -webkit-text-fill-color: var(--text-primary, #fff);
+}
+
+.char-lead {
+  margin: 0 0 16px;
+  max-width: 40rem;
+  font-size: 0.98rem;
+  line-height: 1.55;
+  color: var(--text-subhead, #94a3b8);
+}
+
+.char-hero .cta-group {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.char-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.char-card {
+  background: var(--panel, rgba(11, 15, 29, 0.72));
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+  border-radius: 16px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: none;
+}
+
+.char-card:hover {
+  border-color: rgba(251, 191, 36, 0.38);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+}
+
+.char-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.char-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 14px;
+  object-fit: cover;
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  background: #050508;
+  flex-shrink: 0;
+}
+
+.char-meta h2 {
+  font-family: var(--font-display, "Syne", sans-serif);
+  font-size: 1.22rem;
+  font-weight: 800;
+  color: var(--text-primary, #fff);
+  margin: 0 0 4px;
+  background: none;
+  -webkit-text-fill-color: var(--text-primary, #fff);
+}
+
+.char-role-badge {
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--gold, #fbbf24);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.char-bio {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--text-subhead, #cbd5e1);
+  line-height: 1.6;
+}
+
+.char-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.06));
+  border-radius: 12px;
+  padding: 12px;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.74rem;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--mute, #94a3b8);
+}
+
+.stat-item strong {
+  color: var(--gold, #fbbf24);
+  font-weight: 700;
+}
+
+.voice-btn {
+  background: transparent;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.16));
+  color: var(--text-primary, #fff);
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+  margin-top: auto;
+}
+
+.voice-btn:hover {
+  border-color: var(--gold, #fbbf24);
+  color: var(--gold, #fbbf24);
+  background: rgba(251, 191, 36, 0.08);
+}
+
+.voice-btn:focus-visible {
+  outline: 2px solid var(--gold, #fbbf24);
+  outline-offset: 2px;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Footer full-bleed                                                          */
+/* -------------------------------------------------------------------------- */
+
+footer.site {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  box-sizing: border-box;
+  border-top: 1px solid var(--line, rgba(247, 244, 238, 0.1));
+  padding: 48px clamp(20px, 4vw, 48px) 36px;
+  background: var(--bg, #050508);
+  color: var(--mute, #a8a4c2);
+}
+
+body.has-comic-audio-player footer.site {
+  padding-bottom: 140px;
+}
+
+footer.site .foot-grid {
+  display: grid;
+  grid-template-columns: 1.618fr 1fr 1fr 1fr;
+  gap: 34px;
+  width: 100%;
+  max-width: none;
+}
+
+footer.site .foot-brand {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+footer.site .foot-brand img {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+footer.site .foot-brand strong {
+  display: block;
+  font-family: var(--font-display, "Syne", sans-serif);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-primary, #fff);
+}
+
+footer.site .foot-brand .kicker {
+  display: block;
+  margin: 4px 0 0;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold, #fbbf24);
+  font-weight: 700;
+}
+
+footer.site .foot-brand p {
+  color: var(--mute, #94a3b8);
+  margin: 8px 0 0;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  max-width: 22rem;
+}
+
+footer.site .foot-col h3 {
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold, #fbbf24);
+  margin: 0 0 14px;
+  font-weight: 700;
+}
+
+footer.site .foot-col a {
+  display: block;
+  text-decoration: none;
+  color: var(--text-subhead, #cbd5e1);
+  font-size: 0.94rem;
+  padding: 5px 0;
+}
+
+footer.site .foot-col a:hover {
+  color: var(--gold, #fbbf24);
+}
+
+footer.site .foot-end {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line, rgba(247, 244, 238, 0.1));
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.76rem;
+  color: var(--mute, #94a3b8);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Light mode — dark ink on light ground. Poster h1 stays #111827.            */
+/* -------------------------------------------------------------------------- */
+
+html[data-theme="light"] body {
+  background: #f7f9fc !important;
+  color: #1f2937 !important;
+}
+
+html[data-theme="light"] .codex-poster {
+  background: #f7f9fc !important;
+}
+
+html[data-theme="light"] .codex-poster h1 {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  background: none !important;
+  text-shadow: none !important;
+}
+
+html[data-theme="light"] .codex-poster .lede {
+  color: #374151 !important;
+}
+
+html[data-theme="light"] .codex-poster .kicker,
+html[data-theme="light"] .codex-poster-credit,
+html[data-theme="light"] .char-kicker,
+html[data-theme="light"] .char-role-badge {
+  color: #92400e !important;
+}
+
+html[data-theme="light"] .codex-poster-figure {
+  background: #0b1220;
+}
+
+html[data-theme="light"] .codex-poster-actions .btn-ghost,
+html[data-theme="light"] .char-hero .btn-ghost,
+html[data-theme="light"] .codex-poster-actions a.btn-ghost {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  border: 1.5px solid rgba(17, 24, 39, 0.28) !important;
+  background: #ffffff !important;
+  box-shadow: 0 1px 2px rgba(17, 24, 39, 0.06) !important;
+}
+
+html[data-theme="light"] .char-hero {
+  background: #ffffff;
+  border-color: rgba(17, 24, 39, 0.1);
+}
+
+html[data-theme="light"] .char-hero h2,
+html[data-theme="light"] .char-meta h2 {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+html[data-theme="light"] .char-lead,
+html[data-theme="light"] .char-bio {
+  color: #374151 !important;
+}
+
+html[data-theme="light"] .char-card {
+  background: #ffffff;
+  border-color: rgba(17, 24, 39, 0.1);
+  box-shadow: 0 8px 20px rgba(17, 24, 39, 0.04);
+}
+
+html[data-theme="light"] .char-card:hover {
+  border-color: rgba(146, 64, 14, 0.28);
+  box-shadow: 0 12px 24px rgba(17, 24, 39, 0.08);
+}
+
+html[data-theme="light"] .char-stats {
+  background: #f3f4f6;
+  border-color: rgba(17, 24, 39, 0.08);
+}
+
+html[data-theme="light"] .stat-item {
+  color: #4b5563;
+}
+
+html[data-theme="light"] .stat-item strong {
+  color: #92400e;
+}
+
+html[data-theme="light"] .voice-btn {
+  color: #111827;
+  border-color: rgba(17, 24, 39, 0.16);
+  background: #ffffff;
+}
+
+html[data-theme="light"] .voice-btn:hover {
+  color: #92400e;
+  border-color: rgba(146, 64, 14, 0.4);
+  background: #fffbeb;
+}
+
+html[data-theme="light"] footer.site {
+  background: #f7f9fc !important;
+  color: #374151;
+  border-top-color: rgba(17, 24, 39, 0.1);
+}
+
+html[data-theme="light"] footer.site .foot-brand strong {
+  color: #111827;
+}
+
+html[data-theme="light"] footer.site .foot-col a,
+html[data-theme="light"] footer.site .foot-brand p,
+html[data-theme="light"] footer.site .foot-end {
+  color: #374151;
+}
+
+html[data-theme="light"] footer.site .foot-col a:hover,
+html[data-theme="light"] footer.site .foot-brand .kicker,
+html[data-theme="light"] footer.site .foot-col h3 {
+  color: #92400e;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Mobile — portrait first, copy below                                        */
+/* -------------------------------------------------------------------------- */
+
+@media (max-width: 1024px) {
+  .codex-poster {
+    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: auto;
+    align-items: start;
+    align-content: start;
+  }
+
+  .codex-poster-figure {
+    order: -1;
+    min-height: 52vh;
+    height: 52vh;
+    max-height: none;
+    flex: 0 0 auto;
+    margin: 0;
+  }
+
+  .codex-poster-copy {
+    flex: 1 0 auto;
+    justify-content: flex-start;
+    padding: 18px 20px calc(28px + 108px);
+    gap: 12px;
+    max-width: none;
+  }
+
+  .codex-poster h1 {
+    font-size: clamp(2.4rem, 12vw, 3.2rem);
+    max-width: none;
+  }
+
+  .codex-poster .lede {
+    font-size: 1rem;
+  }
+
+  .codex-poster-credit {
+    right: 16px;
+    bottom: 12px;
+  }
+
+  footer.site .foot-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 28px 21px;
+  }
+}
+
+@media (max-width: 640px) {
+  .codex-poster-figure {
+    height: min(32svh, 260px);
+    min-height: 200px;
+    max-height: 280px;
+  }
+
+  .codex-poster-copy {
+    padding: 14px 20px calc(18px + 120px);
+    gap: 10px;
+  }
+
+  .codex-poster h1 {
+    font-size: clamp(2.1rem, 11vw, 2.8rem);
+  }
+
+  .codex-poster .lede {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .char-grid {
+    grid-template-columns: 1fr;
+  }
+
+  footer.site .foot-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* =============================================================================
+   Matrix Theme
+   ============================================================================= */
+html[data-theme="matrix"] {
+  --comic-gold: #00ff66;
+  --comic-cyan: #00ff66;
+  --comic-line: rgba(0, 255, 102, 0.25);
+  --comic-border: rgba(0, 255, 102, 0.35);
+}
+
+html[data-theme="matrix"] body {
+  background: #020d04 !important;
+  color: #e0ffe8 !important;
+  font-family: "Share Tech Mono", monospace;
+}
+
+html[data-theme="matrix"] .codex-poster h1,
+html[data-theme="matrix"] .char-title {
+  font-family: "Share Tech Mono", monospace !important;
+  color: #00ff66 !important;
+  text-shadow: 0 0 16px rgba(0, 255, 102, 0.5) !important;
+}
+
+html[data-theme="matrix"] .char-card,
+html[data-theme="matrix"] .char-hero {
+  background: rgba(3, 20, 8, 0.88) !important;
+  border-color: rgba(0, 255, 102, 0.35) !important;
+  box-shadow: 0 0 24px rgba(0, 255, 102, 0.15) !important;
+}
+
+html[data-theme="matrix"] .char-tab.active {
+  background: #00ff66 !important;
+  color: #020d04 !important;
+  font-weight: 800;
+  box-shadow: 0 0 16px rgba(0, 255, 102, 0.5) !important;
+}
+
+/* =============================================================================
+   Gold Theme
+   ============================================================================= */
+html[data-theme="gold"] {
+  --comic-gold: #fbbf24;
+  --comic-cyan: #fbbf24;
+  --comic-line: rgba(251, 191, 36, 0.2);
+  --comic-border: rgba(251, 191, 36, 0.3);
+}
+
+html[data-theme="gold"] body {
+  background: #080602 !important;
+  color: #fbf5e6 !important;
+}
+
+html[data-theme="gold"] .codex-poster h1,
+html[data-theme="gold"] .char-title {
+  font-family: "Cinzel", "Fraunces", serif !important;
+  color: #fbbf24 !important;
+  text-shadow: 0 0 20px rgba(251, 191, 36, 0.45) !important;
+}
+
+html[data-theme="gold"] .char-card,
+html[data-theme="gold"] .char-hero {
+  background: rgba(18, 14, 6, 0.88) !important;
+  border-color: rgba(251, 191, 36, 0.3) !important;
+  box-shadow: 0 0 28px rgba(251, 191, 36, 0.12) !important;
+}
+
+html[data-theme="gold"] .char-tab.active {
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%) !important;
+  color: #140d02 !important;
+  font-weight: 800;
+  box-shadow: 0 0 18px rgba(251, 191, 36, 0.4) !important;
+}

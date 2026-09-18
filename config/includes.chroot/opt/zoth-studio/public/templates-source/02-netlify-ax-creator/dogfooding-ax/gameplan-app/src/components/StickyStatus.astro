@@ -1,0 +1,29 @@
+---
+interface Props {
+  percent: number;
+}
+
+const { percent = 0 } = Astro.props;
+---
+
+<div class="sticky-status" id="sticky-status" aria-hidden="true">
+  <div class="sticky-status-inner">
+    <span class="sticky-status-label">Mission progress</span>
+    <div class="sticky-status-bar">
+      <div class="sticky-status-fill" style={`width: ${percent}%`}></div>
+    </div>
+    <span class="sticky-status-value">{percent}%</span>
+  </div>
+</div>
+
+<script>
+  const sticky = document.getElementById('sticky-status');
+  if (sticky) {
+    const threshold = window.innerHeight * 0.75;
+    const onScroll = () => {
+      sticky.classList.toggle('visible', window.scrollY > threshold);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  }
+</script>

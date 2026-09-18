@@ -1,0 +1,129 @@
+---
+---
+
+<div id="lead-modal" class="lead-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="lead-modal-title">
+  <div class="lead-modal-backdrop" data-close-modal></div>
+
+  <div class="lead-modal-panel">
+    <button class="lead-modal-close" data-close-modal aria-label="Close modal">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+
+    <div class="lead-modal-body" id="lead-modal-form-view">
+      <p class="lead-modal-eyebrow" id="lead-modal-title">Get connected</p>
+      <h2 class="lead-modal-headline">Tell us what the property needs.</h2>
+      <p class="lead-modal-sub">Join the contact list for updates, quotes, and priority scheduling in Virginia Beach and Hampton Roads.</p>
+
+      <form
+        name="lead-capture"
+        method="POST"
+        data-netlify="true"
+        netlify-honeypot="bot-field"
+        action="/thank-you/"
+        class="lead-modal-form"
+        data-form-success="lead-modal-success"
+      >
+        <input type="hidden" name="form-name" value="lead-capture" />
+        <p hidden><label>Do not fill this out: <input name="bot-field" /></label></p>
+
+        <div class="lead-modal-row">
+          <label class="lead-modal-field">
+            <span>Name</span>
+            <input name="name" autocomplete="name" placeholder="Your name" required />
+          </label>
+          <label class="lead-modal-field">
+            <span>Phone</span>
+            <input name="phone" autocomplete="tel" type="tel" placeholder="804-000-0000" required />
+          </label>
+        </div>
+
+        <label class="lead-modal-field">
+          <span>Email</span>
+          <input name="email" autocomplete="email" type="email" placeholder="you@email.com" required />
+        </label>
+
+        <div class="lead-modal-row">
+          <label class="lead-modal-field">
+            <span>I am a</span>
+            <select name="customer-type" required>
+              <option value="" disabled selected>Select audience</option>
+              <option>Homeowner</option>
+              <option>Business</option>
+              <option>Contractor</option>
+              <option>Property Manager</option>
+              <option>Other</option>
+            </select>
+          </label>
+          <label class="lead-modal-field">
+            <span>Service need</span>
+            <select name="service" required>
+              <option value="" disabled selected>Select service</option>
+              <option>CCTV / Video Monitoring</option>
+              <option>Alarm Systems</option>
+              <option>Access Control</option>
+              <option>Structured Cabling</option>
+              <option>Audio / Visual</option>
+              <option>MSP / Managed IT</option>
+              <option>VoIP / Communications</option>
+              <option>Network & WiFi Solutions</option>
+              <option>Smart Home Integration</option>
+              <option>Multiple services</option>
+              <option>Not sure yet</option>
+            </select>
+          </label>
+        </div>
+
+        <button type="submit" class="lead-modal-submit" data-submit-text="Request contact">
+          <span class="btn-text">Request contact</span>
+          <span class="btn-loader" hidden>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2v4m0 12v4m-8-8h4m12 0h4m-2.93-5.07l-2.83 2.83m-8.48 8.48l-2.83 2.83m0-14.14l2.83 2.83m8.48 8.48l2.83 2.83"/></svg>
+          </span>
+        </button>
+
+        <p class="lead-modal-footnote">No spam. Unsubscribe anytime. Response within 1 business day.</p>
+      </form>
+    </div>
+
+    <div class="form-success" id="lead-modal-success" hidden>
+      <div class="form-success-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+      <h3>Request sent.</h3>
+      <p>Elite Connect will follow up within one business day.</p>
+      <button class="button secondary" data-close-modal>Close</button>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+(function() {
+  var modal = document.getElementById('lead-modal');
+  if (!modal) return;
+  var shown = false;
+  try { shown = sessionStorage.getItem('eliteconnect-lead-modal') === '1'; } catch(e) {}
+
+  function open() {
+    modal.classList.add('lead-modal--open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    try { sessionStorage.setItem('eliteconnect-lead-modal', '1'); } catch(e) {}
+  }
+
+  function close() {
+    modal.classList.remove('lead-modal--open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  if (!shown) setTimeout(open, 3500);
+
+  modal.addEventListener('click', function(e) {
+    var closeTrigger = e.target.closest('[data-close-modal]');
+    if (closeTrigger) close();
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && modal.classList.contains('lead-modal--open')) close();
+  });
+})();
+</script>

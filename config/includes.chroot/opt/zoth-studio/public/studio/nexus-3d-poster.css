@@ -1,0 +1,506 @@
+/* Nexus 3D Omniverse — compact editorial poster above the CAD workspace.
+   Loaded after zoth-theme.css. Page :root must not pin --text / --bg. */
+
+.ambient-mesh,
+.rune-matrix-canvas {
+  display: none !important;
+}
+
+html,
+body {
+  height: auto !important;
+  min-height: 100%;
+  max-width: 100vw;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  background: var(--bg, #050508);
+  color: var(--text-body, var(--text, #f1f5f9));
+}
+
+main#main-content {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  z-index: 1;
+  display: block;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  height: auto;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Compact poster — copy left, Azoth right. CAD stage stays below.            */
+/* -------------------------------------------------------------------------- */
+
+.nexus-poster {
+  position: relative;
+  width: 100%;
+  min-height: min(48svh, 420px);
+  display: grid;
+  grid-template-columns: minmax(18rem, 38rem) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  background: var(--bg, #050508);
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+}
+
+.nexus-poster-copy {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 14px;
+  max-width: 38rem;
+  padding: clamp(22px, 4vw, 48px) clamp(20px, 4vw, 48px) clamp(28px, 5vw, 52px);
+}
+
+.nexus-poster .kicker {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold, #fbbf24);
+  font-weight: 700;
+  background: none;
+  border: 0;
+}
+
+html .nexus-poster h1,
+.nexus-poster h1 {
+  font-family: var(--font-display, "Syne", system-ui, sans-serif) !important;
+  font-size: clamp(2.6rem, 6vw, 4.6rem) !important;
+  font-weight: 800 !important;
+  line-height: 0.92 !important;
+  letter-spacing: -0.05em !important;
+  max-width: 12ch;
+  margin: 0;
+  background: none !important;
+  color: var(--text-primary, #fff6dc) !important;
+  -webkit-text-fill-color: var(--text-primary, #fff6dc) !important;
+  text-shadow: none !important;
+  overflow-wrap: normal !important;
+  word-break: keep-all !important;
+  hyphens: none !important;
+  white-space: nowrap;
+}
+
+.nexus-poster .lede {
+  margin: 0;
+  max-width: 34rem;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  color: var(--text-subhead, var(--mute, #cbd5e1));
+}
+
+.nexus-poster-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.nexus-poster-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 12px 20px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  box-sizing: border-box;
+}
+
+.nexus-poster-actions .btn:hover {
+  text-decoration: none;
+}
+
+.nexus-poster-actions .btn-gold {
+  background: var(--gold, #fbbf24) !important;
+  color: #050508 !important;
+  box-shadow: 0 8px 24px rgba(251, 191, 36, 0.28) !important;
+  border: 0 !important;
+}
+
+.nexus-poster-actions .btn-gold:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+}
+
+.nexus-poster-actions .btn-ghost {
+  background: transparent !important;
+  color: var(--text-primary, #fff) !important;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.16)) !important;
+  box-shadow: none !important;
+}
+
+.nexus-poster-actions .btn-ghost:hover {
+  border-color: var(--gold, #fbbf24) !important;
+  color: var(--gold, #fbbf24) !important;
+}
+
+.nexus-poster-visual {
+  position: relative;
+  z-index: 1;
+  min-height: min(48svh, 420px);
+  align-self: stretch;
+  overflow: hidden;
+  background: #050508;
+}
+
+.nexus-poster-visual img.nexus-poster-azoth {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  pointer-events: none;
+}
+
+/* Never cover 18% of Azoth */
+.nexus-poster-visual::after,
+.nexus-poster-visual::before {
+  display: none;
+}
+
+.nexus-poster-credit {
+  position: absolute;
+  right: 20px;
+  bottom: 16px;
+  z-index: 3;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold, #fbbf24);
+  pointer-events: none;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Omniverse CAD stage — keep Three.js / #three-viewport mount                */
+/* -------------------------------------------------------------------------- */
+
+#omniverse.nexus-omniverse {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  scroll-margin-top: calc(var(--zoth-header-h, 54px) + var(--zoth-ribbon, 0px) + 12px);
+  box-sizing: border-box;
+}
+
+#omniverse .studio-layout {
+  height: calc(100svh - var(--zoth-header-h, 54px) - var(--zoth-ribbon, 0px) - 16px);
+  min-height: 560px;
+  background: var(--bg, #020306);
+}
+
+#three-viewport {
+  position: relative;
+  z-index: 1;
+}
+
+#three-viewport canvas {
+  position: relative;
+  z-index: 1;
+  display: block;
+}
+
+footer.site {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  box-sizing: border-box;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Mobile — portrait first, skip fighting GL                                  */
+/* -------------------------------------------------------------------------- */
+
+/* -------------------------------------------------------------------------- */
+/* Mobile — portrait first, skip fighting GL                                  */
+/* -------------------------------------------------------------------------- */
+
+@media (max-width: 1100px) {
+  .nexus-poster {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .nexus-poster-visual {
+    order: -1;
+    min-height: min(48svh, 360px);
+  }
+
+  .nexus-poster-copy {
+    justify-content: flex-start;
+    padding: 20px 18px 28px;
+  }
+
+  html .nexus-poster h1,
+  .nexus-poster h1 {
+    font-size: clamp(2.2rem, 9vw, 3.2rem) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  html .nexus-poster h1,
+  .nexus-poster h1,
+  html[data-theme="light"] .nexus-poster h1,
+  html.theme-light .nexus-poster h1 {
+    white-space: normal !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    font-size: clamp(1.9rem, 8.5vw, 2.8rem) !important;
+    line-height: 1.05 !important;
+  }
+}
+
+@media (max-width: 880px) {
+  #omniverse .studio-layout {
+    height: auto;
+    min-height: 0;
+  }
+
+  #omniverse .viewport-container,
+  #omniverse #viewport-host {
+    height: clamp(240px, 38vh, 340px);
+    min-height: 240px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nexus-poster-actions .btn-gold:hover {
+    transform: none;
+    filter: none;
+  }
+
+  #three-viewport canvas {
+    /* Keep the mount; engine may still tick. Do not hide the node. */
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Light — dark ink, pale paper. CAD viewport stays void.                     */
+/* -------------------------------------------------------------------------- */
+
+html[data-theme="light"] body,
+html.theme-light body {
+  background: #f7f9fc !important;
+  color: #1f2937 !important;
+}
+
+html[data-theme="light"] .nexus-poster,
+html.theme-light .nexus-poster {
+  background: #f7f9fc;
+  border-bottom-color: rgba(17, 24, 39, 0.1);
+}
+
+html[data-theme="light"] .nexus-poster h1,
+html.theme-light .nexus-poster h1 {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  background: none !important;
+  text-shadow: none !important;
+}
+
+html[data-theme="light"] .nexus-poster .lede,
+html.theme-light .nexus-poster .lede {
+  color: #374151 !important;
+}
+
+html[data-theme="light"] .nexus-poster .kicker,
+html.theme-light .nexus-poster .kicker,
+html[data-theme="light"] .nexus-poster-credit,
+html.theme-light .nexus-poster-credit {
+  color: #92400e !important;
+}
+
+html[data-theme="light"] .nexus-poster-visual,
+html.theme-light .nexus-poster-visual {
+  background: #050508;
+}
+
+html[data-theme="light"] .nexus-poster-actions .btn-ghost,
+html.theme-light .nexus-poster-actions .btn-ghost {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  border: 1px solid rgba(17, 24, 39, 0.28) !important;
+  background: #ffffff !important;
+}
+
+html[data-theme="light"] .nexus-poster-actions .btn-gold,
+html.theme-light .nexus-poster-actions .btn-gold {
+  background: #fbbf24 !important;
+  color: #050508 !important;
+}
+
+html[data-theme="light"] #omniverse,
+html.theme-light #omniverse {
+  --text: #e8eef7;
+  --text-primary: #f8fafc;
+  --text-body: #e8eef7;
+  --text-subhead: #cbd5e1;
+  --text-secondary: #cbd5e1;
+  --muted: #94a3b8;
+  --text-dim: #94a3b8;
+  color: #e8eef7;
+}
+
+html[data-theme="light"] #omniverse .studio-layout,
+html.theme-light #omniverse .studio-layout {
+  background: #0b1020;
+}
+
+html[data-theme="light"] #omniverse h2,
+html[data-theme="light"] #omniverse h3,
+html[data-theme="light"] #omniverse .panel-header,
+html[data-theme="light"] #omniverse .panel-title,
+html[data-theme="light"] #omniverse .header-title,
+html.theme-light #omniverse h2,
+html.theme-light #omniverse h3,
+html.theme-light #omniverse .panel-header,
+html.theme-light #omniverse .panel-title,
+html.theme-light #omniverse .header-title {
+  color: #f8fafc !important;
+  text-shadow: none !important;
+  -webkit-text-fill-color: #f8fafc !important;
+}
+
+html[data-theme="light"] .mobile-segmented-bar,
+html.theme-light .mobile-segmented-bar {
+  background: rgba(247, 249, 252, 0.96);
+}
+
+html[data-theme="light"] .mobile-desktop-insight,
+html.theme-light .mobile-desktop-insight {
+  color: #1f2937;
+  background: rgba(99, 91, 255, 0.08);
+  border-color: rgba(99, 91, 255, 0.25);
+}
+
+html[data-theme="light"] footer.site,
+html.theme-light footer.site {
+  background: #eef2f7;
+  color: #1f2937;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Matrix / gold — token-aligned poster ink                                   */
+/* -------------------------------------------------------------------------- */
+
+html[data-theme="matrix"] body,
+html.theme-matrix body {
+  background: #000800 !important;
+  color: #a7f3d0 !important;
+}
+
+html[data-theme="matrix"] .nexus-poster,
+html.theme-matrix .nexus-poster {
+  background: var(--bg, #000800);
+  border-bottom-color: rgba(0, 255, 106, 0.15);
+}
+
+html[data-theme="matrix"] .nexus-poster h1,
+html.theme-matrix .nexus-poster h1 {
+  color: #b7ffbf !important;
+  -webkit-text-fill-color: #b7ffbf !important;
+  text-shadow: 0 0 20px rgba(0, 255, 106, 0.25) !important;
+}
+
+html[data-theme="matrix"] .nexus-poster .lede,
+html.theme-matrix .nexus-poster .lede {
+  color: #6ee7b7 !important;
+}
+
+html[data-theme="matrix"] .nexus-poster .kicker,
+html.theme-matrix .nexus-poster .kicker,
+html[data-theme="matrix"] .nexus-poster-credit,
+html.theme-matrix .nexus-poster-credit {
+  color: #00ff6a !important;
+}
+
+html[data-theme="matrix"] .nexus-poster-visual,
+html.theme-matrix .nexus-poster-visual {
+  background: #000800;
+}
+
+html[data-theme="matrix"] .nexus-poster-actions .btn-ghost,
+html.theme-matrix .nexus-poster-actions .btn-ghost {
+  color: #b7ffbf !important;
+  -webkit-text-fill-color: #b7ffbf !important;
+  border: 1px solid rgba(0, 255, 106, 0.35) !important;
+  background: rgba(0, 255, 106, 0.05) !important;
+}
+
+html[data-theme="matrix"] .nexus-poster-actions .btn-gold,
+html.theme-matrix .nexus-poster-actions .btn-gold {
+  background: #00ff6a !important;
+  color: #001a05 !important;
+  box-shadow: 0 8px 24px rgba(0, 255, 106, 0.35) !important;
+}
+
+html[data-theme="gold"] body,
+html.theme-gold body {
+  background: #0c0802 !important;
+  color: #fef3c7 !important;
+}
+
+html[data-theme="gold"] .nexus-poster,
+html.theme-gold .nexus-poster {
+  background: var(--bg, #0c0802);
+  border-bottom-color: rgba(251, 191, 36, 0.2);
+}
+
+html[data-theme="gold"] .nexus-poster h1,
+html.theme-gold .nexus-poster h1 {
+  color: #f8ecc4 !important;
+  -webkit-text-fill-color: #f8ecc4 !important;
+  text-shadow: 0 0 24px rgba(251, 191, 36, 0.2) !important;
+}
+
+html[data-theme="gold"] .nexus-poster .lede,
+html.theme-gold .nexus-poster .lede {
+  color: #e2d5ad !important;
+}
+
+html[data-theme="gold"] .nexus-poster .kicker,
+html.theme-gold .nexus-poster .kicker,
+html[data-theme="gold"] .nexus-poster-credit,
+html.theme-gold .nexus-poster-credit {
+  color: #ffd700 !important;
+}
+
+html[data-theme="gold"] .nexus-poster-visual,
+html.theme-gold .nexus-poster-visual {
+  background: #0c0802;
+}
+
+html[data-theme="gold"] .nexus-poster-actions .btn-ghost,
+html.theme-gold .nexus-poster-actions .btn-ghost {
+  color: #f8ecc4 !important;
+  -webkit-text-fill-color: #f8ecc4 !important;
+  border: 1px solid rgba(251, 191, 36, 0.35) !important;
+  background: rgba(251, 191, 36, 0.05) !important;
+}
+
+html[data-theme="gold"] .nexus-poster-actions .btn-gold,
+html.theme-gold .nexus-poster-actions .btn-gold {
+  background: #fbbf24 !important;
+  color: #0c0802 !important;
+  box-shadow: 0 8px 24px rgba(251, 191, 36, 0.35) !important;
+}

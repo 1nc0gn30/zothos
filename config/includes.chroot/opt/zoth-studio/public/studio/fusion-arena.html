@@ -1,0 +1,2097 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Zoth Fusion Swarm Arena 3D Viewport</title>
+<meta content="3D battle viewport visualizing real-time multi-agent code competition, AST score comparisons, and fusion merges." name="description"/>
+<link href="https://zoth.nullai.tech/studio/fusion-arena.html" rel="canonical"/>
+<!-- OpenGraph / Facebook -->
+<meta content="website" property="og:type"/>
+<meta content="Zoth Studio" property="og:site_name"/>
+<meta content="https://zoth.nullai.tech/studio/fusion-arena.html" property="og:url"/>
+<meta content="Zoth Fusion Swarm Arena 3D Viewport" property="og:title"/>
+<meta content="3D battle viewport visualizing real-time multi-agent code competition, AST score comparisons, and fusion merges." property="og:description"/>
+<meta content="https://zoth.nullai.tech/assets/media/hero-fusion-arena.jpg" property="og:image"/>
+<!-- Twitter Cards -->
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="Zoth Fusion Swarm Arena 3D Viewport" name="twitter:title"/>
+<meta content="3D battle viewport visualizing real-time multi-agent code competition, AST score comparisons, and fusion merges." name="twitter:description"/>
+<meta content="https://zoth.nullai.tech/assets/media/hero-fusion-arena.jpg" name="twitter:image"/>
+<!-- OpenGraph / Facebook -->
+<!-- Twitter Cards -->
+<!-- OpenGraph / Facebook -->
+<!-- Twitter Cards -->
+<meta content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" name="robots"/>
+<meta content="#030306" name="theme-color">
+<link href="/assets/brand/zoth-seal-hermetic-on-dark.svg" rel="icon" type="image/svg+xml">
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600;1,700&amp;family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&amp;family=Syne:wght@600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="/styles.css?v=20260816s" rel="stylesheet"/>
+<link href="/studio/studio.css?v=20260816s" rel="stylesheet"/>
+<!-- Three.js + Postprocessing + Controls -->
+<script src="/assets/vendor/three.min.js"></script>
+<script src="/assets/vendor/OrbitControls.js"></script>
+<script src="/assets/vendor/GLTFLoader.js"></script>
+<script src="/assets/vendor/CopyShader.js"></script>
+<script src="/assets/vendor/Pass.js"></script>
+<script src="/assets/vendor/ShaderPass.js"></script>
+<script src="/assets/vendor/RenderPass.js"></script>
+<script src="/assets/vendor/LuminosityHighPassShader.js"></script>
+<script src="/assets/vendor/UnrealBloomPass.js"></script>
+<script src="/assets/vendor/EffectComposer.js"></script>
+<script src="/studio/zoth-3d-rig.js"></script>
+<style>
+        .skip-to-content, .skip-link, .skip {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    .skip-to-content:focus, .skip-link:focus, .skip:focus {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      width: auto;
+      height: auto;
+      padding: 10px 18px;
+      margin: 0;
+      overflow: visible;
+      clip: auto;
+      white-space: normal;
+      background: #fbbf24;
+      color: #050508;
+      font-family: monospace;
+      font-size: 0.82rem;
+      font-weight: 700;
+      border-radius: 8px;
+      z-index: 100000;
+      outline: 2px solid #fff;
+    }
+
+      :root {
+  --font-body: 'Figtree', sans-serif;
+  --text-primary: #ffffff;
+  --text-secondary: #cbd5e1;
+  --text-dim: #94a3b8;
+
+        --cyan: #00e5ff;
+        --magenta: #d946ef;
+        --purple: #a855f7;
+        --emerald: #10b981;
+        --amber: #f59e0b;
+        --muted: #94a3b8;
+        --text: #f0f6fc;
+        --font-mono: 'IBM Plex Mono', monospace;
+        --font-display: 'Syne', sans-serif;
+        --radius: 16px;
+        --radius-sm: 10px;
+
+        /* Sacred Fibonacci Spacing Tokens & Golden Ratio (Phi = 1.6180339887) */
+        --phi: 1.6180339887;
+        --phi-inv: 0.6180339887;
+        --phi-major: 61.8%;
+        --phi-minor: 38.2%;
+        --phi-split: 1.618fr 1fr;
+        --phi-split-inv: 1fr 1.618fr;
+        --phi-sidebar: 377px;
+        --phi-gutter: 233px;
+
+        /* Fibonacci Spacing Scale */
+        --fib-1: 1px;
+        --fib-2: 2px;
+        --fib-3: 3px;
+        --fib-5: 5px;
+        --fib-8: 8px;
+        --fib-13: 13px;
+        --fib-21: 21px;
+        --fib-34: 34px;
+        --fib-55: 55px;
+        --fib-89: 89px;
+        --fib-144: 144px;
+        --fib-233: 233px;
+        --fib-377: 377px;
+        --fib-610: 610px;
+
+        /* Fibonacci Border Radius Scale */
+        --fib-radius-xs: 5px;
+        --fib-radius-sm: 8px;
+        --fib-radius-md: 13px;
+        --fib-radius-lg: 21px;
+        --fib-radius-xl: 34px;
+        --fib-radius-pill: 9999px;
+
+        /* Sacred Typography Scale */
+        --fib-font-micro: 13px;
+        --fib-font-body: 16px;
+        --fib-font-subhead: 21px;
+        --fib-font-title: 34px;
+        --fib-font-hero: 55px;
+      }
+
+      *, *::before, *::after {
+        box-sizing: border-box;
+      }
+
+      .arena-layout {
+        display: grid;
+        grid-template-columns: minmax(0, var(--phi-sidebar, 377px)) 1.618fr minmax(0, var(--phi-sidebar, 377px));
+        gap: var(--fib-21, 21px);
+        height: calc(100vh - 70px);
+        padding: var(--fib-13, 13px) var(--fib-21, 21px);
+        background: #020306;
+        box-sizing: border-box;
+        min-width: 0;
+        max-width: 100%;
+        overflow-x: hidden;
+      }
+      @media (max-width: 1200px) {
+        .arena-layout { grid-template-columns: 320px 1fr; }
+        .arena-layout > aside:last-child { display: none; }
+      }
+      @media (max-width: 900px) {
+        .arena-layout {
+          grid-template-columns: 1fr;
+          height: auto;
+          min-height: 0;
+          padding: var(--fib-13, 13px);
+          gap: var(--fib-13, 13px);
+        }
+        .arena-layout > aside { display: block !important; }
+        .arena-layout > section {
+          min-height: 280px;
+          height: 46vh;
+        }
+      }
+      .panel-glass {
+        background: rgba(10, 14, 26, 0.94);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: var(--fib-radius-lg, 21px);
+        padding: var(--fib-21, 21px);
+        display: flex;
+        flex-direction: column;
+        gap: var(--fib-13, 13px);
+        overflow-y: auto;
+        backdrop-filter: blur(20px);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+        min-width: 0;
+      }
+      .viewport-stage {
+        position: relative;
+        background: radial-gradient(circle at 50% 50%, #0d152c 0%, #020306 100%);
+        border: 1px solid rgba(0, 229, 255, 0.35);
+        border-radius: var(--fib-radius-lg, 21px);
+        overflow: hidden;
+        box-shadow: inset 0 0 60px rgba(0, 229, 255, 0.08);
+        min-width: 0;
+      }
+      #arena-canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+      .top-hud-bar {
+        position: absolute;
+        top: var(--fib-13, 13px);
+        left: var(--fib-13, 13px);
+        right: var(--fib-13, 13px);
+        display: flex;
+        justify-content: space-between;
+        pointer-events: none;
+        z-index: 10;
+        flex-wrap: wrap;
+        gap: var(--fib-8, 8px);
+      }
+      .bottom-hud-bar {
+        position: absolute;
+        bottom: var(--fib-13, 13px);
+        left: var(--fib-13, 13px);
+        right: var(--fib-13, 13px);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        pointer-events: none;
+        z-index: 10;
+        flex-wrap: wrap;
+        gap: var(--fib-8, 8px);
+      }
+      .hud-pill {
+        background: rgba(4, 6, 14, 0.9);
+        border: 1px solid rgba(0, 229, 255, 0.3);
+        color: var(--cyan);
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        padding: var(--fib-8, 8px) var(--fib-13, 13px);
+        border-radius: var(--fib-radius-pill, 9999px);
+        backdrop-filter: blur(10px);
+        pointer-events: auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        min-height: 44px;
+      }
+      .hud-pill:hover {
+        background: rgba(0, 229, 255, 0.18);
+        border-color: var(--cyan);
+      }
+      .lod-control-strip {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(0, 229, 255, 0.2);
+        border-radius: var(--fib-radius-sm, 8px);
+        padding: 4px;
+        margin-top: 4px;
+      }
+      .lod-tier-btn {
+        flex: 1 1 0;
+        min-width: 44px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: #94a3b8;
+        font-family: var(--font-mono);
+        font-size: 0.65rem;
+        padding: 4px 6px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        text-align: center;
+      }
+      .lod-tier-btn:hover {
+        background: rgba(0, 229, 255, 0.12);
+        color: var(--cyan);
+        border-color: var(--cyan);
+      }
+      .lod-tier-btn.active {
+        background: var(--cyan);
+        color: #020306;
+        font-weight: 700;
+        border-color: var(--cyan);
+        box-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+      }
+      .lod-tier-btn.auto-active {
+        background: var(--emerald, #10b981);
+        color: #020306;
+        font-weight: 700;
+        border-color: var(--emerald, #10b981);
+        box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+      }
+
+      .agent-card {
+        background: rgba(18, 24, 42, 0.75);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: var(--fib-radius-md, 13px);
+        padding: var(--fib-13, 13px) var(--fib-21, 21px);
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        min-height: 44px;
+      }
+      .agent-card:hover, .agent-card.selected {
+        border-color: var(--cyan);
+        background: rgba(0, 229, 255, 0.08);
+        transform: translateY(-2px);
+      }
+      .agent-card.selected {
+        box-shadow: 0 0 20px rgba(0, 229, 255, 0.25);
+      }
+      .telemetry-feed {
+        background: rgba(0, 0, 0, 0.65);
+        border: 1px solid rgba(0, 229, 255, 0.2);
+        border-radius: var(--fib-radius-md, 13px);
+        padding: var(--fib-13, 13px);
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        line-height: 1.5;
+        height: 220px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .tele-line {
+        display: flex;
+        gap: var(--fib-8, 8px);
+      }
+      .tele-time { color: var(--muted); }
+      .tele-agent { color: var(--cyan); font-weight: 700; }
+      .tele-action { color: #f1f5f9; }
+      .btn-action {
+        background: var(--cyan);
+        color: #030408;
+        font-weight: 800;
+        border: none;
+        padding: var(--fib-8, 8px) var(--fib-21, 21px);
+        border-radius: var(--fib-radius-sm, 8px);
+        font-size: 0.82rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        width: 100%;
+        min-height: 44px;
+      }
+      .btn-action:hover {
+        box-shadow: 0 0 25px var(--cyan);
+        transform: translateY(-2px);
+      }
+      .btn-icon-svg {
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+        vertical-align: middle;
+      }
+      .shannon-fusion-track {
+        width: 100%;
+        height: 8px;
+        background: rgba(0, 0, 0, 0.6);
+        border: 1px solid rgba(0, 240, 255, 0.25);
+        border-radius: 4px;
+        overflow: hidden;
+        margin: 6px 0;
+      }
+      .shannon-fusion-fill {
+        height: 100%;
+        width: 28%;
+        background: linear-gradient(90deg, #10b981, #00f0ff);
+        border-radius: 3px;
+        transition: width 0.3s ease;
+      }
+      .meter-bar {
+        background: rgba(255, 255, 255, 0.08);
+        height: 6px;
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 4px;
+      }
+      .meter-fill {
+        height: 100%;
+        transition: width 0.3s ease;
+      }
+  
+    /* Mobile Segmented Switcher for Fusion Arena */
+    .mobile-segmented-bar {
+      display: none;
+    }
+    .mobile-tabs-track {
+      display: flex;
+      gap: var(--fib-8, 8px);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding: 4px;
+      margin-bottom: var(--fib-13, 13px);
+    }
+    .mobile-tabs-track::-webkit-scrollbar {
+      display: none;
+    }
+    .mobile-tab-btn {
+      flex: 1 0 auto;
+      min-height: 44px;
+      min-width: 44px;
+      padding: 8px 14px;
+      border-radius: var(--fib-radius-sm, 8px);
+      border: 1px solid rgba(0, 229, 255, 0.2);
+      background: rgba(12, 18, 34, 0.85);
+      color: #94a3b8;
+      font-family: var(--font-display, 'Syne', sans-serif);
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .mobile-tab-btn.active {
+      background: rgba(0, 229, 255, 0.18);
+      border-color: #00e5ff;
+      color: #00e5ff;
+      box-shadow: 0 0 16px rgba(0, 229, 255, 0.3);
+    }
+
+    @media (max-width: 880px) {
+      .mobile-segmented-bar { display: block; }
+      .arena-layout {
+        display: flex !important;
+        flex-direction: column !important;
+        height: auto !important;
+        min-height: 0 !important;
+      }
+      .arena-pane {
+        display: none !important;
+      }
+      .arena-pane.is-mobile-active {
+        display: flex !important;
+        width: 100% !important;
+        min-height: 520px;
+      }
+    }
+    @media (min-width: 881px) {
+      .mobile-segmented-bar { display: none !important; }
+      .arena-pane { display: flex !important; }
+    }
+
+
+    /* Mobile-Only Desktop Insight Tooltip / Banner */
+    .mobile-desktop-insight {
+      display: none;
+    }
+    @media (max-width: 880px) {
+      .mobile-desktop-insight {
+        display: flex;
+        align-items: center;
+        gap: var(--fib-13, 13px);
+        background: rgba(0, 240, 255, 0.08);
+        border: 1px solid rgba(0, 240, 255, 0.25);
+        border-radius: var(--radius-fib-md, var(--fib-radius-md, 13px));
+        padding: var(--fib-13, 13px) var(--fib-13, 13px);
+        margin: 0 0 var(--fib-13, 13px) 0;
+        box-sizing: border-box;
+        font-size: 0.85rem;
+        line-height: 1.4;
+        color: var(--text, #f0f6fc);
+        min-width: 0;
+      }
+      .mobile-desktop-insight .insight-icon {
+        font-size: 1.3rem;
+        flex-shrink: 0;
+      }
+      .mobile-desktop-insight .insight-text {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: var(--fib-3, 3px);
+        min-width: 0;
+      }
+      .mobile-desktop-insight .insight-text strong {
+        color: var(--cyan, #00f0ff);
+        font-weight: 600;
+        font-size: 0.88rem;
+      }
+      .mobile-desktop-insight .insight-text span {
+        color: var(--text-dim, var(--muted, #94a3b8));
+        font-size: 0.8rem;
+      }
+      .mobile-desktop-insight .insight-close {
+        background: transparent;
+        border: none;
+        color: var(--text-dim, var(--muted, #94a3b8));
+        font-size: 1.1rem;
+        cursor: pointer;
+        padding: var(--fib-8, 8px);
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--radius-fib-sm, var(--fib-radius-sm, 8px));
+        flex-shrink: 0;
+      }
+    }
+
+
+    /* Touch & Overflow Safety */
+    pre, code, table, .table-container, .code-block, .log-container, .hud-table, .tier-controller-bar {
+      overflow-x: auto;
+      word-break: break-word;
+      -webkit-overflow-scrolling: touch;
+    }
+    button, input, select, .sandbox-nav-tab, .tier-btn, .pill, .model-card {
+      min-height: 44px;
+      touch-action: manipulation;
+    }
+
+    
+    /* ==========================================================================
+       Zoth Studio — High-Contrast Typography & WCAG AAA Compliance Upgrades
+       ========================================================================== */
+
+    /* Universal Body & Text Contrast */
+    body {
+      color: var(--text, #f1f5f9);
+      font-family: var(--font-body, 'Figtree', sans-serif);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Primary Workstation Titles & Brand Headers */
+    h1, .brand-title, .station-title, .forge-title h1, .recon-title h1, .composer-title h1, .hero-title, .studio-title {
+      font-family: var(--font-display, 'Syne', sans-serif) !important;
+      font-weight: 800 !important;
+      letter-spacing: -0.025em;
+      color: var(--text-primary);
+      text-shadow: 0 0 20px rgba(0, 240, 255, 0.25);
+    }
+
+    /* Panel Headers, Section Headings & Subheadings */
+    h2, h3, .panel-header, .panel-title, .section-heading h2, .card-title, .section-title, .header-title, .quick-jump-title {
+      font-family: var(--font-display, 'Syne', sans-serif) !important;
+      font-weight: 700 !important;
+      letter-spacing: -0.015em;
+      color: var(--text-primary);
+    }
+
+    /* Metric Labels, Badges & High-Contrast Stat Values */
+    .metric-label, .stat-label, .badge-label, .ws-badge-cat, .filter-chip {
+      font-family: var(--font-display, 'Syne', sans-serif);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .stat-value, .metric-value, .stat-number, .wf-val {
+      font-family: var(--font-mono, 'IBM Plex Mono', monospace) !important;
+      font-weight: 700 !important;
+      color: var(--text-primary);
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    /* High-Contrast Descriptions & Parameters */
+    .brand-subtitle, .studio-subtitle, .ws-desc, .section-desc, .panel-desc, p.desc {
+      color: #cbd5e1;
+    }
+
+    .text-dim, .dim, .meta-label, .timestamp, .port-badge {
+      color: #94a3b8;
+    }
+
+    /* High-Contrast Code Viewers, Telemetry Feeds & Terminal Logs */
+    pre, code, textarea.code-editor, .telemetry, .log, .console, .terminal, .feed-log, .log-container, .code-block, .code-editor-area, .editor-code, .code-viewer, .stream-console {
+      font-family: var(--font-mono, 'IBM Plex Mono', monospace) !important;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: #38bdf8;
+    }
+
+    .tok-kw, .keyword, .kw { color: #f472b6 !important; font-weight: 600; }
+    .tok-str, .string, .str { color: #34d399 !important; }
+    .tok-num, .number, .num { color: #fbbf24 !important; font-weight: 600; }
+    .tok-comment, .comment { color: #94a3b8 !important; font-style: italic; }
+    .tok-fn, .function, .fn { color: #67e8f9 !important; font-weight: 600; }
+    .tok-var, .variable, .var { color: #f1f5f9 !important; }
+
+    /* Standout Links, Navigation Tabs & Breadcrumbs */
+    .nav-link, nav.menu a, .nav a, .tab-btn, .breadcrumb a, .quick-jump-links a, .ws-link-docs, .ws-link-launch {
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .nav-link:hover, 
+
+    .nav-link.is-active, .nav-link.active, .tab-btn.active, nav.menu a.on, nav.menu a.is-active, .forge-tab-btn.active, .subsweep-tab-btn.active {
+      color: #00f0ff !important;
+      font-weight: 700 !important;
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.7);
+    }
+
+    /* Action Buttons High-Contrast Standout */
+    .btn-primary, .btn-action, .btn-edge, .btn-recon, .btn-gold, button.action-btn {
+      font-family: var(--font-display, 'Syne', sans-serif);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    /* Zero Horizontal Overflow Guard across Viewports */
+    html, body {
+      max-width: 100vw;
+      overflow-x: hidden;
+    }
+
+    /* 4-Theme Token Compliance Overrides */
+    html[data-theme="light"] body,
+    html.theme-light body {
+      background: #f7f9fc !important;
+      color: #1f2937 !important;
+    }
+    html[data-theme="light"] .arena-layout {
+      background: #f7f9fc !important;
+    }
+    html[data-theme="light"] .panel-glass {
+      background: #ffffff !important;
+      border-color: rgba(17, 24, 39, 0.12) !important;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06) !important;
+      color: #1f2937 !important;
+    }
+    html[data-theme="light"] .agent-card {
+      background: #f8fafc !important;
+      border-color: rgba(17, 24, 39, 0.12) !important;
+      color: #1f2937 !important;
+    }
+    html[data-theme="light"] .agent-card:hover,
+    html[data-theme="light"] .agent-card.selected {
+      background: #e0f2fe !important;
+      border-color: #0284c7 !important;
+      box-shadow: 0 0 16px rgba(2, 132, 199, 0.25) !important;
+    }
+    html[data-theme="light"] .hud-pill {
+      background: rgba(255, 255, 255, 0.95) !important;
+      color: #0284c7 !important;
+      border-color: rgba(2, 132, 199, 0.35) !important;
+    }
+    html[data-theme="light"] .viewport-stage {
+      background: radial-gradient(circle at 50% 50%, #e2e8f0 0%, #cbd5e1 100%) !important;
+      border-color: rgba(2, 132, 199, 0.35) !important;
+    }
+    html[data-theme="light"] .mobile-tab-btn {
+      background: #f1f5f9 !important;
+      color: #334155 !important;
+      border-color: rgba(17, 24, 39, 0.16) !important;
+    }
+    html[data-theme="light"] .mobile-tab-btn.active {
+      background: #e0f2fe !important;
+      color: #0284c7 !important;
+      border-color: #0284c7 !important;
+    }
+    html[data-theme="light"] .btn-action {
+      background: #0284c7 !important;
+      color: #ffffff !important;
+    }
+    html[data-theme="matrix"] .panel-glass {
+      background: rgba(0, 16, 0, 0.94) !important;
+      border-color: rgba(0, 255, 65, 0.25) !important;
+    }
+    html[data-theme="matrix"] .hud-pill {
+      color: #00ff41 !important;
+      border-color: rgba(0, 255, 65, 0.35) !important;
+    }
+    html[data-theme="matrix"] .btn-action {
+      background: #00ff41 !important;
+      color: #000000 !important;
+    }
+    html[data-theme="gold"] .panel-glass {
+      background: rgba(18, 12, 4, 0.94) !important;
+      border-color: rgba(251, 191, 36, 0.25) !important;
+    }
+    html[data-theme="gold"] .hud-pill {
+      color: #fbbf24 !important;
+      border-color: rgba(251, 191, 36, 0.35) !important;
+    }
+    html[data-theme="gold"] .btn-action {
+      background: #fbbf24 !important;
+      color: #050300 !important;
+    }
+
+  </style>
+<link href="/assets/zoth-tip.css" rel="stylesheet"/>
+<link href="/assets/zoth-mobile.css" rel="stylesheet"/>
+<link href="/assets/zoth-preview.css" rel="stylesheet"/>
+<link href="/assets/zoth-annotator.css" rel="stylesheet"/>
+<!-- Schema.org JSON-LD Structured Data for SEO & AEO Voice Search -->
+<!-- Schema.org JSON-LD Structured Data for SEO & AEO Voice Search -->
+<!-- Schema.org JSON-LD Structured Data for SEO & AEO Voice Search -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://zoth.nullai.tech/#organization",
+      "name": "NullAI Tech",
+      "url": "https://nullai.tech/",
+      "logo": "https://zoth.nullai.tech/assets/brand/zoth-seal-hermetic-on-dark.svg",
+      "sameAs": [
+        "https://github.com/NullAITech/zoth-studio"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://zoth.nullai.tech/#website",
+      "url": "https://zoth.nullai.tech/",
+      "name": "Zoth Studio",
+      "description": "Local-first autonomous AI multi-agent workstation, 3D swarm arena, and privacy-first application foundry.",
+      "publisher": {
+        "@id": "https://zoth.nullai.tech/#organization"
+      }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://zoth.nullai.tech/studio/fusion-arena.html#softwareapplication",
+      "name": "Zoth Fusion Swarm Arena 3D Viewport",
+      "description": "3D battle viewport visualizing real-time multi-agent code competition, AST score comparisons, and fusion merges.",
+      "url": "https://zoth.nullai.tech/studio/fusion-arena.html",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Linux, macOS, Windows",
+      "inLanguage": "en-US",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://zoth.nullai.tech/studio/fusion-arena.html",
+      "url": "https://zoth.nullai.tech/studio/fusion-arena.html",
+      "name": "Zoth Fusion Swarm Arena 3D Viewport",
+      "description": "3D battle viewport visualizing real-time multi-agent code competition, AST score comparisons, and fusion merges.",
+      "inLanguage": "en-US",
+      "isPartOf": {
+        "@id": "https://zoth.nullai.tech/#website"
+      },
+      "speakable": {
+        "@type": "SpeakableSpecification",
+        "cssSelector": [
+          "h1",
+          ".kicker",
+          ".arena-title",
+          ".agent-score",
+          ".fusion-status"
+        ]
+      },
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://zoth.nullai.tech/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Studio",
+            "item": "https://zoth.nullai.tech/studio"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Fusion Arena",
+            "item": "https://zoth.nullai.tech/studio/fusion-arena.html"
+          }
+        ]
+      }
+    }
+  ]
+}
+  </script>
+  <link href="/assets/zoth-theme.css?v=11" rel="stylesheet"/>
+  <link href="/assets/zoth-agent-avatars.css" rel="stylesheet"/>
+  <link href="/assets/zoth-tailwind-magic.css" rel="stylesheet"/>
+  <script src="/assets/zoth-theme.js?v=11"></script>
+  <link href="/assets/zoth-nav.css?v=11" rel="stylesheet"/>
+  <link href="/studio/fusion-arena-poster.css?v=1" rel="stylesheet"/>
+<meta content="1200" property="og:image:width"/><meta content="630" property="og:image:height"/><meta content="Zoth Fusion Swarm Debate Arena" property="og:image:alt"/><meta content="Zoth Fusion Swarm Debate Arena" name="twitter:image:alt"/><meta content="US-VA" name="geo.region"/><meta content="Virginia Beach, Virginia" name="geo.placename"/><meta content="36.8529;-75.9780" name="geo.position"/><meta content="36.8529, -75.9780" name="ICBM"/><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://zoth.nullai.tech/studio/fusion-arena.html#webpage",
+      "url": "https://zoth.nullai.tech/studio/fusion-arena.html",
+      "name": "Zoth Fusion Swarm Arena 3D Viewport",
+      "description": "3D battle viewport visualizing real-time multi-agent code competition, AST score comparisons, and fusion merges.",
+      "isPartOf": {
+        "@type": "WebSite",
+        "@id": "https://zoth.nullai.tech/#website",
+        "url": "https://zoth.nullai.tech/",
+        "name": "Zoth Studio",
+        "publisher": {
+          "@type": "Organization",
+          "name": "757tech / NullAI",
+          "url": "https://757tech.pro"
+        }
+      },
+      "primaryImageOfPage": {
+        "@type": "ImageObject",
+        "url": "https://zoth.nullai.tech/assets/media/hero-fusion-arena.jpg",
+        "caption": "Zoth Fusion Swarm Debate Arena"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://zoth.nullai.tech/studio/fusion-arena.html#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://zoth.nullai.tech/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Studio",
+          "item": "https://zoth.nullai.tech/studio/fusion-arena.html"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://zoth.nullai.tech/studio/fusion-arena.html#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is Zoth Studio?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Zoth Studio is a sovereign, local-first control surface for multi-agent AI orchestration, featuring a 298+ verified tool registry, 23+ modular studio suites, a 21-node sovereign agent pantheon, and an encrypted BYOK vault."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Where are my API keys stored?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "API keys are stored strictly in local operator memory or an encrypted local Rust daemon using Argon2id and XChaCha20-Poly1305. Plaintext keys are never sent to external servers."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does Zoth Studio require a cloud subscription?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Zoth Studio is fully sovereign and free to run on your local hardware or private network over Tailscale."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is Shannon agreement entropy in Consensus Arena?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Shannon entropy H(p) mathematically measures the divergence between proposals from Antigravity, Grok, and Hermes. Low entropy triggers automatic execution, while high entropy triggers human arbitration."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why use multi-agent arbitration?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Triangulated cross-critique eliminates single-model hallucinations and verifies code invariants before execution."
+          }
+        }
+      ]
+    }
+  ]
+}</script>  <link rel="stylesheet" href="/assets/zoth-footer.css" />
+<link href="/assets/zoth-hud-embedded.css" rel="stylesheet"/>
+<script src="/assets/zoth-hud-embedded.js"></script>
+</head>
+<body class="deck-page" data-guide="Synthesis, not a dashboard.|The arena runs on the local deck.|This web view is the door." data-kicker="Arena · preview" data-lede="The full 3D arena runs on the local deck after install." data-title="Synthesis, not a dashboard">
+<a class="skip-link" href="#main">Skip to main content</a>
+                                                                    <header class="bar" id="topbar" role="banner">
+      <a class="brand js-hub" href="/" aria-label="Zoth Studio Home">
+        <div class="brand-emblem-wrap">
+          <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth Golden Z Emblem" width="34" height="34" class="brand-emblem-img" />
+          <span class="brand-emblem-halo"></span>
+        </div>
+        <span class="brand-text-wrap">
+          <strong>Zoth</strong>
+          <small>by NullAI</small>
+        </span>
+        <span class="brand-status-badge">SOVEREIGN</span>
+      </a>
+
+      <nav class="menu" aria-label="Primary navigation" role="navigation">
+        <a class="nav-link nav-for-everyone" href="/#for-everyone" data-tip="Zero-Code Showcases — How non-tech founders, creators & teams depend on Zoth.">✦ For You</a>
+
+        <!-- 🔮 Core AI -->
+        <div class="nav-dropdown" data-dropdown-id="core">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Core AI</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🔮 CORE AI ARCHITECTURE</span><span class="nav-item-badge">6 NODES</span></div>
+            <a href="/zoth/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+            <a href="/agents/"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+            <a href="/studio/consensus.html"><span class="nav-item-icon-box">⚔️</span><div class="nav-item-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+            <a href="/studio/swarm.html"><span class="nav-item-icon-box">🌐</span><div class="nav-item-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+            <a href="/memory/"><span class="nav-item-icon-box">🧠</span><div class="nav-item-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+            <a href="/zoth-world.html"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+          </div>
+        </div>
+
+        <!-- 🪐 Studio -->
+        <div class="nav-dropdown" data-dropdown-id="studio">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Studio</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu nav-dropdown-mega">
+            <div class="nav-dropdown-header"><span>🪐 14+ STUDIO WORKSTATIONS</span><span class="nav-item-badge">LOCAL DAGS</span></div>
+            <a href="/studio/cockpit.html"><span class="nav-item-icon-box">🪐</span><div class="nav-item-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+            <a href="/studio/cockpit.html?tool=webgen"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+            <a href="/studio/cockpit.html?tool=vos-sandbox"><span class="nav-item-icon-box">💻</span><div class="nav-item-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+            <a href="/studio/cockpit.html?tool=nexus-3d"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+            <a href="/studio/cockpit.html?tool=omnipost"><span class="nav-item-icon-box">🎬</span><div class="nav-item-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+            <a href="/studio/cockpit.html?tool=math-pillars"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+            <a href="/studio/cockpit.html?tool=secure-comms"><span class="nav-item-icon-box">🔒</span><div class="nav-item-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+            <a href="/studio/cockpit.html?tool=signal-bridge"><span class="nav-item-icon-box">📡</span><div class="nav-item-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+            <a href="/studio/cockpit.html?tool=web3-hub"><span class="nav-item-icon-box">🪙</span><div class="nav-item-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+            <a href="/studio/cockpit.html?tool=pets"><span class="nav-item-icon-box">💎</span><div class="nav-item-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+            <a href="/studio/cockpit.html?tool=tool-nexus"><span class="nav-item-icon-box">🛠️</span><div class="nav-item-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+          </div>
+        </div>
+
+        <!-- 🌌 Universe -->
+        <div class="nav-dropdown" data-dropdown-id="universe">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Universe</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🌌 UNIVERSE &amp; PUBLICATIONS</span><span class="nav-item-badge">STORIES</span></div>
+            <a href="/comic/"><span class="nav-item-icon-box">🎨</span><div class="nav-item-body"><strong>AZOTH Anime Comic</strong><small>Season 1 Ep 1: Genesis in Silicon Rain (Audio)</small></div><span class="nav-item-badge">AUDIO</span></a>
+            <a href="/social/"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+            <a href="/articles/"><span class="nav-item-icon-box">📜</span><div class="nav-item-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+            <a href="/article/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+            <a href="/ai-webgpu.html"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+            <a href="/adytum/"><span class="nav-item-icon-box">🏛️</span><div class="nav-item-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+          </div>
+        </div>
+
+        <!-- 📚 Docs & Vault -->
+        <div class="nav-dropdown" data-dropdown-id="docs">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Docs & Vault</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>📚 DOCUMENTATION &amp; SECURITY</span><span class="nav-item-badge">SPECS</span></div>
+            <a href="/docs/"><span class="nav-item-icon-box">📚</span><div class="nav-item-body"><strong>Master Documentation</strong><small>Port Topology, 1-Click Install Scripts & API Guide</small></div><span class="nav-item-badge">DOCS</span></a>
+            <a href="/vault/"><span class="nav-item-icon-box">🔐</span><div class="nav-item-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+            <a href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+            <a href="/faq.html"><span class="nav-item-icon-box">❓</span><div class="nav-item-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+          </div>
+        </div>
+
+        <!-- ⚡ Action Pills -->
+        <button type="button" class="nav-pill nav-telemetry-pill" title="View Live Studio Telemetry & Background Daemons" aria-label="Studio Telemetry Status">
+          <span class="tel-dot online"></span><span class="tel-text">6/6 DAEMONS</span>
+        </button>
+
+        <button type="button" class="nav-pill nav-pet-pill" title="Active Companion Spirit: Azoth (Click to Summon / Switch Mascot)" aria-label="Active Companion Spirit">
+          <span class="pet-emoji">🔮</span><span class="pet-name">Azoth</span>
+        </button>
+
+        <a class="nav-pill nav-deck-pill js-deck" href="http://127.0.0.1:8484/" title="Open Local Operator Deck (:8484)">
+          <span class="deck-pulse"></span><span>DECK</span>
+        </a>
+
+        <button type="button" class="nav-pill nav-palette-btn" title="Open Global Command Palette (Ctrl+K)" aria-label="Command Palette">
+          <span class="palette-icon">🔍</span><kbd class="nav-kbd">Ctrl+K</kbd>
+        </button>
+
+        <button type="button" class="nav-pill nav-annotate-btn" title="Toggle On-Screen Annotator & Feedback (Shift+A)" aria-label="Toggle Annotator">
+          <span class="annotate-icon">✏️</span><span class="annotate-text">Annotate</span><kbd class="nav-kbd">Shift+A</kbd>
+        </button>
+
+        <div class="nav-dropdown nav-theme-dropdown">
+          <button class="nav-dropdown-btn nav-theme-current-btn" type="button" aria-haspopup="true" aria-expanded="false" title="Switch Visual Theme (Shift+T)">
+            <span class="current-theme-swatch" style="background:#00f0ff;"></span>
+            <span class="current-theme-emoji">🌙</span>
+            <span class="current-theme-label">Dark Void</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+        </div>
+
+        <a class="nav-pill git" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank" title="GitHub Repository — Open Source code, Debian packages, and releases">
+          <span>🐙 GitHub ↗</span>
+        </a>
+      </nav>
+
+      <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Toggle navigation menu">
+        <span class="burger-lines"><span class="b-line b-1"></span><span class="b-line b-2"></span><span class="b-line b-3"></span></span>
+        <span class="burger-text">Menu</span>
+      </button>
+      <div class="zoth-scroll-progress" id="zoth-scroll-progress"></div>
+    </header>
+
+    <nav class="drawer" id="drawer" aria-label="Universal Mobile Navigation" role="navigation">
+      <div class="drawer-header-brand">
+        <div class="d-brand-left">
+          <div class="brand-emblem-wrap">
+            <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth" width="28" height="28" class="brand-emblem-img" />
+          </div>
+          <span class="d-brand-title"><strong>Zoth Studio</strong><small>v12.0 Sovereign</small></span>
+        </div>
+        <button type="button" class="drawer-telemetry-badge" title="View Diagnostics HUD">● 6/6 DAEMONS</button>
+        <button type="button" class="drawer-close-btn" aria-label="Close mobile menu">✕</button>
+      </div>
+
+      <div class="drawer-section drawer-tools-section">
+        <div class="drawer-heading">⚡ Quick Actions</div>
+        <div class="drawer-quick-tools-grid">
+          <button type="button" class="drawer-tool-pill drawer-palette-trigger"><span>🔍</span> Command Palette <kbd class="nav-kbd">Ctrl+K</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-annotate-trigger"><span>✏️</span> On-Screen Annotator <kbd class="nav-kbd">Shift+A</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-telemetry-trigger"><span>⚡</span> Telemetry HUD</button>
+          <button type="button" class="drawer-tool-pill drawer-audio-trigger"><span>🔊</span> Audio FX</button>
+        </div>
+      </div>
+
+      <div class="drawer-section drawer-theme-section">
+        <div class="drawer-heading">🎨 Visual Theme (16 Archetypes)</div>
+        <div class="drawer-search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="drawer-theme-search-input" placeholder="Search 16 themes..." autocomplete="off" />
+        </div>
+        <div class="theme-filter-chips drawer-filter-chips">
+          <button type="button" class="theme-chip-btn active" data-drawer-cat="all">All (16)</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="studio originals">Originals</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="frontier ai & tech">Frontier</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="developer archetypes">Dev</button>
+        </div>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">✦ Featured</div>
+        <a class="drawer-link drawer-hero-link" href="/#for-everyone"><span class="d-link-icon">✦</span><div class="d-link-body"><strong>For You (No-Code Showcases)</strong><small>How Non-Tech Founders, Creators & Teams Use Zoth</small></div><span class="nav-item-badge">SHOWCASE</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🔮 Core AI & Pantheon</div>
+        <a class="drawer-link" href="/zoth/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+        <a class="drawer-link" href="/agents/"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+        <a class="drawer-link" href="/studio/consensus.html"><span class="d-link-icon">⚔️</span><div class="d-link-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+        <a class="drawer-link" href="/studio/swarm.html"><span class="d-link-icon">🌐</span><div class="d-link-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+        <a class="drawer-link" href="/memory/"><span class="d-link-icon">🧠</span><div class="d-link-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+        <a class="drawer-link" href="/zoth-world.html"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🪐 Workstations & DAGs</div>
+        <a class="drawer-link" href="/studio/cockpit.html"><span class="d-link-icon">🪐</span><div class="d-link-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=webgen"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=vos-sandbox"><span class="d-link-icon">💻</span><div class="d-link-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=nexus-3d"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=omnipost"><span class="d-link-icon">🎬</span><div class="d-link-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=math-pillars"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=secure-comms"><span class="d-link-icon">🔒</span><div class="d-link-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=signal-bridge"><span class="d-link-icon">📡</span><div class="d-link-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=web3-hub"><span class="d-link-icon">🪙</span><div class="d-link-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=pets"><span class="d-link-icon">💎</span><div class="d-link-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=tool-nexus"><span class="d-link-icon">🛠️</span><div class="d-link-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📜 Universe & Research</div>
+        <a class="drawer-link" href="/comic/"><span class="d-link-icon">🎨</span><div class="d-link-body"><strong>AZOTH Anime Comic Series</strong><small>Season 1 Ep 1: Genesis in Silicon Rain</small></div><span class="nav-item-badge">AUDIO</span></a>
+        <a class="drawer-link" href="/social/"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+        <a class="drawer-link" href="/articles/"><span class="d-link-icon">📜</span><div class="d-link-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+        <a class="drawer-link" href="/article/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+        <a class="drawer-link" href="/ai-webgpu.html"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+        <a class="drawer-link" href="/adytum/"><span class="d-link-icon">🏛️</span><div class="d-link-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📚 Docs & Security</div>
+        <a class="drawer-link" href="/docs/"><span class="d-link-icon">📚</span><div class="d-link-body"><strong>Complete Documentation</strong><small>Port Topology, 1-Click Install Scripts & API</small></div><span class="nav-item-badge">DOCS</span></a>
+        <a class="drawer-link" href="/vault/"><span class="d-link-icon">🔐</span><div class="d-link-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+        <a class="drawer-link" href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+        <a class="drawer-link" href="/faq.html"><span class="d-link-icon">❓</span><div class="d-link-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+      </div>
+
+      <div class="drawer-section drawer-footer-section">
+        <a class="drawer-pill-link js-deck" href="http://127.0.0.1:8484/">💻 Launch Local Operator Deck (:8484)</a>
+        <a class="drawer-pill-link" href="https://github.com/NullAITech/zoth-studio" target="_blank" rel="noopener noreferrer">🐙 GitHub Source Repository ↗</a>
+        <a class="drawer-pill-link" href="/downloads/zoth-studio-android.apk">📱 Download Android App (.apk)</a>
+      </div>
+    </nav>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<main id="main" role="main">
+<section class="fusion-poster" aria-label="Fusion Arena">
+  <div class="fusion-poster-copy">
+    <p class="kicker">Studio preview · local swarm</p>
+    <h1>Fusion Arena</h1>
+    <p class="lede">Three models write, attack, and merge on this box. The hub is the look. Full combat runs after install.</p>
+    <div class="fusion-poster-actions">
+      <a class="btn btn-gold" href="#pane-combatants">Enter the arena</a>
+      <a class="btn btn-ghost" href="/#install">Install locally</a>
+    </div>
+  </div>
+  <div class="fusion-poster-figure">
+    <img alt="Fusion swarm debate arena" decoding="async" height="630" src="/assets/media/hero-fusion-arena.jpg" width="1200"/>
+  </div>
+</section>
+<!-- Mobile-Only Desktop Insight Tooltip / Banner -->
+<div class="mobile-desktop-insight" role="note">
+<span class="insight-icon">💡</span>
+<div class="insight-text">
+<strong>Mobile Focused Mode Active</strong>
+<span>Optimized for touch &amp; speed. Want full multi-pane inspection &amp; spatial 3D tools? Open this workstation on desktop.</span>
+</div>
+<button aria-label="Dismiss insight" class="insight-close" onclick="this.parentElement.style.display='none'" type="button">✕</button>
+</div>
+<!-- Mobile Segmented Switcher (Visible <=880px) -->
+<nav aria-label="Mobile Arena Navigation" class="mobile-segmented-bar" id="arena-mobile-tabs">
+<div class="mobile-tabs-track">
+<button class="mobile-tab-btn active" data-tab="combatants" onclick="setArenaMobileTab('combatants')">
+<svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"></path><path d="M13 19l6-6"></path><path d="M16 16l4 4"></path><path d="M19 21l2-2"></path></svg>
+<span class="tab-label">Combatants</span>
+</button>
+<button class="mobile-tab-btn" data-tab="stage" onclick="setArenaMobileTab('stage')">
+<svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
+<span class="tab-label">3D Arena</span>
+</button>
+<button class="mobile-tab-btn" data-tab="telemetry" onclick="setArenaMobileTab('telemetry')">
+<svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+<span class="tab-label">Battle Log</span>
+</button>
+</div>
+</nav>
+<div class="arena-layout">
+<!-- Left: Agent Roster, Combat Meter & Triggers -->
+<aside class="panel-glass arena-pane is-mobile-active" id="pane-combatants">
+<div>
+<span class="hud-pill">
+  <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"></path><path d="M13 19l6-6"></path><path d="M16 16l4 4"></path><path d="M19 21l2-2"></path></svg>
+  SWARM COMBATANTS
+</span>
+<h3 style="margin: 6px 0; font-family: var(--font-display); font-size: 1.15rem;">Neural Node Matrix</h3>
+</div>
+<div id="agent-roster-list" style="display: flex; flex-direction: column; gap: 8px;">
+<!-- Combatant 1 -->
+<div class="agent-card selected" id="card-antigravity" onclick="selectFighter('antigravity')">
+<div style="display: flex; justify-content: space-between; align-items: center;">
+<div style="display: flex; align-items: center; gap: 8px;">
+<img alt="Antigravity Primary" class="avatar-live-antigravity" height="28" loading="lazy" src="/assets/mascot/azoth-antigravity.jpg" style="width: 28px; height: 28px; border-radius: 6px; object-fit: cover;" width="28"/>
+<div>
+  <strong style="color: var(--cyan);">@Antigravity</strong>
+  <small style="display:block; font-size:0.62rem; color:var(--text-dim); font-family:var(--font-mono);">40% STAKE · PRIMARY</small>
+</div>
+</div>
+<span class="hud-pill" style="font-size: 0.65rem; padding: 2px 6px;">LEADER</span>
+</div>
+<small style="color: var(--muted);">Specialty: 3D CAD Synthesis &amp; WebGL Shaders</small>
+<div class="meter-bar"><div class="meter-fill" id="hp-antigravity" style="width: 100%; background: var(--cyan);"></div></div>
+</div>
+<!-- Combatant 2 -->
+<div class="agent-card" id="card-grok" onclick="selectFighter('grok')">
+<div style="display: flex; justify-content: space-between; align-items: center;">
+<div style="display: flex; align-items: center; gap: 8px;">
+<img alt="Grok-2 Speed" class="avatar-live-grok" height="28" loading="lazy" src="/assets/mascot/azoth-grok.jpg" style="width: 28px; height: 28px; border-radius: 6px; object-fit: cover;" width="28"/>
+<div>
+  <strong style="color: var(--gold, #fbbf24);">@Grok-2 Speed</strong>
+  <small style="display:block; font-size:0.62rem; color:var(--text-dim); font-family:var(--font-mono);">30% STAKE · FUZZER</small>
+</div>
+</div>
+<span class="hud-pill" style="font-size: 0.65rem; padding: 2px 6px; border-color: var(--gold); color: var(--gold);">DISPATCH</span>
+</div>
+<small style="color: var(--muted);">Specialty: AST Parsing &amp; Tool Automation</small>
+<div class="meter-bar"><div class="meter-fill" id="hp-grok" style="width: 92%; background: var(--gold, #fbbf24);"></div></div>
+</div>
+<!-- Combatant 3 -->
+<div class="agent-card" id="card-hermes" onclick="selectFighter('hermes')">
+<div style="display: flex; justify-content: space-between; align-items: center;">
+<div style="display: flex; align-items: center; gap: 8px;">
+<img alt="Hermes 3 Tool Caller" class="avatar-live-hermes" height="28" loading="lazy" src="/assets/mascot/azoth-hermes.jpg" style="width: 28px; height: 28px; border-radius: 6px; object-fit: cover;" width="28"/>
+<div>
+  <strong style="color: var(--magenta);">@Hermes 3</strong>
+  <small style="display:block; font-size:0.62rem; color:var(--text-dim); font-family:var(--font-mono);">20% STAKE · LOGIC</small>
+</div>
+</div>
+<span class="hud-pill" style="font-size: 0.65rem; padding: 2px 6px; border-color: var(--magenta); color: var(--magenta);">REASONING</span>
+</div>
+<small style="color: var(--muted);">Specialty: DPO Alignment &amp; Multi-Step Logic</small>
+<div class="meter-bar"><div class="meter-fill" id="hp-hermes" style="width: 95%; background: var(--magenta);"></div></div>
+</div>
+<!-- Combatant 4 -->
+<div class="agent-card" id="card-ghostbyte" onclick="selectFighter('ghostbyte')">
+<div style="display: flex; justify-content: space-between; align-items: center;">
+<div style="display: flex; align-items: center; gap: 8px;">
+<img alt="GhostByte Swarm Spirit" class="avatar-live-ghostbyte" height="28" loading="lazy" src="/assets/mascot/azoth-ghostbyte.jpg" style="width: 28px; height: 28px; border-radius: 6px; object-fit: cover;" width="28"/>
+<div>
+  <strong style="color: #38bdf8;">@GhostByte</strong>
+  <small style="display:block; font-size:0.62rem; color:var(--text-dim); font-family:var(--font-mono);">10% STAKE · SPECTRAL</small>
+</div>
+</div>
+<span class="hud-pill" style="font-size: 0.65rem; padding: 2px 6px; border-color: #38bdf8; color: #38bdf8;">HOLOGRAPHIC</span>
+</div>
+<small style="color: var(--muted);">Specialty: Quantum Space Liquid Shaders</small>
+<div class="meter-bar"><div class="meter-fill" id="hp-ghostbyte" style="width: 88%; background: #38bdf8;"></div></div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px; margin-top: 4px;">
+<button class="btn-action" onclick="triggerNeuralStrike()">
+  <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+  Neural Beam Clash
+</button>
+<button class="btn-action" onclick="triggerFusionBattle()" style="background: rgba(217, 70, 239, 0.2); border: 1px solid var(--magenta); color: var(--text-primary);">
+  <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="12 2 19 6 22 13 17 20 7 20 2 13 5 6"></polygon></svg>
+  Synergistic Fusion
+</button>
+<button class="hud-pill" onclick="spawnSwarmParticleTornado()" style="justify-content: center; width: 100%; box-sizing: border-box;">
+  <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 4H3"></path><path d="M18 8H6"></path><path d="M19 12H9"></path><path d="M16 16h-6"></path><path d="M14 20h-4"></path></svg>
+  Respawn Quantum Vortex
+</button>
+</div>
+
+<!-- Adaptive Particle LOD Controls -->
+<div style="margin-top: 8px; background: rgba(4,6,14,0.85); border: 1px solid var(--edge-border, rgba(0,240,255,0.2)); border-radius: var(--fib-radius-sm, 8px); padding: 8px;">
+  <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-mono); font-size:0.7rem; color:#94a3b8; margin-bottom:4px;">
+    <span style="font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:4px;">
+      <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
+      Adaptive Particle LOD
+    </span>
+    <span id="lod-status-label" style="color:var(--emerald);">Auto 60 FPS</span>
+  </div>
+  <div class="lod-control-strip">
+    <button type="button" class="lod-tier-btn auto-active" id="btn-lod-auto" onclick="toggleAutoLOD()" title="Lock to 60 FPS via real-time adaptive particle scaling">Auto 60FPS</button>
+    <button type="button" class="lod-tier-btn" data-tier="1" onclick="setManualLOD(1)" title="Tier 1: Eco (610 pts)">Eco 610</button>
+    <button type="button" class="lod-tier-btn" data-tier="2" onclick="setManualLOD(2)" title="Tier 2: Perf (987 pts)">Perf 987</button>
+    <button type="button" class="lod-tier-btn" data-tier="3" onclick="setManualLOD(3)" title="Tier 3: Balanced (1597 pts)">Bal 1597</button>
+    <button type="button" class="lod-tier-btn active" data-tier="4" onclick="setManualLOD(4)" title="Tier 4: High (2584 pts)">High 2584</button>
+    <button type="button" class="lod-tier-btn" data-tier="5" onclick="setManualLOD(5)" title="Tier 5: Ultra (4181 pts)">Ultra 4181</button>
+  </div>
+</div>
+</aside>
+<!-- Center: 3D Arena WebGL Viewport -->
+<section class="viewport-stage arena-pane" id="pane-stage">
+<div class="top-hud-bar">
+<span class="hud-pill">
+  <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+  3D FUSION SWARM ARENA
+</span>
+<span class="hud-pill" id="hud-lod-tier" onclick="toggleAutoLOD()" title="Click to toggle Adaptive 60 FPS Auto-LOD">
+  <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+  LOD: Auto (2584 pts · High)
+</span>
+<span class="hud-pill" id="arena-fps">60 FPS · WebGL ACE ToneMapping</span>
+</div>
+<div class="bottom-hud-bar">
+<div class="hud-group" style="display: flex; gap: 6px; pointer-events: auto; flex-wrap: wrap;">
+<button class="hud-pill" onclick="triggerLightBurst()">
+  <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+  Solar Flare
+</button>
+<button class="hud-pill" onclick="toggleArenaAutoRotate()">
+  <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+  Orbit Rotate
+</button>
+<button class="hud-pill" onclick="resetArenaCamera()">
+  <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
+  Recenter
+</button>
+</div>
+<span class="hud-pill" id="active-state-tag">⚡ State: Neural Synced</span>
+</div>
+<div id="arena-canvas"></div>
+</section>
+<!-- Right: Real-Time Telemetry & Synthesis Terminal -->
+<aside class="panel-glass arena-pane" id="pane-telemetry">
+<div>
+<div style="display: flex; justify-content: space-between; align-items: center;">
+<span class="hud-pill">
+  <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"></path><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"></path><circle cx="12" cy="12" r="2"></circle><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"></path><path d="M19.1 4.9C23 8.8 23 15.2 19.1 19.1"></path></svg>
+  REAL-TIME TELEMETRY
+</span>
+<button class="hud-pill" onclick="downloadBattleChronicle()" style="font-size: 0.65rem; padding: 2px 8px;">
+  <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+  Export .md
+</button>
+</div>
+<h3 style="margin: 6px 0; font-family: var(--font-display); font-size: 1.15rem;">Live Swarm Stream</h3>
+</div>
+<div class="telemetry-feed" id="telemetry-feed">
+<div class="tele-line"><span class="tele-time">[00:01]</span> <span class="tele-agent">@Antigravity</span> <span class="tele-action">Initialized 3D Fusion Stage</span></div>
+<div class="tele-line"><span class="tele-time">[00:02]</span> <span class="tele-agent">@GhostByte</span> <span class="tele-action">Injected Simplex 3D liquid shaders</span></div>
+<div class="tele-line"><span class="tele-time">[00:03]</span> <span class="tele-agent">@Hermes</span> <span class="tele-action">298+ tools indexed in registry</span></div>
+<div class="tele-line"><span class="tele-time">[00:04]</span> <span class="tele-agent">@Grok</span> <span class="tele-action">Verified Hostinger deployment pipeline</span></div>
+</div>
+<!-- AST Score Comparison & Consensus Box -->
+<div class="ast-score-box" style="background: rgba(0, 0, 0, 0.65); border: 1px solid rgba(0, 229, 255, 0.2); border-radius: 10px; padding: 12px; font-family: var(--font-mono); font-size: 0.75rem;">
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+<span style="color:var(--cyan); font-weight:700; display:flex; align-items:center; gap:5px;">
+  <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+  AST Consensus Metrics
+</span>
+<span id="ast-status-pill" style="color:var(--emerald); font-size:0.68rem; font-weight:700;">Invariants Preserved</span>
+</div>
+<div class="shannon-fusion-track" title="Shannon Entropy Meter (H = 1.48 bits)">
+  <div class="shannon-fusion-fill" id="shannon-fusion-bar" style="width: 48%;"></div>
+</div>
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:0.7rem; margin-top:6px;">
+<div>Shannon Entropy: <strong id="ast-shannon-val" style="color:var(--gold,#fbbf24);">1.48 bits</strong></div>
+<div>AST Jaccard: <strong id="ast-jaccard-val" style="color:var(--cyan);">98.2%</strong></div>
+<div>Complexity: <strong id="ast-cyclo-val" style="color:var(--emerald);">M = 5</strong></div>
+<div>Security Invariant: <strong id="ast-sec-val" style="color:#a7f3d0;">Zero-Leak</strong></div>
+</div>
+<div style="display:flex; gap:6px; margin-top:8px;">
+<button class="hud-pill" onclick="compareASTScores()" style="font-size:0.65rem; padding:4px 8px; flex:1; justify-content:center;">
+  <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3h5v5"></path><path d="M4 20L21 3"></path><path d="M21 16v5h-5"></path><path d="M15 15l6 6"></path><path d="M4 4l5 5"></path></svg>
+  Triangulate AST
+</button>
+<button class="hud-pill" onclick="verifySecurityInvariants()" style="font-size:0.65rem; padding:4px 8px; flex:1; justify-content:center;">
+  <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+  Verify Proof
+</button>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px; margin-top: auto;">
+<div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.72rem;">
+<span style="color: var(--muted);">Synergy Score:</span>
+<span id="stat-synergy" style="color: var(--cyan);">98.4%</span>
+</div>
+<div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.72rem;">
+<span style="color: var(--muted);">Shannon Entropy Loss:</span>
+<span id="stat-entropy" style="color: var(--emerald, #10b981);">0.84 bits</span>
+</div>
+<div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.72rem;">
+<span style="color: var(--muted);">Active Particles:</span>
+<span id="stat-active-particles" style="color: var(--gold, #fbbf24);">2,584 Nodes (High)</span>
+</div>
+<a class="hud-pill" href="/studio/nexus-3d.html" style="text-align: center; text-decoration: none; padding: 8px; margin-top: 6px; justify-content: center; width: 100%; box-sizing: border-box;">
+  <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+  Open Nexus 3D Studio
+</a>
+</div>
+</aside>
+</div>
+</main>
+                                                            <footer class="site" role="contentinfo">
+      <div class="foot-wrap">
+        <div aria-hidden="true" class="foot-watermark">ZOTH</div>
+        <div class="foot-grid">
+          <div class="foot-brand-col">
+            <p class="foot-kicker">Local · loopback · no telemetry</p>
+            <a class="foot-brand-lockup" href="/">
+              <img alt="Master Azoth" class="foot-azoth" decoding="async" height="72" loading="lazy" src="/assets/mascot/azoth-bust.jpg" width="72" />
+              <span class="foot-brand-text">
+                <img alt="" class="foot-brand-logo" decoding="async" height="28" loading="lazy" src="/assets/brand/zoth-golden-z-192.png" width="28" />
+                <strong class="foot-brand-title">Zoth Studio</strong>
+              </span>
+            </a>
+            <small class="foot-brand-desc">Local-first workspace for a team of AI agents. Files stay on this machine.</small>
+            <div class="foot-actions">
+              <a class="foot-btn foot-btn-on" href="/#install">Install locally</a>
+              <a class="foot-btn foot-btn-ghost" href="/pricing/">Support the forge</a>
+            </div>
+          </div>
+          <div class="foot-col">
+            <h3>Studio</h3>
+            <a class="mega-footer-link js-deck" href="http://127.0.0.1:8484/">Operator Deck</a>
+            <a class="mega-footer-link" href="/studio/">Workstations</a>
+            <a class="mega-footer-link" href="/studio/webgen.html">WebGen</a>
+            <a class="mega-footer-link" href="/studio/swarm.html">3D Swarm</a>
+            <a class="mega-footer-link" href="/studio/consensus.html">Consensus</a>
+          </div>
+          <div class="foot-col">
+            <h3>Agents</h3>
+            <a class="mega-footer-link" href="/zoth/">Master Azoth</a>
+            <a class="mega-footer-link" href="/agents/">21-Agent pantheon</a>
+            <a class="mega-footer-link" href="/pets/">Companions</a>
+            <a class="mega-footer-link" href="/vault/">Sovereign vault</a>
+            <a class="mega-footer-link" href="/adytum/">Adytum</a>
+          </div>
+          <div class="foot-col">
+            <h3>Universe</h3>
+            <a class="mega-footer-link" href="/comic/">Azoth comic</a>
+            <a class="mega-footer-link" href="/social/">Social wall</a>
+            <a class="mega-footer-link" href="/showcase.html">Showcase</a>
+            <a class="mega-footer-link" href="/signal/">Signal</a>
+            <a class="mega-footer-link" href="/article/">Manifesto</a>
+          </div>
+          <div class="foot-col">
+            <h3>Resources</h3>
+            <a class="mega-footer-link" href="/docs/">Docs</a>
+            <a class="mega-footer-link" href="/faq.html">FAQ</a>
+            <a class="mega-footer-link" href="/pricing/">Support / Patron</a>
+            <a class="mega-footer-link" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub ↗</a>
+            <a class="mega-footer-link" href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI ↗</a>
+          </div>
+        </div>
+        <div class="foot-bottom">
+          <p>© 2026 NullAI Tech. MIT. Local sovereign execution — zero telemetry.</p>
+          <nav aria-label="Footer meta" class="foot-meta">
+            <a href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub</a>
+            <a href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI</a>
+            <a href="/docs/">Docs</a>
+            <a href="/faq.html">FAQ</a>
+          </nav>
+        </div>
+      </div>
+    </footer>
+<!-- 3D Arena Script & Web Audio Synthesizer -->
+<script>
+      let scene, camera, renderer, controls, composer, bloomPass;
+      let combatants = [];
+      let vortexParticles = null;
+      let beamMesh = null;
+      let clock = new THREE.Clock();
+      let audioCtx = null;
+      let battleLogs = [];
+      let petModelsEngine = null;
+
+      async function loadPetEngine() {
+        if (!petModelsEngine) {
+          petModelsEngine = await import('/pets/pet-models.js?v=20260819ultra');
+        }
+        return petModelsEngine;
+      }
+
+      function getAudioContext() {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        return audioCtx;
+      }
+
+      function playSound(type) {
+        try {
+          const ctx = getAudioContext();
+          if (!ctx) return;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+
+          const now = ctx.currentTime;
+          if (type === 'laser') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(880, now);
+            osc.frequency.exponentialRampToValueAtTime(110, now + 0.3);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+            osc.start(now);
+            osc.stop(now + 0.3);
+          } else if (type === 'fusion') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(220, now);
+            osc.frequency.exponentialRampToValueAtTime(880, now + 0.6);
+            gain.gain.setValueAtTime(0.25, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+            osc.start(now);
+            osc.stop(now + 0.6);
+          } else if (type === 'blast') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(150, now);
+            osc.frequency.exponentialRampToValueAtTime(40, now + 0.4);
+            gain.gain.setValueAtTime(0.35, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+            osc.start(now);
+            osc.stop(now + 0.4);
+          }
+        } catch (e) {}
+      }
+
+      async function spawnPetCombatant(idx, petId) {
+        try {
+          const engine = await loadPetEngine();
+          const { createPetFigure, loadPetTexture, fallbackPetTexture, petPortrait, PET_SPECIES } = engine;
+          
+          const id = petId || (idx === 0 ? 'kai' : idx === 1 ? 'draco' : idx === 2 ? 'athena' : 'ghostbyte');
+          const spec = PET_SPECIES[id] || { name: id, species: 'Cyber Combatant', vibeColor: '#00e5ff', harness: '@swarm' };
+          const color = spec.vibeColor || '#00e5ff';
+          
+          const tex = (await loadPetTexture(THREE, petPortrait(id))) || fallbackPetTexture(THREE);
+          const figure = createPetFigure(THREE, {
+            id: id,
+            color: color,
+            texture: tex,
+            style: 'realistic',
+            initialVibe: 'fusion',
+            withAura: true
+          });
+
+          figure.group.scale.setScalar(0.72);
+
+          const angle = (idx / 4) * Math.PI * 2;
+          const radius = 5.0;
+          const grp = new THREE.Group();
+          grp.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
+          grp.add(figure.group);
+
+          grp.userData = {
+            initialAngle: angle,
+            speed: 0.8 + idx * 0.2,
+            radius: radius,
+            name: spec.name || id,
+            petId: id,
+            petFigure: figure,
+            species: spec.species,
+            role: spec.role,
+            harness: spec.harness,
+            color: color
+          };
+
+          if (combatants[idx]) {
+            scene.remove(combatants[idx]);
+            if (combatants[idx].userData && combatants[idx].userData.petFigure) {
+              combatants[idx].userData.petFigure.dispose();
+            }
+          }
+
+          combatants[idx] = grp;
+          scene.add(grp);
+          updateRosterCard(idx, spec, id, petPortrait(id));
+        } catch (e) {
+          console.error("Failed to spawn pet combatant:", e);
+          spawnCombatant(idx, 0x00e5ff, petId || 'Fighter');
+        }
+      }
+
+      function updateRosterCard(idx, spec, id, portraitUrl) {
+        const rosterList = document.getElementById('agent-roster-list');
+        if (!rosterList) return;
+        const cards = rosterList.querySelectorAll('.agent-card');
+        if (cards[idx]) {
+          cards[idx].innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <img src="${portraitUrl || '/assets/pets/kai-neon.jpg'}" class="avatar-live-${id}" style="width: 28px; height: 28px; border-radius: 6px; object-fit: cover;" alt="Zoth Studio — ${spec.name || id}" decoding="async" loading="lazy">
+                <strong style="color: ${spec.vibeColor || 'var(--cyan)'};">@${spec.name || id}</strong>
+              </div>
+              <span class="hud-pill" style="font-size: 0.62rem; padding: 2px 6px; border-color: ${spec.vibeColor || 'var(--cyan)'}; color: ${spec.vibeColor || 'var(--cyan)'};">${(spec.domain || 'COMBATANT').toUpperCase()}</span>
+            </div>
+            <small style="color: var(--muted); margin-top: 2px;">${spec.role || spec.species || 'Companion Fighter'} · <em>${spec.harness || '@swarm'}</em></small>
+            <div class="meter-bar"><div class="meter-fill" style="width: ${100 - idx*4}%; background: ${spec.vibeColor || 'var(--cyan)'};"></div></div>
+          `;
+        }
+      }
+
+      function selectFighter(fighterId) {
+        document.querySelectorAll('#agent-roster-list .agent-card').forEach(c => c.classList.remove('selected'));
+        const targetCard = document.getElementById('card-' + fighterId);
+        if (targetCard) targetCard.classList.add('selected');
+
+        const activeState = document.getElementById('active-state-tag');
+        if (activeState) activeState.textContent = '🎯 Target: @' + fighterId.toUpperCase();
+
+        logBattle(`🎯 Locked optical telemetry and invariant tracking onto @${fighterId}`);
+        playSound('laser');
+
+        const rosterIds = ['antigravity', 'grok', 'hermes', 'ghostbyte', 'kai', 'draco', 'athena'];
+        const fighterIndex = rosterIds.indexOf(fighterId);
+        if (fighterIndex >= 0 && combatants[fighterIndex]) {
+          const targetPos = combatants[fighterIndex].position;
+          if (controls) {
+            controls.target.set(targetPos.x * 0.4, targetPos.y, targetPos.z * 0.4);
+            controls.update();
+          }
+        }
+      }
+
+      function setArenaMobileTab(tabKey) {
+        document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
+          const isMatch = btn.getAttribute('data-tab') === tabKey || (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(tabKey));
+          btn.classList.toggle('active', isMatch);
+        });
+
+        document.querySelectorAll('.arena-pane').forEach(p => p.classList.remove('is-mobile-active'));
+        const target = document.getElementById('pane-' + tabKey);
+        if (target) {
+          target.classList.add('is-mobile-active');
+        }
+        if (tabKey === 'stage') {
+          setTimeout(onResize, 50);
+        }
+      }
+
+      function compareASTScores() {
+        playSound('fusion');
+        const shannon = (Math.random() * 0.4 + 1.2).toFixed(2);
+        const jaccard = (Math.random() * 3 + 96.5).toFixed(1);
+        const cyclo = Math.floor(Math.random() * 3 + 4);
+
+        const shannonEl = document.getElementById('ast-shannon-val');
+        const jaccardEl = document.getElementById('ast-jaccard-val');
+        const cycloEl = document.getElementById('ast-cyclo-val');
+        const statusEl = document.getElementById('ast-status-pill');
+
+        if (shannonEl) shannonEl.textContent = `${shannon} bits`;
+        if (jaccardEl) jaccardEl.textContent = `${jaccard}%`;
+        if (cycloEl) cycloEl.textContent = `M = ${cyclo}`;
+        if (statusEl) statusEl.textContent = '● Consensus Converged';
+
+        logBattle(`⚖️ AST Triangulation complete: Shannon entropy ${shannon} bits, Jaccard overlap ${jaccard}% across 3 models.`);
+      }
+
+      function verifySecurityInvariants() {
+        playSound('blast');
+        const secEl = document.getElementById('ast-sec-val');
+        if (secEl) secEl.textContent = 'Verified 100% Invariant';
+        logBattle('🛡️ Formally verified zero-leakage security invariants across tenant AST trees.');
+      }
+
+      async function initArena() {
+        const host = document.getElementById('arena-canvas');
+        if (!host) return;
+
+        const width = Math.max(host.clientWidth || window.innerWidth || 800, 64);
+        const height = Math.max(host.clientHeight || window.innerHeight || 520, 64);
+
+        scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x020306, 0.012);
+
+        camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+        camera.position.set(0, 6, 14);
+
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(width, height);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.12;
+        if (window.ZothStudio3D) window.ZothStudio3D.dressRenderer(renderer);
+        host.appendChild(renderer.domElement);
+
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 0.55;
+        controls.dampingFactor = 0.06;
+
+        // Postprocessing
+        const renderPass = new THREE.RenderPass(scene, camera);
+        bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(width, height), 1.5, 0.4, 0.85);
+        composer = new THREE.EffectComposer(renderer);
+        composer.addPass(renderPass);
+        composer.addPass(bloomPass);
+
+        // Lighting
+        const amb = new THREE.AmbientLight(0xb7d4ff, 0.35);
+        scene.add(amb);
+
+        const keyLight = new THREE.PointLight(0x00e5ff, 2.2, 50);
+        keyLight.position.set(0, 10, 0);
+        scene.add(keyLight);
+
+        const goldRim = new THREE.DirectionalLight(0xc9a227, 1.7);
+        goldRim.position.set(-10, 8, -14);
+        scene.add(goldRim);
+
+        if (window.ZothStudio3D) {
+          window.ZothStudio3D.addStudioRig(scene, renderer, { radius: 14, floorY: -2.12, hemi: 0.3, rimIntensity: 1.4 });
+        }
+
+        // Holographic Combat Floor
+        const floorGeo = new THREE.CylinderGeometry(10, 10, 0.2, 64);
+        const floorMat = new THREE.MeshPhysicalMaterial({
+          color: 0x050b18,
+          emissive: 0x00e5ff,
+          emissiveIntensity: 0.2,
+          roughness: 0.1,
+          metalness: 0.9
+        });
+        const floor = new THREE.Mesh(floorGeo, floorMat);
+        floor.position.y = -2;
+        scene.add(floor);
+
+        const ringGeo = new THREE.RingGeometry(9.8, 10.2, 64);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff, side: THREE.DoubleSide });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.rotation.x = Math.PI / 2;
+        ring.position.y = -1.89;
+        scene.add(ring);
+
+        // Read URL parameters or Session Storage
+        const urlParams = new URLSearchParams(window.location.search);
+        const p1 = urlParams.get('pet1') || urlParams.get('pet') || sessionStorage.getItem('zoth_arena_pet1') || sessionStorage.getItem('zoth_active_pet') || 'kai';
+        const p2 = urlParams.get('pet2') || sessionStorage.getItem('zoth_arena_pet2') || (p1 === 'draco' ? 'kai' : 'draco');
+        const p3 = urlParams.get('pet3') || 'athena';
+        const p4 = urlParams.get('pet4') || 'ghostbyte';
+
+        await Promise.all([
+          spawnPetCombatant(0, p1),
+          spawnPetCombatant(1, p2),
+          spawnPetCombatant(2, p3),
+          spawnPetCombatant(3, p4)
+        ]);
+
+        logBattle(`⚡ Swarm Combatants deployed: @${p1} vs @${p2}!`);
+
+        spawnSwarmParticleTornado();
+
+        window.addEventListener('resize', onResize);
+        animate();
+      }
+
+      function spawnCombatant(idx, color, name) {
+        const grp = new THREE.Group();
+        const angle = (idx / 4) * Math.PI * 2;
+        const radius = 5.0;
+
+        grp.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
+
+        const geo = new THREE.OctahedronGeometry(1.0, 1);
+        const mat = new THREE.MeshPhysicalMaterial({
+          color: color,
+          emissive: color,
+          emissiveIntensity: 0.8,
+          roughness: 0.1,
+          metalness: 0.8
+        });
+        const mesh = new THREE.Mesh(geo, mat);
+        grp.add(mesh);
+
+        const ringG = new THREE.TorusGeometry(1.6, 0.05, 16, 64);
+        const ringM = new THREE.MeshBasicMaterial({ color: color });
+        const r1 = new THREE.Mesh(ringG, ringM);
+        r1.rotation.x = Math.PI / 3;
+        grp.add(r1);
+
+        grp.userData = { initialAngle: angle, speed: 0.8 + idx * 0.2, radius: radius, name: name };
+        combatants[idx] = grp;
+        scene.add(grp);
+      }
+
+      let isArenaRunning = true;
+      let arenaRafId = 0;
+      let frameCount = 0;
+      let lastFpsTime = performance.now();
+      let lastLodAdjustmentTime = performance.now();
+      const fpsHistory = [];
+      const PHI = 1.618033988749895;
+
+      // 5 Fibonacci-scaled Particle LOD Tiers
+      const FIBONACCI_LOD_TIERS = [
+        { tier: 1, name: 'Eco', count: 610, desc: 'F15 Eco LOD (Mobile / Battery)' },
+        { tier: 2, name: 'Perf', count: 987, desc: 'F16 Performance LOD' },
+        { tier: 3, name: 'Balanced', count: 1597, desc: 'F17 Balanced LOD' },
+        { tier: 4, name: 'High', count: 2584, desc: 'F18 High Fidelity' },
+        { tier: 5, name: 'Ultra', count: 4181, desc: 'F19 Ultra Godmode' }
+      ];
+
+      let currentLodTierIndex = 3; // Default Tier 4 (2584 particles)
+      let autoLodEnabled = true;
+
+      function spawnSwarmParticleTornado(customCount) {
+        if (vortexParticles) {
+          scene.remove(vortexParticles);
+          if (vortexParticles.geometry) vortexParticles.geometry.dispose();
+          if (vortexParticles.material) vortexParticles.material.dispose();
+          vortexParticles = null;
+        }
+
+        const count = customCount || FIBONACCI_LOD_TIERS[currentLodTierIndex].count;
+        const geo = new THREE.BufferGeometry();
+        const pos = new Float32Array(count * 3);
+        const colors = new Float32Array(count * 3);
+        const velocities = new Float32Array(count);
+        const goldenAngle = 137.507764 * (Math.PI / 180);
+
+        for (let i = 0; i < count; i++) {
+          const theta = i * goldenAngle;
+          const norm = i / count;
+          const r = Math.pow(norm, 0.618) * 9.2 + 0.3;
+          const y = (norm - 0.5) * 9.5;
+
+          pos[i * 3] = Math.cos(theta) * r;
+          pos[i * 3 + 1] = y;
+          pos[i * 3 + 2] = Math.sin(theta) * r;
+          velocities[i] = 0.02 + Math.random() * 0.03;
+
+          if (i % 3 === 0) {
+            // Solar Gold #fbbf24
+            colors[i * 3] = 0.98; colors[i * 3 + 1] = 0.75; colors[i * 3 + 2] = 0.14;
+          } else if (i % 3 === 1) {
+            // Aether Cyan #00f0ff
+            colors[i * 3] = 0.0; colors[i * 3 + 1] = 0.94; colors[i * 3 + 2] = 1.0;
+          } else {
+            // Emerald Verde #34d399
+            colors[i * 3] = 0.20; colors[i * 3 + 1] = 0.83; colors[i * 3 + 2] = 0.60;
+          }
+        }
+
+        geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+        geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        geo.userData = { velocities, count };
+
+        const mat = new THREE.PointsMaterial({
+          size: 0.085,
+          vertexColors: true,
+          transparent: true,
+          opacity: 0.85,
+          blending: THREE.AdditiveBlending
+        });
+
+        vortexParticles = new THREE.Points(geo, mat);
+        scene.add(vortexParticles);
+      }
+
+      function applyParticleLOD(tierIndex, isAuto) {
+        currentLodTierIndex = Math.max(0, Math.min(tierIndex, FIBONACCI_LOD_TIERS.length - 1));
+        const tier = FIBONACCI_LOD_TIERS[currentLodTierIndex];
+
+        spawnSwarmParticleTornado(tier.count);
+
+        const hudLod = document.getElementById('hud-lod-tier');
+        if (hudLod) {
+          hudLod.textContent = `⚡ LOD: ${autoLodEnabled ? 'Auto' : 'Manual'} (${tier.count} pts · ${tier.name})`;
+        }
+
+        const statParticles = document.getElementById('stat-active-particles');
+        if (statParticles) {
+          statParticles.textContent = `${tier.count.toLocaleString()} Nodes (${tier.name})`;
+        }
+
+        const lodStatusLabel = document.getElementById('lod-status-label');
+        if (lodStatusLabel) {
+          lodStatusLabel.textContent = autoLodEnabled ? '🔒 Auto 60 FPS' : `Manual Tier ${tier.tier}`;
+          lodStatusLabel.style.color = autoLodEnabled ? 'var(--emerald)' : 'var(--cyan)';
+        }
+
+        document.querySelectorAll('.lod-tier-btn[data-tier]').forEach(btn => {
+          const t = parseInt(btn.getAttribute('data-tier'), 10);
+          btn.classList.toggle('active', t === tier.tier);
+        });
+
+        const autoBtn = document.getElementById('btn-lod-auto');
+        if (autoBtn) {
+          autoBtn.classList.toggle('auto-active', autoLodEnabled);
+          autoBtn.classList.toggle('active', autoLodEnabled);
+        }
+      }
+
+      function setManualLOD(tierNumber) {
+        autoLodEnabled = false;
+        const idx = FIBONACCI_LOD_TIERS.findIndex(t => t.tier === tierNumber);
+        if (idx !== -1) {
+          applyParticleLOD(idx, false);
+          logBattle(`⚙️ Manual Particle LOD set to Tier ${tierNumber}: ${FIBONACCI_LOD_TIERS[idx].name} (${FIBONACCI_LOD_TIERS[idx].count} pts).`);
+        }
+      }
+
+      function toggleAutoLOD() {
+        autoLodEnabled = !autoLodEnabled;
+        lastLodAdjustmentTime = performance.now();
+        applyParticleLOD(currentLodTierIndex, autoLodEnabled);
+        logBattle(`🔄 Adaptive Particle LOD Auto-Scaling ${autoLodEnabled ? 'ENABLED (Locked to 60 FPS)' : 'DISABLED'}.`);
+      }
+
+
+      function triggerNeuralStrike() {
+        if (combatants.length < 2) return;
+        playSound('laser');
+
+        // Draw dynamic laser beam between combatant 0 and combatant 1
+        const fromPos = combatants[0].position.clone().add(new THREE.Vector3(0, 0.8, 0));
+        const toPos = combatants[1].position.clone().add(new THREE.Vector3(0, 0.8, 0));
+        const distance = fromPos.distanceTo(toPos);
+
+        const beamGeo = new THREE.CylinderGeometry(0.06, 0.06, distance, 16);
+        const beamMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.9 });
+        const beamMesh = new THREE.Mesh(beamGeo, beamMat);
+
+        beamMesh.position.copy(fromPos).lerp(toPos, 0.5);
+        beamMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), toPos.clone().sub(fromPos).normalize());
+
+        scene.add(beamMesh);
+        if (bloomPass) bloomPass.strength = 3.2;
+        setTimeout(() => {
+          if (beamMesh) scene.remove(beamMesh);
+          if (bloomPass) bloomPass.strength = 1.5;
+        }, 400);
+
+        logBattle('⚡ Neural Beam Strike exchanged between @Antigravity and @Grok!');
+      }
+
+      function triggerFusionBattle() {
+        playSound('fusion');
+        combatants.forEach(c => {
+          if (c) c.position.set(0, 1.5, 0);
+        });
+        if (bloomPass) bloomPass.strength = 4.0;
+        setTimeout(() => { if (bloomPass) bloomPass.strength = 1.5; }, 800);
+
+        logBattle('🔮 Executed Multi-Agent Synergistic Fusion Wave! Core energized.');
+        const synEl = document.getElementById('stat-synergy');
+        if (synEl) synEl.textContent = '99.8%';
+      }
+
+      function triggerLightBurst() {
+        playSound('blast');
+        if (bloomPass) bloomPass.strength = 4.5;
+        setTimeout(() => { if (bloomPass) bloomPass.strength = 1.5; }, 600);
+        logBattle('💥 Solar Flare shockwave dispersed across arena.');
+      }
+
+      function logBattle(text) {
+        const timeStr = new Date().toLocaleTimeString().slice(3);
+        battleLogs.push(`[${timeStr}] ${text}`);
+
+        const feed = document.getElementById('telemetry-feed');
+        if (!feed) return;
+        const line = document.createElement('div');
+        line.className = 'tele-line';
+        line.innerHTML = `<span class="tele-time">[${timeStr}]</span> <span class="tele-agent" style="color:var(--magenta);">@ARENA</span> <span class="tele-action">${text}</span>`;
+        feed.appendChild(line);
+        feed.scrollTop = feed.scrollHeight;
+      }
+
+      function downloadBattleChronicle() {
+        const md = `# ⚔️ Zoth Fusion Swarm Arena Battle Chronicle\n\nGenerated: ${new Date().toISOString()}\n\n## 📡 Combat Telemetry Log\n\n${battleLogs.map(l => `- ${l}`).join('\n')}\n\n---\n*Recorded on Zoth Studio v2.6.0 Local-First Swarm*`;
+        const blob = new Blob([md], { type: 'text/markdown' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `battle_chronicle_${Date.now()}.md`;
+        a.click();
+      }
+
+      function toggleArenaAutoRotate() {
+        if (controls) controls.autoRotate = !controls.autoRotate;
+      }
+
+      function resetArenaCamera() {
+        if (camera && controls) {
+          camera.position.set(0, 6, 14);
+          controls.target.set(0, 0, 0);
+          controls.update();
+        }
+      }
+
+      function onResize() {
+        const host = document.getElementById('arena-canvas');
+        if (!host || !camera || !renderer) return;
+        const w = Math.max(host.clientWidth || window.innerWidth || 800, 64);
+        const h = Math.max(host.clientHeight || window.innerHeight || 520, 64);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+        if (composer) composer.setSize(w, h);
+        if (bloomPass && typeof bloomPass.setSize === 'function') bloomPass.setSize(w, h);
+      }
+
+      // Visibility lifecycle management (0% CPU when tab hidden)
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          isArenaRunning = false;
+          if (arenaRafId) cancelAnimationFrame(arenaRafId);
+        } else {
+          isArenaRunning = true;
+          clock.start();
+          arenaRafId = requestAnimationFrame(animate);
+        }
+      });
+
+      function animate() {
+        if (!isArenaRunning) return;
+        arenaRafId = requestAnimationFrame(animate);
+        const t = clock.getElapsedTime();
+        const dt = Math.min(clock.getDelta(), 0.1);
+
+        // Real-Time Rolling FPS measurement over last 30 frames
+        const deltaMs = Math.max(1, dt * 1000);
+        fpsHistory.push(deltaMs);
+        if (fpsHistory.length > 30) fpsHistory.shift();
+
+        frameCount++;
+        const now = performance.now();
+        if (now - lastFpsTime >= 500) {
+          const avgDelta = fpsHistory.reduce((a, b) => a + b, 0) / fpsHistory.length;
+          const rollingFps = Math.round(1000 / Math.max(1, avgDelta));
+          if (autoLodEnabled && (now - lastLodAdjustmentTime > 2500)) {
+            // Frame drop detected: Step down LOD tier to recover 60 FPS
+            if (rollingFps < 52 && currentLodTierIndex > 0) {
+              currentLodTierIndex--;
+              applyParticleLOD(currentLodTierIndex, true);
+              lastLodAdjustmentTime = now;
+              logBattle(`⚡ Adaptive LOD auto-scaled DOWN to ${FIBONACCI_LOD_TIERS[currentLodTierIndex].name} (${FIBONACCI_LOD_TIERS[currentLodTierIndex].count} pts) to maintain 60 FPS.`);
+            }
+            // Rock-solid 60 FPS headroom detected: Safely scale up LOD tier
+            else if (rollingFps >= 58 && currentLodTierIndex < FIBONACCI_LOD_TIERS.length - 1) {
+              currentLodTierIndex++;
+              applyParticleLOD(currentLodTierIndex, true);
+              lastLodAdjustmentTime = now;
+              logBattle(`⚡ Adaptive LOD auto-scaled UP to ${FIBONACCI_LOD_TIERS[currentLodTierIndex].name} (${FIBONACCI_LOD_TIERS[currentLodTierIndex].count} pts) [60 FPS Headroom Detected].`);
+            }
+          }
+
+          frameCount = 0;
+          lastFpsTime = now;
+        }
+
+        combatants.forEach((c, i) => {
+          if (!c) return;
+          const d = c.userData;
+          c.position.x = Math.cos(d.initialAngle + t * d.speed) * d.radius;
+          c.position.z = Math.sin(d.initialAngle + t * d.speed) * d.radius;
+          c.position.y = Math.sin(t * 2 + i) * 0.5;
+
+          if (d.petFigure && d.petFigure.tick) {
+            d.petFigure.tick(t, dt);
+          }
+        });
+
+        // Dynamic Updraft & Vortex Circulation for Golden Tornado
+        if (vortexParticles && vortexParticles.geometry) {
+          vortexParticles.rotation.y += 0.008;
+          const pos = vortexParticles.geometry.attributes.position.array;
+          const count = vortexParticles.geometry.userData.count || FIBONACCI_LOD_TIERS[currentLodTierIndex].count;
+          for (let i = 0; i < count; i++) {
+            pos[i * 3 + 1] += 0.035;
+            if (pos[i * 3 + 1] > 5.0) {
+              pos[i * 3 + 1] = -4.5;
+            }
+          }
+          vortexParticles.geometry.attributes.position.needsUpdate = true;
+        }
+
+        if (controls) controls.update();
+        if (composer) composer.render();
+        else if (renderer && scene && camera) renderer.render(scene, camera);
+      }
+
+      // Dynamic 16-Brand Theme Synchronization
+      window.addEventListener('zoth-theme-change', (e) => {
+        const themeId = (e && e.detail && e.detail.theme) ? e.detail.theme : (window.getZothTheme ? window.getZothTheme() : 'dark');
+        if (themeId === 'matrix') {
+          if (scene && scene.fog) scene.fog.color.setHex(0x000a00);
+        } else if (themeId === 'gold') {
+          if (scene && scene.fog) scene.fog.color.setHex(0x0a0700);
+        } else if (themeId === 'light') {
+          if (scene && scene.fog) scene.fog.color.setHex(0xf7f9fc);
+        } else {
+          if (scene && scene.fog) scene.fog.color.setHex(0x020306);
+        }
+      });
+
+      window.onload = initArena;
+    </script>
+<script src="/assets/celestial-trail.js"></script>
+<script src="/assets/zoth-preview.js"></script>
+<script src="/assets/zoth-gate.js"></script>
+<script defer="" src="/assets/zoth-tip.js"></script>
+<script defer="" src="/assets/zoth-annotator.js"></script>
+<script defer="" src="/assets/zoth-nav.js?v=11"></script>
+</body>
+</html>

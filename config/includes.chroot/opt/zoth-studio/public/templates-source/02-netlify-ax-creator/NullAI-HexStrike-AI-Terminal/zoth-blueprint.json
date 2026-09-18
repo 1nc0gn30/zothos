@@ -1,0 +1,67 @@
+{
+  "id": "nullai-hexstrike-terminal",
+  "name": "NullAI HexStrike AI Terminal & Swarm Commander",
+  "version": "2.0.0",
+  "archetype": "terminal-agent-orchestrator",
+  "category": "02-netlify-ax-creator",
+  "description": "Autonomous local-first multi-agent tactical terminal and strike commander interface communicating with Ollama and Hermes tool agents.",
+  "ai_composable_modules": [
+    {
+      "name": "HexStrikeCore",
+      "file": "backend/main.py",
+      "type": "engine",
+      "purpose": "FastAPI orchestration daemon dispatching LLM prompts to local models and system shell tools",
+      "exports": [
+        "app",
+        "execute_command",
+        "route_agent"
+      ]
+    },
+    {
+      "name": "TacticalTerminalUI",
+      "file": "index.html",
+      "type": "view",
+      "purpose": "Low-latency xterm-styled canvas web terminal with ANSI color streaming and multi-pane agent monitors",
+      "exports": [
+        "TerminalUI"
+      ]
+    },
+    {
+      "name": "AgentSwarmConfig",
+      "file": "backend/hex_config.py",
+      "type": "data",
+      "purpose": "Declarative agent doctrine definitions, tool authorization levels, and model routing parameters",
+      "exports": [
+        "HEX_ROLES",
+        "SWARM_CONFIG"
+      ]
+    }
+  ],
+  "technical_hooks": {
+    "audio_engine": "Web Audio API tactical radio chirp and alarm synthesizers",
+    "rendering_engine": "Canvas 2D / CRT scanline post-processing / Hex grid visualizer",
+    "state_and_offline": "Local filesystem state persistence / Offline Ollama Qwen2.5 execution",
+    "telemetry_and_events": "WebSocket agent execution stream / Token throughput HUD",
+    "integrations": "Ollama REST API / FastAPI / Local shell execution / Python"
+  },
+  "seo_aeo_schemas": [
+    "WebApplication",
+    "SoftwareApplication",
+    "TechArticle",
+    "BreadcrumbList"
+  ],
+  "cli_compose_command": "zoth compose 02-netlify-ax-creator/NullAI-HexStrike-AI-Terminal --with-audio --with-terminal",
+  "deployment": {
+    "target": "docker",
+    "framework": "fastapi",
+    "output": "."
+  },
+  "tags": [
+    "nullai",
+    "hexstrike",
+    "ai-agents",
+    "ollama",
+    "terminal",
+    "swarm-orchestrator"
+  ]
+}

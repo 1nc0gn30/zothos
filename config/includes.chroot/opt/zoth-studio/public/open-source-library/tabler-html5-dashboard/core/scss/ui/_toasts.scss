@@ -1,0 +1,27 @@
+@use '../config' as *;
+
+.toast {
+  border: $alert-border-width var(--border-style) $alert-border-color;
+  box-shadow: $alert-shadow;
+
+  .toast-header {
+    user-select: none;
+  }
+
+  button[data-bs-dismiss='toast'],
+  button[data-dismiss='toast'] {
+    &:focus:not(:focus-visible) {
+      outline: none;
+    }
+  }
+
+  @include media-print() {
+    display: none;
+  }
+}
+
+@each $state, $value in $theme-colors {
+  .toast-#{$state} {
+    --toast-color: #{$value};
+  }
+}

@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Codex Workbench Linux</title>
+    <meta
+      name="description"
+      content="A Linux-native local workbench for running Codex CLI sessions with terminal, files, and live preview panes."
+    />
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script>
+      const storedTheme = window.localStorage.getItem("codex-workbench-theme");
+      document.documentElement.dataset.theme = storedTheme || "dark";
+    </script>
+  
+<link rel="stylesheet" href="/assets/zoth-theme.css?v=11">
+<link rel="stylesheet" href="/assets/zoth-nav.css?v=11">
+<script src="/assets/zoth-theme.js?v=11"></script>
+<script src="/assets/zoth-nav.js?v=11" defer></script>
+
+</head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div class="brand-row">
+          <div class="mark" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <div>
+            <h1 id="app-title">Codex Workbench Linux</h1>
+            <p id="health">Checking local tools...</p>
+          </div>
+        </div>
+        <div class="topbar-status" aria-label="Workbench capabilities">
+          <span>PTY terminal</span>
+          <span>Workspace files</span>
+          <span>Live preview</span>
+        </div>
+        <button id="theme-toggle" class="icon-button" type="button" aria-label="Switch color theme" title="Switch color theme">
+          <span id="theme-icon" aria-hidden="true">◐</span>
+        </button>
+      </header>
+
+      <div class="workspace-grid">
+        <section class="panel setup-panel" aria-labelledby="setup-title">
+          <div class="panel-title">
+            <div>
+              <h2 id="setup-title">Session Setup</h2>
+              <p>Choose the workspace and launch mode.</p>
+            </div>
+            <span class="status-dot" aria-hidden="true"></span>
+          </div>
+
+          <form id="start-form" class="start-form">
+            <div class="workspace-picker">
+              <label>
+                Workspace action
+                <select id="workspace-mode" name="workspace-mode">
+                  <option value="existing">Use existing folder</option>
+                  <option value="create">Create named folder</option>
+                </select>
+              </label>
+              <label>
+                Workspace folder
+                <input
+                  id="workspace"
+                  name="workspace"
+                  value=""
+                  autocomplete="off"
+                  placeholder="~/projects/my-new-app"
+                  required
+                />
+              </label>
+            </div>
+            <p id="workspace-help" class="setup-help">Sessions stay locked until you choose an existing folder or name a folder to create.</p>
+
+            <label>
+              Initial prompt
+              <textarea
+                id="prompt"
+                name="prompt"
+                rows="5"
+                placeholder="Ask Codex to inspect, build, fix, or explain something in this workspace."
+              ></textarea>
+            </label>
+
+            <div class="field-grid">
+              <label>
+                Agent launcher
+                <select id="launcher" name="launcher">
+                  <option value="ollama-codex">Ollama Launch Codex</option>
+                  <option value="codex-cli">Original Codex CLI</option>
+                  <option value="codex-oss">Codex CLI + Ollama OSS</option>
+                </select>
+              </label>
+              <label>
+                Model
+                <input id="model" name="model" list="model-presets" autocomplete="off" />
+                <datalist id="model-presets"></datalist>
+              </label>
+            </div>
+
+            <div class="field-grid">
+              <label>
+                Sandbox
+                <select id="sandbox" name="sandbox">
+                  <option value="workspace-write">workspace-write</option>
+                  <option value="read-only">read-only</option>
+                  <option value="danger-full-access">danger-full-access</option>
+                </select>
+              </label>
+              <label class="command-field">
+                Command
+                <input id="command-preview" readonly aria-label="Generated launch command" />
+              </label>
+            </div>
+
+            <div id="model-chips" class="model-chips" aria-label="Ollama cloud model presets"></div>
+
+            <div class="switch-row">
+              <label class="check">
+                <input id="resume-last" type="checkbox" />
+                Resume last Codex session
+              </label>
+            </div>
+
+            <div class="actions">
+              <button type="submit">Start session</button>
+              <button id="stop-session" type="button" class="secondary" disabled>Stop</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel workbench-panel" aria-labelledby="workbench-title">
+          <div class="workbench-header">
+            <div>
+              <h2 id="workbench-title">Workbench</h2>
+              <p id="session-meta">No active session</p>
+            </div>
+            <div class="tabs" role="tablist" aria-label="Workbench views">
+              <button class="tab is-active" type="button" role="tab" aria-selected="true" data-tab="terminal-view">
+                Terminal
+              </button>
+              <button class="tab" type="button" role="tab" aria-selected="false" data-tab="files-view">
+                Files
+              </button>
+              <button class="tab" type="button" role="tab" aria-selected="false" data-tab="showcase-view">
+                Showcase
+              </button>
+              <button class="tab" type="button" role="tab" aria-selected="false" data-tab="preview-view">
+                Preview
+              </button>
+            </div>
+          </div>
+
+          <div id="terminal-view" class="view is-active" role="tabpanel">
+            <div class="view-toolbar">
+              <span>Session Output</span>
+              <button id="clear-output" type="button" class="ghost">Clear view</button>
+            </div>
+            <pre id="terminal" aria-live="polite"></pre>
+
+            <form id="input-form" class="input-form">
+              <label class="sr-only" for="command-input">Message to Codex</label>
+              <textarea
+                id="command-input"
+                rows="3"
+                placeholder="Type a message, shell approval answer, or instruction for the running Codex session."
+                disabled
+              ></textarea>
+              <button id="send-input" type="submit" disabled>Send</button>
+            </form>
+          </div>
+
+          <div id="files-view" class="view files-view" role="tabpanel" hidden>
+            <div class="view-toolbar">
+              <div>
+                <span>Workspace Files</span>
+                <p id="file-path">Start a session to browse files</p>
+              </div>
+              <div class="toolbar-actions">
+                <button id="file-up" type="button" class="ghost" disabled>Up</button>
+                <button id="refresh-files" type="button" class="ghost" disabled>Refresh</button>
+              </div>
+            </div>
+            <div class="files-grid">
+              <nav id="file-list" class="file-list" aria-label="Workspace files"></nav>
+              <article class="file-preview">
+                <header>
+                  <h3 id="file-title">No file selected</h3>
+                  <p id="file-meta"></p>
+                </header>
+                <pre id="file-content"></pre>
+              </article>
+            </div>
+          </div>
+
+          <div id="showcase-view" class="view showcase-view" role="tabpanel" hidden>
+            <div class="showcase-hero">
+              <div>
+                <p class="eyebrow">Agent showcase</p>
+                <h3 id="showcase-kind">No workspace loaded</h3>
+                <p id="showcase-summary">Start a session to see the app Codex is building.</p>
+              </div>
+              <button id="refresh-showcase" type="button" class="ghost" disabled>Refresh</button>
+            </div>
+            <div class="showcase-grid">
+              <article class="showcase-card live-card">
+                <header>
+                  <span>Live build</span>
+                  <p id="showcase-preview-hint">Detected dev URLs will appear here.</p>
+                </header>
+                <div id="showcase-live" class="showcase-live-empty">Waiting for a local dev server URL...</div>
+              </article>
+              <article class="showcase-card files-card">
+                <header>
+                  <span>Code spotlight</span>
+                  <p>Key files the agent can use to explain or preview the build.</p>
+                </header>
+                <div id="showcase-files" class="showcase-files"></div>
+              </article>
+            </div>
+          </div>
+
+          <div id="preview-view" class="view preview-view" role="tabpanel" hidden>
+            <div class="view-toolbar preview-toolbar">
+              <label>
+                Live Preview URL
+                <input id="preview-url" placeholder="http://localhost:8501" autocomplete="off" />
+              </label>
+              <div class="toolbar-actions">
+                <button id="load-preview" type="button">Load</button>
+                <button id="refresh-preview" type="button" class="ghost">Refresh</button>
+                <a id="open-preview" class="button-link" href="#" target="_blank" rel="noreferrer">Open</a>
+              </div>
+            </div>
+            <div id="detected-urls" class="detected-urls" aria-label="Detected preview URLs"></div>
+            <iframe id="preview-frame" title="Live app preview" sandbox="allow-forms allow-modals allow-pointer-lock allow-popups allow-same-origin allow-scripts"></iframe>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

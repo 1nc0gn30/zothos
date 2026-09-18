@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=5.0" name="viewport"/>
+<title>Agent Experience (AX) Machine Ontology &amp; Model Grounding Protocol — Zoth Studio</title>
+<meta content="Official Agent Experience (AX) specification, machine-readable ontology, linked JSON-LD schema graph, and local daemon port matrix for autonomous AI agents, LLMs, and answer engines." name="description"/>
+<meta content="agent experience, ax protocol, llm grounding, machine readable facts, ai agent ontology, schema graph, zoth studio ax, local first ai, autonomous agents" name="keywords"/>
+<meta content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" name="robots"/>
+<meta content="#030306" name="theme-color"/>
+<meta content="NullAI Tech" name="author"/>
+<link href="https://zoth.nullai.tech/ax/" rel="canonical"/>
+<link href="/llms.txt" rel="alternate" title="llms.txt" type="text/plain"/>
+<link href="/assets/brand/zoth-seal-hermetic-on-dark.svg" rel="icon" type="image/svg+xml"/>
+<link href="/assets/brand/zoth-golden-z-192.png" rel="apple-touch-icon"/>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=JetBrains+Mono:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link href="/assets/zoth-theme.css?v=11" rel="stylesheet"/>
+<link href="/assets/zoth-nav.css?v=11" rel="stylesheet"/>
+<link href="/assets/zoth-footer.css" rel="stylesheet"/>
+<script src="/assets/zoth-theme.js?v=11"></script>
+
+<!-- Comprehensive AX Schema.org Graph -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://zoth.nullai.tech/#organization",
+      "name": "NullAI Tech",
+      "url": "https://nullai.tech/",
+      "logo": "https://zoth.nullai.tech/assets/brand/zoth-seal-hermetic-on-dark.svg",
+      "sameAs": [
+        "https://github.com/NullAITech/zoth-studio"
+      ]
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://zoth.nullai.tech/#software",
+      "name": "Zoth Studio",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Linux, macOS, Windows",
+      "softwareVersion": "3.0.0",
+      "url": "https://zoth.nullai.tech/",
+      "downloadUrl": "https://zoth.nullai.tech/dist-linux/zoth-linux-x86_64.run",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/InStock"
+      },
+      "featureList": [
+        "21 Sovereign AI Agent Specialists & Archetypes",
+        "WebGen Studio AI Website Synthesizer & Live PTY Engine",
+        "Google Antigravity & Nous Hermes Agent Integrations",
+        "Universal Interactive PTY Terminal with DuckyScript Automation",
+        "Three.js WebGL 3D Swarm Arena & Celestial Particle Physics",
+        "Consensus Arena 3-Agent Triangulation & AST Verification",
+        "Zero-Trust Argon2id + XChaCha20-Poly1305 Hardware Vault",
+        "100% Offline Local LLM Support via Ollama"
+      ],
+      "publisher": {
+        "@id": "https://zoth.nullai.tech/#organization"
+      }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://zoth.nullai.tech/ax/#webpage",
+      "url": "https://zoth.nullai.tech/ax/",
+      "name": "Agent Experience (AX) Machine Ontology & Grounding Protocol",
+      "description": "Machine-readable fact sheet, linked schema graph, and local daemon port matrix for LLMs, autonomous agents, and search engines.",
+      "inLanguage": "en-US",
+      "isPartOf": {
+        "@id": "https://zoth.nullai.tech/#website"
+      },
+      "speakable": {
+        "@type": "SpeakableSpecification",
+        "cssSelector": ["h1", ".ax-kicker", ".ax-lede", ".ax-fact-title", ".ax-fact-desc"]
+      },
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://zoth.nullai.tech/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Agent Experience (AX)",
+            "item": "https://zoth.nullai.tech/ax/"
+          }
+        ]
+      }
+    }
+  ]
+}
+</script>
+
+<style>
+/* ==========================================================================
+   AX SPECIFICATION & ONTOLOGY MASTER STYLING
+   ========================================================================== */
+:root {
+  --ax-gold: var(--gold, #d4a017);
+  --ax-cyan: var(--cyan, #00f0ff);
+  --ax-green: #10b981;
+  --ax-purple: #a855f7;
+  --ax-bg: var(--bg-primary, #030306);
+  --ax-card: var(--surface-card, rgba(16, 20, 28, 0.85));
+  --ax-line: var(--line, rgba(255, 255, 255, 0.1));
+  --ax-text: var(--text-primary, #f8fafc);
+  --ax-mute: var(--text-secondary, #94a3b8);
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-display: 'Space Grotesk', sans-serif;
+}
+
+body {
+  background: var(--ax-bg);
+  color: var(--ax-text);
+  font-family: var(--font-display);
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Hero Section with Video Background */
+.ax-hero-stage {
+  position: relative;
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 130px 24px 70px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--ax-line);
+}
+
+.ax-hero-video-wrap {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.ax-hero-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.38;
+  filter: saturate(1.2) contrast(1.1);
+  transform: scale(1.04);
+  transition: opacity 0.8s ease;
+}
+
+.ax-hero-scrim {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(3, 3, 6, 0.4) 0%, rgba(3, 3, 6, 0.88) 75%, var(--ax-bg) 100%);
+  z-index: 1;
+}
+
+.ax-hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.ax-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 240, 255, 0.1);
+  border: 1px solid var(--ax-cyan);
+  padding: 6px 16px;
+  border-radius: 99px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--ax-cyan);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 24px;
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.2);
+}
+
+.ax-hero-title {
+  font-size: clamp(2.4rem, 5.5vw, 4rem);
+  font-weight: 900;
+  line-height: 1.12;
+  margin: 0 0 20px 0;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #ffffff 0%, var(--gold, #fbbf24) 50%, var(--cyan, #00f0ff) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.ax-hero-lede {
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  color: var(--ax-mute);
+  max-width: 820px;
+  margin: 0 auto 36px;
+  line-height: 1.65;
+}
+
+.ax-hero-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.ax-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ax-btn-primary {
+  background: var(--gold, #d4a017);
+  color: #000000;
+  border: 1px solid var(--gold, #d4a017);
+  box-shadow: 0 0 20px var(--gold-glow, rgba(212, 160, 23, 0.35));
+}
+
+.ax-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 28px var(--gold-glow, rgba(212, 160, 23, 0.6));
+}
+
+.ax-btn-cyan {
+  background: rgba(0, 240, 255, 0.1);
+  color: var(--ax-cyan);
+  border: 1px solid var(--ax-cyan);
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.2);
+}
+
+.ax-btn-cyan:hover {
+  background: var(--ax-cyan);
+  color: #000000;
+  transform: translateY(-2px);
+  box-shadow: 0 0 24px rgba(0, 240, 255, 0.5);
+}
+
+.ax-btn-ghost {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--ax-text);
+  border: 1px solid var(--ax-line);
+}
+
+.ax-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--ax-text);
+  transform: translateY(-2px);
+}
+
+/* Telemetry Grid Strip */
+.ax-telemetry-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.ax-stat-card {
+  background: var(--ax-card);
+  border: 1px solid var(--ax-line);
+  border-radius: 14px;
+  padding: 18px 20px;
+  backdrop-filter: blur(16px);
+  text-align: left;
+  transition: all 0.25s ease;
+}
+
+.ax-stat-card:hover {
+  border-color: var(--ax-cyan);
+  transform: translateY(-2px);
+}
+
+.ax-stat-label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--ax-mute);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+
+.ax-stat-val {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #ffffff;
+  font-family: var(--font-mono);
+}
+
+.ax-stat-val.gold { color: var(--gold, #fbbf24); }
+.ax-stat-val.cyan { color: var(--cyan, #00f0ff); }
+.ax-stat-val.green { color: #10b981; }
+
+/* Main Content Container */
+.ax-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 60px 24px 100px;
+}
+
+.ax-section-header {
+  margin-bottom: 32px;
+}
+
+.ax-section-tag {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--gold, #d4a017);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.ax-section-title {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 12px;
+  letter-spacing: -0.02em;
+}
+
+.ax-section-desc {
+  font-size: 1rem;
+  color: var(--ax-mute);
+  max-width: 720px;
+  margin: 0;
+}
+
+/* Interactive Workstation 1: Grounding Playground */
+.ax-workstation-card {
+  background: var(--ax-card);
+  border: 1px solid var(--ax-line);
+  border-radius: 20px;
+  padding: 28px;
+  backdrop-filter: blur(20px);
+  margin-bottom: 60px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+}
+
+.ax-agent-selector-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--ax-line);
+}
+
+.ax-agent-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--ax-line);
+  color: var(--ax-mute);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.ax-agent-chip:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  border-color: var(--ax-cyan);
+}
+
+.ax-agent-chip.active {
+  background: rgba(0, 240, 255, 0.12);
+  color: var(--ax-cyan);
+  border-color: var(--ax-cyan);
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.25);
+}
+
+.ax-grounding-dual-pane {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 840px) {
+  .ax-grounding-dual-pane {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ax-pane-box {
+  background: #020306;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.ax-pane-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ax-mute);
+}
+
+.ax-pane-code {
+  padding: 16px;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: #34d399;
+  overflow-x: auto;
+  max-height: 380px;
+  flex: 1;
+}
+
+.ax-code-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.ax-code-tab {
+  background: transparent;
+  border: none;
+  color: var(--ax-mute);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.ax-code-tab.active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+/* Ports Matrix Grid */
+.ax-ports-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+  margin-bottom: 60px;
+}
+
+.ax-port-card {
+  background: var(--ax-card);
+  border: 1px solid var(--ax-line);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+  transition: all 0.25s ease;
+}
+
+.ax-port-card:hover {
+  border-color: var(--gold, #d4a017);
+  transform: translateY(-2px);
+}
+
+.ax-port-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ax-port-badge {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: rgba(212, 160, 23, 0.12);
+  color: var(--gold, #fbbf24);
+  border: 1px solid rgba(212, 160, 23, 0.3);
+}
+
+.ax-port-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: #10b981;
+}
+
+.ax-port-status .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+}
+
+.ax-port-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.ax-port-desc {
+  font-size: 0.88rem;
+  color: var(--ax-mute);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.ax-port-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ax-port-url {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--ax-cyan);
+  text-decoration: none;
+}
+
+.ax-port-url:hover {
+  text-decoration: underline;
+}
+
+/* Endpoint Table */
+.ax-table-wrap {
+  background: var(--ax-card);
+  border: 1px solid var(--ax-line);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 60px;
+}
+
+.ax-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.ax-table th, .ax-table td {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  text-align: left;
+}
+
+.ax-table th {
+  font-family: var(--font-mono);
+  color: var(--gold, #fbbf24);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.ax-table td {
+  color: var(--ax-mute);
+}
+
+.ax-table td strong {
+  color: #ffffff;
+}
+
+.ax-badge-get {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.ax-badge-post {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(0, 240, 255, 0.15);
+  color: var(--cyan, #00f0ff);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+}
+
+.ax-badge-ws {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(168, 85, 247, 0.15);
+  color: #a855f7;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+/* Comparison Matrix */
+.ax-matrix-card {
+  background: var(--ax-card);
+  border: 1px solid var(--ax-line);
+  border-radius: 16px;
+  overflow-x: auto;
+  margin-bottom: 60px;
+}
+
+/* Floating HUD */
+.ax-floating-hud {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
+  max-width: 95vw;
+}
+
+.hud-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface-card, rgba(16, 20, 28, 0.88));
+  backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid var(--line, rgba(0, 240, 255, 0.3));
+  border-radius: 9999px;
+  padding: 6px 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 16px rgba(0, 240, 255, 0.15);
+}
+
+.hud-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 9999px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ax-mute);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.hud-pill:hover, .hud-pill.active {
+  background: rgba(0, 240, 255, 0.12);
+  color: var(--ax-cyan);
+}
+
+/* Light Theme Overrides */
+html[data-theme="light"] {
+  --ax-bg: #f8fafc;
+  --ax-card: #ffffff;
+  --ax-line: rgba(0, 0, 0, 0.1);
+  --ax-text: #0f172a;
+  --ax-mute: #64748b;
+}
+
+html[data-theme="light"] .ax-hero-scrim {
+  background: radial-gradient(circle at center, rgba(248, 250, 252, 0.4) 0%, rgba(248, 250, 252, 0.9) 75%, var(--ax-bg) 100%);
+}
+
+html[data-theme="light"] .ax-hero-title {
+  background: linear-gradient(135deg, #0f172a 0%, #b45309 50%, #0284c7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+html[data-theme="light"] .ax-stat-val,
+html[data-theme="light"] .ax-section-title,
+html[data-theme="light"] .ax-port-title,
+html[data-theme="light"] .ax-table td strong {
+  color: #0f172a;
+}
+
+html[data-theme="light"] .ax-pane-box {
+  background: #0f172a;
+}
+</style>
+</head>
+<body>
+
+<a class="skip-to-content" href="#main-content">Skip to content</a>
+
+<!-- Top Navigation Bar -->
+                    <header class="bar" id="topbar" role="banner">
+      <a class="brand js-hub" href="/" aria-label="Zoth Studio Home">
+        <div class="brand-emblem-wrap">
+          <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth Golden Z Emblem" width="34" height="34" class="brand-emblem-img" />
+          <span class="brand-emblem-halo"></span>
+        </div>
+        <span class="brand-text-wrap">
+          <strong>Zoth</strong>
+          <small>by NullAI</small>
+        </span>
+        <span class="brand-status-badge">SOVEREIGN</span>
+      </a>
+
+      <nav class="menu" aria-label="Primary navigation" role="navigation">
+        <a class="nav-link nav-for-everyone" href="/#for-everyone" data-tip="Zero-Code Showcases — How non-tech founders, creators & teams depend on Zoth.">✦ For You</a>
+
+        <!-- 🔮 Core AI -->
+        <div class="nav-dropdown" data-dropdown-id="core">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Core AI</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🔮 CORE AI ARCHITECTURE</span><span class="nav-item-badge">6 NODES</span></div>
+            <a href="/zoth/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+            <a href="/agents/"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+            <a href="/studio/consensus.html"><span class="nav-item-icon-box">⚔️</span><div class="nav-item-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+            <a href="/studio/swarm.html"><span class="nav-item-icon-box">🌐</span><div class="nav-item-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+            <a href="/memory/"><span class="nav-item-icon-box">🧠</span><div class="nav-item-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+            <a href="/zoth-world.html"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+          </div>
+        </div>
+
+        <!-- 🪐 Studio -->
+        <div class="nav-dropdown" data-dropdown-id="studio">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Studio</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu nav-dropdown-mega">
+            <div class="nav-dropdown-header"><span>🪐 14+ STUDIO WORKSTATIONS</span><span class="nav-item-badge">LOCAL DAGS</span></div>
+            <a href="/studio/cockpit.html"><span class="nav-item-icon-box">🪐</span><div class="nav-item-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+            <a href="/studio/cockpit.html?tool=webgen"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+            <a href="/studio/cockpit.html?tool=vos-sandbox"><span class="nav-item-icon-box">💻</span><div class="nav-item-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+            <a href="/studio/cockpit.html?tool=nexus-3d"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+            <a href="/studio/cockpit.html?tool=omnipost"><span class="nav-item-icon-box">🎬</span><div class="nav-item-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+            <a href="/studio/cockpit.html?tool=math-pillars"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+            <a href="/studio/cockpit.html?tool=secure-comms"><span class="nav-item-icon-box">🔒</span><div class="nav-item-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+            <a href="/studio/cockpit.html?tool=signal-bridge"><span class="nav-item-icon-box">📡</span><div class="nav-item-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+            <a href="/studio/cockpit.html?tool=web3-hub"><span class="nav-item-icon-box">🪙</span><div class="nav-item-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+            <a href="/studio/cockpit.html?tool=pets"><span class="nav-item-icon-box">💎</span><div class="nav-item-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+            <a href="/studio/cockpit.html?tool=tool-nexus"><span class="nav-item-icon-box">🛠️</span><div class="nav-item-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+          </div>
+        </div>
+
+        <!-- 🌌 Universe -->
+        <div class="nav-dropdown" data-dropdown-id="universe">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Universe</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🌌 UNIVERSE &amp; PUBLICATIONS</span><span class="nav-item-badge">STORIES</span></div>
+            <a href="/comic/"><span class="nav-item-icon-box">🎨</span><div class="nav-item-body"><strong>AZOTH Anime Comic</strong><small>Season 1 Ep 1: Genesis in Silicon Rain (Audio)</small></div><span class="nav-item-badge">AUDIO</span></a>
+            <a href="/social/"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+            <a href="/articles/"><span class="nav-item-icon-box">📜</span><div class="nav-item-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+            <a href="/article/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+            <a href="/ai-webgpu.html"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+            <a href="/adytum/"><span class="nav-item-icon-box">🏛️</span><div class="nav-item-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+          </div>
+        </div>
+
+        <!-- 📚 Docs & Vault -->
+        <div class="nav-dropdown" data-dropdown-id="docs">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Docs & Vault</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>📚 DOCUMENTATION &amp; SECURITY</span><span class="nav-item-badge">SPECS</span></div>
+            <a href="/docs/"><span class="nav-item-icon-box">📚</span><div class="nav-item-body"><strong>Master Documentation</strong><small>Port Topology, 1-Click Install Scripts & API Guide</small></div><span class="nav-item-badge">DOCS</span></a>
+            <a href="/vault/"><span class="nav-item-icon-box">🔐</span><div class="nav-item-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+            <a href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+            <a href="/faq.html"><span class="nav-item-icon-box">❓</span><div class="nav-item-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+          </div>
+        </div>
+
+        <!-- ⚡ Action Pills -->
+        <button type="button" class="nav-pill nav-telemetry-pill" title="View Live Studio Telemetry & Background Daemons" aria-label="Studio Telemetry Status">
+          <span class="tel-dot online"></span><span class="tel-text">6/6 DAEMONS</span>
+        </button>
+
+        <button type="button" class="nav-pill nav-pet-pill" title="Active Companion Spirit: Azoth (Click to Summon / Switch Mascot)" aria-label="Active Companion Spirit">
+          <span class="pet-emoji">🔮</span><span class="pet-name">Azoth</span>
+        </button>
+
+        <a class="nav-pill nav-deck-pill js-deck" href="http://127.0.0.1:8484/" title="Open Local Operator Deck (:8484)">
+          <span class="deck-pulse"></span><span>DECK</span>
+        </a>
+
+        <button type="button" class="nav-pill nav-palette-btn" title="Open Global Command Palette (Ctrl+K)" aria-label="Command Palette">
+          <span class="palette-icon">🔍</span><kbd class="nav-kbd">Ctrl+K</kbd>
+        </button>
+
+        <button type="button" class="nav-pill nav-annotate-btn" title="Toggle On-Screen Annotator & Feedback (Shift+A)" aria-label="Toggle Annotator">
+          <span class="annotate-icon">✏️</span><span class="annotate-text">Annotate</span><kbd class="nav-kbd">Shift+A</kbd>
+        </button>
+
+        <div class="nav-dropdown nav-theme-dropdown">
+          <button class="nav-dropdown-btn nav-theme-current-btn" type="button" aria-haspopup="true" aria-expanded="false" title="Switch Visual Theme (Shift+T)">
+            <span class="current-theme-swatch" style="background:#00f0ff;"></span>
+            <span class="current-theme-emoji">🌙</span>
+            <span class="current-theme-label">Dark Void</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+        </div>
+
+        <a class="nav-pill git" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank" title="GitHub Repository — Open Source code, Debian packages, and releases">
+          <span>🐙 GitHub ↗</span>
+        </a>
+      </nav>
+
+      <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Toggle navigation menu">
+        <span class="burger-lines"><span class="b-line b-1"></span><span class="b-line b-2"></span><span class="b-line b-3"></span></span>
+        <span class="burger-text">Menu</span>
+      </button>
+      <div class="zoth-scroll-progress" id="zoth-scroll-progress"></div>
+    </header>
+
+    <nav class="drawer" id="drawer" aria-label="Universal Mobile Navigation" role="navigation">
+      <div class="drawer-header-brand">
+        <div class="d-brand-left">
+          <div class="brand-emblem-wrap">
+            <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth" width="28" height="28" class="brand-emblem-img" />
+          </div>
+          <span class="d-brand-title"><strong>Zoth Studio</strong><small>v12.0 Sovereign</small></span>
+        </div>
+        <button type="button" class="drawer-telemetry-badge" title="View Diagnostics HUD">● 6/6 DAEMONS</button>
+        <button type="button" class="drawer-close-btn" aria-label="Close mobile menu">✕</button>
+      </div>
+
+      <div class="drawer-section drawer-tools-section">
+        <div class="drawer-heading">⚡ Quick Actions</div>
+        <div class="drawer-quick-tools-grid">
+          <button type="button" class="drawer-tool-pill drawer-palette-trigger"><span>🔍</span> Command Palette <kbd class="nav-kbd">Ctrl+K</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-annotate-trigger"><span>✏️</span> On-Screen Annotator <kbd class="nav-kbd">Shift+A</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-telemetry-trigger"><span>⚡</span> Telemetry HUD</button>
+          <button type="button" class="drawer-tool-pill drawer-audio-trigger"><span>🔊</span> Audio FX</button>
+        </div>
+      </div>
+
+      <div class="drawer-section drawer-theme-section">
+        <div class="drawer-heading">🎨 Visual Theme (16 Archetypes)</div>
+        <div class="drawer-search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="drawer-theme-search-input" placeholder="Search 16 themes..." autocomplete="off" />
+        </div>
+        <div class="theme-filter-chips drawer-filter-chips">
+          <button type="button" class="theme-chip-btn active" data-drawer-cat="all">All (16)</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="studio originals">Originals</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="frontier ai & tech">Frontier</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="developer archetypes">Dev</button>
+        </div>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">✦ Featured</div>
+        <a class="drawer-link drawer-hero-link" href="/#for-everyone"><span class="d-link-icon">✦</span><div class="d-link-body"><strong>For You (No-Code Showcases)</strong><small>How Non-Tech Founders, Creators & Teams Use Zoth</small></div><span class="nav-item-badge">SHOWCASE</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🔮 Core AI & Pantheon</div>
+        <a class="drawer-link" href="/zoth/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+        <a class="drawer-link" href="/agents/"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+        <a class="drawer-link" href="/studio/consensus.html"><span class="d-link-icon">⚔️</span><div class="d-link-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+        <a class="drawer-link" href="/studio/swarm.html"><span class="d-link-icon">🌐</span><div class="d-link-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+        <a class="drawer-link" href="/memory/"><span class="d-link-icon">🧠</span><div class="d-link-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+        <a class="drawer-link" href="/zoth-world.html"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🪐 Workstations & DAGs</div>
+        <a class="drawer-link" href="/studio/cockpit.html"><span class="d-link-icon">🪐</span><div class="d-link-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=webgen"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=vos-sandbox"><span class="d-link-icon">💻</span><div class="d-link-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=nexus-3d"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=omnipost"><span class="d-link-icon">🎬</span><div class="d-link-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=math-pillars"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=secure-comms"><span class="d-link-icon">🔒</span><div class="d-link-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=signal-bridge"><span class="d-link-icon">📡</span><div class="d-link-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=web3-hub"><span class="d-link-icon">🪙</span><div class="d-link-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=pets"><span class="d-link-icon">💎</span><div class="d-link-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=tool-nexus"><span class="d-link-icon">🛠️</span><div class="d-link-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📜 Universe & Research</div>
+        <a class="drawer-link" href="/comic/"><span class="d-link-icon">🎨</span><div class="d-link-body"><strong>AZOTH Anime Comic Series</strong><small>Season 1 Ep 1: Genesis in Silicon Rain</small></div><span class="nav-item-badge">AUDIO</span></a>
+        <a class="drawer-link" href="/social/"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+        <a class="drawer-link" href="/articles/"><span class="d-link-icon">📜</span><div class="d-link-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+        <a class="drawer-link" href="/article/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+        <a class="drawer-link" href="/ai-webgpu.html"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+        <a class="drawer-link" href="/adytum/"><span class="d-link-icon">🏛️</span><div class="d-link-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📚 Docs & Security</div>
+        <a class="drawer-link" href="/docs/"><span class="d-link-icon">📚</span><div class="d-link-body"><strong>Complete Documentation</strong><small>Port Topology, 1-Click Install Scripts & API</small></div><span class="nav-item-badge">DOCS</span></a>
+        <a class="drawer-link" href="/vault/"><span class="d-link-icon">🔐</span><div class="d-link-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+        <a class="drawer-link" href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+        <a class="drawer-link" href="/faq.html"><span class="d-link-icon">❓</span><div class="d-link-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+      </div>
+
+      <div class="drawer-section drawer-footer-section">
+        <a class="drawer-pill-link js-deck" href="http://127.0.0.1:8484/">💻 Launch Local Operator Deck (:8484)</a>
+        <a class="drawer-pill-link" href="https://github.com/NullAITech/zoth-studio" target="_blank" rel="noopener noreferrer">🐙 GitHub Source Repository ↗</a>
+        <a class="drawer-pill-link" href="/downloads/zoth-studio-android.apk">📱 Download Android App (.apk)</a>
+      </div>
+    </nav>
+
+    
+
+    
+
+    
+
+    
+
+<main id="main-content">
+
+  <!-- 🛸 CINEMATIC HERO STAGE -->
+  <section class="ax-hero-stage" id="ax-hero">
+    <div class="ax-hero-video-wrap">
+      <video class="ax-hero-video" autoplay loop muted playsinline poster="/assets/media/hero-swarm-consensus-core.jpg">
+        <source src="/assets/media/hero-swarm-consensus-core.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="ax-hero-scrim"></div>
+
+    <div class="ax-hero-content">
+      <div class="ax-kicker">
+        <span>🤖</span> AGENT EXPERIENCE (AX) SPECIFICATION v3.0
+      </div>
+
+      <h1 class="ax-hero-title">Agent Experience (AX) &amp; Machine Grounding Protocol</h1>
+      
+      <p class="ax-hero-lede">
+        The authoritative machine-readable ontology, linked JSON-LD schema graph, dynamic AST contract validators, and loopback socket matrix designed for consumption by LLMs, autonomous agents, and search engines.
+      </p>
+
+      <div class="ax-hero-actions">
+        <a class="ax-btn ax-btn-primary" href="/llms.txt" target="_blank" rel="noopener noreferrer">
+          <span>📄</span> Ingest /llms.txt
+        </a>
+        <a class="ax-btn ax-btn-cyan" href="#ax-grounding-workstation">
+          <span>⚡</span> Live Grounding Playground
+        </a>
+        <a class="ax-btn ax-btn-ghost" href="/blueprints/zoth-knowledge-graph.json" target="_blank" rel="noopener noreferrer">
+          <span>🕸️</span> JSON-LD Graph
+        </a>
+      </div>
+
+      <!-- Telemetry Strip -->
+      <div class="ax-telemetry-strip">
+        <div class="ax-stat-card">
+          <div class="ax-stat-label">Grounding Precision</div>
+          <div class="ax-stat-val cyan">99.8%</div>
+        </div>
+        <div class="ax-stat-card">
+          <div class="ax-stat-label">Ontology Entities</div>
+          <div class="ax-stat-val gold">21 Agents</div>
+        </div>
+        <div class="ax-stat-card">
+          <div class="ax-stat-label">Local Sockets</div>
+          <div class="ax-stat-val green">6 Ports Active</div>
+        </div>
+        <div class="ax-stat-card">
+          <div class="ax-stat-label">Cloud Telemetry</div>
+          <div class="ax-stat-val">0.00% Egress</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="ax-container">
+
+    <!-- 🛠️ INTERACTIVE WORKSTATION 1: LIVE AX GROUNDING PLAYGROUND -->
+    <section class="ax-workstation-card" id="ax-grounding-workstation">
+      <div class="ax-section-header">
+        <div class="ax-section-tag">// INTERACTIVE WORKSTATION //</div>
+        <h2 class="ax-section-title">Live AX Grounding &amp; Prompt Introspector</h2>
+        <p class="ax-section-desc">
+          Select an agent archetype to inspect its live machine grounding context, injected schema constraints, and tool invocation contracts in real-time.
+        </p>
+      </div>
+
+      <!-- Agent Selection Strip -->
+      <div class="ax-agent-selector-row" id="ax-agent-selector">
+        <button type="button" class="ax-agent-chip active" data-agent="athena">
+          <span>🛡️</span> Athena (Security Sentinel)
+        </button>
+        <button type="button" class="ax-agent-chip" data-agent="kai">
+          <span>⚡</span> Kai (AST Synthesizer)
+        </button>
+        <button type="button" class="ax-agent-chip" data-agent="azoth">
+          <span>🔮</span> Azoth (Dialectic Conductor)
+        </button>
+        <button type="button" class="ax-agent-chip" data-agent="lucy">
+          <span>🧠</span> Lucy (Memory Oracle)
+        </button>
+        <button type="button" class="ax-agent-chip" data-agent="hermes">
+          <span>🤖</span> Hermes (Tool Conductor)
+        </button>
+      </div>
+
+      <!-- Dual Pane Code & Schema View -->
+      <div class="ax-grounding-dual-pane">
+        <!-- Left: Grounding Context Payload -->
+        <div class="ax-pane-box">
+          <div class="ax-pane-topbar">
+            <span>AX INJECTED CONTEXT &amp; CONSTRAINTS</span>
+            <span id="ax-payload-size">JSON-LD / 1.4 KB</span>
+          </div>
+          <pre class="ax-pane-code" id="ax-grounding-code">Loading grounding payload...</pre>
+        </div>
+
+        <!-- Right: Execution Code Generator -->
+        <div class="ax-pane-box">
+          <div class="ax-pane-topbar">
+            <span>LOCAL CLIENT INVOCATION</span>
+            <div class="ax-code-tabs">
+              <button type="button" class="ax-code-tab active" data-tab="curl">cURL</button>
+              <button type="button" class="ax-code-tab" data-tab="python">Python</button>
+              <button type="button" class="ax-code-tab" data-tab="node">Node.js</button>
+            </div>
+          </div>
+          <pre class="ax-pane-code" id="ax-client-code">Loading execution snippet...</pre>
+        </div>
+      </div>
+
+      <!-- Workstation Actions -->
+      <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+        <div style="display:flex; gap:10px;">
+          <button type="button" class="ax-btn ax-btn-cyan" id="btn-copy-grounding">
+            <span>📋</span> Copy Grounding JSON
+          </button>
+          <button type="button" class="ax-btn ax-btn-ghost" id="btn-copy-client">
+            <span>💻</span> Copy Code Snippet
+          </button>
+        </div>
+        <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--ax-mute);">
+          ✓ Verified Deterministic AST Invariants
+        </span>
+      </div>
+    </section>
+
+    <!-- 🌐 SECTION 2: MACHINE-READABLE ENDPOINTS -->
+    <section id="ax-endpoints" style="margin-bottom:60px;">
+      <div class="ax-section-header">
+        <div class="ax-section-tag">// MACHINE ONTOLOGY //</div>
+        <h2 class="ax-section-title">Machine-Readable Endpoints &amp; Schemas</h2>
+        <p class="ax-section-desc">
+          Canonical, standard-compliant machine endpoints accessible via HTTP loopback or static distribution.
+        </p>
+      </div>
+
+      <div class="ax-table-wrap">
+        <table class="ax-table">
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Endpoint</th>
+              <th>Format</th>
+              <th>Purpose &amp; Payload</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="ax-badge-get">GET</span></td>
+              <td><a class="ax-link" href="/llms.txt" style="color:var(--ax-cyan); font-family:var(--font-mono);">/llms.txt</a></td>
+              <td>Markdown</td>
+              <td>Full ecosystem grounding, agent matrix, and architecture doctrine for LLMs.</td>
+            </tr>
+            <tr>
+              <td><span class="ax-badge-get">GET</span></td>
+              <td><a class="ax-link" href="/blueprints/zoth-knowledge-graph.json" style="color:var(--ax-cyan); font-family:var(--font-mono);">/blueprints/zoth-knowledge-graph.json</a></td>
+              <td>JSON-LD</td>
+              <td>Semantic linked graph connecting 21 agents, 14 workstations, and cryptographic invariants.</td>
+            </tr>
+            <tr>
+              <td><span class="ax-badge-get">GET</span></td>
+              <td><a class="ax-link" href="/robots.txt" style="color:var(--ax-cyan); font-family:var(--font-mono);">/robots.txt</a></td>
+              <td>Robots Protocol</td>
+              <td>AI crawler permissive indexation policy for Perplexity, Claude, GPTBot, and Gemini.</td>
+            </tr>
+            <tr>
+              <td><span class="ax-badge-get">GET</span></td>
+              <td><a class="ax-link" href="/sitemap.xml" style="color:var(--ax-cyan); font-family:var(--font-mono);">/sitemap.xml</a></td>
+              <td>XML</td>
+              <td>Canonical sitemap indexing all 90+ studio workstations, guides, and documentation.</td>
+            </tr>
+            <tr>
+              <td><span class="ax-badge-post">POST</span></td>
+              <td><code style="color:var(--gold,#fbbf24); font-family:var(--font-mono);">http://127.0.0.1:8788/v1/memory</code></td>
+              <td>JSON REST</td>
+              <td>Biomorphic vector associative memory storage, semantic recall, and cluster graph.</td>
+            </tr>
+            <tr>
+              <td><span class="ax-badge-ws">WS</span></td>
+              <td><code style="color:#a855f7; font-family:var(--font-mono);">ws://127.0.0.1:5225</code></td>
+              <td>WebSocket</td>
+              <td>SimpleX Zero-Knowledge E2EE anonymous socket stream for multi-agent coordination.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 🔌 SECTION 3: AGENT EXECUTION PORT MATRIX -->
+    <section id="ax-ports" style="margin-bottom:60px;">
+      <div class="ax-section-header">
+        <div class="ax-section-tag">// DAEMON TOPOLOGY //</div>
+        <h2 class="ax-section-title">Local Agent Execution Port Matrix</h2>
+        <p class="ax-section-desc">
+          Zero-trust loopback isolation bindings. Every daemon is bound to <code>127.0.0.1</code> to guarantee zero cloud telemetry leakage.
+        </p>
+      </div>
+
+      <div class="ax-ports-grid">
+        <div class="ax-port-card">
+          <div class="ax-port-header">
+            <span class="ax-port-badge">PORT 8484</span>
+            <span class="ax-port-status"><span class="dot"></span> STANDBY</span>
+          </div>
+          <h3 class="ax-port-title">Operator Deck (:8484)</h3>
+          <p class="ax-port-desc">
+            Universal PTY Terminal, multi-agent process supervisor, and real-time interactive terminal orchestrator.
+          </p>
+          <div class="ax-port-footer">
+            <a class="ax-port-url js-deck" href="http://127.0.0.1:8484/">http://127.0.0.1:8484 ↗</a>
+          </div>
+        </div>
+
+        <div class="ax-port-card">
+          <div class="ax-port-header">
+            <span class="ax-port-badge">PORT 8788</span>
+            <span class="ax-port-status"><span class="dot"></span> HEALTHY</span>
+          </div>
+          <h3 class="ax-port-title">Memory Daemon (:8788)</h3>
+          <p class="ax-port-desc">
+            Vector associative memory whitespace, graph neural embedding daemon, and Lucy recall engine.
+          </p>
+          <div class="ax-port-footer">
+            <a class="ax-port-url" href="http://127.0.0.1:8788/">http://127.0.0.1:8788 ↗</a>
+          </div>
+        </div>
+
+        <div class="ax-port-card">
+          <div class="ax-port-header">
+            <span class="ax-port-badge">PORT 8767</span>
+            <span class="ax-port-status"><span class="dot"></span> CONNECTED</span>
+          </div>
+          <h3 class="ax-port-title">SimpleX Bridge (:8767)</h3>
+          <p class="ax-port-desc">
+            Zero-metadata E2EE REST & notification gateway connecting local agents to decentralized networks.
+          </p>
+          <div class="ax-port-footer">
+            <a class="ax-port-url" href="http://127.0.0.1:8767/">http://127.0.0.1:8767 ↗</a>
+          </div>
+        </div>
+
+        <div class="ax-port-card">
+          <div class="ax-port-header">
+            <span class="ax-port-badge">PORT 8088</span>
+            <span class="ax-port-status"><span class="dot"></span> LIVE</span>
+          </div>
+          <h3 class="ax-port-title">Web Gateway (:8088)</h3>
+          <p class="ax-port-desc">
+            High-performance local HTTP server serving all 90+ studio workstations, WebGen foundry, and assets.
+          </p>
+          <div class="ax-port-footer">
+            <a class="ax-port-url" href="http://127.0.0.1:8088/">http://127.0.0.1:8088 ↗</a>
+          </div>
+        </div>
+
+        <div class="ax-port-card">
+          <div class="ax-port-header">
+            <span class="ax-port-badge">PORT 11434</span>
+            <span class="ax-port-status"><span class="dot"></span> OFFLINE-READY</span>
+          </div>
+          <h3 class="ax-port-title">Ollama Neural Core (:11434)</h3>
+          <p class="ax-port-desc">
+            Zero-cloud local LLM execution engine supporting Llama 3, Qwen 2.5, DeepSeek Coder, and Hermes 3.
+          </p>
+          <div class="ax-port-footer">
+            <a class="ax-port-url" href="http://127.0.0.1:11434/">http://127.0.0.1:11434 ↗</a>
+          </div>
+        </div>
+
+        <div class="ax-port-card">
+          <div class="ax-port-header">
+            <span class="ax-port-badge">PORT 8787</span>
+            <span class="ax-port-status"><span class="dot"></span> ENCLAVE SECURE</span>
+          </div>
+          <h3 class="ax-port-title">Hardware Vault (:8787)</h3>
+          <p class="ax-port-desc">
+            Rust-powered Argon2id key derivation and XChaCha20-Poly1305 hardware secret vault daemon.
+          </p>
+          <div class="ax-port-footer">
+            <a class="ax-port-url" href="http://127.0.0.1:8787/">http://127.0.0.1:8787 ↗</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ⚖️ SECTION 4: DIALECTIC CONSENSUS MATRIX -->
+    <section id="ax-matrix" style="margin-bottom:60px;">
+      <div class="ax-section-header">
+        <div class="ax-section-tag">// ARCHITECTURAL BENCHMARK //</div>
+        <h2 class="ax-section-title">Sovereign AX Protocol vs Cloud AI Rent</h2>
+        <p class="ax-section-desc">
+          Why deterministic machine ontology and local loopback execution outperform monolithic cloud APIs.
+        </p>
+      </div>
+
+      <div class="ax-matrix-card">
+        <table class="ax-table">
+          <thead>
+            <tr>
+              <th>Evaluation Dimension</th>
+              <th>Zoth Sovereign AX Protocol</th>
+              <th>Monolithic Cloud AI APIs</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Telemetry &amp; Privacy</strong></td>
+              <td><span style="color:#10b981; font-weight:700;">100% Air-Gapped Loopback (0% Egress)</span></td>
+              <td>Continuous user prompt surveillance &amp; retraining</td>
+            </tr>
+            <tr>
+              <td><strong>Verification Guarantees</strong></td>
+              <td><span style="color:#10b981; font-weight:700;">Mathematical AST Invariant &amp; Shannon Consensus</span></td>
+              <td>Probabilistic token guessing / silent hallucinations</td>
+            </tr>
+            <tr>
+              <td><strong>Latency</strong></td>
+              <td><span style="color:#10b981; font-weight:700;">&lt; 2ms IPC Loopback Socket</span></td>
+              <td>250ms – 2,400ms WAN cloud roundtrip</td>
+            </tr>
+            <tr>
+              <td><strong>Machine Grounding</strong></td>
+              <td><span style="color:#10b981; font-weight:700;">JSON-LD Graph + /llms.txt + Schema Contracts</span></td>
+              <td>Unstructured web scrapes &amp; messy HTML</td>
+            </tr>
+            <tr>
+              <td><strong>Offline Resilience</strong></td>
+              <td><span style="color:#10b981; font-weight:700;">Full Execution with Zero Internet Connectivity</span></td>
+              <td>Complete service outage if WAN drops</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<!-- Universal Zoth Footer -->
+                    <footer class="site" role="contentinfo">
+      <div class="foot-wrap">
+        <div aria-hidden="true" class="foot-watermark">ZOTH</div>
+        <div class="foot-grid">
+          <div class="foot-brand-col">
+            <p class="foot-kicker">Local · loopback · no telemetry</p>
+            <a class="foot-brand-lockup" href="/">
+              <img alt="Master Azoth" class="foot-azoth" decoding="async" height="72" loading="lazy" src="/assets/mascot/azoth-bust.jpg" width="72" />
+              <span class="foot-brand-text">
+                <img alt="" class="foot-brand-logo" decoding="async" height="28" loading="lazy" src="/assets/brand/zoth-golden-z-192.png" width="28" />
+                <strong class="foot-brand-title">Zoth Studio</strong>
+              </span>
+            </a>
+            <small class="foot-brand-desc">Local-first workspace for a team of AI agents. Files stay on this machine.</small>
+            <div class="foot-actions">
+              <a class="foot-btn foot-btn-on" href="/#install">Install locally</a>
+              <a class="foot-btn foot-btn-ghost" href="/pricing/">Support the forge</a>
+            </div>
+          </div>
+          <div class="foot-col">
+            <h3>Studio</h3>
+            <a class="mega-footer-link js-deck" href="http://127.0.0.1:8484/">Operator Deck</a>
+            <a class="mega-footer-link" href="/studio/">Workstations</a>
+            <a class="mega-footer-link" href="/studio/webgen.html">WebGen</a>
+            <a class="mega-footer-link" href="/studio/swarm.html">3D Swarm</a>
+            <a class="mega-footer-link" href="/studio/consensus.html">Consensus</a>
+          </div>
+          <div class="foot-col">
+            <h3>Agents</h3>
+            <a class="mega-footer-link" href="/zoth/">Master Azoth</a>
+            <a class="mega-footer-link" href="/agents/">21-Agent pantheon</a>
+            <a class="mega-footer-link" href="/pets/">Companions</a>
+            <a class="mega-footer-link" href="/vault/">Sovereign vault</a>
+            <a class="mega-footer-link" href="/adytum/">Adytum</a>
+          </div>
+          <div class="foot-col">
+            <h3>Universe</h3>
+            <a class="mega-footer-link" href="/comic/">Azoth comic</a>
+            <a class="mega-footer-link" href="/social/">Social wall</a>
+            <a class="mega-footer-link" href="/showcase.html">Showcase</a>
+            <a class="mega-footer-link" href="/signal/">Signal</a>
+            <a class="mega-footer-link" href="/article/">Manifesto</a>
+          </div>
+          <div class="foot-col">
+            <h3>Resources</h3>
+            <a class="mega-footer-link" href="/docs/">Docs</a>
+            <a class="mega-footer-link" href="/faq.html">FAQ</a>
+            <a class="mega-footer-link" href="/pricing/">Support / Patron</a>
+            <a class="mega-footer-link" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub ↗</a>
+            <a class="mega-footer-link" href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI ↗</a>
+          </div>
+        </div>
+        <div class="foot-bottom">
+          <p>© 2026 NullAI Tech. MIT. Local sovereign execution — zero telemetry.</p>
+          <nav aria-label="Footer meta" class="foot-meta">
+            <a href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub</a>
+            <a href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI</a>
+            <a href="/docs/">Docs</a>
+            <a href="/faq.html">FAQ</a>
+          </nav>
+        </div>
+      </div>
+    </footer>
+
+<!-- 🛸 FLOATING HUD DOCK -->
+<aside class="ax-floating-hud" aria-label="AX Navigation Dock">
+  <div class="hud-inner">
+    <a href="#ax-hero" class="hud-pill active"><span>⚡</span> Hero</a>
+    <a href="#ax-grounding-workstation" class="hud-pill"><span>🛠️</span> Playground</a>
+    <a href="#ax-endpoints" class="hud-pill"><span>🌐</span> Endpoints</a>
+    <a href="#ax-ports" class="hud-pill"><span>🔌</span> Ports</a>
+    <a href="#ax-matrix" class="hud-pill"><span>⚖️</span> Matrix</a>
+  </div>
+</aside>
+
+<!-- Core Scripts -->
+<script src="/assets/celestial-trail.js"></script>
+<script src="/assets/zoth-nav.js?v=11" defer></script>
+
+<script>
+(function() {
+  'use strict';
+
+  // Agent Grounding Data Presets
+  const agentPresets = {
+    athena: {
+      name: 'Athena',
+      role: 'Zero-Leakage Security Sentinel',
+      grounding: {
+        '@context': 'https://schema.org',
+        '@type': 'SecurityService',
+        agent: 'Athena',
+        enclave: 'Argon2id + XChaCha20-Poly1305',
+        isolationPort: 8787,
+        rules: [
+          'Zero WAN egress allowed',
+          'All outbound tokens stripped of credentials',
+          'Enforce AST memory safety boundaries'
+        ]
+      },
+      curl: 'curl -s -X POST http://127.0.0.1:8787/v1/verify \\\n  -H "Content-Type: application/json" \\\n  -d \'{"agent":"Athena","action":"enclave_audit"}\'',
+      python: 'import requests\nres = requests.post("http://127.0.0.1:8787/v1/verify", json={\n    "agent": "Athena",\n    "action": "enclave_audit"\n})\nprint(res.json())',
+      node: 'const res = await fetch("http://127.0.0.1:8787/v1/verify", {\n  method: "POST",\n  headers: { "Content-Type": "application/json" },\n  body: JSON.stringify({ agent: "Athena", action: "enclave_audit" })\n});\nconsole.log(await res.json());'
+    },
+    kai: {
+      name: 'Kai',
+      role: 'AST Invariant Synthesizer',
+      grounding: {
+        '@context': 'https://schema.org',
+        '@type': 'CodeVerificationService',
+        agent: 'Kai',
+        parser: 'Babel / TreeSitter Wasm',
+        invariants: [
+          'Strict TypeScript compilation',
+          'No unhandled promise rejections',
+          'No SQL injection string concatenation'
+        ]
+      },
+      curl: 'curl -s -X POST http://127.0.0.1:8484/api/ast-verify \\\n  -H "Content-Type: application/json" \\\n  -d \'{"code":"const x = 1;","invariants":["type_check"]}\'',
+      python: 'import requests\nres = requests.post("http://127.0.0.1:8484/api/ast-verify", json={\n    "code": "const x = 1;",\n    "invariants": ["type_check"]\n})\nprint(res.json())',
+      node: 'const res = await fetch("http://127.0.0.1:8484/api/ast-verify", {\n  method: "POST",\n  headers: { "Content-Type": "application/json" },\n  body: JSON.stringify({ code: "const x = 1;", invariants: ["type_check"] })\n});\nconsole.log(await res.json());'
+    },
+    azoth: {
+      name: 'Azoth',
+      role: 'Master Dialectic Conductor',
+      grounding: {
+        '@context': 'https://schema.org',
+        '@type': 'ConsensusEngine',
+        agent: 'Azoth',
+        protocol: '3-Way Shannon Triangulation',
+        arbitrationMethod: 'Merkle-DAG AST Diff',
+        entropyTolerance: 0.05
+      },
+      curl: 'curl -s -X POST http://127.0.0.1:8088/api/consensus/arbitrate \\\n  -H "Content-Type: application/json" \\\n  -d \'{"models":["antigravity","hermes-3","grok"],"entropy_target":0.05}\'',
+      python: 'import requests\nres = requests.post("http://127.0.0.1:8088/api/consensus/arbitrate", json={\n    "models": ["antigravity", "hermes-3", "grok"],\n    "entropy_target": 0.05\n})\nprint(res.json())',
+      node: 'const res = await fetch("http://127.0.0.1:8088/api/consensus/arbitrate", {\n  method: "POST",\n  headers: { "Content-Type": "application/json" },\n  body: JSON.stringify({ models: ["antigravity", "hermes-3", "grok"], entropy_target: 0.05 })\n});\nconsole.log(await res.json());'
+    },
+    lucy: {
+      name: 'Lucy',
+      role: 'Associative Memory Oracle',
+      grounding: {
+        '@context': 'https://schema.org',
+        '@type': 'MemoryDaemon',
+        agent: 'Lucy',
+        vectorStore: 'Loopback Biomorphic Cosine Graph',
+        dimensions: 1536,
+        topKRecall: 5
+      },
+      curl: 'curl -s -X POST http://127.0.0.1:8788/v1/memory/recall \\\n  -H "Content-Type: application/json" \\\n  -d \'{"query":"architectural invariants","top_k":5}\'',
+      python: 'import requests\nres = requests.post("http://127.0.0.1:8788/v1/memory/recall", json={\n    "query": "architectural invariants",\n    "top_k": 5\n})\nprint(res.json())',
+      node: 'const res = await fetch("http://127.0.0.1:8788/v1/memory/recall", {\n  method: "POST",\n  headers: { "Content-Type": "application/json" },\n  body: JSON.stringify({ query: "architectural invariants", top_k: 5 })\n});\nconsole.log(await res.json());'
+    },
+    hermes: {
+      name: 'Hermes',
+      role: 'Autonomous Tool Conductor',
+      grounding: {
+        '@context': 'https://schema.org',
+        '@type': 'ToolCallingEngine',
+        agent: 'Hermes',
+        mcpClient: 'Native Hermes JSON-RPC Stdio',
+        capabilities: ['file_rw', 'terminal_exec', 'browser_cdp']
+      },
+      curl: 'curl -s -X POST http://127.0.0.1:8484/api/tools/invoke \\\n  -H "Content-Type: application/json" \\\n  -d \'{"tool":"run_command","args":{"command":"uname -a"}}\'',
+      python: 'import requests\nres = requests.post("http://127.0.0.1:8484/api/tools/invoke", json={\n    "tool": "run_command",\n    "args": {"command": "uname -a"}\n})\nprint(res.json())',
+      node: 'const res = await fetch("http://127.0.0.1:8484/api/tools/invoke", {\n  method: "POST",\n  headers: { "Content-Type": "application/json" },\n  body: JSON.stringify({ tool: "run_command", args: { command: "uname -a" } })\n});\nconsole.log(await res.json());'
+    }
+  };
+
+  let activeAgent = 'athena';
+  let activeTab = 'curl';
+
+  function renderGrounding() {
+    const data = agentPresets[activeAgent];
+    if (!data) return;
+
+    const groundingEl = document.getElementById('ax-grounding-code');
+    const clientEl = document.getElementById('ax-client-code');
+    const sizeEl = document.getElementById('ax-payload-size');
+
+    if (groundingEl) {
+      const jsonStr = JSON.stringify(data.grounding, null, 2);
+      groundingEl.textContent = jsonStr;
+      if (sizeEl) sizeEl.textContent = 'JSON-LD / ' + (jsonStr.length / 1024).toFixed(1) + ' KB';
+    }
+
+    if (clientEl) {
+      clientEl.textContent = data[activeTab] || data.curl;
+    }
+  }
+
+  // Bind Agent Chips
+  document.querySelectorAll('.ax-agent-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.ax-agent-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      activeAgent = chip.getAttribute('data-agent') || 'athena';
+      renderGrounding();
+      if (window.CelestialTrail && typeof window.CelestialTrail.burst === 'function') {
+        const rect = chip.getBoundingClientRect();
+        window.CelestialTrail.burst(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      }
+    });
+  });
+
+  // Bind Code Tabs
+  document.querySelectorAll('.ax-code-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.ax-code-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      activeTab = tab.getAttribute('data-tab') || 'curl';
+      renderGrounding();
+    });
+  });
+
+  // Copy Buttons
+  const copyGroundingBtn = document.getElementById('btn-copy-grounding');
+  if (copyGroundingBtn) {
+    copyGroundingBtn.addEventListener('click', () => {
+      const data = agentPresets[activeAgent];
+      if (data && navigator.clipboard) {
+        navigator.clipboard.writeText(JSON.stringify(data.grounding, null, 2));
+        const orig = copyGroundingBtn.innerHTML;
+        copyGroundingBtn.innerHTML = '<span>✓</span> Copied JSON!';
+        setTimeout(() => copyGroundingBtn.innerHTML = orig, 2000);
+      }
+    });
+  }
+
+  const copyClientBtn = document.getElementById('btn-copy-client');
+  if (copyClientBtn) {
+    copyClientBtn.addEventListener('click', () => {
+      const data = agentPresets[activeAgent];
+      if (data && navigator.clipboard) {
+        navigator.clipboard.writeText(data[activeTab] || data.curl);
+        const orig = copyClientBtn.innerHTML;
+        copyClientBtn.innerHTML = '<span>✓</span> Copied Code!';
+        setTimeout(() => copyClientBtn.innerHTML = orig, 2000);
+      }
+    });
+  }
+
+  // Scrollspy for Floating HUD
+  const hudPills = document.querySelectorAll('.hud-pill');
+  const sections = ['ax-hero', 'ax-grounding-workstation', 'ax-endpoints', 'ax-ports', 'ax-matrix'];
+  window.addEventListener('scroll', () => {
+    let current = 'ax-hero';
+    sections.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        const top = el.getBoundingClientRect().top;
+        if (top <= 200) current = id;
+      }
+    });
+    hudPills.forEach(pill => {
+      if (pill.getAttribute('href') === '#' + current) {
+        pill.classList.add('active');
+      } else {
+        pill.classList.remove('active');
+      }
+    });
+  }, { passive: true });
+
+  // Initial render
+  renderGrounding();
+})();
+</script>
+
+</body>
+</html>

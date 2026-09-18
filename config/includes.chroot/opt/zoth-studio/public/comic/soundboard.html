@@ -1,0 +1,1632 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AZOTH Soundboard &amp; 432Hz Synthesizer Deck · Zoth Studio</title>
+<meta content="Interactive cybernetic soundboard and 432Hz ambient drone synthesizer featuring raw voice drops, SFX impacts, and neural narration from the AZOTH Anime Comic Series." name="description"/>
+<link href="https://zoth.nullai.tech/comic/soundboard.html" rel="canonical"/>
+<meta content="AZOTH Soundboard &amp; 432Hz Synthesizer Deck · Zoth Studio" property="og:title"/>
+<meta content="Interactive cybernetic soundboard and 432Hz ambient drone synthesizer featuring raw voice drops, SFX impacts, and neural narration from the AZOTH Anime Comic Series." property="og:description"/>
+<meta content="website" property="og:type"/>
+<meta content="https://zoth.nullai.tech/comic/soundboard.html" property="og:url"/>
+<meta content="https://zoth.nullai.tech/assets/media/hero-azoth-citadel.jpg" property="og:image"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link as="image" fetchpriority="high" href="/assets/mascot/azoth-portrait.jpg" rel="preload"/>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&amp;family=IBM+Plex+Mono:ital,wght@0,400;0,600;0,700;1,400&amp;family=Syne:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="/styles.css" rel="stylesheet"/>
+<link href="/assets/zoth-theme.css?v=11" rel="stylesheet"/>
+<link href="/assets/zoth-theme-light.css?v=11" id="zoth-theme-light-css" rel="stylesheet"/>
+<link href="/assets/zoth-nav.css?v=11" rel="stylesheet"/>
+<link href="/assets/comic-cinematic.css" rel="stylesheet"/>
+<link href="/assets/comic/comic-audio-player.css" rel="stylesheet"/>
+<link href="/comic/soundboard-poster.css" rel="stylesheet"/>
+<script src="/assets/zoth-theme.js?v=11"></script>
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "AZOTH Soundboard & 432Hz Synthesizer Deck",
+    "description": "Interactive cybernetic soundboard and 432Hz ambient drone synthesizer featuring raw voice drops, SFX impacts, and neural narration from the AZOTH Anime Comic Series.",
+    "url": "https://zoth.io/comic/soundboard.html",
+    "publisher": {
+      "@type": "Organization",
+      "name": "Zoth Studio",
+      "logo": "https://zoth.io/assets/mascot/azoth-mask.jpg"
+    }
+  }
+  </script>
+<style>
+    :root {
+      --sound-gold: #fbbf24;
+      --sound-cyan: #00f0ff;
+      --sound-purple: #a855f7;
+    }
+
+    /* Voice Recorder & DSP Modulator Styles */
+    .voice-recorder-card {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(8, 12, 24, 0.98) 100%);
+      border: 1px solid rgba(0, 240, 255, 0.28);
+      border-radius: 22px;
+      padding: 28px 24px;
+      margin-bottom: 36px;
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.6), 0 0 25px rgba(0, 240, 255, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+    .voice-recorder-card::before {
+      content: "";
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 250px;
+      height: 250px;
+      background: radial-gradient(circle, rgba(0, 240, 255, 0.12) 0%, rgba(168, 85, 247, 0.06) 50%, transparent 70%);
+      pointer-events: none;
+    }
+    .recorder-head {
+      margin-bottom: 20px;
+    }
+    .recorder-badge-strip {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .recorder-pill {
+      font-family: var(--font-mono, monospace);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+    }
+    .recorder-pill.gold {
+      background: rgba(251, 191, 36, 0.12);
+      border-color: rgba(251, 191, 36, 0.4);
+      color: var(--sound-gold);
+    }
+    .recorder-pill.cyan {
+      background: rgba(0, 240, 255, 0.12);
+      border-color: rgba(0, 240, 255, 0.4);
+      color: var(--sound-cyan);
+    }
+    .recorder-pill.purple {
+      background: rgba(168, 85, 247, 0.12);
+      border-color: rgba(168, 85, 247, 0.4);
+      color: var(--sound-purple);
+    }
+    .recorder-title {
+      font-family: var(--font-display, 'Syne', sans-serif);
+      font-size: clamp(1.4rem, 3.2vw, 1.9rem);
+      font-weight: 800;
+      color: #ffffff;
+      margin: 0 0 8px 0;
+      letter-spacing: -0.02em;
+    }
+    .recorder-desc {
+      color: #94a3b8;
+      font-size: 0.92rem;
+      line-height: 1.55;
+      max-width: 900px;
+      margin: 0 0 18px 0;
+    }
+    .recorder-display-frame {
+      background: rgba(4, 6, 12, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 20px;
+    }
+    .recorder-canvas {
+      width: 100%;
+      height: 80px;
+      display: block;
+      border-radius: 8px;
+      background: rgba(2, 4, 8, 0.95);
+    }
+    .recorder-status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      font-family: var(--font-mono, monospace);
+      font-size: 0.78rem;
+    }
+    .recorder-status-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #94a3b8;
+    }
+    .rec-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #64748b;
+      transition: all 0.2s ease;
+    }
+    .rec-dot.recording {
+      background: #ef4444;
+      box-shadow: 0 0 12px #ef4444;
+      animation: pulse-rec 1s infinite alternate;
+    }
+    @keyframes pulse-rec {
+      from { transform: scale(0.9); opacity: 0.7; }
+      to { transform: scale(1.25); opacity: 1; }
+    }
+    .rec-timer {
+      font-weight: 700;
+      color: var(--sound-gold);
+    }
+    .recorder-controls-deck {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .recorder-btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .btn-rec-action {
+      font-family: var(--font-display, 'Syne', sans-serif);
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 10px 18px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.05);
+      color: #ffffff;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      min-height: 42px;
+    }
+    .btn-rec-action:hover:not(:disabled) {
+      transform: translateY(-2px);
+    }
+    .btn-rec-action:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .btn-record {
+      background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+      border-color: #ef4444;
+      color: #ffffff;
+      box-shadow: 0 0 16px rgba(239, 68, 68, 0.35);
+    }
+    .btn-record.is-recording {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border-color: #10b981;
+      box-shadow: 0 0 16px rgba(16, 185, 129, 0.4);
+    }
+    .btn-preview-mod {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.18) 0%, rgba(168, 85, 247, 0.18) 100%);
+      border-color: var(--sound-cyan);
+      color: var(--sound-cyan);
+    }
+    .btn-preview-mod:hover:not(:disabled) {
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.35);
+      color: #ffffff;
+    }
+    .btn-preview-dry {
+      background: rgba(255, 255, 255, 0.06);
+      color: #e2e8f0;
+    }
+    .btn-download-audio {
+      background: rgba(251, 191, 36, 0.12);
+      border-color: rgba(251, 191, 36, 0.45);
+      color: var(--sound-gold);
+    }
+    .btn-download-audio:hover:not(:disabled) {
+      box-shadow: 0 0 18px rgba(251, 191, 36, 0.35);
+      background: rgba(251, 191, 36, 0.22);
+    }
+    .dsp-preset-selector {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .dsp-label {
+      font-family: var(--font-mono, monospace);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .dsp-chips {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+    }
+    .dsp-chip {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 12px;
+      padding: 10px 14px;
+      color: #cbd5e1;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .dsp-chip strong {
+      font-size: 0.82rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #ffffff;
+    }
+    .dsp-chip small {
+      font-family: var(--font-mono, monospace);
+      font-size: 0.68rem;
+      color: #94a3b8;
+    }
+    .dsp-chip:hover {
+      border-color: var(--sound-cyan);
+      background: rgba(0, 240, 255, 0.06);
+      transform: translateY(-2px);
+    }
+    .dsp-chip.active {
+      background: rgba(0, 240, 255, 0.14);
+      border-color: var(--sound-cyan);
+      box-shadow: 0 0 14px rgba(0, 240, 255, 0.25);
+    }
+    .dsp-chip.active strong {
+      color: var(--sound-cyan);
+    }
+
+    /* Light Theme Overrides */
+    html[data-theme="light"] .voice-recorder-card {
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      border-color: rgba(217, 119, 6, 0.35);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+    }
+    html[data-theme="light"] .recorder-title {
+      color: #0f172a;
+    }
+    html[data-theme="light"] .recorder-desc {
+      color: #475569;
+    }
+    html[data-theme="light"] .recorder-display-frame {
+      background: #f1f5f9;
+      border-color: rgba(0, 0, 0, 0.1);
+    }
+    html[data-theme="light"] .recorder-canvas {
+      background: #0f172a;
+    }
+    html[data-theme="light"] .dsp-chip {
+      background: #ffffff;
+      border-color: rgba(0, 0, 0, 0.12);
+      color: #334155;
+    }
+    html[data-theme="light"] .dsp-chip strong {
+      color: #0f172a;
+    }
+    html[data-theme="light"] .dsp-chip.active {
+      background: rgba(217, 119, 6, 0.12);
+      border-color: #d97706;
+    }
+    html[data-theme="light"] .dsp-chip.active strong {
+      color: #d97706;
+    }
+    html[data-theme="light"] .btn-rec-action {
+      background: #ffffff;
+      border-color: rgba(0, 0, 0, 0.15);
+      color: #0f172a;
+    }
+
+    /* Matrix Theme Overrides */
+    html[data-theme="matrix"] .voice-recorder-card {
+      background: rgba(3, 15, 6, 0.96);
+      border-color: rgba(0, 255, 102, 0.4);
+      box-shadow: 0 0 30px rgba(0, 255, 102, 0.15);
+    }
+    html[data-theme="matrix"] .recorder-title {
+      color: #00ff66;
+      text-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
+    }
+    html[data-theme="matrix"] .dsp-chip.active {
+      border-color: #00ff66;
+      background: rgba(0, 255, 102, 0.18);
+    }
+    html[data-theme="matrix"] .dsp-chip.active strong {
+      color: #00ff66;
+    }
+
+    /* Gold Theme Overrides */
+    html[data-theme="gold"] .voice-recorder-card {
+      background: rgba(18, 14, 4, 0.96);
+      border-color: rgba(251, 191, 36, 0.4);
+      box-shadow: 0 0 30px rgba(251, 191, 36, 0.15);
+    }
+    html[data-theme="gold"] .recorder-title {
+      color: #fbbf24;
+      text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+    }
+    html[data-theme="gold"] .dsp-chip.active {
+      border-color: #fbbf24;
+      background: rgba(251, 191, 36, 0.18);
+    }
+    html[data-theme="gold"] .dsp-chip.active strong {
+      color: #fbbf24;
+    }
+  </style>
+<meta content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" name="robots"/><meta content="Zoth Studio" property="og:site_name"/><meta content="1200" property="og:image:width"/><meta content="630" property="og:image:height"/><meta content="Zoth Cybernetic Comic Series — The Sovereign Alchemists" property="og:image:alt"/><meta content="summary_large_image" name="twitter:card"/><meta content="AZOTH Soundboard &amp; 432Hz Synthesizer Deck · Zoth Studio" name="twitter:title"/><meta content="Interactive cybernetic soundboard and 432Hz ambient drone synthesizer featuring raw voice drops, SFX impacts, and neural narration from the AZOTH Anime Comic Series." name="twitter:description"/><meta content="https://zoth.nullai.tech/assets/media/hero-azoth-citadel.jpg" name="twitter:image"/><meta content="Zoth Cybernetic Comic Series — The Sovereign Alchemists" name="twitter:image:alt"/><meta content="US-VA" name="geo.region"/><meta content="Virginia Beach, Virginia" name="geo.placename"/><meta content="36.8529;-75.9780" name="geo.position"/><meta content="36.8529, -75.9780" name="ICBM"/><meta content="#030306" name="theme-color"/><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://zoth.nullai.tech/comic/soundboard.html#webpage",
+      "url": "https://zoth.nullai.tech/comic/soundboard.html",
+      "name": "AZOTH Soundboard & 432Hz Synthesizer Deck \u00b7 Zoth Studio",
+      "description": "Interactive cybernetic soundboard and 432Hz ambient drone synthesizer featuring raw voice drops, SFX impacts, and neural narration from the AZOTH Anime Comic Series.",
+      "isPartOf": {
+        "@type": "WebSite",
+        "@id": "https://zoth.nullai.tech/#website",
+        "url": "https://zoth.nullai.tech/",
+        "name": "Zoth Studio",
+        "publisher": {
+          "@type": "Organization",
+          "name": "757tech / NullAI",
+          "url": "https://757tech.pro"
+        }
+      },
+      "primaryImageOfPage": {
+        "@type": "ImageObject",
+        "url": "https://zoth.nullai.tech/assets/media/hero-azoth-citadel.jpg",
+        "caption": "Zoth Cybernetic Comic Series \u2014 The Sovereign Alchemists"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://zoth.nullai.tech/comic/soundboard.html#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://zoth.nullai.tech/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Comic",
+          "item": "https://zoth.nullai.tech/comic/soundboard.html"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://zoth.nullai.tech/comic/soundboard.html#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is Zoth Studio?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Zoth Studio is a sovereign, local-first control surface for multi-agent AI orchestration, featuring a 298+ verified tool registry, 23+ modular studio suites, a 21-node sovereign agent pantheon, and an encrypted BYOK vault."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Where are my API keys stored?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "API keys are stored strictly in local operator memory or an encrypted local Rust daemon using Argon2id and XChaCha20-Poly1305. Plaintext keys are never sent to external servers."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does Zoth Studio require a cloud subscription?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Zoth Studio is fully sovereign and free to run on your local hardware or private network over Tailscale."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the Zoth Cybernetic Comic Series?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The comic chronicles the narrative journey of the Sovereign Alchemists across Cyberpunk Virginian landscapes, featuring soundboards, interactive timelines, and voice stems."
+          }
+        }
+      ]
+    }
+  ]
+}</script>  <link rel="stylesheet" href="/assets/zoth-footer.css" />
+</head>
+<body>
+<a class="skip-to-content" href="#main-content">Skip to content</a>
+                                                                    <header class="bar" id="topbar" role="banner">
+      <a class="brand js-hub" href="/" aria-label="Zoth Studio Home">
+        <div class="brand-emblem-wrap">
+          <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth Golden Z Emblem" width="34" height="34" class="brand-emblem-img" />
+          <span class="brand-emblem-halo"></span>
+        </div>
+        <span class="brand-text-wrap">
+          <strong>Zoth</strong>
+          <small>by NullAI</small>
+        </span>
+        <span class="brand-status-badge">SOVEREIGN</span>
+      </a>
+
+      <nav class="menu" aria-label="Primary navigation" role="navigation">
+        <a class="nav-link nav-for-everyone" href="/#for-everyone" data-tip="Zero-Code Showcases — How non-tech founders, creators & teams depend on Zoth.">✦ For You</a>
+
+        <!-- 🔮 Core AI -->
+        <div class="nav-dropdown" data-dropdown-id="core">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Core AI</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🔮 CORE AI ARCHITECTURE</span><span class="nav-item-badge">6 NODES</span></div>
+            <a href="/zoth/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+            <a href="/agents/"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+            <a href="/studio/consensus.html"><span class="nav-item-icon-box">⚔️</span><div class="nav-item-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+            <a href="/studio/swarm.html"><span class="nav-item-icon-box">🌐</span><div class="nav-item-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+            <a href="/memory/"><span class="nav-item-icon-box">🧠</span><div class="nav-item-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+            <a href="/zoth-world.html"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+          </div>
+        </div>
+
+        <!-- 🪐 Studio -->
+        <div class="nav-dropdown" data-dropdown-id="studio">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Studio</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu nav-dropdown-mega">
+            <div class="nav-dropdown-header"><span>🪐 14+ STUDIO WORKSTATIONS</span><span class="nav-item-badge">LOCAL DAGS</span></div>
+            <a href="/studio/cockpit.html"><span class="nav-item-icon-box">🪐</span><div class="nav-item-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+            <a href="/studio/cockpit.html?tool=webgen"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+            <a href="/studio/cockpit.html?tool=vos-sandbox"><span class="nav-item-icon-box">💻</span><div class="nav-item-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+            <a href="/studio/cockpit.html?tool=nexus-3d"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+            <a href="/studio/cockpit.html?tool=omnipost"><span class="nav-item-icon-box">🎬</span><div class="nav-item-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+            <a href="/studio/cockpit.html?tool=math-pillars"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+            <a href="/studio/cockpit.html?tool=secure-comms"><span class="nav-item-icon-box">🔒</span><div class="nav-item-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+            <a href="/studio/cockpit.html?tool=signal-bridge"><span class="nav-item-icon-box">📡</span><div class="nav-item-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+            <a href="/studio/cockpit.html?tool=web3-hub"><span class="nav-item-icon-box">🪙</span><div class="nav-item-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+            <a href="/studio/cockpit.html?tool=pets"><span class="nav-item-icon-box">💎</span><div class="nav-item-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+            <a href="/studio/cockpit.html?tool=tool-nexus"><span class="nav-item-icon-box">🛠️</span><div class="nav-item-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+          </div>
+        </div>
+
+        <!-- 🌌 Universe -->
+        <div class="nav-dropdown" data-dropdown-id="universe">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Universe</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🌌 UNIVERSE &amp; PUBLICATIONS</span><span class="nav-item-badge">STORIES</span></div>
+            <a href="/comic/"><span class="nav-item-icon-box">🎨</span><div class="nav-item-body"><strong>AZOTH Anime Comic</strong><small>Season 1 Ep 1: Genesis in Silicon Rain (Audio)</small></div><span class="nav-item-badge">AUDIO</span></a>
+            <a href="/social/"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+            <a href="/articles/"><span class="nav-item-icon-box">📜</span><div class="nav-item-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+            <a href="/article/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+            <a href="/ai-webgpu.html"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+            <a href="/adytum/"><span class="nav-item-icon-box">🏛️</span><div class="nav-item-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+          </div>
+        </div>
+
+        <!-- 📚 Docs & Vault -->
+        <div class="nav-dropdown" data-dropdown-id="docs">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Docs & Vault</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>📚 DOCUMENTATION &amp; SECURITY</span><span class="nav-item-badge">SPECS</span></div>
+            <a href="/docs/"><span class="nav-item-icon-box">📚</span><div class="nav-item-body"><strong>Master Documentation</strong><small>Port Topology, 1-Click Install Scripts & API Guide</small></div><span class="nav-item-badge">DOCS</span></a>
+            <a href="/vault/"><span class="nav-item-icon-box">🔐</span><div class="nav-item-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+            <a href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+            <a href="/faq.html"><span class="nav-item-icon-box">❓</span><div class="nav-item-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+          </div>
+        </div>
+
+        <!-- ⚡ Action Pills -->
+        <button type="button" class="nav-pill nav-telemetry-pill" title="View Live Studio Telemetry & Background Daemons" aria-label="Studio Telemetry Status">
+          <span class="tel-dot online"></span><span class="tel-text">6/6 DAEMONS</span>
+        </button>
+
+        <button type="button" class="nav-pill nav-pet-pill" title="Active Companion Spirit: Azoth (Click to Summon / Switch Mascot)" aria-label="Active Companion Spirit">
+          <span class="pet-emoji">🔮</span><span class="pet-name">Azoth</span>
+        </button>
+
+        <a class="nav-pill nav-deck-pill js-deck" href="http://127.0.0.1:8484/" title="Open Local Operator Deck (:8484)">
+          <span class="deck-pulse"></span><span>DECK</span>
+        </a>
+
+        <button type="button" class="nav-pill nav-palette-btn" title="Open Global Command Palette (Ctrl+K)" aria-label="Command Palette">
+          <span class="palette-icon">🔍</span><kbd class="nav-kbd">Ctrl+K</kbd>
+        </button>
+
+        <button type="button" class="nav-pill nav-annotate-btn" title="Toggle On-Screen Annotator & Feedback (Shift+A)" aria-label="Toggle Annotator">
+          <span class="annotate-icon">✏️</span><span class="annotate-text">Annotate</span><kbd class="nav-kbd">Shift+A</kbd>
+        </button>
+
+        <div class="nav-dropdown nav-theme-dropdown">
+          <button class="nav-dropdown-btn nav-theme-current-btn" type="button" aria-haspopup="true" aria-expanded="false" title="Switch Visual Theme (Shift+T)">
+            <span class="current-theme-swatch" style="background:#00f0ff;"></span>
+            <span class="current-theme-emoji">🌙</span>
+            <span class="current-theme-label">Dark Void</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+        </div>
+
+        <a class="nav-pill git" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank" title="GitHub Repository — Open Source code, Debian packages, and releases">
+          <span>🐙 GitHub ↗</span>
+        </a>
+      </nav>
+
+      <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Toggle navigation menu">
+        <span class="burger-lines"><span class="b-line b-1"></span><span class="b-line b-2"></span><span class="b-line b-3"></span></span>
+        <span class="burger-text">Menu</span>
+      </button>
+      <div class="zoth-scroll-progress" id="zoth-scroll-progress"></div>
+    </header>
+
+    <nav class="drawer" id="drawer" aria-label="Universal Mobile Navigation" role="navigation">
+      <div class="drawer-header-brand">
+        <div class="d-brand-left">
+          <div class="brand-emblem-wrap">
+            <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth" width="28" height="28" class="brand-emblem-img" />
+          </div>
+          <span class="d-brand-title"><strong>Zoth Studio</strong><small>v12.0 Sovereign</small></span>
+        </div>
+        <button type="button" class="drawer-telemetry-badge" title="View Diagnostics HUD">● 6/6 DAEMONS</button>
+        <button type="button" class="drawer-close-btn" aria-label="Close mobile menu">✕</button>
+      </div>
+
+      <div class="drawer-section drawer-tools-section">
+        <div class="drawer-heading">⚡ Quick Actions</div>
+        <div class="drawer-quick-tools-grid">
+          <button type="button" class="drawer-tool-pill drawer-palette-trigger"><span>🔍</span> Command Palette <kbd class="nav-kbd">Ctrl+K</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-annotate-trigger"><span>✏️</span> On-Screen Annotator <kbd class="nav-kbd">Shift+A</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-telemetry-trigger"><span>⚡</span> Telemetry HUD</button>
+          <button type="button" class="drawer-tool-pill drawer-audio-trigger"><span>🔊</span> Audio FX</button>
+        </div>
+      </div>
+
+      <div class="drawer-section drawer-theme-section">
+        <div class="drawer-heading">🎨 Visual Theme (16 Archetypes)</div>
+        <div class="drawer-search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="drawer-theme-search-input" placeholder="Search 16 themes..." autocomplete="off" />
+        </div>
+        <div class="theme-filter-chips drawer-filter-chips">
+          <button type="button" class="theme-chip-btn active" data-drawer-cat="all">All (16)</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="studio originals">Originals</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="frontier ai & tech">Frontier</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="developer archetypes">Dev</button>
+        </div>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">✦ Featured</div>
+        <a class="drawer-link drawer-hero-link" href="/#for-everyone"><span class="d-link-icon">✦</span><div class="d-link-body"><strong>For You (No-Code Showcases)</strong><small>How Non-Tech Founders, Creators & Teams Use Zoth</small></div><span class="nav-item-badge">SHOWCASE</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🔮 Core AI & Pantheon</div>
+        <a class="drawer-link" href="/zoth/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+        <a class="drawer-link" href="/agents/"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+        <a class="drawer-link" href="/studio/consensus.html"><span class="d-link-icon">⚔️</span><div class="d-link-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+        <a class="drawer-link" href="/studio/swarm.html"><span class="d-link-icon">🌐</span><div class="d-link-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+        <a class="drawer-link" href="/memory/"><span class="d-link-icon">🧠</span><div class="d-link-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+        <a class="drawer-link" href="/zoth-world.html"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🪐 Workstations & DAGs</div>
+        <a class="drawer-link" href="/studio/cockpit.html"><span class="d-link-icon">🪐</span><div class="d-link-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=webgen"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=vos-sandbox"><span class="d-link-icon">💻</span><div class="d-link-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=nexus-3d"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=omnipost"><span class="d-link-icon">🎬</span><div class="d-link-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=math-pillars"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=secure-comms"><span class="d-link-icon">🔒</span><div class="d-link-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=signal-bridge"><span class="d-link-icon">📡</span><div class="d-link-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=web3-hub"><span class="d-link-icon">🪙</span><div class="d-link-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=pets"><span class="d-link-icon">💎</span><div class="d-link-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=tool-nexus"><span class="d-link-icon">🛠️</span><div class="d-link-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📜 Universe & Research</div>
+        <a class="drawer-link" href="/comic/"><span class="d-link-icon">🎨</span><div class="d-link-body"><strong>AZOTH Anime Comic Series</strong><small>Season 1 Ep 1: Genesis in Silicon Rain</small></div><span class="nav-item-badge">AUDIO</span></a>
+        <a class="drawer-link" href="/social/"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+        <a class="drawer-link" href="/articles/"><span class="d-link-icon">📜</span><div class="d-link-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+        <a class="drawer-link" href="/article/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+        <a class="drawer-link" href="/ai-webgpu.html"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+        <a class="drawer-link" href="/adytum/"><span class="d-link-icon">🏛️</span><div class="d-link-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📚 Docs & Security</div>
+        <a class="drawer-link" href="/docs/"><span class="d-link-icon">📚</span><div class="d-link-body"><strong>Complete Documentation</strong><small>Port Topology, 1-Click Install Scripts & API</small></div><span class="nav-item-badge">DOCS</span></a>
+        <a class="drawer-link" href="/vault/"><span class="d-link-icon">🔐</span><div class="d-link-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+        <a class="drawer-link" href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+        <a class="drawer-link" href="/faq.html"><span class="d-link-icon">❓</span><div class="d-link-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+      </div>
+
+      <div class="drawer-section drawer-footer-section">
+        <a class="drawer-pill-link js-deck" href="http://127.0.0.1:8484/">💻 Launch Local Operator Deck (:8484)</a>
+        <a class="drawer-pill-link" href="https://github.com/NullAITech/zoth-studio" target="_blank" rel="noopener noreferrer">🐙 GitHub Source Repository ↗</a>
+        <a class="drawer-pill-link" href="/downloads/zoth-studio-android.apk">📱 Download Android App (.apk)</a>
+      </div>
+    </nav>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<main id="main-content" role="main">
+<section aria-label="AZOTH Soundboard" class="soundboard-poster">
+<div class="soundboard-poster-copy">
+<p class="kicker">Deck · 432Hz</p>
+<h1>Soundboard</h1>
+<p class="lede">Play neural voice drops, cinematic impacts, and a 432Hz drone on this machine.</p>
+<div class="cta-group">
+<a class="btn btn-gold" href="#pads">Jump to pads</a>
+<a class="btn btn-ghost" href="/comic/">Comic hub</a>
+</div>
+</div>
+<div class="soundboard-poster-figure">
+<img alt="Master Azoth, operator of the 432Hz soundboard" class="soundboard-azoth" decoding="async" fetchpriority="high" height="1024" src="/assets/mascot/azoth-portrait.jpg" width="1024"/>
+<span class="soundboard-poster-credit">Azoth · Operator</span>
+</div>
+</section>
+<div class="sound-deck">
+<div class="viz-card">
+<canvas id="audio-canvas"></canvas>
+<div class="drone-bar">
+<div>
+<strong>432Hz Sacred Alchemical Drone</strong>
+<div class="drone-hint">Procedural resonant sine waves with subtle 8Hz binaural beating.</div>
+</div>
+<button class="drone-btn" id="toggleDrone" onclick="toggleDrone()">▶ Start 432Hz Synth</button>
+</div>
+</div>
+<!-- ========================================================
+     CUSTOM SFX VOICE RECORDER & ALCHEMICAL DSP MODULATOR
+     ======================================================== -->
+<section class="voice-recorder-card" id="voice-recorder" aria-label="Microphone Voice Recorder &amp; Alchemical DSP Modulator">
+  <div class="recorder-head">
+    <div class="recorder-badge-strip">
+      <span class="recorder-pill gold">🎙️ VOICE LAB</span>
+      <span class="recorder-pill cyan">WEB AUDIO DSP</span>
+      <span class="recorder-pill purple">LOCAL ONLY · ZERO LEAKAGE</span>
+    </div>
+    <h2 class="recorder-title">Microphone Voice Recorder &amp; Alchemical DSP Modulator</h2>
+    <p class="recorder-desc">
+      Record your voice directly through local browser Web Audio, apply real-time cybernetic DSP modulation filters (Alchemical Distortion, Robotic Droid, Hadal Leviathan, 432Hz Chorus, Telemetry Telecom), preview live waveforms, and download high-quality audio files with 1-click.
+    </p>
+  </div>
+
+  <!-- Live Visualizer & Waveform Display -->
+  <div class="recorder-display-frame">
+    <canvas id="recorder-canvas" class="recorder-canvas" height="80" width="800" aria-label="Audio recording and playback waveform visualizer"></canvas>
+    <div class="recorder-status-bar">
+      <div class="recorder-status-left">
+        <span class="rec-dot" id="rec-dot"></span>
+        <span class="rec-status-text" id="rec-status-text">Ready to record</span>
+      </div>
+      <div class="rec-timer" id="rec-timer">00:00</div>
+    </div>
+  </div>
+
+  <!-- Recorder Controls Deck -->
+  <div class="recorder-controls-deck">
+    <div class="recorder-btn-group">
+      <button class="btn-rec-action btn-record" id="btn-record" onclick="toggleRecording()" type="button">
+        <span id="record-icon">🔴</span> <span id="record-label">Record Voice</span>
+      </button>
+      <button class="btn-rec-action btn-preview-mod" id="btn-play-mod" onclick="playModulatedAudio()" type="button" disabled>
+        <span>⚡ Play Modulated</span>
+      </button>
+      <button class="btn-rec-action btn-preview-dry" id="btn-play-dry" onclick="playDryAudio()" type="button" disabled>
+        <span>🔄 Play Dry (Original)</span>
+      </button>
+      <button class="btn-rec-action btn-download-audio" id="btn-download-audio" onclick="downloadRecordedAudio()" type="button" disabled>
+        <span>💾 Download Audio</span>
+      </button>
+    </div>
+
+    <!-- DSP Preset Selector Chips -->
+    <div class="dsp-preset-selector">
+      <span class="dsp-label">Select DSP Modulator Preset:</span>
+      <div class="dsp-chips" role="radiogroup" aria-label="Alchemical DSP Modulator Presets">
+        <button type="button" class="dsp-chip active" data-preset="alchemical" onclick="selectDspPreset('alchemical', this)" role="radio" aria-checked="true">
+          <strong>⚡ Cyber Alchemical</strong>
+          <small>WaveShaper Saturation + 432Hz Peaking</small>
+        </button>
+        <button type="button" class="dsp-chip" data-preset="robotic" onclick="selectDspPreset('robotic', this)" role="radio" aria-checked="false">
+          <strong>🤖 Robotic Droid</strong>
+          <small>60Hz Ring Modulator + Bandpass</small>
+        </button>
+        <button type="button" class="dsp-chip" data-preset="leviathan" onclick="selectDspPreset('leviathan', this)" role="radio" aria-checked="false">
+          <strong>🌊 Hadal Leviathan</strong>
+          <small>Pitch Shift 0.75x + 32Hz Sub-Bass</small>
+        </button>
+        <button type="button" class="dsp-chip" data-preset="harmony" onclick="selectDspPreset('harmony', this)" role="radio" aria-checked="false">
+          <strong>✨ 432Hz Harmony</strong>
+          <small>Golden Chorus Delay + Solfeggio Resonance</small>
+        </button>
+        <button type="button" class="dsp-chip" data-preset="telecom" onclick="selectDspPreset('telecom', this)" role="radio" aria-checked="false">
+          <strong>📟 Clean Telemetry</strong>
+          <small>300Hz-4.2kHz Radio Bandpass</small>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section aria-label="Sound pads" id="pads">
+<!-- Season 1 Finale Highlight Banner -->
+<div style="background:linear-gradient(135deg, rgba(0,240,255,0.12), rgba(168,85,247,0.15)); border:1px solid rgba(0,240,255,0.35); border-radius:18px; padding:20px 24px; margin-bottom:32px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;">
+  <div>
+    <span style="font-family:var(--font-mono); font-size:0.75rem; font-weight:800; color:var(--cyan,#00f0ff); letter-spacing:0.08em; text-transform:uppercase;">
+      🌊 SEASON 1 FINALE CLIMAX · S01E04
+    </span>
+    <h3 style="font-family:var(--font-display); font-size:1.3rem; font-weight:800; color:#fff; margin:4px 0 0;">
+      The Alchemical Singularity &amp; Sovereign Swarm Soundscape
+    </h3>
+  </div>
+  <a class="btn btn-gold" href="/comic/s01e04.html" style="font-size:0.82rem; padding:10px 20px;">
+    🌊 Launch S01E04 Reader ➔
+  </a>
+</div>
+
+<!-- Section 1: Canonical Character Voices -->
+<h2 class="sound-section-title">🎙️ Canonical Character Voice Drops (Season 1 Pantheon &amp; Hadal Archetypes)</h2>
+<div class="sound-grid">
+<button class="pad-btn" onclick="playVoice('/assets/audio/mascot/azoth.mp3', this)">
+<div class="pad-top"><span class="pad-title">Master Azoth</span><span class="pad-badge">Prime Sovereign</span></div>
+<span class="pad-desc">"Solve et coagula. At the bottom of the world, we seal local silicon forever."</span>
+</button>
+<button class="pad-btn" onclick="triggerSynthSFX('leviathanPulse', this)">
+<div class="pad-top"><span class="pad-title">The Leviathan</span><span class="pad-badge" style="background:rgba(168,85,247,0.3);color:var(--sound-purple);">22nd Archetype</span></div>
+<span class="pad-desc">"In the deep silence of hadal space, no token is leaked and no assertion is false."</span>
+</button>
+<button class="pad-btn" onclick="playVoice('/assets/audio/agents/antigravity.mp3', this)">
+<div class="pad-top"><span class="pad-title">Antigravity</span><span class="pad-badge">Lead Architect</span></div>
+<span class="pad-desc">"Zero cloud leakage. Pressure invariants holding at 1,086 atmospheres on loopback :8484."</span>
+</button>
+<button class="pad-btn" onclick="triggerSynthSFX('krakenShield', this)">
+<div class="pad-top"><span class="pad-title">Kraken Sentinel</span><span class="pad-badge" style="background:rgba(0,240,255,0.3);color:var(--sound-cyan);">Depth Shield</span></div>
+<span class="pad-desc">"Ten-thousand fathoms of encryption. The perimeter is unbreakable against corporate probes."</span>
+</button>
+<button class="pad-btn" onclick="playVoice('/assets/audio/agents/ghostbyte.mp3', this)">
+<div class="pad-top"><span class="pad-title">GhostByte</span><span class="pad-badge">Cryptographer</span></div>
+<span class="pad-desc">"Intercepting trans-Pacific fiber repeaters. Cloud surveillance tracks severed."</span>
+</button>
+<button class="pad-btn" onclick="playVoice('/assets/audio/agents/grok.mp3', this)">
+<div class="pad-top"><span class="pad-title">Grok 4.5</span><span class="pad-badge">Empirical Blade</span></div>
+<span class="pad-desc">"Checking Shannon entropy. Truth penetrates 11,000m of water with zero attenuation."</span>
+</button>
+<button class="pad-btn" onclick="playVoice('/assets/audio/agents/hermes.mp3', this)">
+<div class="pad-top"><span class="pad-title">Hermes 3</span><span class="pad-badge">Swarm Handoff</span></div>
+<span class="pad-desc">"Subsea hyperlanes routed across 21 autonomous nodes in 2.1 milliseconds."</span>
+</button>
+<button class="pad-btn" onclick="playVoice('/assets/audio/agents/athena.mp3', this)">
+<div class="pad-top"><span class="pad-title">Athena</span><span class="pad-badge">Strategic Core</span></div>
+<span class="pad-desc">"Consensus reached. 22-node quorum synthesized into final deterministic AST."</span>
+</button>
+<button class="pad-btn" onclick="playVoice('/assets/audio/agents/chronos.mp3', this)">
+<div class="pad-top"><span class="pad-title">Chronos</span><span class="pad-badge">Deterministic Clock</span></div>
+<span class="pad-desc">"Temporal drift: 0.000ms. Immutable state machine locked in absolute synchronization."</span>
+</button>
+</div>
+<!-- Section 2: Cinematic SFX Impacts (Synthesized via Web Audio) -->
+<h2 class="sound-section-title">⚡ Cinematic Cyberpunk &amp; Hadal SFX Impacts</h2>
+<div class="sound-grid">
+<button class="pad-btn" onclick="triggerSynthSFX('sonarPing', this)">
+<div class="pad-top"><span class="pad-title">Hadal Sonar Acoustic Ping</span><span class="pad-badge" style="background:rgba(0,240,255,0.25);color:var(--sound-cyan);">HADAL 432Hz</span></div>
+<span class="pad-desc">1.2kHz acoustic chirped reflection pulse sweeping -10,994m depth.</span>
+</button>
+<button class="pad-btn" onclick="triggerSynthSFX('leviathanPulse', this)">
+<div class="pad-top"><span class="pad-title">Leviathan Seismic Pulse</span><span class="pad-badge" style="background:rgba(168,85,247,0.25);color:var(--sound-purple);">SUB-BASS 32Hz</span></div>
+<span class="pad-desc">Deep 32Hz/64Hz hydrothermal tectonic resonance shaking ocean bedrock.</span>
+</button>
+<button class="pad-btn" onclick="triggerSynthSFX('krakenShield', this)">
+<div class="pad-top"><span class="pad-title">Kraken Shield Hum</span><span class="pad-badge" style="background:rgba(0,240,255,0.25);color:var(--sound-cyan);">ARGON2ID</span></div>
+<span class="pad-desc">Bioluminescent electromagnetic perimeter defense barrier oscillation.</span>
+</button>
+<button class="pad-btn" onclick="triggerSynthSFX('diamondSeal', this)">
+<div class="pad-top"><span class="pad-title">Eternal Sovereign Seal Chime</span><span class="pad-badge" style="background:rgba(251,191,36,0.25);color:var(--sound-gold);">SOLVE ET COAGULA</span></div>
+<span class="pad-desc">432Hz Golden Harmonic Diamond AST finish sealing Vault 127.0.0.1:8484.</span>
+</button>
+<button class="pad-btn" onclick="triggerSynthSFX('laser', this)">
+<div class="pad-top"><span class="pad-title">Laser Calipers</span><span class="pad-badge">SFX</span></div>
+<span class="pad-desc">High-frequency focused optical beam calibration impulse.</span>
+</button>
+<button class="pad-btn" onclick="triggerSynthSFX('astrolabe', this)">
+<div class="pad-top"><span class="pad-title">Astrolabe Chime</span><span class="pad-badge">SFX</span></div>
+<span class="pad-desc">Golden ratio harmonic crystal bell resonance.</span>
+</button>
+<button class="pad-btn" onclick="triggerSynthSFX('jsonSurge', this)">
+<div class="pad-top"><span class="pad-title">JSON Voltage Surge</span><span class="pad-badge">SFX</span></div>
+<span class="pad-desc">Raw AST schema validation voltage shockwave.</span>
+</button>
+<button class="pad-btn" onclick="triggerSynthSFX('subBass', this)">
+<div class="pad-top"><span class="pad-title">Sub-Bass Kinetic Drop</span><span class="pad-badge">SFX</span></div>
+<span class="pad-desc">40Hz deep planetary rumble kinetic actuator.</span>
+</button>
+<button class="pad-btn" onclick="triggerSynthSFX('airlock', this)">
+<div class="pad-top"><span class="pad-title">Pneumatic Decompression</span><span class="pad-badge">SFX</span></div>
+<span class="pad-desc">High-pressure cleanroom gate depressurization hiss.</span>
+</button>
+<button class="pad-btn" onclick="triggerSynthSFX('matrixLock', this)">
+<div class="pad-top"><span class="pad-title">Argon2id Key Lock</span><span class="pad-badge">SFX</span></div>
+<span class="pad-desc">Heavy titanium solenoid engaging hardware container.</span>
+</button>
+</div>
+<!-- Section 3: Sovereign Cyberpunk BGM Soundscapes (High-Fidelity) -->
+<h2 class="sound-section-title">🎧 Sovereign BGM Soundscapes (IVOXYGEN · Lucidbeatz · Willow Kayne)</h2>
+<div class="sound-grid">
+<button class="pad-btn" onclick="playVoice('/assets/audio/music/ivoxygen-casino143.mp3', this)">
+<div class="pad-top"><span class="pad-title">IVOXYGEN · Casino 143</span><span class="pad-badge">Cyber Phonk</span></div>
+<span class="pad-desc">Hypnotic bassline &amp; dark neon synth drift through Neo-Cupertino.</span>
+</button>
+<button class="pad-btn" onclick="playVoice('/assets/audio/music/ivoxygen-ghost.mp3', this)">
+<div class="pad-top"><span class="pad-title">IVOXYGEN · Ghost</span><span class="pad-badge">Atmospheric</span></div>
+<span class="pad-desc">Ethereal vocal chops and spatial reverb for deep alchemical coding.</span>
+</button>
+<button class="pad-btn" onclick="playVoice('/assets/audio/music/ivoxygen-skate.mp3', this)">
+<div class="pad-top"><span class="pad-title">IVOXYGEN · Skate</span><span class="pad-badge">Cyber Drift</span></div>
+<span class="pad-desc">Heavy rhythm glide with kinetic sidechain compression.</span>
+</button>
+<button class="pad-btn" onclick="playVoice('/assets/audio/music/lucidbeatz-shadows.mp3', this)">
+<div class="pad-top"><span class="pad-title">Lucidbeatz · Shadows</span><span class="pad-badge">Dark Drift</span></div>
+<span class="pad-desc">Menacing sub-bass and 808 percussion for Byzantine consensus battles.</span>
+</button>
+<button class="pad-btn" onclick="playVoice('/assets/audio/music/lucidbeatz-drift.mp3', this)">
+<div class="pad-top"><span class="pad-title">Lucidbeatz · Night Drive</span><span class="pad-badge">Hyper Ambient</span></div>
+<span class="pad-desc">Analog cassette warmth &amp; midnight synthesizer pads.</span>
+</button>
+<button class="pad-btn" onclick="playVoice('/assets/audio/music/lucidbeatz-memory.mp3', this)">
+<div class="pad-top"><span class="pad-title">Lucidbeatz · Memories</span><span class="pad-badge">Alchemical Wave</span></div>
+<span class="pad-desc">Deep nostalgic melodies infused with 432Hz sacred tuning.</span>
+</button>
+<button class="pad-btn" onclick="playVoice('/assets/audio/music/willow-kayne-two-seater.mp3', this)">
+<div class="pad-top"><span class="pad-title">Willow Kayne · Two Seater</span><span class="pad-badge">Cyberpunk Bass</span></div>
+<span class="pad-desc">Punchy UK breakbeats &amp; gritty high-velocity electronic attitude.</span>
+</button>
+<button class="pad-btn" onclick="playVoice('/assets/audio/music/willow-kayne-opinion.mp3', this)">
+<div class="pad-top"><span class="pad-title">Willow Kayne · Opinion</span><span class="pad-badge">UK Cyber Alt-Pop</span></div>
+<span class="pad-desc">Distorted synth hooks &amp; energetic rebellious vocal cadence.</span>
+</button>
+<button class="pad-btn" onclick="playVoice('/assets/audio/music/willow-kayne-white-city.mp3', this)">
+<div class="pad-top"><span class="pad-title">Willow Kayne · White City</span><span class="pad-badge">Glitch Electronic</span></div>
+<span class="pad-desc">Crisp digital clipping &amp; futuristic cyberpunk bass groove.</span>
+</button>
+</div>
+</section>
+</div>
+</main>
+                                                            <footer class="site" role="contentinfo">
+      <div class="foot-wrap">
+        <div aria-hidden="true" class="foot-watermark">ZOTH</div>
+        <div class="foot-grid">
+          <div class="foot-brand-col">
+            <p class="foot-kicker">Local · loopback · no telemetry</p>
+            <a class="foot-brand-lockup" href="/">
+              <img alt="Master Azoth" class="foot-azoth" decoding="async" height="72" loading="lazy" src="/assets/mascot/azoth-bust.jpg" width="72" />
+              <span class="foot-brand-text">
+                <img alt="" class="foot-brand-logo" decoding="async" height="28" loading="lazy" src="/assets/brand/zoth-golden-z-192.png" width="28" />
+                <strong class="foot-brand-title">Zoth Studio</strong>
+              </span>
+            </a>
+            <small class="foot-brand-desc">Local-first workspace for a team of AI agents. Files stay on this machine.</small>
+            <div class="foot-actions">
+              <a class="foot-btn foot-btn-on" href="/#install">Install locally</a>
+              <a class="foot-btn foot-btn-ghost" href="/pricing/">Support the forge</a>
+            </div>
+          </div>
+          <div class="foot-col">
+            <h3>Studio</h3>
+            <a class="mega-footer-link js-deck" href="http://127.0.0.1:8484/">Operator Deck</a>
+            <a class="mega-footer-link" href="/studio/">Workstations</a>
+            <a class="mega-footer-link" href="/studio/webgen.html">WebGen</a>
+            <a class="mega-footer-link" href="/studio/swarm.html">3D Swarm</a>
+            <a class="mega-footer-link" href="/studio/consensus.html">Consensus</a>
+          </div>
+          <div class="foot-col">
+            <h3>Agents</h3>
+            <a class="mega-footer-link" href="/zoth/">Master Azoth</a>
+            <a class="mega-footer-link" href="/agents/">21-Agent pantheon</a>
+            <a class="mega-footer-link" href="/pets/">Companions</a>
+            <a class="mega-footer-link" href="/vault/">Sovereign vault</a>
+            <a class="mega-footer-link" href="/adytum/">Adytum</a>
+          </div>
+          <div class="foot-col">
+            <h3>Universe</h3>
+            <a class="mega-footer-link" href="/comic/">Azoth comic</a>
+            <a class="mega-footer-link" href="/social/">Social wall</a>
+            <a class="mega-footer-link" href="/showcase.html">Showcase</a>
+            <a class="mega-footer-link" href="/signal/">Signal</a>
+            <a class="mega-footer-link" href="/article/">Manifesto</a>
+          </div>
+          <div class="foot-col">
+            <h3>Resources</h3>
+            <a class="mega-footer-link" href="/docs/">Docs</a>
+            <a class="mega-footer-link" href="/faq.html">FAQ</a>
+            <a class="mega-footer-link" href="/pricing/">Support / Patron</a>
+            <a class="mega-footer-link" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub ↗</a>
+            <a class="mega-footer-link" href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI ↗</a>
+          </div>
+        </div>
+        <div class="foot-bottom">
+          <p>© 2026 NullAI Tech. MIT. Local sovereign execution — zero telemetry.</p>
+          <nav aria-label="Footer meta" class="foot-meta">
+            <a href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub</a>
+            <a href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI</a>
+            <a href="/docs/">Docs</a>
+            <a href="/faq.html">FAQ</a>
+          </nav>
+        </div>
+      </div>
+    </footer>
+<script>
+    let audioCtx = null;
+    let droneOsc1 = null, droneOsc2 = null, droneGain = null;
+    let isDronePlaying = false;
+    let currentVoiceAudio = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function toggleDrone() {
+      const ctx = getAudioContext();
+      const btn = document.getElementById('toggleDrone');
+      
+      if (isDronePlaying) {
+        droneGain.gain.setTargetAtTime(0, ctx.currentTime, 0.5);
+        setTimeout(() => {
+          if (droneOsc1) droneOsc1.stop();
+          if (droneOsc2) droneOsc2.stop();
+          isDronePlaying = false;
+          btn.textContent = "▶ Start 432Hz Synth";
+          btn.classList.remove("playing");
+        }, 500);
+      } else {
+        droneOsc1 = ctx.createOscillator();
+        droneOsc2 = ctx.createOscillator();
+        droneGain = ctx.createGain();
+
+        droneOsc1.type = "sine";
+        droneOsc1.frequency.setValueAtTime(432, ctx.currentTime);
+
+        droneOsc2.type = "triangle";
+        droneOsc2.frequency.setValueAtTime(216, ctx.currentTime);
+
+        droneGain.gain.setValueAtTime(0.001, ctx.currentTime);
+        droneGain.gain.exponentialRampToValueAtTime(0.18, ctx.currentTime + 1.2);
+
+        droneOsc1.connect(droneGain);
+        droneOsc2.connect(droneGain);
+        droneGain.connect(ctx.destination);
+
+        droneOsc1.start();
+        droneOsc2.start();
+
+        isDronePlaying = true;
+        btn.textContent = "⏹ Stop 432Hz Synth";
+        btn.classList.add("playing");
+      }
+    }
+
+    function playVoice(src, btn) {
+      if (currentVoiceAudio) {
+        currentVoiceAudio.pause();
+        currentVoiceAudio.currentTime = 0;
+      }
+      currentVoiceAudio = new Audio(src);
+      btn.classList.add("active");
+      currentVoiceAudio.play().catch(e => console.log("Audio play allowed on user click", e));
+      currentVoiceAudio.onended = () => btn.classList.remove("active");
+    }
+
+    function triggerSynthSFX(type, btn) {
+      const ctx = getAudioContext();
+      btn.classList.add("active");
+      setTimeout(() => btn.classList.remove("active"), 400);
+
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      if (type === "sonarPing") {
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(1400, now);
+        osc.frequency.exponentialRampToValueAtTime(1200, now + 0.15);
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+        osc.start(now);
+        osc.stop(now + 1.2);
+      } else if (type === "leviathanPulse") {
+        const osc2 = ctx.createOscillator();
+        osc.type = "sine";
+        osc2.type = "triangle";
+        osc.frequency.setValueAtTime(32, now);
+        osc.frequency.linearRampToValueAtTime(48, now + 0.8);
+        osc.frequency.exponentialRampToValueAtTime(24, now + 1.8);
+        osc2.frequency.setValueAtTime(64, now);
+        osc2.frequency.linearRampToValueAtTime(96, now + 0.8);
+        osc2.frequency.exponentialRampToValueAtTime(32, now + 1.8);
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
+        osc2.connect(gain);
+        osc2.start(now);
+        osc2.stop(now + 1.8);
+        osc.start(now);
+        osc.stop(now + 1.8);
+      } else if (type === "krakenShield") {
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(110, now);
+        osc.frequency.linearRampToValueAtTime(220, now + 0.3);
+        osc.frequency.linearRampToValueAtTime(110, now + 0.7);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+        osc.start(now);
+        osc.stop(now + 0.8);
+      } else if (type === "diamondSeal") {
+        [432, 540, 648, 864, 1080].forEach((f, idx) => {
+          const sOsc = ctx.createOscillator();
+          const sGain = ctx.createGain();
+          sOsc.type = "sine";
+          sOsc.frequency.setValueAtTime(f, now);
+          sGain.gain.setValueAtTime(0.2 / (idx + 1), now);
+          sGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.6 + idx * 0.15);
+          sOsc.connect(sGain);
+          sGain.connect(ctx.destination);
+          sOsc.start(now);
+          sOsc.stop(now + 2.0);
+        });
+      } else if (type === "laser") {
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(1400, now);
+        osc.frequency.exponentialRampToValueAtTime(80, now + 0.3);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      } else if (type === "astrolabe") {
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(864, now);
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+        osc.start(now);
+        osc.stop(now + 1.5);
+      } else if (type === "jsonSurge") {
+        osc.type = "square";
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.linearRampToValueAtTime(880, now + 0.15);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+        osc.start(now);
+        osc.stop(now + 0.25);
+      } else if (type === "subBass") {
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(90, now);
+        osc.frequency.exponentialRampToValueAtTime(32, now + 0.8);
+        gain.gain.setValueAtTime(0.6, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+        osc.start(now);
+        osc.stop(now + 0.8);
+      } else if (type === "airlock") {
+        // Noise buffer
+        const bufferSize = ctx.sampleRate * 0.5;
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+        const noise = ctx.createBufferSource();
+        noise.buffer = buffer;
+        const filter = ctx.createBiquadFilter();
+        filter.type = "bandpass";
+        filter.frequency.value = 800;
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+        noise.start(now);
+      } else if (type === "matrixLock") {
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.setValueAtTime(120, now + 0.08);
+        gain.gain.setValueAtTime(0.5, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+        osc.start(now);
+        osc.stop(now + 0.4);
+      }
+    }
+
+    // ========================================================
+    // VOICE RECORDER & ALCHEMICAL DSP MODULATION ENGINE
+    // ========================================================
+    let mediaRecorder = null;
+    let audioStream = null;
+    let isRecording = false;
+    let recordedChunks = [];
+    let recordedBlob = null;
+    let recordedAudioBuffer = null;
+    let activeDspPreset = 'alchemical';
+    let recTimer = null;
+    let recDuration = 0;
+    let activeSourceNode = null;
+    let recorderAnalyser = null;
+    let isPlayingModulated = false;
+
+    function makeDistortionCurve(amount = 50) {
+      const k = typeof amount === 'number' ? amount : 50;
+      const n_samples = 44100;
+      const curve = new Float32Array(n_samples);
+      const deg = Math.PI / 180;
+      for (let i = 0; i < n_samples; ++i) {
+        const x = (i * 2) / n_samples - 1;
+        curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
+      }
+      return curve;
+    }
+
+    window.selectDspPreset = function (presetName, btnEl) {
+      activeDspPreset = presetName;
+      document.querySelectorAll('.dsp-chip').forEach(chip => {
+        chip.classList.remove('active');
+        chip.setAttribute('aria-checked', 'false');
+      });
+      if (btnEl) {
+        btnEl.classList.add('active');
+        btnEl.setAttribute('aria-checked', 'true');
+      }
+      const statusText = document.getElementById('rec-status-text');
+      if (statusText && recordedAudioBuffer) {
+        statusText.textContent = `Preset set to: ${presetName.toUpperCase()} · Ready for modulated playback.`;
+      }
+    };
+
+    window.toggleRecording = async function () {
+      const ctx = getAudioContext();
+      const recBtn = document.getElementById('btn-record');
+      const recIcon = document.getElementById('record-icon');
+      const recLabel = document.getElementById('record-label');
+      const recDot = document.getElementById('rec-dot');
+      const statusText = document.getElementById('rec-status-text');
+      const timerEl = document.getElementById('rec-timer');
+
+      if (!isRecording) {
+        try {
+          audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          recordedChunks = [];
+          
+          // Setup Analyser for Live Mic Input
+          const micSource = ctx.createMediaStreamSource(audioStream);
+          if (!recorderAnalyser) {
+            recorderAnalyser = ctx.createAnalyser();
+            recorderAnalyser.fftSize = 512;
+          }
+          micSource.connect(recorderAnalyser);
+
+          const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') 
+            ? 'audio/webm;codecs=opus' 
+            : 'audio/ogg';
+
+          mediaRecorder = new MediaRecorder(audioStream, { mimeType });
+
+          mediaRecorder.ondataavailable = (e) => {
+            if (e.data.size > 0) {
+              recordedChunks.push(e.data);
+            }
+          };
+
+          mediaRecorder.onstop = async () => {
+            recordedBlob = new Blob(recordedChunks, { type: mimeType });
+            const arrayBuffer = await recordedBlob.arrayBuffer();
+            recordedAudioBuffer = await ctx.decodeAudioData(arrayBuffer);
+
+            // Enable playback & download buttons
+            document.getElementById('btn-play-mod').disabled = false;
+            document.getElementById('btn-play-dry').disabled = false;
+            document.getElementById('btn-download-audio').disabled = false;
+
+            if (statusText) {
+              statusText.textContent = `Recording saved (${(recordedAudioBuffer.duration).toFixed(1)}s) · Click 'Play Modulated' or 'Download'`;
+            }
+
+            // Stop tracks
+            if (audioStream) {
+              audioStream.getTracks().forEach(t => t.stop());
+              audioStream = null;
+            }
+          };
+
+          mediaRecorder.start(100);
+          isRecording = true;
+          recDuration = 0;
+          recTimer = setInterval(() => {
+            recDuration++;
+            const m = Math.floor(recDuration / 60).toString().padStart(2, '0');
+            const s = (recDuration % 60).toString().padStart(2, '0');
+            if (timerEl) timerEl.textContent = `${m}:${s}`;
+          }, 1000);
+
+          recBtn.classList.add('is-recording');
+          recIcon.textContent = '⏹';
+          recLabel.textContent = 'Stop Recording';
+          recDot.classList.add('recording');
+          if (statusText) statusText.textContent = 'Recording live microphone input...';
+
+        } catch (err) {
+          console.warn('Microphone access denied or error:', err);
+          if (statusText) statusText.textContent = 'Microphone access denied or unavailable.';
+        }
+      } else {
+        // Stop recording
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+          mediaRecorder.stop();
+        }
+        clearInterval(recTimer);
+        isRecording = false;
+
+        recBtn.classList.remove('is-recording');
+        recIcon.textContent = '🔴';
+        recLabel.textContent = 'Record Again';
+        recDot.classList.remove('recording');
+      }
+    };
+
+    window.playDryAudio = function () {
+      if (!recordedAudioBuffer) return;
+      const ctx = getAudioContext();
+      if (activeSourceNode) {
+        try { activeSourceNode.stop(); } catch(e) {}
+      }
+
+      activeSourceNode = ctx.createBufferSource();
+      activeSourceNode.buffer = recordedAudioBuffer;
+
+      if (!recorderAnalyser) {
+        recorderAnalyser = ctx.createAnalyser();
+        recorderAnalyser.fftSize = 512;
+      }
+
+      activeSourceNode.connect(recorderAnalyser);
+      recorderAnalyser.connect(ctx.destination);
+
+      const statusText = document.getElementById('rec-status-text');
+      if (statusText) statusText.textContent = 'Playing unmodulated raw voice...';
+
+      activeSourceNode.onended = () => {
+        if (statusText) statusText.textContent = 'Playback finished · Ready for DSP filter.';
+      };
+
+      activeSourceNode.start();
+    };
+
+    window.playModulatedAudio = function () {
+      if (!recordedAudioBuffer) return;
+      const ctx = getAudioContext();
+      if (activeSourceNode) {
+        try { activeSourceNode.stop(); } catch(e) {}
+      }
+
+      activeSourceNode = ctx.createBufferSource();
+      activeSourceNode.buffer = recordedAudioBuffer;
+
+      if (!recorderAnalyser) {
+        recorderAnalyser = ctx.createAnalyser();
+        recorderAnalyser.fftSize = 512;
+      }
+
+      const masterGain = ctx.createGain();
+      masterGain.gain.setValueAtTime(0.85, ctx.currentTime);
+
+      const statusText = document.getElementById('rec-status-text');
+
+      if (activeDspPreset === 'alchemical') {
+        // Cyber Alchemical: Distortion + 432Hz Peaking + Feedback
+        const shaper = ctx.createWaveShaper();
+        shaper.curve = makeDistortionCurve(40);
+        shaper.oversample = '4x';
+
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'peaking';
+        filter.frequency.setValueAtTime(432, ctx.currentTime);
+        filter.Q.setValueAtTime(2.0, ctx.currentTime);
+        filter.gain.setValueAtTime(8, ctx.currentTime);
+
+        const delay = ctx.createDelay();
+        delay.delayTime.setValueAtTime(0.025, ctx.currentTime);
+
+        const feedback = ctx.createGain();
+        feedback.gain.setValueAtTime(0.35, ctx.currentTime);
+
+        activeSourceNode.connect(shaper);
+        shaper.connect(filter);
+        filter.connect(masterGain);
+        filter.connect(delay);
+        delay.connect(feedback);
+        feedback.connect(filter);
+
+        if (statusText) statusText.textContent = '⚡ Playing with Cyber Alchemical DSP Modulation...';
+
+      } else if (activeDspPreset === 'robotic') {
+        // Robotic Droid: Ring Modulation + Bandpass Filter
+        const ringMod = ctx.createGain();
+        ringMod.gain.setValueAtTime(0, ctx.currentTime);
+
+        const modOsc = ctx.createOscillator();
+        modOsc.type = 'sawtooth';
+        modOsc.frequency.setValueAtTime(65, ctx.currentTime);
+        modOsc.connect(ringMod.gain);
+        modOsc.start();
+
+        const bandpass = ctx.createBiquadFilter();
+        bandpass.type = 'bandpass';
+        bandpass.frequency.setValueAtTime(1400, ctx.currentTime);
+        bandpass.Q.setValueAtTime(3.5, ctx.currentTime);
+
+        activeSourceNode.connect(ringMod);
+        ringMod.connect(bandpass);
+        bandpass.connect(masterGain);
+
+        activeSourceNode.onended = () => {
+          try { modOsc.stop(); } catch(e){}
+          if (statusText) statusText.textContent = 'Playback finished · Ready.';
+        };
+
+        if (statusText) statusText.textContent = '🤖 Playing with Robotic Droid DSP Modulation...';
+
+      } else if (activeDspPreset === 'leviathan') {
+        // Hadal Leviathan: Pitch Shift down 0.74x + Lowpass Sub-Bass
+        activeSourceNode.playbackRate.setValueAtTime(0.74, ctx.currentTime);
+
+        const lp = ctx.createBiquadFilter();
+        lp.type = 'lowpass';
+        lp.frequency.setValueAtTime(480, ctx.currentTime);
+        lp.Q.setValueAtTime(2.5, ctx.currentTime);
+
+        const subBoost = ctx.createBiquadFilter();
+        subBoost.type = 'lowshelf';
+        subBoost.frequency.setValueAtTime(90, ctx.currentTime);
+        subBoost.gain.setValueAtTime(10, ctx.currentTime);
+
+        activeSourceNode.connect(lp);
+        lp.connect(subBoost);
+        subBoost.connect(masterGain);
+
+        if (statusText) statusText.textContent = '🌊 Playing with Hadal Leviathan Pitch & Sub-Bass Modulation...';
+
+      } else if (activeDspPreset === 'harmony') {
+        // 432Hz Harmony: Golden Ratio Chorus Delay + Dual Resonance
+        const delay1 = ctx.createDelay();
+        delay1.delayTime.setValueAtTime(0.019, ctx.currentTime);
+
+        const delay2 = ctx.createDelay();
+        delay2.delayTime.setValueAtTime(0.034, ctx.currentTime);
+
+        const peak1 = ctx.createBiquadFilter();
+        peak1.type = 'peaking';
+        peak1.frequency.setValueAtTime(432, ctx.currentTime);
+        peak1.gain.setValueAtTime(6, ctx.currentTime);
+
+        const peak2 = ctx.createBiquadFilter();
+        peak2.type = 'peaking';
+        peak2.frequency.setValueAtTime(864, ctx.currentTime);
+        peak2.gain.setValueAtTime(4, ctx.currentTime);
+
+        activeSourceNode.connect(peak1);
+        peak1.connect(peak2);
+        peak2.connect(masterGain);
+        peak2.connect(delay1);
+        delay1.connect(masterGain);
+        peak2.connect(delay2);
+        delay2.connect(masterGain);
+
+        if (statusText) statusText.textContent = '✨ Playing with 432Hz Sacred Harmony Chorus...';
+
+      } else if (activeDspPreset === 'telecom') {
+        // Clean Telemetry: Radio/Walkie-Talkie Bandpass
+        const hp = ctx.createBiquadFilter();
+        hp.type = 'highpass';
+        hp.frequency.setValueAtTime(380, ctx.currentTime);
+
+        const lp = ctx.createBiquadFilter();
+        lp.type = 'lowpass';
+        lp.frequency.setValueAtTime(3400, ctx.currentTime);
+
+        const shaper = ctx.createWaveShaper();
+        shaper.curve = makeDistortionCurve(15);
+
+        activeSourceNode.connect(hp);
+        hp.connect(lp);
+        lp.connect(shaper);
+        shaper.connect(masterGain);
+
+        if (statusText) statusText.textContent = '📟 Playing with Clean Telemetry Telecom Filter...';
+      }
+
+      masterGain.connect(recorderAnalyser);
+      recorderAnalyser.connect(ctx.destination);
+
+      activeSourceNode.onended = () => {
+        if (statusText) statusText.textContent = 'Playback finished · Ready.';
+      };
+
+      activeSourceNode.start();
+    };
+
+    window.downloadRecordedAudio = function () {
+      if (!recordedBlob) return;
+      const url = URL.createObjectURL(recordedBlob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `azoth-voice-${activeDspPreset}-${Date.now()}.webm`;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 2000);
+
+      const statusText = document.getElementById('rec-status-text');
+      if (statusText) statusText.textContent = `Audio download initiated (${a.download}).`;
+    };
+
+    // Recorder Waveform Visualizer Loop
+    (function initRecorderViz() {
+      const canvas = document.getElementById('recorder-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let w = canvas.width = canvas.parentElement.clientWidth - 28;
+      let h = canvas.height = 80;
+
+      window.addEventListener('resize', () => {
+        w = canvas.width = canvas.parentElement.clientWidth - 28;
+        h = canvas.height = 80;
+      });
+
+      const bufferLength = 256;
+      const dataArray = new Uint8Array(bufferLength);
+
+      function renderRecWave() {
+        ctx.fillStyle = 'rgba(2, 4, 8, 0.3)';
+        ctx.fillRect(0, 0, w, h);
+
+        if (recorderAnalyser && (isRecording || activeSourceNode)) {
+          recorderAnalyser.getByteTimeDomainData(dataArray);
+
+          ctx.lineWidth = 2.2;
+          ctx.strokeStyle = isRecording ? '#ef4444' : '#00f0ff';
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = isRecording ? '#ef4444' : '#00f0ff';
+
+          ctx.beginPath();
+          const sliceWidth = w * 1.0 / bufferLength;
+          let x = 0;
+
+          for (let i = 0; i < bufferLength; i++) {
+            const v = dataArray[i] / 128.0;
+            const y = v * (h / 2);
+
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+
+            x += sliceWidth;
+          }
+          ctx.stroke();
+        } else {
+          // Idle ambient baseline line
+          ctx.lineWidth = 1.5;
+          ctx.strokeStyle = 'rgba(251, 191, 36, 0.25)';
+          ctx.shadowBlur = 0;
+          ctx.beginPath();
+          ctx.moveTo(0, h / 2);
+          ctx.lineTo(w, h / 2);
+          ctx.stroke();
+        }
+
+        requestAnimationFrame(renderRecWave);
+      }
+      renderRecWave();
+    })();
+
+    // Animated Canvas Visualizer for Drone Bar
+    (function initViz() {
+      const canvas = document.getElementById("audio-canvas");
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      let w = canvas.width = canvas.parentElement.clientWidth - 40;
+      let h = canvas.height = 120;
+
+      window.addEventListener("resize", () => {
+        w = canvas.width = canvas.parentElement.clientWidth - 40;
+        h = canvas.height = 120;
+      });
+
+      let phase = 0;
+      function draw() {
+        ctx.fillStyle = "rgba(2, 3, 7, 0.25)";
+        ctx.fillRect(0, 0, w, h);
+
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = isDronePlaying ? "#00f0ff" : "rgba(251, 191, 36, 0.4)";
+        ctx.shadowBlur = isDronePlaying ? 12 : 4;
+        ctx.shadowColor = isDronePlaying ? "#00f0ff" : "#fbbf24";
+
+        ctx.beginPath();
+        const bars = 48;
+        const step = w / bars;
+
+        for (let i = 0; i < bars; i++) {
+          const x = i * step;
+          const amp = isDronePlaying ? Math.sin(i * 0.2 + phase) * 35 + Math.cos(i * 0.4 - phase) * 15 : Math.sin(i * 0.1 + phase) * 8;
+          const y = h / 2 + amp;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        phase += isDronePlaying ? 0.08 : 0.02;
+        requestAnimationFrame(draw);
+      }
+      draw();
+    })();
+  </script>
+<script defer="" src="/assets/comic/comic-audio-player.js"></script>
+<script defer="" src="/assets/zoth-nav.js?v=11"></script>
+</body>
+</html>

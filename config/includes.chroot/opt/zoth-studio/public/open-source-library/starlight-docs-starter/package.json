@@ -1,0 +1,62 @@
+{
+  "name": "starlight-root",
+  "private": true,
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "build:examples": "pnpm --no-bail --workspace-concurrency 1 --filter '@example/*' build",
+    "lint": "eslint . --max-warnings 0",
+    "size": "size-limit",
+    "version": "pnpm changeset version && pnpm i --no-frozen-lockfile",
+    "format": "prettier -w --cache --plugin prettier-plugin-astro .",
+    "typecheck": "astro check --minimumSeverity warning --noSync && pnpm --filter starlight-docs typecheck"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@changesets/changelog-github": "^1.0.0",
+    "@changesets/cli": "^3.0.1",
+    "@eslint/js": "^10.0.1",
+    "@size-limit/file": "^12.1.0",
+    "astro": "^7.1.6",
+    "eslint": "^10.3.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.6.0",
+    "pkg-pr-new": "^0.0.86",
+    "prettier": "3.3.3",
+    "prettier-plugin-astro": "^0.14.1",
+    "size-limit": "^12.1.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.59.2"
+  },
+  "packageManager": "pnpm@11.22.0",
+  "size-limit": [
+    {
+      "name": "/index.html",
+      "path": "examples/basics/dist/index.html",
+      "limit": "7 kB",
+      "gzip": true
+    },
+    {
+      "name": "/guides/example/index.html",
+      "path": "examples/basics/dist/guides/example/index.html",
+      "limit": "7 kB",
+      "gzip": true
+    },
+    {
+      "name": "/_astro/*.js",
+      "path": "examples/basics/dist/_astro/*.js",
+      "limit": "27 kB",
+      "gzip": true
+    },
+    {
+      "name": "/_astro/*.css",
+      "path": [
+        "examples/basics/dist/_astro/*.css",
+        "!examples/basics/dist/_astro/print.*.css"
+      ],
+      "limit": "16.75 kB",
+      "gzip": true
+    }
+  ]
+}

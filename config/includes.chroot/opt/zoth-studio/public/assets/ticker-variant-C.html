@@ -1,0 +1,767 @@
+<!--
+  TICKER VARIANT C — "SOVEREIGN SCANNER" (ops-console readout)
+  ============================================================
+  USAGE
+    Replace the entire `.sovereign-stack` block in zoth/index.html
+    (the <div class="sovereign-stack" ...> ... </div> element, ~line 1157)
+    with the markup in the SNIPPET below, then include this file:
+
+      <link rel="stylesheet" href="/assets/ticker-variant-C.html" />   <-- NO — this is a standalone demo/preview file.
+      Standalone: open this file directly in a browser to preview.
+      Integration: copy the <style id="tkc-style"> block into the page <head>
+      (or link it as ticker-variant-C.css), copy the SNIPPET markup over
+      .sovereign-stack, and copy the <script id="tkc-script"> block before
+                                                                  <footer class="site" role="contentinfo">
+      <div class="foot-wrap">
+        <div aria-hidden="true" class="foot-watermark">ZOTH</div>
+        <div class="foot-grid">
+          <div class="foot-brand-col">
+            <p class="foot-kicker">Local · loopback · no telemetry</p>
+            <a class="foot-brand-lockup" href="/">
+              <img alt="Master Azoth" class="foot-azoth" decoding="async" height="72" loading="lazy" src="/assets/mascot/azoth-bust.jpg" width="72" />
+              <span class="foot-brand-text">
+                <img alt="" class="foot-brand-logo" decoding="async" height="28" loading="lazy" src="/assets/brand/zoth-golden-z-192.png" width="28" />
+                <strong class="foot-brand-title">Zoth Studio</strong>
+              </span>
+            </a>
+            <small class="foot-brand-desc">Local-first workspace for a team of AI agents. Files stay on this machine.</small>
+            <div class="foot-actions">
+              <a class="foot-btn foot-btn-on" href="/#install">Install locally</a>
+              <a class="foot-btn foot-btn-ghost" href="/pricing/">Support the forge</a>
+            </div>
+          </div>
+          <div class="foot-col">
+            <h3>Studio</h3>
+            <a class="mega-footer-link js-deck" href="http://127.0.0.1:8484/">Operator Deck</a>
+            <a class="mega-footer-link" href="/studio/">Workstations</a>
+            <a class="mega-footer-link" href="/studio/webgen.html">WebGen</a>
+            <a class="mega-footer-link" href="/studio/swarm.html">3D Swarm</a>
+            <a class="mega-footer-link" href="/studio/consensus.html">Consensus</a>
+          </div>
+          <div class="foot-col">
+            <h3>Agents</h3>
+            <a class="mega-footer-link" href="/zoth/">Master Azoth</a>
+            <a class="mega-footer-link" href="/agents/">21-Agent pantheon</a>
+            <a class="mega-footer-link" href="/pets/">Companions</a>
+            <a class="mega-footer-link" href="/vault/">Sovereign vault</a>
+            <a class="mega-footer-link" href="/adytum/">Adytum</a>
+          </div>
+          <div class="foot-col">
+            <h3>Universe</h3>
+            <a class="mega-footer-link" href="/comic/">Azoth comic</a>
+            <a class="mega-footer-link" href="/social/">Social wall</a>
+            <a class="mega-footer-link" href="/showcase.html">Showcase</a>
+            <a class="mega-footer-link" href="/signal/">Signal</a>
+            <a class="mega-footer-link" href="/article/">Manifesto</a>
+          </div>
+          <div class="foot-col">
+            <h3>Resources</h3>
+            <a class="mega-footer-link" href="/docs/">Docs</a>
+            <a class="mega-footer-link" href="/faq.html">FAQ</a>
+            <a class="mega-footer-link" href="/pricing/">Support / Patron</a>
+            <a class="mega-footer-link" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub ↗</a>
+            <a class="mega-footer-link" href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI ↗</a>
+          </div>
+        </div>
+        <div class="foot-bottom">
+          <p>© 2026 NullAI Tech. MIT. Local sovereign execution — zero telemetry.</p>
+          <nav aria-label="Footer meta" class="foot-meta">
+            <a href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub</a>
+            <a href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI</a>
+            <a href="/docs/">Docs</a>
+            <a href="/faq.html">FAQ</a>
+          </nav>
+        </div>
+      </div>
+    </footer>
+</body>. All classes are prefixed tkc- and will not collide.
+
+    This single file is self-contained and previewable as-is.
+
+  NOTES
+    - Logos: /assets/logos/*.svg (verified present: anthropic-claude,
+      google-gemini, xai-grok, deepseek, cerebras-wafer, nous-research).
+    - Motion: transform/opacity/clip-path only (no layout thrash).
+    - Hover/touch freezes the scanline and highlights the node panel.
+    - prefers-reduced-motion: static wrapped grid, statuses visible, no scan.
+-->
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Sovereign Scanner — Ticker Variant C preview</title>
+<style id="tkc-style">
+  /* ============ tkc tokens ============ */
+  .tkc-stack {
+    --tkc-cyan: #00f0ff;
+    --tkc-gold: #d4af37;
+    --tkc-amber: #ffb000;
+    --tkc-green: #34ff7a;
+    --tkc-mute: #8b90a5;
+    --tkc-line: rgba(255, 255, 255, 0.10);
+    --tkc-gap: 20px;
+    --tkc-node-w: 190px;
+    margin-top: 34px;
+    padding-top: 20px;
+    border-top: 1px solid var(--tkc-line);
+    font-family: ui-monospace, "SF Mono", "IBM Plex Mono", Menlo, Consolas, monospace;
+  }
+  .tkc-head {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 16px;
+  }
+  .tkc-label {
+    font-size: 0.66rem; font-weight: 700; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--tkc-mute); white-space: nowrap;
+  }
+  .tkc-label .tkc-dot {
+    display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--tkc-green); margin-right: 8px; vertical-align: 1px;
+    box-shadow: 0 0 6px var(--tkc-green);
+    animation: tkc-blink 2.2s steps(2, start) infinite;
+  }
+  @keyframes tkc-blink { 50% { opacity: 0.35; } }
+  .tkc-rule { flex: 1; height: 1px; background: var(--tkc-line); }
+  .tkc-readout {
+    font-size: 0.62rem; letter-spacing: 0.14em; color: var(--tkc-amber);
+    text-transform: uppercase; white-space: nowrap;
+  }
+
+  /* ============ scanner viewport ============ */
+  .tkc-marquee {
+    position: relative;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  }
+  .tkc-track {
+    display: flex; align-items: stretch; gap: var(--tkc-gap);
+    width: max-content;
+    padding: 14px 0 6px;
+    animation: tkc-scroll 55s linear infinite;
+    will-change: transform;
+    transform: translate3d(0,0,0);
+  }
+  @keyframes tkc-scroll {
+    from { transform: translate3d(0, 0, 0); }
+    to   { transform: translate3d(-50%, 0, 0); }
+  }
+  /* hover/touch freeze */
+  .tkc-marquee.tkc-paused .tkc-track { animation-play-state: paused; }
+
+  /* horizontal scanline sweeping the viewport */
+  .tkc-scanline {
+    position: absolute; top: 0; bottom: 0; left: 0;
+    width: 90px; pointer-events: none; z-index: 2;
+    background: linear-gradient(90deg, transparent, rgba(0,240,255,0.10) 40%, rgba(52,255,122,0.22) 82%, rgba(52,255,122,0.55) 98%, transparent);
+    border-right: 1px solid rgba(52,255,122,0.65);
+    box-shadow: 1px 0 14px rgba(52,255,122,0.25);
+    animation: tkc-sweep 7s linear infinite;
+    will-change: transform;
+  }
+  @keyframes tkc-sweep {
+    from { transform: translate3d(-100px, 0, 0); }
+    to   { transform: translate3d(110vw, 0, 0); }
+  }
+  .tkc-marquee.tkc-paused .tkc-scanline { animation-play-state: paused; }
+
+  /* ============ node panels ============ */
+  .tkc-node {
+    position: relative;
+    flex: 0 0 var(--tkc-node-w);
+    display: flex; flex-direction: column; gap: 10px;
+    padding: 14px 14px 12px;
+    border: 1px solid var(--tkc-line);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.025);
+    cursor: default;
+    transition: border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+  }
+  .tkc-node::before { /* corner brackets */
+    content: ""; position: absolute; inset: 4px; pointer-events: none;
+    border-radius: 6px;
+    background:
+      linear-gradient(var(--tkc-cyan), var(--tkc-cyan)) top left / 10px 1px,
+      linear-gradient(var(--tkc-cyan), var(--tkc-cyan)) top left / 1px 10px,
+      linear-gradient(var(--tkc-cyan), var(--tkc-cyan)) bottom right / 10px 1px,
+      linear-gradient(var(--tkc-cyan), var(--tkc-cyan)) bottom right / 1px 10px;
+    background-repeat: no-repeat;
+    opacity: 0.35; transition: opacity 0.3s ease;
+  }
+  .tkc-node:hover,
+  .tkc-marquee.tkc-paused .tkc-node:hover {
+    border-color: rgba(212, 175, 55, 0.55);
+    background: rgba(212, 175, 55, 0.05);
+    box-shadow: 0 0 22px rgba(212, 175, 55, 0.12), inset 0 0 18px rgba(0, 240, 255, 0.05);
+  }
+  .tkc-node:hover::before { opacity: 0.9; }
+
+  /* logo row */
+  .tkc-logo-row {
+    display: flex; align-items: center; gap: 10px;
+    height: 30px;
+  }
+  .tkc-node img {
+    height: 26px; width: auto; display: block;
+    filter: grayscale(1) brightness(1.7); opacity: 0.55;
+    transition: filter 0.3s ease, opacity 0.3s ease;
+  }
+  .tkc-node:hover img { filter: none; opacity: 1; }
+  .tkc-sig { /* signal bars */
+    margin-left: auto; display: flex; gap: 2px; align-items: flex-end;
+  }
+  .tkc-sig i {
+    width: 3px; background: var(--tkc-green); opacity: 0.85; border-radius: 1px;
+  }
+  .tkc-sig i:nth-child(1) { height: 4px; }
+  .tkc-sig i:nth-child(2) { height: 7px; }
+  .tkc-sig i:nth-child(3) { height: 10px; }
+  .tkc-sig i:nth-child(4) { height: 13px; background: var(--tkc-amber); }
+
+  /* mono status readout under each node */
+  .tkc-status {
+    font-size: 0.58rem; line-height: 1.5; letter-spacing: 0.08em;
+    color: var(--tkc-mute); text-transform: uppercase;
+    white-space: nowrap; overflow: hidden;
+  }
+  .tkc-status .tkc-id { color: var(--tkc-cyan); font-weight: 700; }
+  .tkc-status .tkc-ok { color: var(--tkc-green); }
+  .tkc-status .tkc-lat { color: var(--tkc-amber); }
+
+  /* ============ materialize (decode-in) effect ============
+     Beam passes -> node glitches in via clip-path slices + opacity steps.
+     Real brand text is never scrambled; only clip/opacity flicker. */
+  .tkc-node {
+    opacity: 0.12;
+    clip-path: inset(0 100% 0 0);
+    animation: tkc-decode 0.9s steps(6, end) forwards;
+  }
+  .tkc-node:nth-of-type(odd) { animation-duration: 1.05s; }
+  @keyframes tkc-decode {
+    0%   { opacity: 0.12; clip-path: inset(0 100% 0 0); }
+    20%  { opacity: 0.55; clip-path: inset(12% 62% 30% 0); }
+    40%  { opacity: 0.35; clip-path: inset(0 38% 8% 4%); }
+    60%  { opacity: 0.8;  clip-path: inset(22% 14% 0 0); }
+    80%  { opacity: 0.5;  clip-path: inset(0 4% 14% 2%); }
+    100% { opacity: 1;    clip-path: inset(0 0 0 0); }
+  }
+  /* subtle phosphor flicker after materializing */
+  .tkc-node img { animation: tkc-flicker 6s steps(1) infinite; }
+  @keyframes tkc-flicker {
+    0%, 93%, 100% { opacity: inherit; }
+    94% { opacity: 0.35; }
+    96% { opacity: 0.8; }
+  }
+  .tkc-node:hover img, .tkc-marquee.tkc-paused .tkc-node img { animation: none; }
+
+  /* ============ reduced motion: static grid ============ */
+  @media (prefers-reduced-motion: reduce) {
+    .tkc-track {
+      animation: none;
+      width: auto; max-width: 100%;
+      flex-wrap: wrap; justify-content: center;
+      transform: none;
+    }
+    .tkc-marquee { overflow: visible; mask-image: none; -webkit-mask-image: none; }
+    .tkc-scanline, .tkc-label .tkc-dot { display: none; }
+    .tkc-node { opacity: 1; clip-path: none; animation: none; }
+    .tkc-node img { animation: none; }
+    .tkc-readout { display: none; }
+  }
+
+  /* ============ mobile ============ */
+  @media (max-width: 720px) {
+    .tkc-stack { --tkc-node-w: 170px; }
+    .tkc-track { animation-duration: 75s; }
+    .tkc-node { flex-basis: 170px; }
+    .tkc-readout { display: none; }
+  }
+  @media (max-width: 480px) {
+    .tkc-track { animation: none; flex-wrap: wrap; width: auto; justify-content: center; }
+    .tkc-marquee { overflow: visible; mask-image: none; -webkit-mask-image: none; }
+    .tkc-scanline { display: none; }
+    .tkc-node { opacity: 1; clip-path: none; animation: none; flex-basis: calc(50% - 10px); }
+  }
+</style>
+<meta content="Sovereign Scanner — Ticker Variant C preview — Sovereign, local-first multi-agent AI engineering deck, 298+ verified tools, and encrypted BYOK vault." name="description"/><link href="https://zoth.nullai.tech/assets/ticker-variant-C.html" rel="canonical"/><meta content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" name="robots"/><meta content="website" property="og:type"/><meta content="Zoth Studio" property="og:site_name"/><meta content="https://zoth.nullai.tech/assets/ticker-variant-C.html" property="og:url"/><meta content="Sovereign Scanner — Ticker Variant C preview" property="og:title"/><meta content="Sovereign Scanner — Ticker Variant C preview — Sovereign, local-first multi-agent AI engineering deck, 298+ verified tools, and encrypted BYOK vault." property="og:description"/><meta content="https://zoth.nullai.tech/og-image.jpg" property="og:image"/><meta content="1200" property="og:image:width"/><meta content="630" property="og:image:height"/><meta content="Zoth Studio — Sovereign AI Multi-Agent Workstation" property="og:image:alt"/><meta content="summary_large_image" name="twitter:card"/><meta content="Sovereign Scanner — Ticker Variant C preview" name="twitter:title"/><meta content="Sovereign Scanner — Ticker Variant C preview — Sovereign, local-first multi-agent AI engineering deck, 298+ verified tools, and encrypted BYOK vault." name="twitter:description"/><meta content="https://zoth.nullai.tech/og-image.jpg" name="twitter:image"/><meta content="Zoth Studio — Sovereign AI Multi-Agent Workstation" name="twitter:image:alt"/><meta content="US-VA" name="geo.region"/><meta content="Virginia Beach, Virginia" name="geo.placename"/><meta content="36.8529;-75.9780" name="geo.position"/><meta content="36.8529, -75.9780" name="ICBM"/><meta content="#030306" name="theme-color"/><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://zoth.nullai.tech/assets/ticker-variant-C.html#webpage",
+      "url": "https://zoth.nullai.tech/assets/ticker-variant-C.html",
+      "name": "Sovereign Scanner \u2014 Ticker Variant C preview",
+      "description": "Sovereign Scanner \u2014 Ticker Variant C preview \u2014 Sovereign, local-first multi-agent AI engineering deck, 298+ verified tools, and encrypted BYOK vault.",
+      "isPartOf": {
+        "@type": "WebSite",
+        "@id": "https://zoth.nullai.tech/#website",
+        "url": "https://zoth.nullai.tech/",
+        "name": "Zoth Studio",
+        "publisher": {
+          "@type": "Organization",
+          "name": "757tech / NullAI",
+          "url": "https://757tech.pro"
+        }
+      },
+      "primaryImageOfPage": {
+        "@type": "ImageObject",
+        "url": "https://zoth.nullai.tech/og-image.jpg",
+        "caption": "Zoth Studio \u2014 Sovereign AI Multi-Agent Workstation"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://zoth.nullai.tech/assets/ticker-variant-C.html#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://zoth.nullai.tech/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Assets",
+          "item": "https://zoth.nullai.tech/assets/ticker-variant-C.html"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://zoth.nullai.tech/assets/ticker-variant-C.html#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is Zoth Studio?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Zoth Studio is a sovereign, local-first control surface for multi-agent AI orchestration, featuring a 298+ verified tool registry, 23+ modular studio suites, a 21-node sovereign agent pantheon, and an encrypted BYOK vault."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Where are my API keys stored?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "API keys are stored strictly in local operator memory or an encrypted local Rust daemon using Argon2id and XChaCha20-Poly1305. Plaintext keys are never sent to external servers."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does Zoth Studio require a cloud subscription?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Zoth Studio is fully sovereign and free to run on your local hardware or private network over Tailscale."
+          }
+        }
+      ]
+    }
+  ]
+}</script>  <link rel="stylesheet" href="/assets/zoth-theme.css?v=11"/>
+  <script src="/assets/zoth-theme.js?v=11"></script>
+
+<link rel="stylesheet" href="/assets/zoth-theme.css?v=11">
+<link rel="stylesheet" href="/assets/zoth-nav.css?v=11">
+<script src="/assets/zoth-theme.js?v=11"></script>
+<script src="/assets/zoth-nav.js?v=11" defer></script>
+
+  <link rel="stylesheet" href="/assets/zoth-footer.css" />
+</head>
+<body style="background:#07080d;color:#d4d8e8;padding:40px;font-family:sans-serif">
+                                                                    <header class="bar" id="topbar" role="banner">
+      <a class="brand js-hub" href="/" aria-label="Zoth Studio Home">
+        <div class="brand-emblem-wrap">
+          <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth Golden Z Emblem" width="34" height="34" class="brand-emblem-img" />
+          <span class="brand-emblem-halo"></span>
+        </div>
+        <span class="brand-text-wrap">
+          <strong>Zoth</strong>
+          <small>by NullAI</small>
+        </span>
+        <span class="brand-status-badge">SOVEREIGN</span>
+      </a>
+
+      <nav class="menu" aria-label="Primary navigation" role="navigation">
+        <a class="nav-link nav-for-everyone" href="/#for-everyone" data-tip="Zero-Code Showcases — How non-tech founders, creators & teams depend on Zoth.">✦ For You</a>
+
+        <!-- 🔮 Core AI -->
+        <div class="nav-dropdown" data-dropdown-id="core">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Core AI</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🔮 CORE AI ARCHITECTURE</span><span class="nav-item-badge">6 NODES</span></div>
+            <a href="/zoth/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+            <a href="/agents/"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+            <a href="/studio/consensus.html"><span class="nav-item-icon-box">⚔️</span><div class="nav-item-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+            <a href="/studio/swarm.html"><span class="nav-item-icon-box">🌐</span><div class="nav-item-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+            <a href="/memory/"><span class="nav-item-icon-box">🧠</span><div class="nav-item-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+            <a href="/zoth-world.html"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+          </div>
+        </div>
+
+        <!-- 🪐 Studio -->
+        <div class="nav-dropdown" data-dropdown-id="studio">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Studio</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu nav-dropdown-mega">
+            <div class="nav-dropdown-header"><span>🪐 14+ STUDIO WORKSTATIONS</span><span class="nav-item-badge">LOCAL DAGS</span></div>
+            <a href="/studio/cockpit.html"><span class="nav-item-icon-box">🪐</span><div class="nav-item-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+            <a href="/studio/cockpit.html?tool=webgen"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+            <a href="/studio/cockpit.html?tool=vos-sandbox"><span class="nav-item-icon-box">💻</span><div class="nav-item-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+            <a href="/studio/cockpit.html?tool=nexus-3d"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+            <a href="/studio/cockpit.html?tool=omnipost"><span class="nav-item-icon-box">🎬</span><div class="nav-item-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+            <a href="/studio/cockpit.html?tool=math-pillars"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+            <a href="/studio/cockpit.html?tool=secure-comms"><span class="nav-item-icon-box">🔒</span><div class="nav-item-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+            <a href="/studio/cockpit.html?tool=signal-bridge"><span class="nav-item-icon-box">📡</span><div class="nav-item-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+            <a href="/studio/cockpit.html?tool=web3-hub"><span class="nav-item-icon-box">🪙</span><div class="nav-item-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+            <a href="/studio/cockpit.html?tool=pets"><span class="nav-item-icon-box">💎</span><div class="nav-item-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+            <a href="/studio/cockpit.html?tool=tool-nexus"><span class="nav-item-icon-box">🛠️</span><div class="nav-item-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+          </div>
+        </div>
+
+        <!-- 🌌 Universe -->
+        <div class="nav-dropdown" data-dropdown-id="universe">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Universe</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🌌 UNIVERSE &amp; PUBLICATIONS</span><span class="nav-item-badge">STORIES</span></div>
+            <a href="/comic/"><span class="nav-item-icon-box">🎨</span><div class="nav-item-body"><strong>AZOTH Anime Comic</strong><small>Season 1 Ep 1: Genesis in Silicon Rain (Audio)</small></div><span class="nav-item-badge">AUDIO</span></a>
+            <a href="/social/"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+            <a href="/articles/"><span class="nav-item-icon-box">📜</span><div class="nav-item-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+            <a href="/article/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+            <a href="/ai-webgpu.html"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+            <a href="/adytum/"><span class="nav-item-icon-box">🏛️</span><div class="nav-item-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+          </div>
+        </div>
+
+        <!-- 📚 Docs & Vault -->
+        <div class="nav-dropdown" data-dropdown-id="docs">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Docs & Vault</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>📚 DOCUMENTATION &amp; SECURITY</span><span class="nav-item-badge">SPECS</span></div>
+            <a href="/docs/"><span class="nav-item-icon-box">📚</span><div class="nav-item-body"><strong>Master Documentation</strong><small>Port Topology, 1-Click Install Scripts & API Guide</small></div><span class="nav-item-badge">DOCS</span></a>
+            <a href="/vault/"><span class="nav-item-icon-box">🔐</span><div class="nav-item-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+            <a href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+            <a href="/faq.html"><span class="nav-item-icon-box">❓</span><div class="nav-item-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+          </div>
+        </div>
+
+        <!-- ⚡ Action Pills -->
+        <button type="button" class="nav-pill nav-telemetry-pill" title="View Live Studio Telemetry & Background Daemons" aria-label="Studio Telemetry Status">
+          <span class="tel-dot online"></span><span class="tel-text">6/6 DAEMONS</span>
+        </button>
+
+        <button type="button" class="nav-pill nav-pet-pill" title="Active Companion Spirit: Azoth (Click to Summon / Switch Mascot)" aria-label="Active Companion Spirit">
+          <span class="pet-emoji">🔮</span><span class="pet-name">Azoth</span>
+        </button>
+
+        <a class="nav-pill nav-deck-pill js-deck" href="http://127.0.0.1:8484/" title="Open Local Operator Deck (:8484)">
+          <span class="deck-pulse"></span><span>DECK</span>
+        </a>
+
+        <button type="button" class="nav-pill nav-palette-btn" title="Open Global Command Palette (Ctrl+K)" aria-label="Command Palette">
+          <span class="palette-icon">🔍</span><kbd class="nav-kbd">Ctrl+K</kbd>
+        </button>
+
+        <button type="button" class="nav-pill nav-annotate-btn" title="Toggle On-Screen Annotator & Feedback (Shift+A)" aria-label="Toggle Annotator">
+          <span class="annotate-icon">✏️</span><span class="annotate-text">Annotate</span><kbd class="nav-kbd">Shift+A</kbd>
+        </button>
+
+        <div class="nav-dropdown nav-theme-dropdown">
+          <button class="nav-dropdown-btn nav-theme-current-btn" type="button" aria-haspopup="true" aria-expanded="false" title="Switch Visual Theme (Shift+T)">
+            <span class="current-theme-swatch" style="background:#00f0ff;"></span>
+            <span class="current-theme-emoji">🌙</span>
+            <span class="current-theme-label">Dark Void</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+        </div>
+
+        <a class="nav-pill git" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank" title="GitHub Repository — Open Source code, Debian packages, and releases">
+          <span>🐙 GitHub ↗</span>
+        </a>
+      </nav>
+
+      <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Toggle navigation menu">
+        <span class="burger-lines"><span class="b-line b-1"></span><span class="b-line b-2"></span><span class="b-line b-3"></span></span>
+        <span class="burger-text">Menu</span>
+      </button>
+      <div class="zoth-scroll-progress" id="zoth-scroll-progress"></div>
+    </header>
+
+    <nav class="drawer" id="drawer" aria-label="Universal Mobile Navigation" role="navigation">
+      <div class="drawer-header-brand">
+        <div class="d-brand-left">
+          <div class="brand-emblem-wrap">
+            <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth" width="28" height="28" class="brand-emblem-img" />
+          </div>
+          <span class="d-brand-title"><strong>Zoth Studio</strong><small>v12.0 Sovereign</small></span>
+        </div>
+        <button type="button" class="drawer-telemetry-badge" title="View Diagnostics HUD">● 6/6 DAEMONS</button>
+        <button type="button" class="drawer-close-btn" aria-label="Close mobile menu">✕</button>
+      </div>
+
+      <div class="drawer-section drawer-tools-section">
+        <div class="drawer-heading">⚡ Quick Actions</div>
+        <div class="drawer-quick-tools-grid">
+          <button type="button" class="drawer-tool-pill drawer-palette-trigger"><span>🔍</span> Command Palette <kbd class="nav-kbd">Ctrl+K</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-annotate-trigger"><span>✏️</span> On-Screen Annotator <kbd class="nav-kbd">Shift+A</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-telemetry-trigger"><span>⚡</span> Telemetry HUD</button>
+          <button type="button" class="drawer-tool-pill drawer-audio-trigger"><span>🔊</span> Audio FX</button>
+        </div>
+      </div>
+
+      <div class="drawer-section drawer-theme-section">
+        <div class="drawer-heading">🎨 Visual Theme (16 Archetypes)</div>
+        <div class="drawer-search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="drawer-theme-search-input" placeholder="Search 16 themes..." autocomplete="off" />
+        </div>
+        <div class="theme-filter-chips drawer-filter-chips">
+          <button type="button" class="theme-chip-btn active" data-drawer-cat="all">All (16)</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="studio originals">Originals</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="frontier ai & tech">Frontier</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="developer archetypes">Dev</button>
+        </div>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">✦ Featured</div>
+        <a class="drawer-link drawer-hero-link" href="/#for-everyone"><span class="d-link-icon">✦</span><div class="d-link-body"><strong>For You (No-Code Showcases)</strong><small>How Non-Tech Founders, Creators & Teams Use Zoth</small></div><span class="nav-item-badge">SHOWCASE</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🔮 Core AI & Pantheon</div>
+        <a class="drawer-link" href="/zoth/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+        <a class="drawer-link" href="/agents/"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+        <a class="drawer-link" href="/studio/consensus.html"><span class="d-link-icon">⚔️</span><div class="d-link-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+        <a class="drawer-link" href="/studio/swarm.html"><span class="d-link-icon">🌐</span><div class="d-link-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+        <a class="drawer-link" href="/memory/"><span class="d-link-icon">🧠</span><div class="d-link-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+        <a class="drawer-link" href="/zoth-world.html"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🪐 Workstations & DAGs</div>
+        <a class="drawer-link" href="/studio/cockpit.html"><span class="d-link-icon">🪐</span><div class="d-link-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=webgen"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=vos-sandbox"><span class="d-link-icon">💻</span><div class="d-link-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=nexus-3d"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=omnipost"><span class="d-link-icon">🎬</span><div class="d-link-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=math-pillars"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=secure-comms"><span class="d-link-icon">🔒</span><div class="d-link-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=signal-bridge"><span class="d-link-icon">📡</span><div class="d-link-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=web3-hub"><span class="d-link-icon">🪙</span><div class="d-link-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=pets"><span class="d-link-icon">💎</span><div class="d-link-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=tool-nexus"><span class="d-link-icon">🛠️</span><div class="d-link-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📜 Universe & Research</div>
+        <a class="drawer-link" href="/comic/"><span class="d-link-icon">🎨</span><div class="d-link-body"><strong>AZOTH Anime Comic Series</strong><small>Season 1 Ep 1: Genesis in Silicon Rain</small></div><span class="nav-item-badge">AUDIO</span></a>
+        <a class="drawer-link" href="/social/"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+        <a class="drawer-link" href="/articles/"><span class="d-link-icon">📜</span><div class="d-link-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+        <a class="drawer-link" href="/article/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+        <a class="drawer-link" href="/ai-webgpu.html"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+        <a class="drawer-link" href="/adytum/"><span class="d-link-icon">🏛️</span><div class="d-link-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📚 Docs & Security</div>
+        <a class="drawer-link" href="/docs/"><span class="d-link-icon">📚</span><div class="d-link-body"><strong>Complete Documentation</strong><small>Port Topology, 1-Click Install Scripts & API</small></div><span class="nav-item-badge">DOCS</span></a>
+        <a class="drawer-link" href="/vault/"><span class="d-link-icon">🔐</span><div class="d-link-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+        <a class="drawer-link" href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+        <a class="drawer-link" href="/faq.html"><span class="d-link-icon">❓</span><div class="d-link-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+      </div>
+
+      <div class="drawer-section drawer-footer-section">
+        <a class="drawer-pill-link js-deck" href="http://127.0.0.1:8484/">💻 Launch Local Operator Deck (:8484)</a>
+        <a class="drawer-pill-link" href="https://github.com/NullAITech/zoth-studio" target="_blank" rel="noopener noreferrer">🐙 GitHub Source Repository ↗</a>
+        <a class="drawer-pill-link" href="/downloads/zoth-studio-android.apk">📱 Download Android App (.apk)</a>
+      </div>
+    </nav>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+<!-- ======================= SNIPPET (paste over .sovereign-stack) ======================= -->
+<div aria-label="Supported model providers" class="tkc-stack" id="tkc-ticker">
+<div class="tkc-head">
+<span class="tkc-label"><span aria-hidden="true" class="tkc-dot"></span>SOVEREIGN SCANNER // NODE REGISTRY</span>
+<span aria-hidden="true" class="tkc-rule"></span>
+<span aria-hidden="true" class="tkc-readout" id="tkc-readout">SCAN ACTIVE</span>
+</div>
+<div class="tkc-marquee" id="tkc-marquee">
+<div aria-hidden="true" class="tkc-scanline"></div>
+<div class="tkc-track">
+<!-- set A (visible) -->
+<div class="tkc-node" style="--i:0">
+<div class="tkc-logo-row">
+<img alt="Anthropic Claude" loading="lazy" src="/assets/logos/anthropic-claude.svg"/>
+<span aria-hidden="true" class="tkc-sig"><i></i><i></i><i></i><i></i></span>
+</div>
+<div class="tkc-status"><span class="tkc-id">NODE 01 // CLAUDE</span><br/><span class="tkc-ok">LINK ESTABLISHED</span> · <span class="tkc-lat">12ms</span></div>
+</div>
+<div class="tkc-node" style="--i:1">
+<div class="tkc-logo-row">
+<img alt="Google Gemini" loading="lazy" src="/assets/logos/google-gemini.svg"/>
+<span aria-hidden="true" class="tkc-sig"><i></i><i></i><i></i><i></i></span>
+</div>
+<div class="tkc-status"><span class="tkc-id">NODE 02 // GEMINI</span><br/><span class="tkc-ok">LINK ESTABLISHED</span> · <span class="tkc-lat">18ms</span></div>
+</div>
+<div class="tkc-node" style="--i:2">
+<div class="tkc-logo-row">
+<img alt="xAI Grok" loading="lazy" src="/assets/logos/xai-grok.svg"/>
+<span aria-hidden="true" class="tkc-sig"><i></i><i></i><i></i><i></i></span>
+</div>
+<div class="tkc-status"><span class="tkc-id">NODE 03 // GROK</span><br/><span class="tkc-ok">LINK ESTABLISHED</span> · <span class="tkc-lat">21ms</span></div>
+</div>
+<div class="tkc-node" style="--i:3">
+<div class="tkc-logo-row">
+<img alt="DeepSeek" loading="lazy" src="/assets/logos/deepseek.svg"/>
+<span aria-hidden="true" class="tkc-sig"><i></i><i></i><i></i><i></i></span>
+</div>
+<div class="tkc-status"><span class="tkc-id">NODE 04 // DEEPSEEK</span><br/><span class="tkc-ok">LINK ESTABLISHED</span> · <span class="tkc-lat">33ms</span></div>
+</div>
+<div class="tkc-node" style="--i:4">
+<div class="tkc-logo-row">
+<img alt="Cerebras" loading="lazy" src="/assets/logos/cerebras-wafer.svg"/>
+<span aria-hidden="true" class="tkc-sig"><i></i><i></i><i></i><i></i></span>
+</div>
+<div class="tkc-status"><span class="tkc-id">NODE 05 // CEREBRAS</span><br/><span class="tkc-ok">LINK ESTABLISHED</span> · <span class="tkc-lat">09ms</span></div>
+</div>
+<div class="tkc-node" style="--i:5">
+<div class="tkc-logo-row">
+<img alt="Nous Research" loading="lazy" src="/assets/logos/nous-research.svg"/>
+<span aria-hidden="true" class="tkc-sig"><i></i><i></i><i></i><i></i></span>
+</div>
+<div class="tkc-status"><span class="tkc-id">NODE 06 // NOUS</span><br/><span class="tkc-ok">LINK ESTABLISHED</span> · <span class="tkc-lat">07ms</span></div>
+</div>
+<!-- set B (aria-hidden duplicate for seamless loop) -->
+<div aria-hidden="true" class="tkc-node">
+<div class="tkc-logo-row">
+<img alt="" loading="lazy" src="/assets/logos/anthropic-claude.svg"/>
+<span class="tkc-sig"><i></i><i></i><i></i><i></i></span>
+</div>
+<div class="tkc-status"><span class="tkc-id">NODE 01 // CLAUDE</span><br/><span class="tkc-ok">LINK ESTABLISHED</span> · <span class="tkc-lat">12ms</span></div>
+</div>
+<div aria-hidden="true" class="tkc-node">
+<div class="tkc-logo-row">
+<img alt="" loading="lazy" src="/assets/logos/google-gemini.svg"/>
+<span class="tkc-sig"><i></i><i></i><i></i><i></i></span>
+</div>
+<div class="tkc-status"><span class="tkc-id">NODE 02 // GEMINI</span><br/><span class="tkc-ok">LINK ESTABLISHED</span> · <span class="tkc-lat">18ms</span></div>
+</div>
+<div aria-hidden="true" class="tkc-node">
+<div class="tkc-logo-row">
+<img alt="" loading="lazy" src="/assets/logos/xai-grok.svg"/>
+<span class="tkc-sig"><i></i><i></i><i></i><i></i></span>
+</div>
+<div class="tkc-status"><span class="tkc-id">NODE 03 // GROK</span><br/><span class="tkc-ok">LINK ESTABLISHED</span> · <span class="tkc-lat">21ms</span></div>
+</div>
+<div aria-hidden="true" class="tkc-node">
+<div class="tkc-logo-row">
+<img alt="" loading="lazy" src="/assets/logos/deepseek.svg"/>
+<span class="tkc-sig"><i></i><i></i><i></i><i></i></span>
+</div>
+<div class="tkc-status"><span class="tkc-id">NODE 04 // DEEPSEEK</span><br/><span class="tkc-ok">LINK ESTABLISHED</span> · <span class="tkc-lat">33ms</span></div>
+</div>
+<div aria-hidden="true" class="tkc-node">
+<div class="tkc-logo-row">
+<img alt="" loading="lazy" src="/assets/logos/cerebras-wafer.svg"/>
+<span class="tkc-sig"><i></i><i></i><i></i><i></i></span>
+</div>
+<div class="tkc-status"><span class="tkc-id">NODE 05 // CEREBRAS</span><br/><span class="tkc-ok">LINK ESTABLISHED</span> · <span class="tkc-lat">09ms</span></div>
+</div>
+<div aria-hidden="true" class="tkc-node">
+<div class="tkc-logo-row">
+<img alt="" loading="lazy" src="/assets/logos/nous-research.svg"/>
+<span class="tkc-sig"><i></i><i></i><i></i><i></i></span>
+</div>
+<div class="tkc-status"><span class="tkc-id">NODE 06 // NOUS</span><br/><span class="tkc-ok">LINK ESTABLISHED</span> · <span class="tkc-lat">07ms</span></div>
+</div>
+</div>
+</div>
+</div>
+<!-- ======================= /SNIPPET ======================= -->
+<script id="tkc-script">
+(function () {
+  "use strict";
+  var stack = document.getElementById("tkc-ticker");
+  if (!stack) return;
+  var marquee = document.getElementById("tkc-marquee");
+  var readout = document.getElementById("tkc-readout");
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduced) {
+    if (readout) readout.textContent = "SCAN COMPLETE";
+    return; // static grid; CSS handles the fallback
+  }
+
+  // Hover freeze + highlight
+  marquee.addEventListener("mouseenter", function () {
+    marquee.classList.add("tkc-paused");
+    if (readout) readout.textContent = "SCAN HELD // NODE INSPECT";
+  });
+  marquee.addEventListener("mouseleave", function () {
+    marquee.classList.remove("tkc-paused");
+    if (readout) readout.textContent = "SCAN ACTIVE";
+  });
+
+  // Touch tap-to-freeze
+  var tapped = false;
+  marquee.addEventListener("touchstart", function () {
+    tapped = !tapped;
+    marquee.classList.toggle("tkc-paused", tapped);
+    if (readout) readout.textContent = tapped ? "SCAN HELD" : "SCAN ACTIVE";
+  }, { passive: true });
+
+  // Cycle readout ticker (cheap, 1.5s interval, textContent only)
+  var phases = ["SCAN ACTIVE", "SWEEP 0x2F // PASSIVE", "SIGNAL LOCK 06/06", "SWEEP 0x30 // PASSIVE"];
+  var pi = 0;
+  setInterval(function () {
+    if (marquee.classList.contains("tkc-paused")) return;
+    pi = (pi + 1) % phases.length;
+    if (readout) readout.textContent = phases[pi];
+  }, 1600);
+})();
+</script>
+</body>
+</html>

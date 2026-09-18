@@ -1,0 +1,177 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import HeroSection from "../components/HeroSection.astro";
+import GoogleReviews from "../components/GoogleReviews.astro";
+import MediaPlaceholder from "../components/MediaPlaceholder.astro";
+import { site } from "../data/site";
+
+const title = "Request A Consultation | Contact Elite Connect Virginia Beach";
+const description = "Contact Elite Connect for CCTV, alarms, access control, structured cabling, AV, MSP, VoIP, and low-voltage project consultations in Virginia Beach and Hampton Roads.";
+---
+
+<BaseLayout title={title} description={description} canonical="/contact/">
+  <HeroSection
+    variant="page"
+    align="left"
+    bgImage="/assets/unsplash/hero-bg.jpg"
+    eyebrow="Request consultation"
+    title="Tell us what the property needs."
+    lead="Share the service, location, urgency, and any existing system details. Elite Connect will follow up to talk through the right next step."
+    ctas={[]}
+    placeholderDesc="Hero image: friendly office scene or technician arriving at a property with branded vehicle and equipment."
+  />
+
+  <section class="section band reveal">
+    <div class="contact-layout">
+      <div class="contact-form-wrapper">
+        <form
+          name="consultation"
+          method="POST"
+          data-netlify="true"
+          netlify-honeypot="bot-field"
+          action="/thank-you/"
+          class="contact-form"
+        >
+          <input type="hidden" name="form-name" value="consultation" />
+          <p hidden><label>Do not fill this out: <input name="bot-field" /></label></p>
+
+          <div class="form-grid">
+            <label>Name
+              <input name="name" type="text" autocomplete="name" placeholder="Your full name" required />
+            </label>
+            <label>Email
+              <input type="email" name="email" autocomplete="email" placeholder="you@email.com" required />
+            </label>
+          </div>
+
+          <div class="form-grid">
+            <label>Phone
+              <input name="phone" type="tel" autocomplete="tel" placeholder="804-000-0000" required />
+            </label>
+            <label>Project city
+              <input name="city" type="text" autocomplete="address-level2" placeholder="Virginia Beach" />
+            </label>
+          </div>
+
+          <div class="form-grid">
+            <label>Customer type
+              <select name="customer-type" required>
+                <option value="" disabled selected>Select one</option>
+                <option>Homeowner</option>
+                <option>Business</option>
+                <option>Contractor / partner</option>
+              </select>
+            </label>
+            <label>Service interest
+              <select name="service" required>
+                <option value="" disabled selected>Select one</option>
+                <option>CCTV / Video Monitoring</option>
+                <option>Alarm Systems</option>
+                <option>Access Control</option>
+                <option>Structured Cabling</option>
+                <option>Audio / Visual</option>
+                <option>MSP / Managed IT</option>
+                <option>VoIP / Communications</option>
+                <option>Other / Not Sure</option>
+              </select>
+            </label>
+          </div>
+
+          <label>Urgency
+            <select name="urgency">
+              <option value="" disabled selected>Select urgency</option>
+              <option>Planning ahead</option>
+              <option>Need quote soon</option>
+              <option>Active issue</option>
+              <option>New buildout / remodel</option>
+            </select>
+          </label>
+
+          <label>Project details
+            <textarea name="message" rows="5" placeholder="Describe the project, property type, number of cameras, existing wiring, timeline..." required></textarea>
+          </label>
+
+          <button type="submit" class="button primary">
+            <span class="submit-text">Send Consultation Request</span>
+            <span class="submit-spinner" hidden>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" opacity="0.3"/>
+                <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/>
+              </svg>
+              Sending...
+            </span>
+          </button>
+        </form>
+
+        <div class="form-success-overlay" id="form-success">
+          <div class="form-success-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <p class="form-success-title">Request sent!</p>
+          <p class="form-success-text">Elite Connect will review your project details and follow up within one business day.</p>
+          <div class="form-success-actions">
+            <a href="/" class="button secondary">Back to home</a>
+            <a href={site.phoneHref} class="button primary">Call {site.phone}</a>
+          </div>
+        </div>
+      </div>
+
+      <aside class="contact-card">
+        <h2>Direct contact</h2>
+        <p><strong>Phone:</strong> <a href={site.phoneHref}>{site.phone}</a></p>
+        <p><strong>Email:</strong> <a href={site.emailHref}>{site.email}</a></p>
+        <p><strong>Service area:</strong> {site.serviceArea}</p>
+        <p><strong>License:</strong> {site.license}<br />{site.dcjs}</p>
+        <p>For active security concerns, call instead of waiting on a form response.</p>
+        <div style="margin-top: 1.5rem;">
+          <MediaPlaceholder
+            description="Photo: Elite Connect office exterior, company vehicle, or branded equipment case."
+            aspect="4/3"
+          />
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <GoogleReviews />
+</BaseLayout>
+
+<script is:inline>
+(function() {
+  var form = document.querySelector('.contact-form');
+  var success = document.getElementById('form-success');
+  if (!form || !success) return;
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    var btn = form.querySelector('button[type="submit"]');
+    var text = btn.querySelector('.submit-text');
+    var spinner = btn.querySelector('.submit-spinner');
+
+    btn.disabled = true;
+    if (text) text.hidden = true;
+    if (spinner) spinner.hidden = false;
+
+    var data = new FormData(form);
+    fetch('/', {
+      method: 'POST',
+      headers: { 'Accept': 'application/x-www-form-urlencoded;charset=UTF-8' },
+      body: new URLSearchParams(data).toString()
+    })
+    .then(function() {
+      success.classList.add('visible');
+      form.reset();
+    })
+    .catch(function() {
+      form.submit();
+    })
+    .finally(function() {
+      btn.disabled = false;
+      if (text) text.hidden = false;
+      if (spinner) spinner.hidden = true;
+    });
+  });
+})();
+</script>

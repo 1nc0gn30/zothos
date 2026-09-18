@@ -1,0 +1,119 @@
+@use '../config' as *;
+
+.list-group {
+  --list-group-header-padding-y: #{$list-group-header-padding-y};
+
+  margin-inline-start: 0;
+  margin-inline-end: 0;
+}
+
+.list-group-header {
+  padding: var(--list-group-header-padding-y) $list-group-item-padding-x;
+  font-size: $h5-font-size;
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+  color: $list-group-header-color;
+  text-transform: uppercase;
+  background: $list-group-header-bg;
+  border-bottom: var(--border-width) var(--border-style) var(--border-color);
+
+  .list-group-flush > & {
+    &:last-child {
+      border-bottom-width: 0;
+    }
+  }
+}
+
+.list-group-item {
+  background-color: inherit;
+
+  &.disabled,
+  &:disabled {
+    color: $gray-500;
+    background-color: $dropdown-link-hover-bg;
+  }
+}
+
+.list-group-item.active {
+  background-color: $dropdown-link-hover-bg;
+  border-inline-start-color: $component-active-bg;
+  border-inline-start-width: $border-width-wide;
+}
+
+.list-bordered {
+  .list-item {
+    margin-top: -1px;
+    border-top: var(--border-width) var(--border-style) var(--border-color);
+
+    &:first-child {
+      border-top: none;
+    }
+  }
+}
+
+.list-group-hoverable {
+  .list-group-item {
+    &:active,
+    &:focus,
+    &:hover {
+      background-color: $dropdown-link-hover-bg;
+    }
+  }
+
+  .list-group-item-actions {
+    opacity: 0;
+    @include transition(opacity $transition-time);
+  }
+
+  .list-group-item:hover .list-group-item-actions,
+  .list-group-item-actions.show {
+    opacity: 1;
+  }
+}
+
+.list-group-transparent {
+  --list-group-border-radius: 0;
+  margin: 0 (-$list-group-item-padding-x);
+
+  .list-group-item {
+    background: none;
+    border: 0;
+
+    .icon {
+      color: var(--secondary);
+    }
+
+    &.active {
+      font-weight: var(--font-weight-semibold);
+      color: inherit;
+      background: $list-group-active-bg;
+
+      .icon {
+        color: inherit;
+      }
+    }
+  }
+}
+
+/**
+Seprated list
+*/
+.list-separated {
+  display: flex;
+  flex-direction: column;
+  gap: $spacer;
+}
+
+/**
+Inline list
+ */
+.list-inline {
+  margin: 0;
+}
+
+.list-inline-dots {
+  .list-inline-item + .list-inline-item::before {
+    margin-inline-end: $list-inline-padding;
+    content: ' · ';
+  }
+}

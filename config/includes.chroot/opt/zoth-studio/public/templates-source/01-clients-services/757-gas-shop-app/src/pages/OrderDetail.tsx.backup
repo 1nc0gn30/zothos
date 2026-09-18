@@ -1,0 +1,453 @@
+import React, { useEffect, useState, useRef } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
+import { ArrowLeft, MapPin, Package, MessageSquare, Send, AlertCircle, Clock, Navigation } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { Order, OrderItem, OrderMeetup, OrderMessage } from '../types/database';
+import { useAuthStore } from '../store/authStore';
+import { format } from 'date-fns';
+
+// Map Imports
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// Fix for default Leaflet icons in React
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+let DefaultIcon = L.icon({
+  iconUrl: icon,
+  shadowUrl: iconShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41]
+});
+L.Marker.prototype.options.icon = DefaultIcon;
+
+const VA_BEACH_TOWN_CENTER = { lat: 36.8430, lng: -76.1320 };
+
+const OrderDetail = () => {
+  const { id } = useParams<{ id: string }>();
+  const { user } = useAuthStore();
+  
+  const [order, setOrder] = useState<Order | null>(null);
+  const [items, setItems] = useState<OrderItem[]>([]);
+  const [meetup, setMeetup] = useState<OrderMeetup | null>(null);
+  const [messages, setMessages] = useState<OrderMessage[]>([]);
+  
+  const [loading, setLoading] = useState(true);
+  const [newMessage, setNewMessage] = useState('');
+  const [sending, setSending] = useState(false);
+  
+  // Timer states
+  const [minutesWaiting, setMinutesWaiting] = useState(0);
+  const [showConcern, setShowConcern] = useState(false);
+  
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (user && id) {
+      fetchOrderDetails();
+      subscribeToMessages();
+    }
+  }, [user, id]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  // Timer Effect for 10 min threshold
+  useEffect(() => {
+    if (order && (order.status === 'pending' || order.status === 'processing')) {
+      const checkWaitTime = () => {
+        const orderTime = new Date(order.created_at).getTime();
+        const now = new Date().getTime();
+        const diffMins = Math.floor((now - orderTime) / 60000);
+        
+        setMinutesWaiting(diffMins);
+        if (diffMins >= 10) {
+          setShowConcern(true);
+        }
+      };
+      
+      checkWaitTime(); // initial check
+      const interval = setInterval(checkWaitTime, 60000); // Check every minute
+      return () => clearInterval(interval);
+    } else {
+      setShowConcern(false);
+    }
+  }, [order]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const fetchOrderDetails = async () => {
+    if (!id) return;
+    try {
+      const { data: orderData, error: orderError } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('id', id)
+        .single();
+      if (orderError) throw orderError;
+      setOrder(orderData);
+
+      const { data: itemsData, error: itemsError } = await supabase
+        .from('order_items')
+        .select('*')
+        .eq('order_id', id);
+      if (itemsError) throw itemsError;
+      setItems(itemsData || []);
+
+      const { data: meetupData, error: meetupError } = await supabase
+        .from('order_meetups')
+        .select('*')
+        .eq('order_id', id)
+        .single();
+      if (meetupError && meetupError.code !== 'PGRST116') throw meetupError; 
+      setMeetup(meetupData);
+
+      const { data: messagesData, error: messagesError } = await supabase
+        .from('order_messages')
+        .select('*')
+        .eq('order_id', id)
+        .order('created_at', { ascending: true });
+      if (messagesError) throw messagesError;
+      setMessages(messagesData || []);
+
+    } catch (error) {
+      console.error('Error fetching order details:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const subscribeToMessages = () => {
+    if (!id) return;
+    const channel = supabase
+      .channel(`order_messages_${id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'order_messages',
+          filter: `order_id=eq.${id}`
+        },
+        (payload) => {
+          setMessages((prev) => [...prev, payload.new as OrderMessage]);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  };
+
+  const sendDirectMessage = async (msgText: string) => {
+    if (!user || !id) return;
+    setSending(true);
+    try {
+      // 1. Save message to Supabase
+      const { error } = await supabase
+        .from('order_messages')
+        .insert({
+          order_id: id,
+          user_id: user.id,
+          message: msgText
+        });
+
+      if (error) throw error;
+      
+      // 2. Trigger Netlify email function silently
+      fetch('/.netlify/functions/notify-message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          order_id: id,
+          user_id: user.id,
+          message: msgText
+        }),
+      }).catch(err => console.error('Failed to trigger email notification:', err));
+
+      // 3. Clear the chat input
+      setNewMessage('');
+    } catch (error) {
+      console.error('Error sending message:', error);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMessage.trim()) return;
+    await sendDirectMessage(newMessage.trim());
+  };
+
+  const handleSendConcern = async () => {
+    await sendDirectMessage("Hello, I have been waiting for over 10 minutes and wanted to check on the status of my order. Could I get an update please?");
+    setShowConcern(false); // Hide the button after using it
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!order) {
+    return (
+      <div className="text-center py-20">
+        <h2 className="text-2xl font-bold mb-4">Order not found</h2>
+        <Link to="/orders" className="text-primary hover:underline">Return to Orders</Link>
+      </div>
+    );
+  }
+
+  const mapCenter: [number, number] = meetup 
+    ? [meetup.latitude, meetup.longitude] 
+    : [VA_BEACH_TOWN_CENTER.lat, VA_BEACH_TOWN_CENTER.lng];
+
+  return (
+    <div className="max-w-5xl mx-auto">
+      <Helmet>
+        <title>Order #{order.id.slice(0, 8).toUpperCase()} | 757 Gas</title>
+      </Helmet>
+
+      {/* Status Warning & Wait Message */}
+      {(order.status === 'pending' || order.status === 'processing') && (
+        <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl flex items-start space-x-3 text-yellow-600 dark:text-yellow-400">
+          <Clock className="h-5 w-5 mt-0.5 flex-shrink-0" />
+          <div>
+            <h3 className="font-bold">Waiting for Confirmation</h3>
+            <p className="text-sm mt-1">Please wait here in the Orders view for an update on your meetup location. We are reviewing your order right now.</p>
+          </div>
+        </div>
+      )}
+
+      <div className="flex items-center justify-between mb-8">
+        <Link 
+          to="/orders"
+          className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4 mr-1" />
+          Back to Orders
+        </Link>
+        <div className="px-3 py-1 bg-primary/10 text-primary border border-primary/20 rounded-full text-sm font-bold uppercase tracking-wider">
+          {order.status}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left Column: Details & Items */}
+        <div className="lg:col-span-2 space-y-8">
+          
+          {/* Order Info */}
+          <div className="bg-card border border-border rounded-xl p-6">
+            <h1 className="text-2xl font-bold mb-2">Order #{order.id.slice(0, 8).toUpperCase()}</h1>
+            <p className="text-muted-foreground mb-6">
+              Placed on {format(new Date(order.created_at), 'MMMM d, yyyy at h:mm a')}
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="flex items-start space-x-3">
+                  <MapPin className="h-5 w-5 text-primary mt-0.5" />
+                  <div>
+                    <div className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-1">Meetup Location</div>
+                    <div className="font-medium">{meetup?.label || 'Virginia Beach Town Center (Default Area)'}</div>
+                    {meetup?.note ? (
+                      <div className="text-sm text-muted-foreground mt-1">{meetup.note}</div>
+                    ) : (
+                      <div className="text-sm text-muted-foreground mt-1 italic">Exact coordinates pending admin confirmation.</div>
+                    )}
+
+                    {/* Navigation Links - Only show if meetup coordinates are set */}
+                    {meetup && (
+                      <div className="flex flex-wrap gap-2 mt-4">
+                        <a
+                          href={`https://www.google.com/maps/search/?api=1&query=${meetup.latitude},${meetup.longitude}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center space-x-1.5 text-xs font-bold bg-primary/10 text-primary hover:bg-primary/20 px-3 py-2 rounded-lg transition-colors border border-primary/20"
+                        >
+                          <Navigation className="h-3 w-3" />
+                          <span>Google Maps</span>
+                        </a>
+                        <a
+                          href={`http://maps.apple.com/?ll=${meetup.latitude},${meetup.longitude}&q=${encodeURIComponent(meetup.label || '757 Gas Meetup')}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center space-x-1.5 text-xs font-bold bg-zinc-800 text-white hover:bg-zinc-700 px-3 py-2 rounded-lg transition-colors border border-zinc-700"
+                        >
+                          <Navigation className="h-3 w-3" />
+                          <span>Apple Maps</span>
+                        </a>
+                      </div>
+                    )}
+
+                  </div>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="flex items-start space-x-3">
+                  <Package className="h-5 w-5 text-primary mt-0.5" />
+                  <div>
+                    <div className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-1">Pickup Code</div>
+                    <div className="font-mono text-xl font-bold tracking-widest bg-muted px-3 py-1 rounded-md inline-block">
+                      {order.code || '----'}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">Show this code at pickup</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Leaflet Map Integration */}
+            <div className="mt-8 rounded-xl overflow-hidden border border-border h-[250px] relative z-0">
+              <MapContainer center={mapCenter} zoom={13} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
+                <TileLayer
+                  attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <Marker position={mapCenter}>
+                  <Popup>
+                    <div className="font-bold text-[14px]">{meetup?.label || 'General Meetup Area'}</div>
+                    {!meetup && <div className="text-xs text-gray-500 mt-1">Awaiting exact drop-off coordinates...</div>}
+                    {meetup && (
+                      <div className="flex flex-col gap-1 mt-2 pt-2 border-t border-gray-200">
+                        <a 
+                          href={`https://www.google.com/maps/search/?api=1&query=${meetup.latitude},${meetup.longitude}`} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="text-[12px] font-semibold text-blue-600 hover:underline"
+                        >
+                          Open in Google Maps
+                        </a>
+                        <a 
+                          href={`http://maps.apple.com/?ll=${meetup.latitude},${meetup.longitude}&q=${encodeURIComponent(meetup.label || 'Meetup')}`} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="text-[12px] font-semibold text-blue-600 hover:underline"
+                        >
+                          Open in Apple Maps
+                        </a>
+                      </div>
+                    )}
+                  </Popup>
+                </Marker>
+              </MapContainer>
+            </div>
+
+          </div>
+
+          {/* Order Items */}
+          <div className="bg-card border border-border rounded-xl p-6">
+            <h2 className="text-xl font-bold mb-6">Order Items</h2>
+            <div className="space-y-4">
+              {items.map((item) => (
+                <div key={item.id} className="flex justify-between items-center py-3 border-b border-border last:border-0 last:pb-0">
+                  <div className="flex items-center space-x-4">
+                    <div className="font-medium bg-muted w-8 h-8 rounded-full flex items-center justify-center text-sm">
+                      {item.quantity}x
+                    </div>
+                    <div className="font-medium">{item.product_name}</div>
+                  </div>
+                  <div className="font-bold">${(item.price_at_purchase * item.quantity).toFixed(2)}</div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="mt-6 pt-6 border-t border-border flex justify-between items-center">
+              <span className="font-bold text-lg">Total Amount</span>
+              <span className="font-bold text-2xl text-primary">${order.total_amount.toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Chat */}
+        <div className="lg:col-span-1">
+          <div className="bg-card border border-border rounded-xl flex flex-col h-[600px] sticky top-24">
+            <div className="p-4 border-b border-border flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <MessageSquare className="h-5 w-5 text-primary" />
+                <h2 className="font-bold">Order Chat</h2>
+              </div>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {messages.length === 0 ? (
+                <div className="text-center text-muted-foreground text-sm mt-10">
+                  No messages yet. Send a message to coordinate your pickup.
+                </div>
+              ) : (
+                messages.map((msg) => {
+                  const isMe = msg.user_id === user?.id;
+                  return (
+                    <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                      <div 
+                        className={`max-w-[85%] rounded-2xl px-4 py-2 ${
+                          isMe 
+                            ? 'bg-primary text-primary-foreground rounded-br-sm' 
+                            : 'bg-muted text-foreground rounded-bl-sm'
+                        }`}
+                      >
+                        {msg.message}
+                      </div>
+                      <span className="text-[10px] text-muted-foreground mt-1 px-1">
+                        {format(new Date(msg.created_at), 'h:mm a')}
+                      </span>
+                    </div>
+                  );
+                })
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Concern Button Overlay */}
+            {showConcern && (
+              <div className="p-3 bg-card border-t border-border">
+                <button
+                  onClick={handleSendConcern}
+                  className="w-full flex items-center justify-center space-x-2 bg-yellow-500 hover:bg-yellow-600 text-black py-2 rounded-lg text-sm font-bold transition-colors"
+                >
+                  <AlertCircle className="h-4 w-4" />
+                  <span>Request Status Update</span>
+                </button>
+              </div>
+            )}
+            
+            <div className="p-4 border-t border-border">
+              <form onSubmit={handleSendMessage} className="flex space-x-2">
+                <input
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder="Type a message..."
+                  className="flex-1 px-4 py-2 rounded-full border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                  disabled={sending}
+                />
+                <button
+                  type="submit"
+                  disabled={!newMessage.trim() || sending}
+                  className="p-2 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-colors disabled:opacity-50"
+                >
+                  <Send className="h-5 w-5" />
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default OrderDetail;

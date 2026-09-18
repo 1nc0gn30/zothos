@@ -1,0 +1,943 @@
+/* ═══════════════════════════════════════════════════════════════
+   ZOTH 3D PETS SANCTUARY & CHAT CONSOLE — SACRED GEOMETRY SYSTEM
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  --cyan: #00f0ff;
+  --magenta: #d946ef;
+  --gold: #fbbf24;
+  --emerald: #34d399;
+  --purple: #c084fc;
+  --bg-deep: #030408;
+  --bg-glass: rgba(10, 14, 26, 0.94);
+  --border-glass: rgba(255, 255, 255, 0.12);
+  --border-cyan: rgba(0, 240, 255, 0.35);
+
+  /* High-Contrast WCAG AAA / AA Text Tokens */
+  --text: #f8fafc;
+  --text-bright: #ffffff;
+  --text-body: #f1f5f9;
+  --text-dossier: #e2e8f0;
+  --text-specs: #cbd5e1;
+  --muted: #94a3b8;
+  --axiom-quote: #fef08a;
+
+  /* Typography Stack */
+  --font-display: 'Syne', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: 'Fraunces', Georgia, serif;
+  --font-axiom: 'Fraunces', Georgia, serif;
+  --font-body: 'Figtree', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  /* Sacred Geometry & Fibonacci Scale Tokens */
+  --phi: 1.6180339887;
+  --fib-1: 1px;
+  --fib-2: 2px;
+  --fib-3: 3px;
+  --fib-5: 5px;
+  --fib-8: 8px;
+  --fib-13: 13px;
+  --fib-21: 21px;
+  --fib-34: 34px;
+  --fib-55: 55px;
+  --fib-89: 89px;
+  --fib-144: 144px;
+  --fib-233: 233px;
+  --fib-377: 377px;
+  --fib-610: 610px;
+
+  /* Fibonacci Radii Scale */
+  --radius-fib-xs: 5px;
+  --radius-fib-sm: 8px;
+  --radius-fib-md: 13px;
+  --radius-fib-lg: 21px;
+  --radius-fib-xl: 34px;
+  --radius-fib-2xl: 55px;
+
+  /* Legacy Aliases */
+  --rad-xs: var(--radius-fib-xs);
+  --rad-sm: var(--radius-fib-sm);
+  --rad-md: var(--radius-fib-md);
+  --rad-lg: var(--radius-fib-lg);
+  --rad-xl: var(--radius-fib-xl);
+  --rad-2xl: var(--radius-fib-2xl);
+
+  /* Fibonacci Spacing & Padding Mappings */
+  --space-fib-xs: var(--fib-8);
+  --space-fib-sm: var(--fib-13);
+  --space-fib-md: var(--fib-21);
+  --space-fib-lg: var(--fib-34);
+  --space-fib-xl: var(--fib-55);
+
+  --golden-split: 1.618fr 1fr;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body.deck-page {
+  background: var(--bg-deep);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  margin: 0;
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
+  -webkit-font-smoothing: antialiased;
+}
+
+.pets-main-container {
+  min-height: calc(100vh - 65px);
+  padding: var(--fib-13) var(--fib-21);
+  box-sizing: border-box;
+  max-width: 100vw;
+  width: 100%;
+}
+
+.sanctuary-layout {
+  display: grid;
+  grid-template-columns: 1.618fr 1fr;
+  gap: var(--fib-21);
+  min-height: calc(100vh - 90px);
+  max-width: 100%;
+}
+
+@media (max-width: 1024px) {
+  .pets-main-container {
+    height: auto;
+    padding: var(--fib-8) var(--fib-13);
+  }
+  .sanctuary-layout {
+    grid-template-columns: 1fr;
+    height: auto;
+    min-height: auto;
+    gap: var(--fib-13);
+  }
+  .sanctuary-stage {
+    min-height: 340px !important;
+    height: 50vh !important;
+  }
+}
+
+/* 3D WebGL Stage */
+.sanctuary-stage {
+  position: relative;
+  background: radial-gradient(circle at 50% 50%, #0d152c 0%, #030408 100%);
+  border: 1px solid var(--border-cyan);
+  border-radius: var(--rad-lg);
+  overflow: hidden;
+  box-shadow: inset 0 0 var(--fib-55) rgba(0, 240, 255, 0.08), 0 10px var(--fib-34) rgba(0, 0, 0, 0.6);
+  min-height: 480px;
+  touch-action: pan-y;
+}
+
+#three-stage {
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: pan-y;
+}
+
+#three-stage canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+  touch-action: pan-y;
+}
+
+.stage-top-hud {
+  position: absolute;
+  top: var(--fib-13);
+  left: var(--fib-13);
+  right: var(--fib-13);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+  z-index: 10;
+  flex-wrap: wrap;
+  gap: var(--fib-8);
+  max-width: calc(100% - var(--fib-21));
+}
+
+.hud-pill-row {
+  display: flex;
+  gap: var(--fib-8);
+  pointer-events: auto;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.hud-pill {
+  background: rgba(4, 6, 14, 0.88);
+  border: 1px solid var(--border-cyan);
+  color: var(--cyan);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: var(--fib-5) var(--fib-13);
+  border-radius: 999px;
+  backdrop-filter: blur(10px);
+  white-space: nowrap;
+}
+
+.hud-pill-btn {
+  background: rgba(4, 6, 14, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: var(--text-specs);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: var(--fib-5) var(--fib-13);
+  border-radius: 999px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: all 0.2s ease;
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+}
+
+.hud-pill-btn:hover, .hud-pill-btn.active {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  box-shadow: 0 0 var(--fib-13) rgba(0, 240, 255, 0.35);
+  font-weight: 700;
+}
+
+/* Sidebar Chat & Dispatch Console */
+.sanctuary-sidebar {
+  background: var(--bg-glass);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--rad-lg);
+  padding: var(--fib-21);
+  display: flex;
+  flex-direction: column;
+  gap: var(--fib-13);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+  overflow-y: auto;
+  text-align: left;
+  min-width: 0;
+}
+
+.sidebar-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--fib-5);
+}
+
+.sidebar-header h2 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sidebar-header p {
+  font-family: var(--font-body);
+  font-size: 0.84rem;
+  color: var(--text-specs);
+  line-height: 1.4;
+}
+
+.chat-feed {
+  background: rgba(0, 0, 0, 0.65);
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  border-radius: var(--rad-md);
+  padding: var(--fib-13);
+  height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--fib-8);
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  text-align: left;
+}
+
+.chat-msg {
+  padding: var(--fib-8) var(--fib-13);
+  border-radius: var(--rad-sm);
+  line-height: 1.5;
+  text-align: left;
+  word-break: break-word;
+}
+
+.chat-msg.system {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-specs);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  border-left: 3px solid var(--cyan);
+}
+
+.chat-msg.pet {
+  background: rgba(0, 240, 255, 0.09);
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  color: var(--text-dossier);
+}
+
+.chat-msg.user {
+  background: rgba(217, 70, 239, 0.14);
+  border: 1px solid rgba(217, 70, 239, 0.35);
+  color: #ffffff;
+  align-self: flex-end;
+}
+
+.chat-input-row {
+  display: flex;
+  gap: var(--fib-8);
+  align-items: center;
+}
+
+.chat-input-box {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--rad-sm);
+  padding: var(--fib-8) var(--fib-13);
+  color: #ffffff;
+  font-family: var(--font-body);
+  font-size: 16px; /* Prevents auto-zoom on mobile */
+  outline: none;
+  text-align: left;
+  min-height: 44px;
+  min-width: 0;
+}
+
+.chat-input-box:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 var(--fib-13) rgba(0, 240, 255, 0.25);
+}
+
+.btn-chat-send {
+  background: var(--cyan);
+  color: #030408;
+  border: none;
+  border-radius: var(--rad-sm);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.82rem;
+  padding: 0 var(--fib-21);
+  min-height: 44px;
+  min-width: 44px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  touch-action: manipulation;
+}
+.btn-chat-send:hover {
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+/* Companion Roster Grid */
+.roster-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fib-8);
+  text-align: left;
+  min-width: 0;
+}
+
+.roster-header {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+}
+
+.roster-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+  gap: var(--fib-8);
+}
+
+.roster-card {
+  background: rgba(18, 24, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--rad-sm);
+  padding: var(--fib-8);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--fib-2);
+  text-align: left;
+  min-height: 44px;
+  touch-action: manipulation;
+}
+
+.roster-card:hover, .roster-card.active {
+  border-color: var(--cyan);
+  background: rgba(0, 240, 255, 0.14);
+  transform: translateY(-2px);
+  box-shadow: 0 4px var(--fib-13) rgba(0, 240, 255, 0.3);
+}
+
+.roster-card strong {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.roster-card small {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-specs);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+@media (max-width: 640px) {
+  .roster-grid {
+    grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+    gap: var(--fib-5);
+  }
+  .sanctuary-sidebar {
+    padding: var(--fib-13);
+  }
+}
+
+/* Mobile-Only Desktop Insight Component */
+.mobile-desktop-insight {
+  display: flex;
+  align-items: center;
+  gap: var(--fib-13);
+  background: rgba(10, 16, 32, 0.94);
+  border: 1px solid rgba(0, 240, 255, 0.35);
+  border-radius: var(--radius-fib-md);
+  padding: var(--fib-13) var(--fib-21);
+  margin: 0 auto var(--fib-21);
+  max-width: min(1200px, 100%);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 4px var(--fib-21) rgba(0, 240, 255, 0.08);
+  position: relative;
+  z-index: 25;
+}
+
+.mobile-desktop-insight .insight-icon {
+  font-size: 1.35rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-desktop-insight .insight-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  text-align: left;
+}
+
+.mobile-desktop-insight .insight-text strong {
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--cyan);
+  letter-spacing: -0.01em;
+}
+
+.mobile-desktop-insight .insight-text span {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  color: var(--text-specs);
+  line-height: 1.4;
+}
+
+.mobile-desktop-insight .insight-close {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--text-specs);
+  font-size: 0.85rem;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: var(--radius-fib-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  touch-action: manipulation;
+}
+
+.mobile-desktop-insight .insight-close:hover {
+  background: rgba(255, 0, 122, 0.2);
+  border-color: var(--magenta);
+  color: #fff;
+}
+
+@media (min-width: 881px) {
+  .mobile-desktop-insight {
+    display: none !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   A11Y + INPUT COMFORT (pets.css owns the HUD / chat / roster-card
+   controls on the studio pages; pets/index.html owns everything in
+   pets-poster.css). Added so no control on either page is reachable
+   only by mouse.
+   ═══════════════════════════════════════════════════════════════ */
+
+.hud-pill-btn:focus-visible,
+.btn-chat-send:focus-visible,
+.chat-input-box:focus-visible,
+.roster-card:focus-visible,
+.mobile-desktop-insight .insight-close:focus-visible,
+.sanctuary-stage:focus-visible {
+  outline: 2px solid var(--border-focus, #00f0ff);
+  outline-offset: 2px;
+}
+
+/* Keyboard-reachable cards: the whole card is the target. */
+.roster-card:focus-visible {
+  border-color: var(--cyan);
+  background: rgba(0, 240, 255, 0.14);
+}
+
+.chat-input-box:focus-visible {
+  border-color: var(--cyan);
+  box-shadow: 0 0 var(--fib-13) rgba(0, 240, 255, 0.25);
+}
+
+/* zoth-mobile.css pins the dismiss control at 36x36 inside its <=880 block;
+   this page needs a 44px thumb target, so win on specificity, not !important. */
+.mobile-desktop-insight button.insight-close {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: var(--radius-fib-sm);
+}
+
+/* Long unbreakable ids / invite keys must not widen a grid or flex cell. */
+.roster-grid > *,
+.chat-msg,
+.roster-card strong,
+.roster-card small {
+  min-width: 0;
+}
+
+.roster-card strong,
+.roster-card small,
+.chat-msg {
+  overflow-wrap: anywhere;
+}
+
+.hud-pill-btn svg,
+.btn-interact svg,
+.btn-glow svg,
+.btn-nexus-export svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roster-card,
+  .hud-pill-btn,
+  .btn-chat-send,
+  .mobile-desktop-insight .insight-close {
+    transition-duration: 0.001ms !important;
+    animation-duration: 0.001ms !important;
+  }
+  .roster-card:hover,
+  .roster-card.active,
+  .btn-chat-send:hover {
+    transform: none !important;
+  }
+}
+
+  /* ═══════════════════════════════════════════════════════════════
+     4-THEME MATRIX FOR PETS SANCTUARY & CHAT CONSOLE
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* ── Light Theme (Clean Technical Canvas) ── */
+  html[data-theme="light"] {
+    --bg-deep: #f8fafc;
+    --bg-glass: rgba(255, 255, 255, 0.94);
+    --border-glass: rgba(15, 23, 42, 0.12);
+    --border-cyan: rgba(2, 132, 199, 0.35);
+    --text: #0f172a;
+    --text-bright: #020617;
+    --text-body: #1e293b;
+    --text-dossier: #334155;
+    --text-specs: #475569;
+    --muted: #64748b;
+    --cyan: #0284c7;
+    --gold: #b45309;
+    --magenta: #c026d3;
+    --emerald: #059669;
+    --purple: #7c3aed;
+  }
+
+  html[data-theme="light"] .deck-page {
+    background: #f8fafc;
+    color: #1e293b;
+  }
+
+  html[data-theme="light"] .sanctuary-stage {
+    background: radial-gradient(circle at 50% 50%, #e2e8f0 0%, #cbd5e1 100%);
+    border-color: rgba(2, 132, 199, 0.3);
+    box-shadow: inset 0 0 55px rgba(2, 132, 199, 0.06), 0 10px 34px rgba(15, 23, 42, 0.08);
+  }
+
+  html[data-theme="light"] .hud-pill {
+    background: rgba(255, 255, 255, 0.92);
+    border-color: rgba(2, 132, 199, 0.35);
+    color: #0284c7;
+  }
+
+  html[data-theme="light"] .hud-pill-btn {
+    background: rgba(255, 255, 255, 0.92);
+    border-color: rgba(15, 23, 42, 0.15);
+    color: #334155;
+  }
+
+  html[data-theme="light"] .hud-pill-btn:hover,
+  html[data-theme="light"] .hud-pill-btn.active {
+    border-color: #0284c7;
+    color: #0284c7;
+    background: rgba(2, 132, 199, 0.08);
+    box-shadow: 0 0 13px rgba(2, 132, 199, 0.2);
+  }
+
+  html[data-theme="light"] .sanctuary-sidebar {
+    background: rgba(255, 255, 255, 0.94);
+    border-color: rgba(15, 23, 42, 0.12);
+    box-shadow: 0 10px 40px rgba(15, 23, 42, 0.06);
+  }
+
+  html[data-theme="light"] .sidebar-header h2,
+  html[data-theme="light"] .sidebar-header h3 {
+    color: #0f172a !important;
+  }
+
+  html[data-theme="light"] .chat-feed {
+    background: #f1f5f9;
+    border-color: rgba(2, 132, 199, 0.25);
+    color: #0f172a;
+  }
+
+  html[data-theme="light"] .chat-msg.system {
+    background: rgba(15, 23, 42, 0.05);
+    color: #334155;
+    border-left-color: #0284c7;
+  }
+
+  html[data-theme="light"] .chat-msg.pet {
+    background: rgba(2, 132, 199, 0.08);
+    border-color: rgba(2, 132, 199, 0.25);
+    color: #0f172a;
+  }
+
+  html[data-theme="light"] .chat-msg.user {
+    background: rgba(124, 58, 237, 0.1);
+    border-color: rgba(124, 58, 237, 0.25);
+    color: #0f172a;
+  }
+
+  html[data-theme="light"] .chat-input-box {
+    background: #ffffff;
+    border-color: rgba(15, 23, 42, 0.2);
+    color: #0f172a;
+  }
+
+  html[data-theme="light"] .chat-input-box::placeholder {
+    color: #94a3b8;
+  }
+
+  html[data-theme="light"] .btn-chat-send {
+    background: #0284c7;
+    color: #ffffff;
+  }
+
+  html[data-theme="light"] .btn-interact {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(15, 23, 42, 0.15);
+    color: #0f172a;
+  }
+
+  html[data-theme="light"] .btn-interact:hover {
+    background: rgba(2, 132, 199, 0.1);
+    border-color: #0284c7;
+    color: #0284c7;
+  }
+
+  html[data-theme="light"] .stat-meter {
+    background: #f8fafc;
+    border-color: rgba(15, 23, 42, 0.1);
+  }
+
+  html[data-theme="light"] .stat-bar {
+    background: rgba(15, 23, 42, 0.08);
+  }
+
+  html[data-theme="light"] .roster-card {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(15, 23, 42, 0.12);
+  }
+
+  html[data-theme="light"] .roster-card strong {
+    color: #0f172a;
+  }
+
+  html[data-theme="light"] .roster-card small {
+    color: #0284c7;
+  }
+
+  html[data-theme="light"] .roster-card:hover,
+  html[data-theme="light"] .roster-card.active {
+    border-color: #0284c7;
+    background: rgba(2, 132, 199, 0.08);
+    box-shadow: 0 4px 13px rgba(2, 132, 199, 0.15);
+  }
+
+  html[data-theme="light"] .mobile-desktop-insight {
+    background: rgba(255, 255, 255, 0.96);
+    border-color: rgba(2, 132, 199, 0.3);
+    box-shadow: 0 4px 21px rgba(15, 23, 42, 0.06);
+  }
+
+  html[data-theme="light"] .mobile-desktop-insight .insight-text strong {
+    color: #0284c7;
+  }
+
+  html[data-theme="light"] .mobile-desktop-insight .insight-text span {
+    color: #475569;
+  }
+
+  html[data-theme="light"] .mobile-desktop-insight .insight-close {
+    background: rgba(15, 23, 42, 0.05);
+    border-color: rgba(15, 23, 42, 0.12);
+    color: #64748b;
+  }
+
+  /* ── Matrix Theme (Hacker Emerald Phosphor) ── */
+  html[data-theme="matrix"] {
+    --cyan: #00ff66;
+    --magenta: #00ffaa;
+    --gold: #10b981;
+    --emerald: #00ff66;
+    --purple: #34d399;
+    --bg-deep: #010803;
+    --bg-glass: rgba(1, 14, 5, 0.94);
+    --border-glass: rgba(0, 255, 102, 0.15);
+    --border-cyan: rgba(0, 255, 102, 0.35);
+    --text: #e6ffed;
+    --text-bright: #00ff66;
+    --text-body: #d1fae5;
+    --text-dossier: #a7f3d0;
+    --text-specs: #6ee7b7;
+    --muted: #059669;
+  }
+
+  html[data-theme="matrix"] .sanctuary-stage {
+    background: radial-gradient(circle at 50% 50%, #03200b 0%, #010803 100%);
+    border-color: rgba(0, 255, 102, 0.35);
+    box-shadow: inset 0 0 55px rgba(0, 255, 102, 0.1), 0 10px 34px rgba(0, 0, 0, 0.8);
+  }
+
+  html[data-theme="matrix"] .hud-pill,
+  html[data-theme="matrix"] .hud-pill-btn {
+    background: rgba(1, 14, 5, 0.92);
+    border-color: rgba(0, 255, 102, 0.25);
+    color: #00ff66;
+  }
+
+  html[data-theme="matrix"] .hud-pill-btn:hover,
+  html[data-theme="matrix"] .hud-pill-btn.active {
+    border-color: #00ff66;
+    color: #00ff66;
+    box-shadow: 0 0 14px rgba(0, 255, 102, 0.4);
+  }
+
+  html[data-theme="matrix"] .sanctuary-sidebar {
+    background: rgba(1, 14, 5, 0.94);
+    border-color: rgba(0, 255, 102, 0.2);
+  }
+
+  html[data-theme="matrix"] .chat-feed {
+    background: rgba(0, 0, 0, 0.8);
+    border-color: rgba(0, 255, 102, 0.25);
+  }
+
+  html[data-theme="matrix"] .chat-msg.system {
+    background: rgba(0, 255, 102, 0.06);
+    color: #6ee7b7;
+    border-left-color: #00ff66;
+  }
+
+  html[data-theme="matrix"] .chat-msg.pet {
+    background: rgba(0, 255, 102, 0.08);
+    border-color: rgba(0, 255, 102, 0.25);
+    color: #e6ffed;
+  }
+
+  html[data-theme="matrix"] .chat-msg.user {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.35);
+    color: #ffffff;
+  }
+
+  html[data-theme="matrix"] .chat-input-box {
+    background: rgba(0, 8, 2, 0.85);
+    border-color: rgba(0, 255, 102, 0.25);
+    color: #00ff66;
+  }
+
+  html[data-theme="matrix"] .btn-chat-send {
+    background: #00ff66;
+    color: #010803;
+  }
+
+  html[data-theme="matrix"] .btn-interact {
+    border-color: rgba(0, 255, 102, 0.25);
+    color: #e6ffed;
+  }
+
+  html[data-theme="matrix"] .btn-interact:hover {
+    background: rgba(0, 255, 102, 0.15);
+    border-color: #00ff66;
+    color: #00ff66;
+  }
+
+  html[data-theme="matrix"] .roster-card {
+    background: rgba(1, 18, 7, 0.8);
+    border-color: rgba(0, 255, 102, 0.15);
+  }
+
+  html[data-theme="matrix"] .roster-card:hover,
+  html[data-theme="matrix"] .roster-card.active {
+    border-color: #00ff66;
+    background: rgba(0, 255, 102, 0.15);
+    box-shadow: 0 4px 13px rgba(0, 255, 102, 0.3);
+  }
+
+  /* ── Gold / Alchemical Theme ── */
+  html[data-theme="gold"] {
+    --cyan: #fbbf24;
+    --magenta: #f59e0b;
+    --gold: #fbbf24;
+    --emerald: #34d399;
+    --purple: #d97706;
+    --bg-deep: #060502;
+    --bg-glass: rgba(18, 14, 6, 0.94);
+    --border-glass: rgba(251, 191, 36, 0.15);
+    --border-cyan: rgba(251, 191, 36, 0.35);
+    --text: #fef3c7;
+    --text-bright: #fbbf24;
+    --text-body: #fef08a;
+    --text-dossier: #fde68a;
+    --text-specs: #fcd34d;
+    --muted: #b45309;
+  }
+
+  html[data-theme="gold"] .sanctuary-stage {
+    background: radial-gradient(circle at 50% 50%, #221704 0%, #060502 100%);
+    border-color: rgba(251, 191, 36, 0.35);
+    box-shadow: inset 0 0 55px rgba(251, 191, 36, 0.1), 0 10px 34px rgba(0, 0, 0, 0.8);
+  }
+
+  html[data-theme="gold"] .hud-pill,
+  html[data-theme="gold"] .hud-pill-btn {
+    background: rgba(18, 14, 6, 0.92);
+    border-color: rgba(251, 191, 36, 0.25);
+    color: #fbbf24;
+  }
+
+  html[data-theme="gold"] .hud-pill-btn:hover,
+  html[data-theme="gold"] .hud-pill-btn.active {
+    border-color: #fbbf24;
+    color: #fbbf24;
+    box-shadow: 0 0 14px rgba(251, 191, 36, 0.4);
+  }
+
+  html[data-theme="gold"] .sanctuary-sidebar {
+    background: rgba(18, 14, 6, 0.94);
+    border-color: rgba(251, 191, 36, 0.2);
+  }
+
+  html[data-theme="gold"] .chat-feed {
+    background: rgba(0, 0, 0, 0.8);
+    border-color: rgba(251, 191, 36, 0.25);
+  }
+
+  html[data-theme="gold"] .chat-msg.system {
+    background: rgba(251, 191, 36, 0.06);
+    color: #fcd34d;
+    border-left-color: #fbbf24;
+  }
+
+  html[data-theme="gold"] .chat-msg.pet {
+    background: rgba(251, 191, 36, 0.08);
+    border-color: rgba(251, 191, 36, 0.25);
+    color: #fef3c7;
+  }
+
+  html[data-theme="gold"] .chat-msg.user {
+    background: rgba(245, 158, 11, 0.15);
+    border-color: rgba(245, 158, 11, 0.35);
+    color: #ffffff;
+  }
+
+  html[data-theme="gold"] .chat-input-box {
+    background: rgba(12, 9, 3, 0.85);
+    border-color: rgba(251, 191, 36, 0.25);
+    color: #fbbf24;
+  }
+
+  html[data-theme="gold"] .btn-chat-send {
+    background: #fbbf24;
+    color: #060502;
+  }
+
+  html[data-theme="gold"] .btn-interact {
+    border-color: rgba(251, 191, 36, 0.25);
+    color: #fef3c7;
+  }
+
+  html[data-theme="gold"] .btn-interact:hover {
+    background: rgba(251, 191, 36, 0.15);
+    border-color: #fbbf24;
+    color: #fbbf24;
+  }
+
+  html[data-theme="gold"] .roster-card {
+    background: rgba(22, 17, 7, 0.8);
+    border-color: rgba(251, 191, 36, 0.15);
+  }
+
+  html[data-theme="gold"] .roster-card:hover,
+  html[data-theme="gold"] .roster-card.active {
+    border-color: #fbbf24;
+    background: rgba(251, 191, 36, 0.15);
+    box-shadow: 0 4px 13px rgba(251, 191, 36, 0.3);
+  }

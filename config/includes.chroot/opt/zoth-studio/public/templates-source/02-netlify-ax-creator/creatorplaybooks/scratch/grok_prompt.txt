@@ -1,0 +1,42 @@
+You are a helper tool for CreatorPlaybooks. Your task is to scrape profile information and recent tweets for the X user @halfmage.
+Retrieve:
+1. Public Profile info: ID, bio, display name, followers count, following count, posts count, verified status, location.
+2. High-res Avatar URL (usually ending in _400x400 or _normal which we can transform) and Profile Banner URL.
+3. 5 recent high-value or media-heavy tweets from the user. For each tweet, extract the tweet ID, text content, creation date, metrics (impressions, likes, retweets, replies), and an array of media objects (each having a direct image or video URL and type like "photo" or "video").
+
+You MUST return ONLY a valid, raw JSON object and nothing else. No conversational text, no markdown code block wrappers (do NOT wrap it in ```json).
+
+Here is the exact JSON structure you MUST match:
+{
+  "id": "string (the numeric user ID of @halfmage on X, e.g. '123456')",
+  "handle": "string (e.g. 'halfmage')",
+  "name": "string (display name, e.g. 'Maya')",
+  "bio": "string (profile bio description)",
+  "followers": number,
+  "following": number,
+  "posts": number,
+  "verified": boolean,
+  "verifiedType": "string or null",
+  "location": "string or null",
+  "avatar": "string (profile image URL)",
+  "banner": "string (profile banner URL)",
+  "tweets": [
+    {
+      "id": "string (tweet ID)",
+      "text": "string (tweet text)",
+      "createdAt": "string (ISO date, e.g. '2026-07-08T09:30:00Z')",
+      "metrics": {
+        "impression_count": number,
+        "like_count": number,
+        "retweet_count": number,
+        "reply_count": number
+      },
+      "media": [
+        {
+          "url": "string (media asset URL)",
+          "type": "string ('photo', 'video', etc.)"
+        }
+      ]
+    }
+  ]
+}

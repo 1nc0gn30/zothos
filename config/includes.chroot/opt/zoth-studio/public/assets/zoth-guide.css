@@ -1,0 +1,190 @@
+/* Zoth presence + digest bubbles. Gold/void, no card soup. */
+
+.zoth-face {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  bottom: 0;
+  height: 100%;
+  width: auto;
+  max-width: 46%;
+  object-fit: cover;
+  object-position: 50% 12%;
+  mix-blend-mode: lighten;
+  opacity: 0.88;
+  filter: saturate(0.92) contrast(1.04);
+}
+.zoth-face.east {
+  right: 0;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 22%, #000 88%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 22%, #000 88%, transparent 100%);
+}
+.zoth-face.west {
+  left: 0;
+  -webkit-mask-image: linear-gradient(270deg, transparent 0%, #000 22%, #000 88%, transparent 100%);
+  mask-image: linear-gradient(270deg, transparent 0%, #000 22%, #000 88%, transparent 100%);
+}
+.zoth-face.mid {
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 38%;
+  opacity: 0.28;
+  mix-blend-mode: screen;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 24%, #000 70%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 24%, #000 70%, transparent 100%);
+}
+
+.zoth-seal {
+  position: absolute;
+  width: min(18rem, 42vw);
+  opacity: 0.07;
+  pointer-events: none;
+  z-index: 1;
+  filter: grayscale(0.2);
+}
+.zoth-seal.tr { top: 12%; right: 6%; }
+.zoth-seal.bl { bottom: 10%; left: 6%; }
+
+/* Legacy bottom-left guide box superseded by Universal Pet HUD Companion */
+#zoth-guide {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+#zoth-guide.on {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+#zoth-guide[hidden] { display: none; }
+#zoth-guide img {
+  width: 72px;
+  height: 72px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(251, 191, 36, 0.5);
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.3), 0 8px 24px rgba(0, 0, 0, 0.6);
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #05060b;
+}
+#zoth-guide .bubble {
+  position: relative;
+  background: var(--bg-surface, rgba(12, 12, 18, 0.95));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--text, #ffffff);
+  border: 1px solid var(--border-gold, rgba(251, 191, 36, 0.45));
+  border-radius: var(--fib-radius-sm, 8px);
+  padding: 10px 28px 11px 12px;
+  min-width: 12rem;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.75), 0 0 20px rgba(251, 191, 36, 0.15);
+}
+#zoth-guide .bubble::before {
+  content: "";
+  position: absolute;
+  left: -7px;
+  bottom: 16px;
+  width: 10px;
+  height: 10px;
+  background: var(--bg-card, #0c0c12);
+  border-left: 1px solid var(--border-gold, rgba(251, 191, 36, 0.45));
+  border-bottom: 1px solid var(--border-gold, rgba(251, 191, 36, 0.45));
+  transform: rotate(45deg);
+}
+#zoth-guide .who {
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.64rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold, #fbbf24);
+  font-weight: 700;
+  text-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
+  margin: 0 0 6px;
+}
+#zoth-guide .lines {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+#zoth-guide .lines li {
+  font-family: var(--font-display, 'Fraunces', 'Syne', serif);
+  font-size: 0.96rem;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+  color: var(--text, #ffffff);
+  margin: 0 0 6px;
+}
+#zoth-guide .lines li:last-child { margin: 0; }
+#zoth-guide .x {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  border: 0;
+  background: none;
+  color: var(--text-dim, #94a3b8);
+  font-size: 1.2rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 0.18s ease, transform 0.15s ease;
+  touch-action: manipulation;
+}
+#zoth-guide .x::after {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  right: -6px;
+  bottom: -6px;
+  min-width: 44px;
+  min-height: 44px;
+}
+#zoth-guide .x:hover {
+  color: var(--gold, #fbbf24);
+  text-shadow: 0 0 8px rgba(251, 191, 36, 0.5);
+  transform: scale(1.1);
+}
+#zoth-guide .x:focus-visible {
+  outline: 2px solid var(--cyan, #00f0ff);
+  outline-offset: 2px;
+  border-radius: var(--fib-radius-xs, 4px);
+}
+
+@media (max-width: 760px) {
+  .zoth-face {
+    max-width: 42%;
+    height: 62%;
+    top: auto;
+    bottom: 28%;
+    opacity: 0.7;
+  }
+  .zoth-face.mid { max-width: 50%; height: 58%; opacity: 0.22; }
+  #zoth-guide {
+    left: 10px;
+    right: 10px;
+    bottom: max(12px, env(safe-area-inset-bottom));
+    max-width: none;
+  }
+  #zoth-guide img { width: 56px; height: 72px; }
+  #zoth-guide .lines li { font-size: 0.86rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #zoth-guide { transition: none; }
+}
+
+@media (forced-colors: active) {
+  #zoth-guide .bubble {
+    border: 2px solid CanvasText;
+  }
+  #zoth-guide .x:focus-visible {
+    outline: 2px solid Highlight;
+  }
+}

@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Zoth Studio — Previews/Testhydratesite</title>
+<meta content="Zoth Studio sovereign AI workstation: Previews/Testhydratesite. Local-first multi-agent architecture with zero cloud telemetry." name="description"/>
+<link href="https://zoth.nullai.tech/previews/testhydratesite/" rel="canonical"/>
+<!-- OpenGraph / Facebook -->
+<meta content="website" property="og:type"/>
+<meta content="Zoth Studio" property="og:site_name"/>
+<meta content="https://zoth.nullai.tech/previews/testhydratesite/" property="og:url"/>
+<meta content="Zoth Studio — Previews/Testhydratesite" property="og:title"/>
+<meta content="Zoth Studio sovereign AI workstation: Previews/Testhydratesite. Local-first multi-agent architecture with zero cloud telemetry." property="og:description"/>
+<meta content="https://zoth.nullai.tech/og-image.jpg" property="og:image"/>
+<!-- Twitter Cards -->
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="Zoth Studio — Previews/Testhydratesite" name="twitter:title"/>
+<meta content="Zoth Studio sovereign AI workstation: Previews/Testhydratesite. Local-first multi-agent architecture with zero cloud telemetry." name="twitter:description"/>
+<meta content="https://zoth.nullai.tech/og-image.jpg" name="twitter:image"/>
+<!-- OpenGraph / Facebook -->
+<!-- Twitter Cards -->
+<meta content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" name="robots"/>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;600&amp;family=Syne:wght@700;800;900&amp;display=swap" rel="stylesheet"/>
+<style>
+        .skip-to-content, .skip-link, .skip {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    .skip-to-content:focus, .skip-link:focus, .skip:focus {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      width: auto;
+      height: auto;
+      padding: 10px 18px;
+      margin: 0;
+      overflow: visible;
+      clip: auto;
+      white-space: normal;
+      background: #fbbf24;
+      color: #050508;
+      font-family: monospace;
+      font-size: 0.82rem;
+      font-weight: 700;
+      border-radius: 8px;
+      z-index: 100000;
+      outline: 2px solid #fff;
+    }
+
+    :root {
+        /* Divine Proportion (Phi = 1.6180339887) */
+        --phi: 1.6180339887;
+        --phi-inv: 0.6180339887;
+        --phi-major: 61.8%;
+        --phi-minor: 38.2%;
+        --golden-split: 1.618fr 1fr;
+        --golden-split-inv: 1fr 1.618fr;
+
+        /* Fibonacci Sequence Spacing Tokens */
+        --fib-1: 1px;
+        --fib-2: 2px;
+        --fib-3: 3px;
+        --fib-5: 5px;
+        --fib-8: 8px;
+        --fib-13: 13px;
+        --fib-21: 21px;
+        --fib-34: 34px;
+        --fib-55: 55px;
+        --fib-89: 89px;
+        --fib-144: 144px;
+        --fib-233: 233px;
+        --fib-377: 377px;
+        --fib-610: 610px;
+        --fib-987: 987px;
+
+        /* Golden Ratio & Fibonacci Border Radii */
+        --radius-fib-xs: 5px;
+        --radius-fib-sm: 8px;
+        --radius-fib-md: 13px;
+        --radius-fib-lg: 21px;
+        --radius-fib-xl: 34px;
+        --radius-fib-pill: 9999px;
+
+        /* Fibonacci & Golden Ratio Typography */
+        --font-fib-micro: 13px;
+        --font-fib-base: 16px;
+        --font-fib-h5: 21px;
+        --font-fib-h4: 26px;
+        --font-fib-h3: 34px;
+        --font-fib-h2: 55px;
+        --font-fib-h1: 89px;
+
+      --primary: #e8c872;
+      --accent: #00f0ff;
+      --bg: #05070f;
+      --surface: #0a0e1c;
+      --surface-hover: #12182e;
+      --border: #1a2342;
+      --text: #f0f4fc;
+      --text-muted: #8493b8;
+      --font-display: 'Syne', sans-serif;
+      --font-body: 'Figtree', sans-serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Background Canvas */
+    #bg-canvas {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      pointer-events: none; z-index: -1; opacity: 0.35;
+    }
+
+    /* Navbar */
+    .navbar {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 2rem;
+      background: rgba(5, 7, 15, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .brand {
+      display: flex; align-items: center; gap: 8px;
+      font-family: var(--font-display); font-weight: 800; font-size: 1.25rem;
+      color: #fff; text-decoration: none;
+    }
+    .brand span { color: var(--primary); }
+    .nav-links { display: flex; gap: 1.5rem; }
+    .nav-link { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: color 0.2s; }
+    .nav-link:hover { color: var(--primary); }
+    .btn-nav {
+      background: var(--primary); color: #05070f;
+      padding: 0.45rem 1.1rem; border-radius: 8px; font-weight: 700; font-size: 0.85rem;
+      text-decoration: none; border: none; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-nav:hover { transform: translateY(-1px); box-shadow: 0 0 15px var(--primary); }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 6rem 1.5rem 4rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .kicker {
+      display: inline-block; font-family: var(--font-mono); font-size: 0.78rem;
+      color: var(--primary); background: rgba(0, 240, 255, 0.1);
+      padding: 4px 12px; border-radius: 999px; margin-bottom: 1.2rem;
+      border: 1px solid var(--border);
+    }
+    .hero h1 {
+      font-family: var(--font-display); font-size: 3.25rem; font-weight: 900;
+      line-height: 1.15; margin-bottom: 1.2rem; letter-spacing: -0.02em;
+    }
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 1.15rem; color: var(--text-muted); margin-bottom: 2rem; max-width: 700px; margin-inline: auto;
+    }
+    .hero-actions { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+    .btn-hero {
+      background: var(--primary); color: #05070f; font-family: var(--font-display); font-weight: 800;
+      padding: 0.85rem 2rem; border-radius: 999px; text-decoration: none; font-size: 1rem;
+      border: none; cursor: pointer; transition: all 0.25s; box-shadow: 0 0 25px rgba(0,240,255,0.3);
+    }
+    .btn-hero:hover { transform: translateY(-2px); box-shadow: 0 0 35px var(--primary); }
+    .btn-sec {
+      background: var(--surface); color: var(--text); border: 1px solid var(--border);
+      padding: 0.85rem 1.8rem; border-radius: 999px; text-decoration: none; font-weight: 600; font-size: 0.95rem;
+      transition: all 0.2s;
+    }
+    .btn-sec:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* Features Grid */
+    .features-sec {
+      max-width: 1200px; margin: 4rem auto; padding: 0 1.5rem;
+    }
+    .sec-head { text-align: center; margin-bottom: 3rem; }
+    .sec-head h2 { font-family: var(--font-display); font-size: 2.2rem; margin-bottom: 0.5rem; }
+    .sec-head p { color: var(--text-muted); font-size: 1rem; }
+
+    .feature-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem;
+    }
+    .feature-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+      padding: 2rem; transition: all 0.25s ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-3px); border-color: var(--primary); background: var(--surface-hover);
+    }
+    .feat-icon { font-size: 2rem; margin-bottom: 1rem; }
+    .feature-card h3 { font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 0.6rem; }
+    .feature-card p { color: var(--text-muted); font-size: 0.92rem; line-height: 1.5; }
+
+    /* Sandbox Interactive Demo */
+    .sandbox-sec {
+      max-width: 900px; margin: 4rem auto; padding: 0 1.5rem;
+    }
+    .terminal-box {
+      background: #000; border: 1px solid var(--border); border-radius: 16px; overflow: hidden;
+    }
+    .terminal-bar {
+      background: var(--surface); padding: 0.6rem 1rem; display: flex; align-items: center; gap: 8px;
+      border-bottom: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);
+    }
+    .term-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .term-dot.r { background: #f87171; }
+    .term-dot.y { background: #fbbf24; }
+    .term-dot.g { background: #34d399; }
+    .terminal-body {
+      padding: 1.5rem; font-family: var(--font-mono); font-size: 0.85rem; color: var(--primary);
+    }
+    .term-input-row {
+      display: flex; gap: 8px; margin-top: 1rem; align-items: center;
+    }
+    .term-input {
+      flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+      color: #fff; padding: 0.5rem 0.8rem; border-radius: 6px; font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .term-btn {
+      background: var(--primary); color: #05070f; border: none; padding: 0.5rem 1rem;
+      border-radius: 6px; font-weight: 700; cursor: pointer; font-family: var(--font-mono);
+    }
+
+    /* Pricing Section */
+    .pricing-sec {
+      max-width: 1100px; margin: 5rem auto; padding: 0 1.5rem;
+    }
+    .pricing-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;
+      align-items: stretch;
+    }
+    .pricing-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 18px;
+      padding: 2.2rem 1.8rem; display: flex; flex-direction: column; position: relative;
+    }
+    .pricing-card.featured {
+      border-color: var(--primary); box-shadow: 0 0 30px rgba(0, 240, 255, 0.15);
+      background: linear-gradient(180deg, rgba(0,240,255,0.06), var(--surface));
+    }
+    .pricing-badge {
+      position: absolute; top: -12px; right: 20px; background: var(--primary); color: #05070f;
+      font-size: 0.72rem; font-weight: 800; font-family: var(--font-display); padding: 3px 10px; border-radius: 999px;
+    }
+    .pricing-card h3 { font-family: var(--font-display); font-size: 1.35rem; margin-bottom: 0.8rem; }
+    .pricing-num { font-size: 2.5rem; font-weight: 900; font-family: var(--font-display); margin-bottom: 1.5rem; color: #fff; }
+    .pricing-num small { font-size: 0.9rem; color: var(--text-muted); font-weight: 400; }
+    .pricing-perks { list-style: none; margin-bottom: 2rem; flex: 1; }
+    .pricing-perks li { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.6rem; }
+    .pricing-btn {
+      background: var(--surface-hover); border: 1px solid var(--border); color: #fff;
+      padding: 0.75rem; border-radius: 10px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+    }
+    .pricing-card.featured .pricing-btn { background: var(--primary); color: #05070f; border-color: var(--primary); }
+    .pricing-btn:hover { border-color: var(--primary); transform: translateY(-1px); }
+
+    /* FAQ */
+    .faq-sec { max-width: 800px; margin: 4rem auto; padding: 0 1.5rem; }
+    .faq-item {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: 1rem 1.25rem; margin-bottom: 0.75rem; cursor: pointer;
+    }
+    .faq-item summary { font-weight: 700; font-size: 1rem; color: #fff; list-style: none; }
+    .faq-item summary::-webkit-details-marker { display: none; }
+    .faq-item p { margin-top: 0.75rem; color: var(--text-muted); font-size: 0.92rem; }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border); padding: 3rem 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.85rem;
+    }
+      /* Standard Preview Responsive */
+    @media (max-width: 768px) {
+      html, body {
+        overflow-x: hidden !important;
+        max-width: 100vw !important;
+        width: 100% !important;
+      }
+      .wrap, .container, .main-wrap, .page-wrap, .hero, .section, .pricing-sec, .faq-sec {
+        padding-left: var(--fib-13) !important;
+        padding-right: var(--fib-13) !important;
+        max-width: 100vw !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+      header.nav, nav.navbar, .nav-bar {
+        padding: var(--fib-8) var(--fib-13) !important;
+        max-width: 100vw !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        flex-wrap: wrap !important;
+      }
+      .nav-links {
+        display: none !important;
+      }
+      .hero-actions, .hero-cta-row, .cta-group, .btn-group {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        gap: var(--fib-8) !important;
+      }
+      .hero-actions a, .hero-actions button,
+      .hero-cta-row a, .hero-cta-row button,
+      .cta-group a, .cta-group button,
+      .btn-hero, .btn-sec, .btn-nav, .btn-accent, .btn-ghost {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+      }
+      .bento, .bento-grid, .grid, .grid-3, .pricing-grid, .features-grid, .cards-grid, .docs-grid {
+        grid-template-columns: 1fr !important;
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+      .card, .bento-card, .pricing-card, .feature-card, .doc-content, .pricing-box {
+        max-width: 100% !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        padding: var(--fib-21) var(--fib-13) !important;
+      }
+      code, pre {
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        word-break: break-word !important;
+      }
+    }
+  </style>
+<link href="/assets/zoth-mobile.css" rel="stylesheet"/>
+<link href="/assets/brand/zoth-seal-hermetic-on-dark.svg" rel="icon" type="image/svg+xml"/>
+<!-- Schema.org JSON-LD Structured Data for SEO & AEO Voice Search -->
+<!-- Schema.org JSON-LD Structured Data for SEO & AEO Voice Search -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://zoth.nullai.tech/#organization",
+      "name": "NullAI Tech",
+      "url": "https://nullai.tech/",
+      "logo": "https://zoth.nullai.tech/assets/brand/zoth-seal-hermetic-on-dark.svg",
+      "sameAs": [
+        "https://github.com/NullAITech/zoth-studio"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://zoth.nullai.tech/#website",
+      "url": "https://zoth.nullai.tech/",
+      "name": "Zoth Studio",
+      "description": "Local-first autonomous AI multi-agent workstation, 3D swarm arena, and privacy-first application foundry.",
+      "publisher": {
+        "@id": "https://zoth.nullai.tech/#organization"
+      }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://zoth.nullai.tech/previews/testhydratesite/index.html#softwareapplication",
+      "name": "Zoth Studio \u2014 Previews/Testhydratesite",
+      "description": "Zoth Studio sovereign AI workstation: Previews/Testhydratesite. Local-first multi-agent architecture with zero cloud telemetry.",
+      "url": "https://zoth.nullai.tech/previews/testhydratesite/index.html",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Linux, macOS, Windows",
+      "inLanguage": "en-US",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://zoth.nullai.tech/previews/testhydratesite/index.html",
+      "url": "https://zoth.nullai.tech/previews/testhydratesite/index.html",
+      "name": "Zoth Studio \u2014 Previews/Testhydratesite",
+      "description": "Zoth Studio sovereign AI workstation: Previews/Testhydratesite. Local-first multi-agent architecture with zero cloud telemetry.",
+      "inLanguage": "en-US",
+      "isPartOf": {
+        "@id": "https://zoth.nullai.tech/#website"
+      },
+      "speakable": {
+        "@type": "SpeakableSpecification",
+        "cssSelector": [
+          "h1",
+          "h2",
+          ".kicker",
+          "main p",
+          ".desc"
+        ]
+      },
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://zoth.nullai.tech/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Previews",
+            "item": "https://zoth.nullai.tech/previews"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Testhydratesite",
+            "item": "https://zoth.nullai.tech/previews/testhydratesite"
+          }
+        ]
+      }
+    }
+  ]
+}
+  </script>
+</link><meta content="1200" property="og:image:width"/><meta content="630" property="og:image:height"/><meta content="Zoth Studio — Sovereign AI Multi-Agent Workstation" property="og:image:alt"/><meta content="Zoth Studio — Sovereign AI Multi-Agent Workstation" name="twitter:image:alt"/><meta content="US-VA" name="geo.region"/><meta content="Virginia Beach, Virginia" name="geo.placename"/><meta content="36.8529;-75.9780" name="geo.position"/><meta content="36.8529, -75.9780" name="ICBM"/><meta content="#030306" name="theme-color"/><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://zoth.nullai.tech/previews/testhydratesite/#webpage",
+      "url": "https://zoth.nullai.tech/previews/testhydratesite/",
+      "name": "Zoth Studio \u2014 Previews/Testhydratesite",
+      "description": "Zoth Studio sovereign AI workstation: Previews/Testhydratesite. Local-first multi-agent architecture with zero cloud telemetry.",
+      "isPartOf": {
+        "@type": "WebSite",
+        "@id": "https://zoth.nullai.tech/#website",
+        "url": "https://zoth.nullai.tech/",
+        "name": "Zoth Studio",
+        "publisher": {
+          "@type": "Organization",
+          "name": "757tech / NullAI",
+          "url": "https://757tech.pro"
+        }
+      },
+      "primaryImageOfPage": {
+        "@type": "ImageObject",
+        "url": "https://zoth.nullai.tech/og-image.jpg",
+        "caption": "Zoth Studio \u2014 Sovereign AI Multi-Agent Workstation"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://zoth.nullai.tech/previews/testhydratesite/#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://zoth.nullai.tech/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Previews",
+          "item": "https://zoth.nullai.tech/previews/testhydratesite/"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://zoth.nullai.tech/previews/testhydratesite/#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is Zoth Studio?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Zoth Studio is a sovereign, local-first control surface for multi-agent AI orchestration, featuring a 298+ verified tool registry, 23+ modular studio suites, a 21-node sovereign agent pantheon, and an encrypted BYOK vault."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Where are my API keys stored?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "API keys are stored strictly in local operator memory or an encrypted local Rust daemon using Argon2id and XChaCha20-Poly1305. Plaintext keys are never sent to external servers."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does Zoth Studio require a cloud subscription?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Zoth Studio is fully sovereign and free to run on your local hardware or private network over Tailscale."
+          }
+        }
+      ]
+    }
+  ]
+}</script>  <link rel="stylesheet" href="/assets/zoth-theme.css?v=11"/>
+  <script src="/assets/zoth-theme.js?v=11"></script>
+
+<link rel="stylesheet" href="/assets/zoth-theme.css?v=11">
+<link rel="stylesheet" href="/assets/zoth-nav.css?v=11">
+<script src="/assets/zoth-theme.js?v=11"></script>
+<script src="/assets/zoth-nav.js?v=11" defer></script>
+
+</head>
+<body>
+<a class="skip-to-content" href="#main-content">Skip to content</a>
+<main id="main-content" role="main">
+<canvas id="bg-canvas"></canvas>
+<!-- Navigation -->
+<nav class="navbar">
+<a class="brand" href="#">◈ TestHydrateSite</a>
+<div class="nav-links">
+<a class="nav-link" href="#features">Architecture</a><a class="nav-link" href="#sandbox">Interactive Demo</a><a class="nav-link" href="#pricing">Pricing</a><a class="nav-link" href="/docs/">Docs</a>
+</div>
+<a class="btn-nav" href="#sandbox" onclick="playChime()">Initialize Node</a>
+</nav>
+<!-- Hero Section -->
+<section class="hero">
+<div class="kicker">Zero-Trust Protocol</div>
+<h1>Sovereign Key Enclaves for Autonomous AI Swarms</h1>
+<p>Eliminate cloud key leakage with Argon2id hardware encryption, local loopback RPC gates, and multi-agent peer arbitration.</p>
+<div class="hero-actions">
+<a class="btn-hero" href="#sandbox" onclick="playChime()">Initialize Vault →</a>
+<a class="btn-sec" href="/docs/">Explore Protocols</a>
+</div>
+</section>
+<!-- Features Section -->
+<section class="features-sec" id="features">
+<div class="sec-head">
+<p class="kicker">Architecture</p>
+<h2>Engineered for High-Assurance Autonomy</h2>
+<p>Decentralized multi-agent execution with AST safety guarantees and local loopback gates.</p>
+</div>
+<div class="feature-grid">
+<div class="feature-card">
+<div class="feat-icon">🛡️</div>
+<h3>Argon2id Enclave</h3>
+<p>Hardware-backed cryptographic secret derivation with memory-hard zero-knowledge boundaries.</p>
+</div>
+<div class="feature-card">
+<div class="feat-icon">⚡</div>
+<h3>Loopback Zero-Egress</h3>
+<p>Local-first IPC socket gates ensuring API keys never touch public network hops.</p>
+</div>
+<div class="feature-card">
+<div class="feat-icon">🤖</div>
+<h3>Swarm Peer Locks</h3>
+<p>Decentralized state arbitration preventing race conditions across concurrent agent threads.</p>
+</div>
+<div class="feature-card">
+<div class="feat-icon">📊</div>
+<h3>Real-Time Telemetry</h3>
+<p>Microsecond latency telemetry with Shannon entropy agreement verification.</p>
+</div>
+</div>
+</section>
+<!-- Interactive Sandbox -->
+<section class="sandbox-sec" id="sandbox">
+<div class="sec-head">
+<p class="kicker">Live Interactive Sandbox</p>
+<h2>Test Neural &amp; Cryptographic Operations</h2>
+</div>
+<div class="terminal-box">
+<div class="terminal-bar">
+<span class="term-dot r"></span>
+<span class="term-dot y"></span>
+<span class="term-dot g"></span>
+<span>testhydratesite :: interactive loopback terminal</span>
+</div>
+<div class="terminal-body" id="term-out">
+<div>[System] Node initialized. Ready for interactive AST execution.</div>
+<div style="color:var(--text-muted); margin-top:4px;">Type a command like 'audit', 'derive-key', or 'ping' and click Execute.</div>
+</div>
+<div class="term-input-row" style="padding: 0 1.5rem 1.25rem;">
+<input class="term-input" id="sandbox-input" placeholder="e.g. derive-key --argon2id" type="text" value="derive-key --argon2id"/>
+<button class="term-btn" onclick="runSandboxCommand()">Execute</button>
+</div>
+</div>
+</section>
+<!-- Pricing Section -->
+<section class="pricing-sec" id="pricing">
+<div class="sec-head">
+<p class="kicker">Deploy &amp; Scale</p>
+<h2>Transparent, Open-Source Pricing</h2>
+<p>Zero lock-in. Host locally or deploy to high-availability global CDNs.</p>
+</div>
+<div class="pricing-grid">
+<div class="pricing-card">
+<div class="pricing-badge">Open Source</div>
+<h3>Starter Node</h3>
+<div class="pricing-num">$0<small>/mo</small></div>
+<ul class="pricing-perks">
+<li>✓ Local Loopback Gateway</li><li>✓ 4 Core Spirit Mascot Agents</li><li>✓ Up to 5 Projects</li><li>✓ Community Forum</li>
+</ul>
+<button class="pricing-btn" onclick="playChime()">Get Started</button>
+</div>
+<div class="pricing-card featured">
+<div class="pricing-badge">Most Popular</div>
+<h3>Swarm Pro</h3>
+<div class="pricing-num">$49<small>/mo</small></div>
+<ul class="pricing-perks">
+<li>✓ Unlimited Swarm Threads</li><li>✓ Argon2id Hardware Key Vault</li><li>✓ AEO Knowledge Engine</li><li>✓ Web Audio DSP Engine</li><li>✓ Netlify 1-Click Deploy</li>
+</ul>
+<button class="pricing-btn" onclick="playChime()">Get Started</button>
+</div>
+<div class="pricing-card">
+<div class="pricing-badge">Air-Gapped</div>
+<h3>Enterprise Sovereignty</h3>
+<div class="pricing-num">Custom<small></small></div>
+<ul class="pricing-perks">
+<li>✓ Dedicated Hardware Enclaves</li><li>✓ Custom AST Validation Rules</li><li>✓ 24/7 Priority SLA</li><li>✓ On-Premises Compliance</li>
+</ul>
+<button class="pricing-btn" onclick="playChime()">Get Started</button>
+</div>
+</div>
+</section>
+<!-- FAQ Section -->
+<section class="faq-sec" id="faq">
+<div class="sec-head">
+<p class="kicker">Knowledge Base</p>
+<h2>Frequently Asked Questions</h2>
+</div>
+<details class="faq-item">
+<summary>How does ApexVault secure API keys?</summary>
+<p>Keys are encrypted on disk with Argon2id and only held in RAM during active loopback transactions on 127.0.0.1.</p>
+</details>
+<details class="faq-item">
+<summary>Can I deploy the generated sites to any host?</summary>
+<p>Yes! All builds produce static HTML5/CSS/JS with zero runtime lock-in, deployable to Netlify, Vercel, Hostinger, or GitHub Pages.</p>
+</details>
+</section>
+<!-- Footer -->
+</main>
+<footer>
+<p>© 2026 TestHydrateSite. Generated by Zoth Autonomous Multi-Agent Foundry.</p>
+</footer>
+<!-- Web Audio DSP & Interactive Sandbox Script -->
+<script>
+    // Web Audio Sound Engine
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playChime() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+      osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.12); // A5
+      gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.35);
+    }
+
+    // Sandbox Execution
+    function runSandboxCommand() {
+      playChime();
+      const inp = document.getElementById('sandbox-input');
+      const out = document.getElementById('term-out');
+      const cmd = (inp.value || '').trim();
+      if (!cmd) return;
+
+      const d = document.createElement('div');
+      d.style.marginTop = '8px';
+      d.innerHTML = `<span style="color:#fff;">&gt; ${cmd}</span><br/><span style="color:#34d399;">✓ [AST Validated] Operation executed smoothly on loopback. Nonce: ${Math.random().toString(36).substring(2, 9)}</span>`;
+      out.appendChild(d);
+      inp.value = '';
+    }
+
+    // Particle Background
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let width, height, particles = [];
+
+    function resize() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    for (let i = 0; i < 40; i++) {
+      particles.push({
+        x: Math.random() * width, y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4,
+        size: Math.random() * 2 + 1
+      });
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = '#e8c872';
+      particles.forEach(p => {
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0) p.x = width; if (p.x > width) p.x = 0;
+        if (p.y < 0) p.y = height; if (p.y > height) p.y = 0;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      requestAnimationFrame(animate);
+    }
+    animate();
+  </script>
+</body>
+</html>

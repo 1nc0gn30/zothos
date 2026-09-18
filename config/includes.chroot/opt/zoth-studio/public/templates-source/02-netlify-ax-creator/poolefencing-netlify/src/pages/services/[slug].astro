@@ -1,0 +1,87 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import CtaBand from "../../components/CtaBand.astro";
+import { businessSchema, faqSchema } from "../../data/schema.js";
+import { services } from "../../data/site.js";
+
+export function getStaticPaths() {
+  return services.map((service) => ({
+    params: { slug: service.slug },
+    props: { service }
+  }));
+}
+
+const { service } = Astro.props;
+---
+
+<BaseLayout
+  title={service.title}
+  description={service.description}
+  path={`/services/${service.slug}`}
+  schema={[businessSchema(), faqSchema(service.faqs)]}
+>
+  <section class="page-hero">
+    <div class="container page-hero-grid">
+      <div>
+        <span class="eyebrow">{service.eyebrow}</span>
+        <h1>{service.h1}</h1>
+        <p>{service.summary}</p>
+        <div class="button-row">
+          <a class="button button-primary" href="/contact-us">Get a Free Quote &rarr;</a>
+          <a class="button button-outline" href="/projects">See Projects</a>
+        </div>
+      </div>
+      {service.image && (
+        <figure class="page-hero-media">
+          <img
+            src={service.image}
+            alt={`${service.h1} installed by Poole Fencing in North Florida`}
+            width="1200"
+            height="900"
+          />
+          <figcaption>Material matched to property use, soil, and maintenance goals</figcaption>
+        </figure>
+      )}
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container split">
+      <div>
+        <span class="eyebrow">What matters</span>
+        <h2>Built for the material, the soil, and the way you use the property.</h2>
+
+      </div>
+      <article class="article">
+        <p>{service.intro}</p>
+
+        <h2>What we install</h2>
+        <ul class="feature-list">
+          {service.install.map((item) => <li>{item}</li>)}
+        </ul>
+
+        <h2>Local install note</h2>
+        <p>{service.localNote}</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="section-tight">
+    <div class="container split">
+      <div>
+        <span class="eyebrow">FAQ</span>
+        <h2>Questions customers ask before quoting this fence.</h2>
+      </div>
+      <div class="faq-list">
+        {service.faqs.map(([question, answer]) => (
+          <details>
+            <summary>{question}</summary>
+            <p>{answer}</p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <CtaBand heading={`Get a free ${service.h1.toLowerCase().replace(" - ", " ")} quote.`} />
+</BaseLayout>

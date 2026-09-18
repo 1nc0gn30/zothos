@@ -1,0 +1,59 @@
+---
+// GoHighLevel inline form embed — safe for multiple instances per page.
+// Rules: unique IDs, no lazy loading, no custom postMessage handlers,
+// deduped script injection, no skeleton/fallback overlays.
+
+let instanceCounter = 0;
+
+const {
+  formId = "REPLACE_WITH_YOUR_GHL_FORM_ID",
+  formName = "REPLACE_WITH_YOUR_FORM_NAME",
+  height = 694,
+} = Astro.props;
+
+const instanceId = ++instanceCounter;
+const inlineId = "inline-" + formId + "-" + instanceId;
+const formSrc = "https://api.leadconnectorhq.com/widget/form/" + formId;
+---
+
+<div class="ghl-form-wrapper">
+  <iframe
+    src={formSrc}
+    style={`width:100%;border:none;border-radius:8px;height:${height}px`}
+    id={inlineId}
+    data-layout="{'id':'INLINE'}"
+    data-trigger-type="alwaysShow"
+    data-trigger-value=""
+    data-activation-type="alwaysActivated"
+    data-activation-value=""
+    data-deactivation-type="neverDeactivate"
+    data-deactivation-value=""
+    data-form-name={formName}
+    data-height={height}
+    data-layout-iframe-id={inlineId}
+    data-form-id={formId}
+    title={formName}
+    loading="eager"
+    fetchpriority="high"
+  ></iframe>
+</div>
+
+<script is:inline>
+  (function () {
+    var src = "https://link.msgsndr.com/js/form_embed.js";
+    if (!document.querySelector('script[src="' + src + '"]')) {
+      var s = document.createElement("script");
+      s.src = src;
+      s.async = true;
+      document.body.appendChild(s);
+    }
+  })();
+</script>
+
+<style>
+  .ghl-form-wrapper {
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 12px 40px rgba(14, 37, 15, 0.18);
+  }
+</style>

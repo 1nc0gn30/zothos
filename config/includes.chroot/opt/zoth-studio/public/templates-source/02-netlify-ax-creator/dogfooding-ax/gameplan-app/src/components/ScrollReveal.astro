@@ -1,0 +1,37 @@
+---
+interface Props {
+  delay?: 1 | 2 | 3;
+}
+
+const { delay } = Astro.props;
+const delayClass = delay ? `reveal-delay-${delay}` : '';
+---
+
+<div class={`reveal ${delayClass}`.trim()}>
+  <slot />
+</div>
+
+<script>
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          entry.target.classList.remove('exit-up', 'exit-down');
+        } else {
+          entry.target.classList.remove('visible');
+          if (entry.boundingClientRect.top < 0) {
+            entry.target.classList.add('exit-up');
+            entry.target.classList.remove('exit-down');
+          } else {
+            entry.target.classList.add('exit-down');
+            entry.target.classList.remove('exit-up');
+          }
+        }
+      });
+    },
+    { threshold: 0.15 }
+  );
+
+  document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+</script>

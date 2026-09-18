@@ -1,0 +1,57 @@
+/*
+Color Input
+ */
+@use '../../config' as *;
+
+.form-colorinput {
+  --form-colorinput-size: #{$form-colorinput-size};
+  position: relative;
+  display: inline-block;
+  margin: 0;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.form-colorinput-input {
+  position: absolute;
+  z-index: -1;
+  opacity: 0;
+}
+
+.form-colorinput-color {
+  display: block;
+  width: var(--form-colorinput-size);
+  height: var(--form-colorinput-size);
+  color: $white;
+  border: var(--border-width) var(--border-style) $input-border-color-translucent;
+  @include border-radius(var(--border-radius));
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+
+  &::before {
+    position: absolute;
+    inset-inline-start: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    content: '';
+    background: no-repeat center center/$form-check-input-checked-bg-size;
+    background-image: escape-svg($form-check-input-checked-bg-image);
+    opacity: 0;
+    @include transition(opacity $transition-time);
+
+    .form-colorinput-input:checked ~ & {
+      opacity: 1;
+    }
+  }
+
+  .form-colorinput-input:focus ~ & {
+    border-color: var(--primary);
+    box-shadow: $input-btn-focus-box-shadow;
+  }
+
+  @at-root .form-colorinput-light & {
+    &::before {
+      background-image: escape-svg($form-check-input-checked-bg-image-dark);
+    }
+  }
+}

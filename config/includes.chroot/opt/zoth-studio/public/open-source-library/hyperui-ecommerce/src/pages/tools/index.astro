@@ -1,0 +1,42 @@
+---
+import { getCollection } from 'astro:content'
+
+import { SEO_TITLE_TOOLS, SEO_DESCRIPTION_TOOLS } from '../../constants/seo'
+
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import BaseHero from '../../components/BaseHero.astro'
+import ToolCard from '../../components/ToolCard.astro'
+
+const toolEntries = await getCollection('tools')
+
+const sortedToolEntries = [...toolEntries].sort((firstEntry, secondEntry) => {
+  const firstSortKey = firstEntry.data.href ?? firstEntry.data.title
+  const secondSortKey = secondEntry.data.href ?? secondEntry.data.title
+
+  return firstSortKey.localeCompare(secondSortKey)
+})
+---
+
+<BaseLayout title={SEO_TITLE_TOOLS} description={SEO_DESCRIPTION_TOOLS}>
+  <BaseHero
+    title="Tools"
+    description="Browser-based Tailwind CSS tools — dark mode generation, contrast checking, typography mapping, theme building, and more. Free, no install, no signup."
+  />
+
+  <main id="main-content" class="mx-auto max-w-7xl px-4 py-8">
+    <ul class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        sortedToolEntries.map(({ data }) => (
+          <li>
+            <ToolCard
+              href={data.href}
+              title={data.title}
+              status={data.status}
+              description={data.description}
+            />
+          </li>
+        ))
+      }
+    </ul>
+  </main>
+</BaseLayout>

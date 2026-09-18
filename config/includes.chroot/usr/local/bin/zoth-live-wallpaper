@@ -10,14 +10,15 @@ if [[ ! -f "$WALLPAPER_HTML" ]]; then
 fi
 
 echo -e "\e[1;32m[*] Launching ZOTHOS Interactive Visual Engine...\e[0m"
+echo -e "\e[1;33m[*] Press ESC or click ✕ EXIT in the top right to return to desktop.\e[0m"
 
-# Check if chromium or firefox is available for app mode
+# Check available browsers and launch in windowed/app mode with standard titlebars
 if command -v chromium >/dev/null 2>&1; then
-    chromium --app="file://$WALLPAPER_HTML" --start-fullscreen --window-position=0,0 >/dev/null 2>&1 &
+    chromium --app="file://$WALLPAPER_HTML" --window-size=1920,1080 --start-maximized >/dev/null 2>&1 &
 elif command -v firefox-esr >/dev/null 2>&1; then
-    firefox-esr --kiosk "file://$WALLPAPER_HTML" >/dev/null 2>&1 &
+    firefox-esr --new-window "file://$WALLPAPER_HTML" >/dev/null 2>&1 &
 elif command -v firefox >/dev/null 2>&1; then
-    firefox --kiosk "file://$WALLPAPER_HTML" >/dev/null 2>&1 &
+    firefox --new-window "file://$WALLPAPER_HTML" >/dev/null 2>&1 &
 else
     xdg-open "file://$WALLPAPER_HTML" 2>/dev/null || true
 fi

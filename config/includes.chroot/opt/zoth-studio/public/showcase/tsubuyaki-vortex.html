@@ -1,0 +1,1936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Harmonic Topology Studio · #つぶやきProcessing Creative Coding Lab</title>
+  <meta name="description" content="Explore, synthesize, and live-code tweet-sized 280-byte generative art sketches (#つぶやきProcessing). Interactive mathematical topology lab with real-time harmonic modulation, turbo rendering, and high-res export.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="/assets/zoth-theme.css?v=12">
+  <link rel="stylesheet" href="/assets/zoth-nav.css?v=12">
+  <script src="/assets/zoth-theme.js?v=12"></script>
+  <!-- High-Speed Local Vendor with CDN Fallback -->
+  <script src="/assets/vendor/p5.min.js"></script>
+  <script>if(typeof p5==='undefined'){document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.3/p5.min.js"><\/script>')}</script>
+  <script defer src="/assets/zoth-speed-engine.js"></script>
+
+  <style>
+    :root {
+      --bg: #030408;
+      --card-bg: rgba(10, 14, 26, 0.88);
+      --card-inner: rgba(5, 8, 16, 0.7);
+      --border: rgba(0, 240, 255, 0.2);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --cyan: #00f0ff;
+      --gold: #fbbf24;
+    }
+
+    html[data-theme="light"] {
+      --bg: #f8fafc;
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --card-inner: rgba(241, 245, 249, 0.9);
+      --border: rgba(15, 23, 42, 0.14);
+      --text: #0f172a;
+      --text-muted: #475569;
+      --text-dim: #64748b;
+      --cyan: #0284c7;
+      --gold: #d97706;
+    }
+
+    html[data-theme="matrix"] {
+      --bg: #020b04;
+      --card-bg: rgba(3, 18, 7, 0.92);
+      --card-inner: rgba(2, 12, 5, 0.9);
+      --border: rgba(34, 197, 94, 0.25);
+      --text: #86efac;
+      --text-muted: #4ade80;
+      --cyan: #22c55e;
+    }
+
+    html[data-theme="gold"] {
+      --bg: #0d0a02;
+      --card-bg: rgba(24, 18, 6, 0.92);
+      --card-inner: rgba(16, 12, 4, 0.9);
+      --border: rgba(251, 191, 36, 0.25);
+      --text: #fef3c7;
+      --text-muted: #fde68a;
+      --cyan: #f59e0b;
+    }
+
+    #canvas-container canvas, .canvas-wrapper canvas {
+      max-width: 100% !important;
+      height: auto !important;
+      aspect-ratio: 1 / 1;
+      display: block;
+    }
+      --emerald: #34d399;
+      --purple: #c084fc;
+      --rose: #fb7185;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --font-display: 'Cinzel', serif;
+      --font-sans: 'Plus Jakarta Sans', sans-serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 50% 10%, rgba(0, 240, 255, 0.09) 0%, transparent 55%),
+        radial-gradient(circle at 90% 85%, rgba(192, 132, 252, 0.07) 0%, transparent 45%),
+        radial-gradient(circle at 10% 75%, rgba(251, 191, 36, 0.05) 0%, transparent 45%);
+    }
+
+    header {
+      padding: 16px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      background: rgba(3, 4, 8, 0.92);
+      backdrop-filter: blur(14px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .brand-icon {
+      font-size: 26px;
+      filter: drop-shadow(0 0 12px var(--cyan));
+      animation: pulseGlow 4s ease-in-out infinite alternate;
+    }
+
+    @keyframes pulseGlow {
+      from { filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.4)); }
+      to { filter: drop-shadow(0 0 18px rgba(0, 240, 255, 0.8)); }
+    }
+
+    .brand-title-wrap {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-title {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      background: linear-gradient(135deg, #ffffff 0%, #a5f3fc 50%, var(--cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-sub {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-pill {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      padding: 6px 12px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+      background: rgba(255, 255, 255, 0.03);
+      transition: all 0.2s;
+    }
+    .nav-pill:hover {
+      color: var(--cyan);
+      border-color: var(--border);
+      background: rgba(0, 240, 255, 0.08);
+    }
+
+    .fps-badge {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--emerald);
+      background: rgba(52, 211, 153, 0.1);
+      border: 1px solid rgba(52, 211, 153, 0.25);
+      padding: 5px 10px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .fps-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--emerald);
+      box-shadow: 0 0 6px var(--emerald);
+    }
+
+    main {
+      flex: 1;
+      max-width: 1540px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 1fr 520px;
+      gap: 22px;
+      align-items: start;
+    }
+
+    @media (max-width: 1200px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Left Column: Stage & Presets */
+    .stage-column {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .viewport-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      backdrop-filter: blur(16px);
+      position: relative;
+    }
+
+    .canvas-outer {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .canvas-wrapper {
+      position: relative;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 0 45px rgba(0, 240, 255, 0.18), inset 0 0 24px rgba(0, 0, 0, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #090909;
+      cursor: grab;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .canvas-wrapper:active {
+      cursor: grabbing;
+    }
+
+    .canvas-overlay-hud {
+      position: absolute;
+      top: 12px;
+      left: 14px;
+      right: 14px;
+      display: flex;
+      justify-content: space-between;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .hud-tag {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      background: rgba(0, 0, 0, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--cyan);
+      padding: 3px 8px;
+      border-radius: 6px;
+      backdrop-filter: blur(8px);
+    }
+
+    .viewport-toolbar {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 14px;
+    }
+
+    .tool-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: rgba(0, 240, 255, 0.08);
+      color: var(--cyan);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn:hover {
+      background: rgba(0, 240, 255, 0.22);
+      box-shadow: 0 0 16px rgba(0, 240, 255, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .btn-gold {
+      border-color: rgba(251, 191, 36, 0.35);
+      background: rgba(251, 191, 36, 0.1);
+      color: var(--gold);
+    }
+    .btn-gold:hover {
+      background: rgba(251, 191, 36, 0.25);
+      box-shadow: 0 0 16px rgba(251, 191, 36, 0.4);
+    }
+
+    .btn-emerald {
+      border-color: rgba(52, 211, 153, 0.35);
+      background: rgba(52, 211, 153, 0.1);
+      color: var(--emerald);
+    }
+    .btn-emerald:hover {
+      background: rgba(52, 211, 153, 0.25);
+      box-shadow: 0 0 16px rgba(52, 211, 153, 0.4);
+    }
+
+    .btn-purple {
+      border-color: rgba(192, 132, 252, 0.35);
+      background: rgba(192, 132, 252, 0.1);
+      color: var(--purple);
+    }
+    .btn-purple:hover {
+      background: rgba(192, 132, 252, 0.25);
+      box-shadow: 0 0 16px rgba(192, 132, 252, 0.4);
+    }
+
+    /* Preset Catalog Grid */
+    .catalog-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 18px;
+      backdrop-filter: blur(16px);
+    }
+
+    .catalog-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .category-tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .cat-tab {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .cat-tab.active {
+      background: rgba(0, 240, 255, 0.18);
+      color: var(--cyan);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+    }
+
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .preset-card {
+      background: var(--card-inner);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 12px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .preset-card:hover {
+      border-color: var(--border);
+      background: rgba(0, 240, 255, 0.06);
+      transform: translateY(-2px);
+    }
+
+    .preset-card.active {
+      border-color: var(--cyan);
+      background: rgba(0, 240, 255, 0.12);
+      box-shadow: 0 0 16px rgba(0, 240, 255, 0.25);
+    }
+
+    .preset-card.active::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
+    }
+
+    .preset-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .preset-name {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .preset-badge {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 2px 5px;
+      border-radius: 4px;
+      color: var(--gold);
+    }
+
+    .preset-desc {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    /* Right Sidebar */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      backdrop-filter: blur(16px);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .panel-title {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--cyan);
+    }
+
+    /* Editor / Tweet Box */
+    .tweet-meter-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .tweet-meter-header {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+    }
+
+    .tweet-progress-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .tweet-progress-fill {
+      height: 100%;
+      width: 80%;
+      background: var(--emerald);
+      transition: width 0.2s, background-color 0.2s;
+    }
+
+    .code-editor-area {
+      width: 100%;
+      height: 110px;
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      background: rgba(0, 0, 0, 0.75);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 12px;
+      color: #38bdf8;
+      line-height: 1.45;
+      resize: vertical;
+      outline: none;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .code-editor-area:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.2);
+    }
+
+    .code-macro-bar {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .macro-chip {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      padding: 3px 7px;
+      border-radius: 6px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .macro-chip:hover {
+      color: var(--gold);
+      border-color: var(--gold);
+      background: rgba(251, 191, 36, 0.1);
+    }
+
+    /* Synthesizer Controls */
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+    }
+
+    .control-row {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .control-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.76rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+    }
+
+    .control-label span:last-child {
+      color: var(--cyan);
+      font-weight: 700;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: var(--cyan);
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--cyan);
+      transition: transform 0.1s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.25);
+    }
+
+    .theme-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 7px;
+      margin-top: 10px;
+    }
+
+    .theme-chip {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      padding: 7px 8px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      background: rgba(0, 0, 0, 0.45);
+      color: var(--text-muted);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .theme-chip.active {
+      border-color: var(--cyan);
+      background: rgba(0, 240, 255, 0.15);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.25);
+    }
+
+    .math-breakdown {
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
+
+    .math-pill {
+      font-family: var(--font-mono);
+      background: rgba(255, 255, 255, 0.08);
+      padding: 2px 5px;
+      border-radius: 4px;
+      color: var(--gold);
+    }
+
+    /* Toast Notification */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: rgba(10, 14, 26, 0.95);
+      border: 1px solid var(--cyan);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      padding: 10px 18px;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0, 240, 255, 0.3);
+      backdrop-filter: blur(10px);
+      display: none;
+      align-items: center;
+      gap: 8px;
+      z-index: 1000;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+  <link rel="stylesheet" href="/assets/zoth-nav.css" />
+  <link rel="stylesheet" href="/assets/zoth-footer.css" />
+</head>
+<body>
+
+                                                          <header class="bar" id="topbar" role="banner">
+      <a class="brand js-hub" href="/" aria-label="Zoth Studio Home">
+        <div class="brand-emblem-wrap">
+          <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth Golden Z Emblem" width="34" height="34" class="brand-emblem-img" />
+          <span class="brand-emblem-halo"></span>
+        </div>
+        <span class="brand-text-wrap">
+          <strong>Zoth</strong>
+          <small>by NullAI</small>
+        </span>
+        <span class="brand-status-badge">SOVEREIGN</span>
+      </a>
+
+      <nav class="menu" aria-label="Primary navigation" role="navigation">
+        <a class="nav-link nav-for-everyone" href="/#for-everyone" data-tip="Zero-Code Showcases — How non-tech founders, creators & teams depend on Zoth.">✦ For You</a>
+
+        <!-- 🔮 Core AI -->
+        <div class="nav-dropdown" data-dropdown-id="core">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Core AI</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🔮 CORE AI ARCHITECTURE</span><span class="nav-item-badge">6 NODES</span></div>
+            <a href="/zoth/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+            <a href="/agents/"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+            <a href="/studio/consensus.html"><span class="nav-item-icon-box">⚔️</span><div class="nav-item-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+            <a href="/studio/swarm.html"><span class="nav-item-icon-box">🌐</span><div class="nav-item-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+            <a href="/memory/"><span class="nav-item-icon-box">🧠</span><div class="nav-item-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+            <a href="/zoth-world.html"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+          </div>
+        </div>
+
+        <!-- 🪐 Studio -->
+        <div class="nav-dropdown" data-dropdown-id="studio">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Studio</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu nav-dropdown-mega">
+            <div class="nav-dropdown-header"><span>🪐 14+ STUDIO WORKSTATIONS</span><span class="nav-item-badge">LOCAL DAGS</span></div>
+            <a href="/studio/cockpit.html"><span class="nav-item-icon-box">🪐</span><div class="nav-item-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+            <a href="/studio/cockpit.html?tool=webgen"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+            <a href="/studio/cockpit.html?tool=vos-sandbox"><span class="nav-item-icon-box">💻</span><div class="nav-item-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+            <a href="/studio/cockpit.html?tool=nexus-3d"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+            <a href="/studio/cockpit.html?tool=omnipost"><span class="nav-item-icon-box">🎬</span><div class="nav-item-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+            <a href="/studio/cockpit.html?tool=math-pillars"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+            <a href="/studio/cockpit.html?tool=secure-comms"><span class="nav-item-icon-box">🔒</span><div class="nav-item-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+            <a href="/studio/cockpit.html?tool=signal-bridge"><span class="nav-item-icon-box">📡</span><div class="nav-item-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+            <a href="/studio/cockpit.html?tool=web3-hub"><span class="nav-item-icon-box">🪙</span><div class="nav-item-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+            <a href="/studio/cockpit.html?tool=pets"><span class="nav-item-icon-box">💎</span><div class="nav-item-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+            <a href="/studio/cockpit.html?tool=tool-nexus"><span class="nav-item-icon-box">🛠️</span><div class="nav-item-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+          </div>
+        </div>
+
+        <!-- 🌌 Universe -->
+        <div class="nav-dropdown" data-dropdown-id="universe">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Universe</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🌌 UNIVERSE &amp; PUBLICATIONS</span><span class="nav-item-badge">STORIES</span></div>
+            <a href="/comic/"><span class="nav-item-icon-box">🎨</span><div class="nav-item-body"><strong>AZOTH Anime Comic</strong><small>Season 1 Ep 1: Genesis in Silicon Rain (Audio)</small></div><span class="nav-item-badge">AUDIO</span></a>
+            <a href="/social/"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+            <a href="/articles/"><span class="nav-item-icon-box">📜</span><div class="nav-item-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+            <a href="/article/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+            <a href="/ai-webgpu.html"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+            <a href="/adytum/"><span class="nav-item-icon-box">🏛️</span><div class="nav-item-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+          </div>
+        </div>
+
+        <!-- 📚 Docs & Vault -->
+        <div class="nav-dropdown" data-dropdown-id="docs">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Docs & Vault</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>📚 DOCUMENTATION &amp; SECURITY</span><span class="nav-item-badge">SPECS</span></div>
+            <a href="/docs/"><span class="nav-item-icon-box">📚</span><div class="nav-item-body"><strong>Master Documentation</strong><small>Port Topology, 1-Click Install Scripts & API Guide</small></div><span class="nav-item-badge">DOCS</span></a>
+            <a href="/vault/"><span class="nav-item-icon-box">🔐</span><div class="nav-item-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+            <a href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+            <a href="/faq.html"><span class="nav-item-icon-box">❓</span><div class="nav-item-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+          </div>
+        </div>
+
+        <!-- ⚡ Action Pills -->
+        <button type="button" class="nav-pill nav-telemetry-pill" title="View Live Studio Telemetry & Background Daemons" aria-label="Studio Telemetry Status">
+          <span class="tel-dot online"></span><span class="tel-text">6/6 DAEMONS</span>
+        </button>
+
+        <button type="button" class="nav-pill nav-pet-pill" title="Active Companion Spirit: Azoth (Click to Summon / Switch Mascot)" aria-label="Active Companion Spirit">
+          <span class="pet-emoji">🔮</span><span class="pet-name">Azoth</span>
+        </button>
+
+        <a class="nav-pill nav-deck-pill js-deck" href="http://127.0.0.1:8484/" title="Open Local Operator Deck (:8484)">
+          <span class="deck-pulse"></span><span>DECK</span>
+        </a>
+
+        <button type="button" class="nav-pill nav-palette-btn" title="Open Global Command Palette (Ctrl+K)" aria-label="Command Palette">
+          <span class="palette-icon">🔍</span><kbd class="nav-kbd">Ctrl+K</kbd>
+        </button>
+
+        <button type="button" class="nav-pill nav-annotate-btn" title="Toggle On-Screen Annotator & Feedback (Shift+A)" aria-label="Toggle Annotator">
+          <span class="annotate-icon">✏️</span><span class="annotate-text">Annotate</span><kbd class="nav-kbd">Shift+A</kbd>
+        </button>
+
+        <div class="nav-dropdown nav-theme-dropdown">
+          <button class="nav-dropdown-btn nav-theme-current-btn" type="button" aria-haspopup="true" aria-expanded="false" title="Switch Visual Theme (Shift+T)">
+            <span class="current-theme-swatch" style="background:#00f0ff;"></span>
+            <span class="current-theme-emoji">🌙</span>
+            <span class="current-theme-label">Dark Void</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+        </div>
+
+        <a class="nav-pill git" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank" title="GitHub Repository — Open Source code, Debian packages, and releases">
+          <span>🐙 GitHub ↗</span>
+        </a>
+      </nav>
+
+      <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Toggle navigation menu">
+        <span class="burger-lines"><span class="b-line b-1"></span><span class="b-line b-2"></span><span class="b-line b-3"></span></span>
+        <span class="burger-text">Menu</span>
+      </button>
+      <div class="zoth-scroll-progress" id="zoth-scroll-progress"></div>
+    </header>
+
+    <nav class="drawer" id="drawer" aria-label="Universal Mobile Navigation" role="navigation">
+      <div class="drawer-header-brand">
+        <div class="d-brand-left">
+          <div class="brand-emblem-wrap">
+            <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth" width="28" height="28" class="brand-emblem-img" />
+          </div>
+          <span class="d-brand-title"><strong>Zoth Studio</strong><small>v12.0 Sovereign</small></span>
+        </div>
+        <button type="button" class="drawer-telemetry-badge" title="View Diagnostics HUD">● 6/6 DAEMONS</button>
+        <button type="button" class="drawer-close-btn" aria-label="Close mobile menu">✕</button>
+      </div>
+
+      <div class="drawer-section drawer-tools-section">
+        <div class="drawer-heading">⚡ Quick Actions</div>
+        <div class="drawer-quick-tools-grid">
+          <button type="button" class="drawer-tool-pill drawer-palette-trigger"><span>🔍</span> Command Palette <kbd class="nav-kbd">Ctrl+K</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-annotate-trigger"><span>✏️</span> On-Screen Annotator <kbd class="nav-kbd">Shift+A</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-telemetry-trigger"><span>⚡</span> Telemetry HUD</button>
+          <button type="button" class="drawer-tool-pill drawer-audio-trigger"><span>🔊</span> Audio FX</button>
+        </div>
+      </div>
+
+      <div class="drawer-section drawer-theme-section">
+        <div class="drawer-heading">🎨 Visual Theme (16 Archetypes)</div>
+        <div class="drawer-search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="drawer-theme-search-input" placeholder="Search 16 themes..." autocomplete="off" />
+        </div>
+        <div class="theme-filter-chips drawer-filter-chips">
+          <button type="button" class="theme-chip-btn active" data-drawer-cat="all">All (16)</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="studio originals">Originals</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="frontier ai & tech">Frontier</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="developer archetypes">Dev</button>
+        </div>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">✦ Featured</div>
+        <a class="drawer-link drawer-hero-link" href="/#for-everyone"><span class="d-link-icon">✦</span><div class="d-link-body"><strong>For You (No-Code Showcases)</strong><small>How Non-Tech Founders, Creators & Teams Use Zoth</small></div><span class="nav-item-badge">SHOWCASE</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🔮 Core AI & Pantheon</div>
+        <a class="drawer-link" href="/zoth/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+        <a class="drawer-link" href="/agents/"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+        <a class="drawer-link" href="/studio/consensus.html"><span class="d-link-icon">⚔️</span><div class="d-link-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+        <a class="drawer-link" href="/studio/swarm.html"><span class="d-link-icon">🌐</span><div class="d-link-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+        <a class="drawer-link" href="/memory/"><span class="d-link-icon">🧠</span><div class="d-link-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+        <a class="drawer-link" href="/zoth-world.html"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🪐 Workstations & DAGs</div>
+        <a class="drawer-link" href="/studio/cockpit.html"><span class="d-link-icon">🪐</span><div class="d-link-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=webgen"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=vos-sandbox"><span class="d-link-icon">💻</span><div class="d-link-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=nexus-3d"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=omnipost"><span class="d-link-icon">🎬</span><div class="d-link-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=math-pillars"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=secure-comms"><span class="d-link-icon">🔒</span><div class="d-link-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=signal-bridge"><span class="d-link-icon">📡</span><div class="d-link-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=web3-hub"><span class="d-link-icon">🪙</span><div class="d-link-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=pets"><span class="d-link-icon">💎</span><div class="d-link-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=tool-nexus"><span class="d-link-icon">🛠️</span><div class="d-link-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📜 Universe & Research</div>
+        <a class="drawer-link" href="/comic/"><span class="d-link-icon">🎨</span><div class="d-link-body"><strong>AZOTH Anime Comic Series</strong><small>Season 1 Ep 1: Genesis in Silicon Rain</small></div><span class="nav-item-badge">AUDIO</span></a>
+        <a class="drawer-link" href="/social/"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+        <a class="drawer-link" href="/articles/"><span class="d-link-icon">📜</span><div class="d-link-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+        <a class="drawer-link" href="/article/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+        <a class="drawer-link" href="/ai-webgpu.html"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+        <a class="drawer-link" href="/adytum/"><span class="d-link-icon">🏛️</span><div class="d-link-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📚 Docs & Security</div>
+        <a class="drawer-link" href="/docs/"><span class="d-link-icon">📚</span><div class="d-link-body"><strong>Complete Documentation</strong><small>Port Topology, 1-Click Install Scripts & API</small></div><span class="nav-item-badge">DOCS</span></a>
+        <a class="drawer-link" href="/vault/"><span class="d-link-icon">🔐</span><div class="d-link-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+        <a class="drawer-link" href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+        <a class="drawer-link" href="/faq.html"><span class="d-link-icon">❓</span><div class="d-link-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+      </div>
+
+      <div class="drawer-section drawer-footer-section">
+        <a class="drawer-pill-link js-deck" href="http://127.0.0.1:8484/">💻 Launch Local Operator Deck (:8484)</a>
+        <a class="drawer-pill-link" href="https://github.com/NullAITech/zoth-studio" target="_blank" rel="noopener noreferrer">🐙 GitHub Source Repository ↗</a>
+        <a class="drawer-pill-link" href="/downloads/zoth-studio-android.apk">📱 Download Android App (.apk)</a>
+      </div>
+    </nav>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+  <main>
+    <!-- Left Stage Column -->
+    <div class="stage-column">
+      <div class="viewport-card">
+        <div class="canvas-outer">
+          <div class="canvas-wrapper" id="canvas-container">
+            <div class="canvas-overlay-hud">
+              <span class="hud-tag" id="hudTopology">Celestial Torus</span>
+              <span class="hud-tag" id="hudRes">500 × 500 px · Turbo Engine</span>
+            </div>
+            <!-- Canvas rendered here -->
+          </div>
+        </div>
+
+        <div class="viewport-toolbar">
+          <div class="tool-group">
+            <button class="btn" onclick="togglePause()"><span id="pauseIcon">⏸</span> <span id="pauseText">Pause</span></button>
+            <button class="btn" onclick="resetParams()">↺ Reset</button>
+            <button class="btn" onclick="toggleHiDPI()"><span id="hidpiIcon">💎</span> <span id="hidpiText">1X Crisp</span></button>
+            <button class="btn" onclick="toggleTurbo()" id="btnTurbo" title="Toggle Hardware Fast Batch Renderer"><span id="turboIcon">🚀</span> <span id="turboText">Turbo ON</span></button>
+          </div>
+          <div class="tool-group">
+            <button class="btn btn-purple" onclick="toggleRecord()"><span id="recIcon">⏺</span> <span id="recText">Record WebM</span></button>
+            <button class="btn btn-gold" onclick="captureFrame()">📸 Snapshot PNG</button>
+            <button class="btn btn-emerald" onclick="copyShareURL()">🔗 Share State</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preset Catalog Tabs & Grid -->
+      <div class="catalog-panel">
+        <div class="catalog-header">
+          <h2 class="panel-title"><span>🌌</span> Topological Preset Catalog</h2>
+          <div class="category-tabs">
+            <button class="cat-tab active" onclick="filterCatalog('all', this)">All (12)</button>
+            <button class="cat-tab" onclick="filterCatalog('toroid', this)">Toroids (4)</button>
+            <button class="cat-tab" onclick="filterCatalog('algebraic', this)">Algebraic (3)</button>
+            <button class="cat-tab" onclick="filterCatalog('wave', this)">Wavefield (3)</button>
+            <button class="cat-tab" onclick="filterCatalog('spiral', this)">Spirals (2)</button>
+          </div>
+        </div>
+
+        <div class="preset-grid" id="presetGrid">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Sidebar -->
+    <div class="sidebar">
+      <!-- Live Code Editor & Twitter 280-Byte Meter -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title"><span>✍️</span> Tweet Live-Code Sandbox</h2>
+          <button class="btn btn-gold" style="padding:4px 10px; font-size:0.72rem;" onclick="copyTweetCode()">📋 Copy Tweet</button>
+        </div>
+
+        <div class="tweet-meter-wrap">
+          <div class="tweet-meter-header">
+            <span>Tweet Byte Economy (<span id="byteCount">222</span> / 280 B)</span>
+            <span id="byteStatus" style="color:var(--emerald);">✓ Fits in 1 Tweet</span>
+          </div>
+          <div class="tweet-progress-bar">
+            <div class="tweet-progress-fill" id="byteFill"></div>
+          </div>
+        </div>
+
+        <textarea class="code-editor-area" id="codeEditor" spellcheck="false" oninput="handleCodeInput()"></textarea>
+
+        <div class="code-macro-bar">
+          <span style="font-size:0.68rem; color:var(--text-dim); align-self:center;">Insert:</span>
+          <button class="macro-chip" onclick="insertMacro('mag(')">mag()</button>
+          <button class="macro-chip" onclick="insertMacro('sin(')">sin()</button>
+          <button class="macro-chip" onclick="insertMacro('cos(')">cos()</button>
+          <button class="macro-chip" onclick="insertMacro('i%')">i%N</button>
+          <button class="macro-chip" onclick="insertMacro('PI/')">PI/N</button>
+          <button class="macro-chip" onclick="insertMacro('point(')">point()</button>
+        </div>
+      </div>
+
+      <!-- Real-Time Interactive Synthesizer -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title"><span>🎛️</span> Harmonic Synthesizer</h2>
+          <span style="font-family:var(--font-mono); font-size:0.7rem; color:var(--text-dim);">Live Parameters</span>
+        </div>
+        <div class="control-group">
+          <div class="control-row">
+            <div class="control-label">
+              <span>Point Density (i budget)</span>
+              <span id="densityVal">20,000</span>
+            </div>
+            <input type="range" id="paramDensity" min="2000" max="45000" step="1000" value="20000" oninput="updateParam('density', this.value)">
+          </div>
+
+          <div class="control-row">
+            <div class="control-label">
+              <span>Harmonic Time Speed (dt)</span>
+              <span id="speedVal">1.0x</span>
+            </div>
+            <input type="range" id="paramSpeed" min="0.1" max="3.5" step="0.1" value="1.0" oninput="updateParam('speed', this.value)">
+          </div>
+
+          <div class="control-row">
+            <div class="control-label">
+              <span>Spatial Scale Multiplier</span>
+              <span id="scaleVal">1.0x</span>
+            </div>
+            <input type="range" id="paramScale" min="0.4" max="2.5" step="0.05" value="1.0" oninput="updateParam('scale', this.value)">
+          </div>
+
+          <div class="control-row">
+            <div class="control-label">
+              <span>Harmonic K-Warp Modulator</span>
+              <span id="warpVal">4.0</span>
+            </div>
+            <input type="range" id="paramWarp" min="0.5" max="8.0" step="0.1" value="4.0" oninput="updateParam('warp', this.value)">
+          </div>
+
+          <div class="control-row">
+            <div class="control-label">
+              <span>Point Size (Stroke Weight)</span>
+              <span id="strokeVal">1.0px</span>
+            </div>
+            <input type="range" id="paramStroke" min="0.5" max="3.0" step="0.1" value="1.0" oninput="updateParam('stroke', this.value)">
+          </div>
+        </div>
+
+        <div style="margin-top:16px;">
+          <div class="control-label"><span>Aesthetic Color Spectrum</span></div>
+          <div class="theme-grid">
+            <button class="theme-chip active" id="theme-monochrome" onclick="setPalette('monochrome')">⚪ Stipple</button>
+            <button class="theme-chip" id="theme-cyan" onclick="setPalette('cyan')">⚡ Neon Cyan</button>
+            <button class="theme-chip" id="theme-gold" onclick="setPalette('gold')">🔮 Gold</button>
+            <button class="theme-chip" id="theme-matrix" onclick="setPalette('matrix')">🟩 Matrix</button>
+            <button class="theme-chip" id="theme-violet" onclick="setPalette('violet')">🟣 Nebula</button>
+            <button class="theme-chip" id="theme-dispersion" onclick="setPalette('dispersion')">🌈 Dispersion</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mathematical Anatomy Deconstruction -->
+      <div class="panel">
+        <h2 class="panel-title"><span>📐</span> Mathematical Topology Anatomy</h2>
+        <div class="math-breakdown" id="mathExplanation">
+          <!-- Dynamically populated per preset -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="toast">📋 Action Completed</div>
+
+  <script>
+    // -------------------------------------------------------------
+    // PRESET CATALOG DATA & FORMULAS (12 Curated Presets)
+    // -------------------------------------------------------------
+    const PRESETS = [
+      {
+        id: 'v1',
+        category: 'toroid',
+        name: 'Celestial Torus Vortex',
+        badge: '222 B',
+        desc: 'Twin-strand counter-rotating torus with singular harmonic ripples sin(9/k).',
+        code: `a=(y,d=mag(k=(4+cos(y))*cos(i/7),e=y/5-11)-6)=>point((q=99+3*sin(9/k)+y/23*k*(e+sin(-d*4)))*sin(c=d/4-t/4+i%2*9+sin(t*3+e)/9)+200,q*cos(c)+200)\nt=0,draw=$=>{t||createCanvas(w=400,w);background(9).stroke(w,166);for(t+=PI/60,i=1e4;i--;)a(i/289)}//#つぶやきProcessing`,
+        density: 12000,
+        speed: 1.0,
+        warp: 4.0,
+        scale: 1.0,
+        math: `
+          <p>• <strong>Parametric Domain:</strong> <span class="math-pill">y = i / 289</span> sweeps 10,000 points over cosine harmonics.</p>
+          <p style="margin-top:6px">• <strong>Radial Singularity:</strong> <span class="math-pill">sin(9 / k)</span> generates bioluminescent pleated nodal ripples when <span class="math-pill">k → 0</span>.</p>
+          <p style="margin-top:6px">• <strong>Interlace Parity:</strong> <span class="math-pill">i % 2 * 9</span> alternates phase by 9 radians, weaving twin counter-rotating helical shells.</p>
+        `
+      },
+      {
+        id: 'v2',
+        category: 'toroid',
+        name: 'Hexa-Strand Möbius Vortex',
+        badge: '245 B',
+        desc: '6-fold phase-split ribbon knot with non-linear cubic wave surges d^3/9.',
+        code: `a=(y,d=mag(k=(4+cos(y))*cos(i/7),e=y/5-11)-6)=>point((79+k*k)*sin(c=d/4-t/4+i%6*9)+200,119*sin(c/2)+200+d**3/9*sin(t*3-d/.7)+3*sin(k*2)+y/23*k*(e+sin(e*4-d*4)))\nt=0,draw=$=>{t||createCanvas(w=400,w);background(9).stroke(w,96);for(t+=PI/90,i=2e4;i--;)a(i/798)}//#つぶやきProcessing`,
+        density: 22000,
+        speed: 1.0,
+        warp: 4.0,
+        scale: 1.0,
+        math: `
+          <p>• <strong>6-Fold Strand Phase:</strong> <span class="math-pill">i % 6 * 9</span> separates points into 6 distinct interlaced ribbons.</p>
+          <p style="margin-top:6px">• <strong>Möbius Half-Period:</strong> <span class="math-pill">119 * sin(c / 2)</span> introduces half-twist rotational asymmetry.</p>
+          <p style="margin-top:6px">• <strong>Cubic Wave Surge:</strong> <span class="math-pill">d^3 / 9 * sin(3t - d/0.7)</span> generates non-linear undulating ripples through outer vertices.</p>
+        `
+      },
+      {
+        id: 'v3',
+        category: 'toroid',
+        name: 'Triskelion Crystalline Knot',
+        badge: '239 B',
+        desc: '3-lobed trifold rotation with parabolic ripple surface and vertical nodal envelope.',
+        code: `a=(y,d=mag(k=(4+cos(y))*cos(i),e=y/5-11)-5)=>point((79+k*k)*cos(c=d/2.5-t/2+i%2*8)+200,99*sin(c/3)+200+d*d*sin(t*2-d)+3*sin(k*2)+sin(y/9+6)*k*(e+sin(e*4-d*4)))\nt=0,draw=$=>{t||createCanvas(w=400,w);background(9).stroke(w,96);for(t+=PI/80,i=2e4;i--;)a(i/663)}//#つぶやきProcessing`,
+        density: 22000,
+        speed: 1.0,
+        warp: 4.0,
+        scale: 1.0,
+        math: `
+          <p>• <strong>Trifold Harmonic Rotation:</strong> <span class="math-pill">99 * sin(c / 3)</span> drives a 3-lobed Möbius triskelion topology.</p>
+          <p style="margin-top:6px">• <strong>Parabolic Dynamic Wave:</strong> <span class="math-pill">d^2 * sin(2t - d)</span> modulates spatial ripple surface flow.</p>
+          <p style="margin-top:6px">• <strong>Sinusoidal Envelope:</strong> <span class="math-pill">sin(y/9 + 6) * k</span> generates rhythmic nodal nodes along the vertical axis.</p>
+        `
+      },
+      {
+        id: 'v4',
+        category: 'toroid',
+        name: 'Hyperbolic Gyroid Mesh',
+        badge: '242 B',
+        desc: '4-fold interwoven saddle geometry with dynamic hyperbolic warping.',
+        code: `a=(y,d=mag(k=sin(y)*cos(i/9)*6,e=y/4-8)-4)=>point((85+k*k*2)*sin(c=d/3-t/3+i%4*8)+200,105*cos(c/2)+200+d*d*cos(t*3-d)+sin(y/7)*k*(e+sin(e*3-d*3)))\nt=0,draw=$=>{t||createCanvas(w=400,w);background(9).stroke(w,96);for(t+=PI/80,i=2e4;i--;)a(i/550)}//#つぶやきProcessing`,
+        density: 20000,
+        speed: 1.0,
+        warp: 4.0,
+        scale: 1.0,
+        math: `
+          <p>• <strong>Quad-Strand Interlace:</strong> <span class="math-pill">i % 4 * 8</span> drives a 4-fold interwoven saddle mesh.</p>
+          <p style="margin-top:6px">• <strong>Hyperbolic Modulator:</strong> <span class="math-pill">sin(y)*cos(i/9)*6</span> creates expanding triply-periodic minimal surface sheets.</p>
+          <p style="margin-top:6px">• <strong>Cross-Axis Torque:</strong> <span class="math-pill">105 * cos(c / 2)</span> pairs with cosine ripple waves to twist space.</p>
+        `
+      },
+      {
+        id: 'v5',
+        category: 'algebraic',
+        name: 'Folium of Descartes Loop',
+        badge: '209 B',
+        desc: 'Trigonometric parametric mapping of the classical folium algebraic nodal loop.',
+        code: `a=(y,r=cos(y*3+t)*90+99,p=y+t)=>point(r*sin(p)*cos(y)+200,r*cos(p)*sin(y*2)+200)\nt=0,draw=$=>{t||createCanvas(w=400,w);background(9).stroke(w,120);for(t+=PI/60,i=2e4;i--;)a(i/318)}//#つぶやきProcessing`,
+        density: 24000,
+        speed: 1.0,
+        warp: 4.0,
+        scale: 1.0,
+        math: `
+          <p>• <strong>Algebraic Nodal Resonance:</strong> <span class="math-pill">r = cos(3y + t)*90 + 99</span> simulates algebraic leaf self-intersections.</p>
+          <p style="margin-top:6px">• <strong>Orthogonal Modulation:</strong> <span class="math-pill">cos(y)</span> on X and <span class="math-pill">sin(2y)</span> on Y produce self-similar petal curves.</p>
+        `
+      },
+      {
+        id: 'v6',
+        category: 'algebraic',
+        name: 'Acos Wave Collapse Toroid',
+        badge: '218 B',
+        desc: 'Piecewise-smooth wave collapse driven by cos(5 - acos(cos(3p))) inverse trig folding.',
+        code: `a=(y,p=y*5+t,r=cos(5-acos(cos(p*3)))*99)=>point(r*sin(p)*sin(y)+200,r*cos(p)*cos(y)+200+sin(p*2)*40)\nt=0,draw=$=>{t||createCanvas(w=400,w);background(9).stroke(w,110);for(t+=PI/50,i=2e4;i--;)a(i/440)}//#つぶやきProcessing`,
+        density: 22000,
+        speed: 1.0,
+        warp: 4.0,
+        scale: 1.0,
+        math: `
+          <p>• <strong>Inverse Arc-Cosine Folding:</strong> <span class="math-pill">acos(cos(3p))</span> creates continuous triangle-wave folds with zero branching.</p>
+          <p style="margin-top:6px">• <strong>Spherical Projection:</strong> <span class="math-pill">sin(p)*sin(y)</span> and <span class="math-pill">cos(p)*cos(y)</span> map triangle waves onto a rolling torus envelope.</p>
+        `
+      },
+      {
+        id: 'v7',
+        category: 'algebraic',
+        name: 'Polar Cassini Oval Resonator',
+        badge: '224 B',
+        desc: 'Bi-focal orbital modulation with dynamic phase shifting and pulsating harmonic lobes.',
+        code: `a=(y,u=y*4+t,r=sqrt(abs(cos(u*2)+sin(t)*0.5))*140+sin(u*7)*20)=>point(r*cos(y)+200,r*sin(y)+200)\nt=0,draw=$=>{t||createCanvas(w=400,w);background(9).stroke(w,110);for(t+=PI/60,i=2e4;i--;)a(i/500)}//#つぶやきProcessing`,
+        density: 20000,
+        speed: 1.0,
+        warp: 4.0,
+        scale: 1.0,
+        math: `
+          <p>• <strong>Cassini Bi-Focal Root:</strong> <span class="math-pill">sqrt(abs(cos(2u) + 0.5*sin(t)))</span> alternates topology between lemniscate and peanut ovals.</p>
+          <p style="margin-top:6px">• <strong>High-Frequency Ripple:</strong> <span class="math-pill">sin(7u) * 20</span> superimposes 7-fold cymatic resonance teeth along the boundary.</p>
+        `
+      },
+      {
+        id: 'v8',
+        category: 'wave',
+        name: 'Order/Disorder Interference Wave',
+        badge: '231 B',
+        desc: '2D regular lattice stipple field modulated by radial undulating interference ripples.',
+        code: `a=(i,x=i%200-100,z=floor(i/200)-100,d=mag(x,z)+1e-4)=>point(x*2+sin(d/9-t*2)*20+200,z*2+cos(d/9-t*2)*20+200)\nt=0,draw=$=>{t||createCanvas(w=400,w);background(9).stroke(w,90);for(t+=PI/45,i=4e4;i--;)a(i)}//#つぶやきProcessing`,
+        density: 36000,
+        speed: 1.0,
+        warp: 4.0,
+        scale: 1.0,
+        math: `
+          <p>• <strong>Lattice Unpacking:</strong> <span class="math-pill">x = i%200 - 100</span>, <span class="math-pill">z = floor(i/200) - 100</span> forms a 200x200 square grid in a single loop.</p>
+          <p style="margin-top:6px">• <strong>Radial Wave Dispersion:</strong> <span class="math-pill">sin(d/9 - 2t)*20</span> drives concentric traveling displacement wavefields.</p>
+        `
+      },
+      {
+        id: 'v9',
+        category: 'wave',
+        name: 'Polar Modulo Lissajous Resonance',
+        badge: '228 B',
+        desc: 'Multi-harmonic resonance rings woven by co-varying frequency phase modulations.',
+        code: `a=(y,k=sin(y*7+t)*cos(y*5-t)*120,p=y+sin(t+y)*2)=>point((90+k)*sin(p*3)+200,(90+k)*cos(p*2)+200+sin(y*11)*20)\nt=0,draw=$=>{t||createCanvas(w=400,w);background(9).stroke(w,130);for(t+=PI/70,i=2e4;i--;)a(i/500)}//#つぶやきProcessing`,
+        density: 22000,
+        speed: 1.0,
+        warp: 4.0,
+        scale: 1.0,
+        math: `
+          <p>• <strong>Interfering Beat Frequencies:</strong> <span class="math-pill">sin(7y+t) * cos(5y-t)</span> generates sum and difference moiré resonance rings.</p>
+          <p style="margin-top:6px">• <strong>Lissajous 3:2 Ratio:</strong> <span class="math-pill">sin(3p)</span> vs <span class="math-pill">cos(2p)</span> yields classic 3:2 knot figures rotated dynamically in space.</p>
+        `
+      },
+      {
+        id: 'v10',
+        category: 'wave',
+        name: 'Clifford Strange Attractor Flow',
+        badge: '248 B',
+        desc: 'Fractal chaotic flow attractor with parameter phase oscillation and dense attractor basins.',
+        code: `a=(x,y,nx=sin(a*y)+c*cos(a*x),ny=sin(b*x)+d*cos(b*y))=>{point(nx*80+200,ny*80+200);return [nx,ny]}\nt=0,draw=$=>{t||createCanvas(w=400,w);background(9).stroke(w,80);a=1.4+sin(t)*.2,b=-2.3,c=2.4,d=-2.1;for(t+=.01,p=[0,0],i=2e4;i--;)p=a(p[0],p[1])}//#つぶやきProcessing`,
+        density: 25000,
+        speed: 1.0,
+        warp: 4.0,
+        scale: 1.0,
+        math: `
+          <p>• <strong>Clifford Attractor Map:</strong> <span class="math-pill">x_{n+1} = sin(a y_n) + c cos(a x_n)</span>, <span class="math-pill">y_{n+1} = sin(b x_n) + d cos(b y_n)</span>.</p>
+          <p style="margin-top:6px">• <strong>Chaotic Basin Morphing:</strong> Time modulates <span class="math-pill">a = 1.4 + 0.2*sin(t)</span>, breathing organic life into the non-linear fractal manifolds.</p>
+        `
+      },
+      {
+        id: 'v11',
+        category: 'spiral',
+        name: 'Logarithmic Cosmic Golden Spiral',
+        badge: '214 B',
+        desc: 'Golden ratio exponential phyllotaxis spiral with pulsating radial wave envelopes.',
+        code: `a=(y,r=pow(1.0008,y)*sin(y/13+t)*180,p=y/2.3999632+t)=>point(r*sin(p)+200,r*cos(p)+200)\nt=0,draw=$=>{t||createCanvas(w=400,w);background(9).stroke(w,120);for(t+=PI/60,i=1.5e4;i--;)a(i/10)}//#つぶやきProcessing`,
+        density: 18000,
+        speed: 1.0,
+        warp: 4.0,
+        scale: 1.0,
+        math: `
+          <p>• <strong>Golden Angle Phase:</strong> <span class="math-pill">p = y / 2.3999632</span> uses the golden angle radians (≈ 137.5077°) for optimal phyllotactic packing.</p>
+          <p style="margin-top:6px">• <strong>Logarithmic Growth:</strong> <span class="math-pill">1.0008^y</span> expands exponentially outward while sine waves modulate pulsating galaxy arms.</p>
+        `
+      },
+      {
+        id: 'v12',
+        category: 'spiral',
+        name: 'Quantum Fermat Phyllotaxis',
+        badge: '238 B',
+        desc: 'Square-root density grain packing with quantum spin warp modulation along both axes.',
+        code: `a=(i,r=sqrt(i)*2.2,p=i*2.3999632+sin(t+r/20))=>point(r*cos(p)*(1+sin(t*2+r/10)*.2)+200,r*sin(p)*(1+cos(t*2+r/10)*.2)+200)\nt=0,draw=$=>{t||createCanvas(w=400,w);background(9).stroke(w,100);for(t+=PI/60,i=1.5e4;i--;)a(i)}//#つぶやきProcessing`,
+        density: 20000,
+        speed: 1.0,
+        warp: 4.0,
+        scale: 1.0,
+        math: `
+          <p>• <strong>Fermat Spiral Spacing:</strong> <span class="math-pill">r = sqrt(i) * 2.2</span> maintains equal area per point, mimicking sunflower florets and optical vortex lattices.</p>
+          <p style="margin-top:6px">• <strong>Orthogonal Pulsing:</strong> <span class="math-pill">1 + 0.2*sin(2t + r/10)</span> on X and cosine on Y causes the disk to oscillate between circular and elliptical quantum states.</p>
+        `
+      }
+    ];
+
+    // -------------------------------------------------------------
+    // STATE & PARAMETERS
+    // -------------------------------------------------------------
+    let activePreset = 'v1';
+    let isPaused = false;
+    let isHiDPI = false;
+    let turboMode = true;
+    let t = 0;
+    let w = 500;
+    let isDragging = false;
+    let dragStart = { x: 0, y: 0 };
+    let panOffset = { x: 0, y: 0 };
+
+    let params = {
+      density: 12000,
+      speed: 1.0,
+      scale: 1.0,
+      warp: 4.0,
+      stroke: 1.0,
+      palette: 'monochrome'
+    };
+
+    // Video Recording variables
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let isRecording = false;
+
+    // -------------------------------------------------------------
+    // SETUP & INITIALIZATION
+    // -------------------------------------------------------------
+    function setup() {
+      const canvas = createCanvas(w, w);
+      canvas.parent('canvas-container');
+      frameRate(60);
+
+      // Drag-to-pan handlers
+      const container = document.getElementById('canvas-container');
+      container.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        dragStart = { x: e.clientX - panOffset.x, y: e.clientY - panOffset.y };
+      });
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        panOffset.x = e.clientX - dragStart.x;
+        panOffset.y = e.clientY - dragStart.y;
+      });
+      window.addEventListener('mouseup', () => { isDragging = false; });
+
+      // Tab visibility guard
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          noLoop();
+        } else if (!isPaused) {
+          loop();
+        }
+      });
+
+      // Global Keyboard Shortcuts
+      window.addEventListener('keydown', (e) => {
+        if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+        if (e.code === 'Space') {
+          e.preventDefault();
+          togglePlayPause();
+        } else if (e.key === 'ArrowRight' || e.key === ']') {
+          e.preventDefault();
+          cyclePreset(1);
+        } else if (e.key === 'ArrowLeft' || e.key === '[') {
+          e.preventDefault();
+          cyclePreset(-1);
+        } else if (e.key === 'r' || e.key === 'R') {
+          e.preventDefault();
+          resetView();
+        } else if (e.key === 's' || e.key === 'S') {
+          e.preventDefault();
+          exportHiResPNG();
+        }
+      });
+
+      initCatalog();
+      parseURLHash();
+      selectPreset(activePreset, false);
+    }
+
+    function cyclePreset(dir) {
+      const idx = PRESETS.findIndex(p => p.id === activePreset);
+      if (idx !== -1) {
+        const nextIdx = (idx + dir + PRESETS.length) % PRESETS.length;
+        selectPreset(PRESETS[nextIdx].id, true);
+        if (window.ZothAudioFX && window.ZothAudioFX.isEnabled()) {
+          window.ZothAudioFX.playClick(720, 0.04);
+        }
+      }
+    }
+
+    function initCatalog() {
+      const grid = document.getElementById('presetGrid');
+      grid.innerHTML = '';
+      PRESETS.forEach(p => {
+        const card = document.createElement('div');
+        card.className = `preset-card ${p.id === activePreset ? 'active' : ''}`;
+        card.id = `card-${p.id}`;
+        card.setAttribute('data-cat', p.category);
+        card.onclick = () => selectPreset(p.id, true);
+        card.innerHTML = `
+          <div class="preset-title-row">
+            <span class="preset-name">${p.name}</span>
+            <span class="preset-badge">${p.badge}</span>
+          </div>
+          <p class="preset-desc">${p.desc}</p>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function filterCatalog(cat, btn) {
+      document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.preset-card').forEach(c => {
+        if (cat === 'all' || c.getAttribute('data-cat') === cat) {
+          c.style.display = 'flex';
+        } else {
+          c.style.display = 'none';
+        }
+      });
+    }
+
+    function selectPreset(id, updateHash = true) {
+      activePreset = id;
+      const p = PRESETS.find(item => item.id === id) || PRESETS[0];
+
+      document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('active'));
+      const activeCard = document.getElementById(`card-${id}`);
+      if (activeCard) activeCard.classList.add('active');
+
+      // Update parameters from preset defaults
+      params.density = p.density;
+      params.speed = p.speed;
+      params.scale = p.scale;
+      params.warp = p.warp;
+
+      // Update UI Controls
+      document.getElementById('paramDensity').value = params.density;
+      document.getElementById('densityVal').textContent = params.density.toLocaleString();
+      document.getElementById('paramSpeed').value = params.speed;
+      document.getElementById('speedVal').textContent = params.speed.toFixed(1) + 'x';
+      document.getElementById('paramScale').value = params.scale;
+      document.getElementById('scaleVal').textContent = params.scale.toFixed(1) + 'x';
+      document.getElementById('paramWarp').value = params.warp;
+      document.getElementById('warpVal').textContent = params.warp.toFixed(1);
+
+      // Update Code & HUD
+      document.getElementById('codeEditor').value = p.code;
+      updateByteCounter(p.code);
+      document.getElementById('hudTopology').textContent = p.name;
+      document.getElementById('mathExplanation').innerHTML = p.math;
+
+      if (updateHash) syncURLHash();
+    }
+
+    // -------------------------------------------------------------
+    // HIGH-SPEED DIRECT CANVAS2D TURBO RENDER PIPELINE
+    // -------------------------------------------------------------
+    function draw() {
+      const renderStart = performance.now();
+      const ctx = drawingContext;
+
+      // Clear Canvas
+      ctx.fillStyle = '#090909';
+      ctx.fillRect(0, 0, width, height);
+
+      if (!isPaused) {
+        let dt = (Math.PI / 60);
+        if (activePreset === 'v2') dt = (Math.PI / 90);
+        if (activePreset === 'v3' || activePreset === 'v4') dt = (Math.PI / 80);
+        if (activePreset === 'v6') dt = (Math.PI / 50);
+        if (activePreset === 'v8') dt = (Math.PI / 45);
+        if (activePreset === 'v9') dt = (Math.PI / 70);
+        if (activePreset === 'v10') dt = 0.012;
+        t += dt * params.speed;
+      }
+
+      ctx.save();
+      ctx.translate(w / 2 + panOffset.x, w / 2 + panOffset.y);
+      const coordScale = (w / 400);
+      const pointSize = params.stroke * (isHiDPI ? 1.4 : 1.0);
+      const count = params.density;
+
+      // Color Palette Fast Setup
+      const pal = params.palette;
+      const sinT = Math.sin(t);
+      const cosT = Math.cos(t);
+
+      // Optimized Point Loop Dispatcher
+      if (pal === 'monochrome') {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+      }
+
+      const pScale = params.scale;
+      const pWarp = params.warp;
+
+      for (let i = count; i--;) {
+        let px = 0, py = 0, k = 0, d = 0, baseAlpha = 110;
+
+        if (activePreset === 'v1') {
+          const y = i / 289;
+          k = (pWarp + Math.cos(y)) * Math.cos(i / 7);
+          const e = y / 5 - 11;
+          d = Math.hypot(k, e) - 6;
+          const q = (99 + 3 * Math.sin(9 / (k || 0.001)) + (y / 23) * k * (e + Math.sin(-d * 4))) * pScale;
+          const c = d / 4 - t / 4 + (i % 2) * 9 + Math.sin(t * 3 + e) / 9;
+          px = q * Math.sin(c);
+          py = q * Math.cos(c);
+          baseAlpha = 166;
+        } else if (activePreset === 'v2') {
+          const y = i / 798;
+          k = (pWarp + Math.cos(y)) * Math.cos(i / 7);
+          const e = y / 5 - 11;
+          d = Math.hypot(k, e) - 6;
+          const c = d / 4 - t / 4 + (i % 6) * 9;
+          px = (79 + k * k) * Math.sin(c) * pScale;
+          py = (119 * Math.sin(c / 2) + Math.pow(d, 3) / 9 * Math.sin(t * 3 - d / 0.7) + 3 * Math.sin(k * 2) + (y / 23) * k * (e + Math.sin(e * 4 - d * 4))) * pScale;
+          baseAlpha = 110;
+        } else if (activePreset === 'v3') {
+          const y = i / 663;
+          k = (pWarp + Math.cos(y)) * Math.cos(i);
+          const e = y / 5 - 11;
+          d = Math.hypot(k, e) - 5;
+          const c = d / 2.5 - t / 2 + (i % 2) * 8;
+          px = (79 + k * k) * Math.cos(c) * pScale;
+          py = (99 * Math.sin(c / 3) + d * d * Math.sin(t * 2 - d) + 3 * Math.sin(k * 2) + Math.sin(y / 9 + 6) * k * (e + Math.sin(e * 4 - d * 4))) * pScale;
+          baseAlpha = 110;
+        } else if (activePreset === 'v4') {
+          const y = i / 550;
+          k = Math.sin(y) * Math.cos(i / 9) * (pWarp * 1.5);
+          const e = y / 4 - 8;
+          d = Math.hypot(k, e) - 4;
+          const c = d / 3 - t / 3 + (i % 4) * 8;
+          px = (85 + k * k * 2) * Math.sin(c) * pScale;
+          py = (105 * Math.cos(c / 2) + d * d * Math.cos(t * 3 - d) + Math.sin(y / 7) * k * (e + Math.sin(e * 3 - d * 3))) * pScale;
+          baseAlpha = 105;
+        } else if (activePreset === 'v5') {
+          const y = i / 318;
+          const p = y + t;
+          const r = (Math.cos(y * (pWarp * 0.75) + t) * 90 + 99) * pScale;
+          px = r * Math.sin(p) * Math.cos(y);
+          py = r * Math.cos(p) * Math.sin(y * 2);
+          k = Math.sin(y * 3);
+          d = r / 30;
+          baseAlpha = 125;
+        } else if (activePreset === 'v6') {
+          const y = i / 440;
+          const p = y * (pWarp * 1.25) + t;
+          const r = Math.cos(5 - Math.acos(Math.cos(p * 3))) * 110 * pScale;
+          px = r * Math.sin(p) * Math.sin(y);
+          py = (r * Math.cos(p) * Math.cos(y) + Math.sin(p * 2) * 50) * pScale;
+          k = Math.cos(p * 3);
+          d = r / 20;
+          baseAlpha = 120;
+        } else if (activePreset === 'v7') {
+          const y = i / 500;
+          const u = y * pWarp + t;
+          const r = (Math.sqrt(Math.abs(Math.cos(u * 2) + sinT * 0.6)) * 140 + Math.sin(u * 5) * 25) * pScale;
+          px = r * Math.cos(y);
+          py = r * Math.sin(y);
+          k = Math.sin(u * 2);
+          d = r / 25;
+          baseAlpha = 115;
+        } else if (activePreset === 'v8') {
+          const side = Math.floor(Math.sqrt(count));
+          const x = (i % side) - side / 2;
+          const z = Math.floor(i / side) - side / 2;
+          d = Math.hypot(x, z) + 1e-4;
+          const ripple = Math.sin(d / (10 / (pWarp * 0.25)) - t * 2) * (18 * pScale);
+          px = (x * 2.2 * pScale) + ripple;
+          py = (z * 2.2 * pScale) + Math.cos(d / (10 / (pWarp * 0.25)) - t * 2) * (18 * pScale);
+          k = Math.sin(d / 10 - t);
+          d = d / 5;
+          baseAlpha = 100;
+        } else if (activePreset === 'v9') {
+          const y = i / 500;
+          k = Math.sin(y * (pWarp * 1.75) + t) * Math.cos(y * 5 - t) * 120;
+          const p = y + Math.sin(t + y) * 2;
+          px = (90 + k) * Math.sin(p * 3) * pScale;
+          py = ((90 + k) * Math.cos(p * 2) + Math.sin(y * 11) * 25) * pScale;
+          d = Math.abs(k) / 10;
+          baseAlpha = 130;
+        } else if (activePreset === 'v10') {
+          const a_param = 1.4 + sinT * (pWarp * 0.08);
+          const b_param = -2.3;
+          const c_param = 2.4 + cosT * 0.12;
+          const d_param = -2.1;
+          const y = i / count;
+          const nx = Math.sin(a_param * Math.cos(y * 6)) + c_param * Math.cos(a_param * Math.sin(y * 6));
+          const ny = Math.sin(b_param * Math.sin(y * 6)) + d_param * Math.cos(b_param * Math.cos(y * 6));
+          px = nx * 85 * pScale;
+          py = ny * 85 * pScale;
+          k = nx * 2;
+          d = Math.hypot(nx, ny) * 3;
+          baseAlpha = 90;
+        } else if (activePreset === 'v11') {
+          const y = i / 10;
+          const p = y / 2.3999632 + t;
+          const r = (Math.pow(1.0008, y) * Math.sin(y / (15 / (pWarp * 0.25)) + t) * 190) * pScale;
+          px = r * Math.sin(p);
+          py = r * Math.cos(p);
+          k = Math.sin(y / 10);
+          d = Math.abs(r) / 20;
+          baseAlpha = 120;
+        } else if (activePreset === 'v12') {
+          const r = Math.sqrt(i) * 2.2 * pScale;
+          const p = i * 2.3999632 + Math.sin(t + r / (25 / (pWarp * 0.25)));
+          const warpFactorX = 1 + Math.sin(t * 2 + r / 15) * 0.22;
+          const warpFactorY = 1 + Math.cos(t * 2 + r / 15) * 0.22;
+          px = r * Math.cos(p) * warpFactorX;
+          py = r * Math.sin(p) * warpFactorY;
+          k = Math.sin(r / 10);
+          d = r / 15;
+          baseAlpha = 110;
+        }
+
+        // Fast Color Styling
+        if (pal === 'cyan') {
+          const alpha = (0.35 + 0.35 * Math.sin(d + t)).toFixed(2);
+          const g = Math.floor(200 + Math.max(-5, Math.min(5, k)) * 10);
+          ctx.fillStyle = `rgba(0, ${g}, 255, ${alpha})`;
+        } else if (pal === 'gold') {
+          const alpha = (0.4 + 0.4 * Math.sin(d + t)).toFixed(2);
+          const g = Math.floor(180 + Math.max(-5, Math.min(5, k)) * 10);
+          ctx.fillStyle = `rgba(251, ${g}, 36, ${alpha})`;
+        } else if (pal === 'matrix') {
+          const alpha = (0.35 + 0.35 * Math.sin(d + t)).toFixed(2);
+          const b = Math.floor(150 + Math.max(-5, Math.min(5, k)) * 15);
+          ctx.fillStyle = `rgba(16, 240, ${b}, ${alpha})`;
+        } else if (pal === 'violet') {
+          const alpha = (0.4 + 0.4 * Math.sin(d + t)).toFixed(2);
+          const g = Math.floor(120 + Math.max(-5, Math.min(5, k)) * 10);
+          ctx.fillStyle = `rgba(192, ${g}, 252, ${alpha})`;
+        } else if (pal === 'dispersion') {
+          const hue = Math.floor(Math.abs(Math.sin(d * 0.4 + t)) * 360);
+          ctx.fillStyle = `hsla(${hue}, 90%, 65%, 0.65)`;
+        }
+
+        // Draw Fast Stipple Rect
+        const finalX = px * coordScale - pointSize / 2;
+        const finalY = py * coordScale - pointSize / 2;
+        ctx.fillRect(finalX, finalY, pointSize, pointSize);
+      }
+
+      ctx.restore();
+
+      // Telemetry Calculation
+      const renderMs = (performance.now() - renderStart).toFixed(1);
+      if (frameCount % 8 === 0) {
+        document.getElementById('fpsDisplay').textContent = `${Math.round(frameRate())} FPS · ${renderMs}ms`;
+      }
+    }
+
+    // -------------------------------------------------------------
+    // INTERACTIVE CONTROLS & EVENT HANDLERS
+    // -------------------------------------------------------------
+    function updateParam(key, val) {
+      params[key] = parseFloat(val);
+      if (key === 'density') document.getElementById('densityVal').textContent = parseInt(val).toLocaleString();
+      if (key === 'speed') document.getElementById('speedVal').textContent = parseFloat(val).toFixed(1) + 'x';
+      if (key === 'scale') document.getElementById('scaleVal').textContent = parseFloat(val).toFixed(1) + 'x';
+      if (key === 'warp') document.getElementById('warpVal').textContent = parseFloat(val).toFixed(1);
+      if (key === 'stroke') document.getElementById('strokeVal').textContent = parseFloat(val).toFixed(1) + 'px';
+      syncURLHash();
+    }
+
+    function setPalette(pal) {
+      params.palette = pal;
+      document.querySelectorAll('.theme-chip').forEach(el => el.classList.remove('active'));
+      const activeBtn = document.getElementById('theme-' + pal);
+      if (activeBtn) activeBtn.classList.add('active');
+      syncURLHash();
+    }
+
+    function togglePause() {
+      isPaused = !isPaused;
+      document.getElementById('pauseIcon').textContent = isPaused ? '▶' : '⏸';
+      document.getElementById('pauseText').textContent = isPaused ? 'Resume' : 'Pause';
+    }
+
+    function toggleHiDPI() {
+      isHiDPI = !isHiDPI;
+      w = isHiDPI ? 1000 : 500;
+      resizeCanvas(w, w);
+      const c = document.querySelector('#canvas-container canvas');
+      if (c) {
+        c.style.width = '500px';
+        c.style.height = '500px';
+      }
+      document.getElementById('hidpiIcon').textContent = isHiDPI ? '✨' : '💎';
+      document.getElementById('hidpiText').textContent = isHiDPI ? '2X Ultra-HD' : '1X Crisp';
+      document.getElementById('hudRes').textContent = `${w} × ${w} px · Turbo Engine`;
+      showToast(isHiDPI ? '✨ 2X Ultra-HD Canvas (1000px) Enabled' : '💎 1X Standard Canvas Enabled');
+    }
+
+    function toggleTurbo() {
+      turboMode = !turboMode;
+      document.getElementById('turboIcon').textContent = turboMode ? '🚀' : '🐢';
+      document.getElementById('turboText').textContent = turboMode ? 'Turbo ON' : 'Pure p5';
+      showToast(turboMode ? '🚀 Direct Canvas2D Turbo Engine ON' : '🐢 Pure p5.js Reference Mode');
+    }
+
+    function resetParams() {
+      panOffset = { x: 0, y: 0 };
+      const p = PRESETS.find(item => item.id === activePreset) || PRESETS[0];
+      params = {
+        density: p.density,
+        speed: p.speed,
+        scale: p.scale,
+        warp: p.warp,
+        stroke: 1.0,
+        palette: 'monochrome'
+      };
+      document.getElementById('paramDensity').value = params.density;
+      document.getElementById('paramSpeed').value = params.speed;
+      document.getElementById('paramScale').value = params.scale;
+      document.getElementById('paramWarp').value = params.warp;
+      document.getElementById('paramStroke').value = 1.0;
+      updateParam('density', params.density);
+      updateParam('speed', params.speed);
+      updateParam('scale', params.scale);
+      updateParam('warp', params.warp);
+      updateParam('stroke', 1.0);
+      setPalette('monochrome');
+      showToast('↺ Parameters Reset to Default');
+    }
+
+    // -------------------------------------------------------------
+    // CODE EDITOR & TWEET BYTE COUNTER
+    // -------------------------------------------------------------
+    function handleCodeInput() {
+      const val = document.getElementById('codeEditor').value;
+      updateByteCounter(val);
+    }
+
+    function updateByteCounter(codeStr) {
+      const byteLen = new TextEncoder().encode(codeStr).length;
+      document.getElementById('byteCount').textContent = byteLen;
+      const fill = document.getElementById('byteFill');
+      const status = document.getElementById('byteStatus');
+      const pct = Math.min(100, (byteLen / 280) * 100);
+      fill.style.width = pct + '%';
+
+      if (byteLen <= 280) {
+        fill.style.backgroundColor = 'var(--emerald)';
+        status.style.color = 'var(--emerald)';
+        status.textContent = `✓ Fits in 1 Tweet (${280 - byteLen} B left)`;
+      } else {
+        fill.style.backgroundColor = 'var(--rose)';
+        status.style.color = 'var(--rose)';
+        status.textContent = `⚠ Over limit by ${byteLen - 280} bytes`;
+      }
+    }
+
+    function insertMacro(str) {
+      const editor = document.getElementById('codeEditor');
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      const text = editor.value;
+      editor.value = text.substring(0, start) + str + text.substring(end);
+      editor.selectionStart = editor.selectionEnd = start + str.length;
+      editor.focus();
+      handleCodeInput();
+    }
+
+    function copyTweetCode() {
+      const code = document.getElementById('codeEditor').value;
+      navigator.clipboard.writeText(code).then(() => {
+        showToast('📋 Tweet Code Copied to Clipboard!');
+      });
+    }
+
+    // -------------------------------------------------------------
+    // EXPORT & RECORDING SUITE
+    // -------------------------------------------------------------
+    function captureFrame() {
+      const filename = `tsubuyaki-${activePreset}-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}`;
+      saveCanvas(filename, 'png');
+      showToast('📸 High-Res Snapshot Saved!');
+    }
+
+    function toggleRecord() {
+      if (isRecording) {
+        stopRecording();
+      } else {
+        startRecording();
+      }
+    }
+
+    function startRecording() {
+      const canvas = document.querySelector('#canvas-container canvas');
+      if (!canvas) return;
+
+      const stream = canvas.captureStream(60);
+      recordedChunks = [];
+      mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm; codecs=vp9' });
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) recordedChunks.push(e.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `tsubuyaki-loop-${activePreset}.webm`;
+        a.click();
+        showToast('🎬 Video Recording Exported!');
+      };
+
+      mediaRecorder.start();
+      isRecording = true;
+      document.getElementById('recIcon').textContent = '⏹';
+      document.getElementById('recText').textContent = 'Stop Rec';
+      showToast('⏺ Recording Loop Video...');
+
+      // Auto stop after 6 seconds for a clean loop
+      setTimeout(() => {
+        if (isRecording) stopRecording();
+      }, 6000);
+    }
+
+    function stopRecording() {
+      if (!mediaRecorder || !isRecording) return;
+      mediaRecorder.stop();
+      isRecording = false;
+      document.getElementById('recIcon').textContent = '⏺';
+      document.getElementById('recText').textContent = 'Record WebM';
+    }
+
+    function copyShareURL() {
+      syncURLHash();
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        showToast('🔗 Shareable State URL Copied!');
+      });
+    }
+
+    function syncURLHash() {
+      const hash = `preset=${activePreset}&density=${params.density}&speed=${params.speed}&warp=${params.warp}&scale=${params.scale}&palette=${params.palette}`;
+      window.location.hash = hash;
+    }
+
+    function parseURLHash() {
+      if (!window.location.hash) return;
+      const hash = window.location.hash.substring(1);
+      const searchParams = new URLSearchParams(hash);
+      if (searchParams.has('preset')) activePreset = searchParams.get('preset');
+      if (searchParams.has('density')) params.density = parseInt(searchParams.get('density'));
+      if (searchParams.has('speed')) params.speed = parseFloat(searchParams.get('speed'));
+      if (searchParams.has('warp')) params.warp = parseFloat(searchParams.get('warp'));
+      if (searchParams.has('scale')) params.scale = parseFloat(searchParams.get('scale'));
+      if (searchParams.has('palette')) setPalette(searchParams.get('palette'));
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.style.display = 'flex';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 3000);
+    }
+  </script>
+  <script src="/assets/zoth-nav.js" defer></script>
+                                                        <footer class="site" role="contentinfo">
+      <div class="foot-wrap">
+        <div aria-hidden="true" class="foot-watermark">ZOTH</div>
+        <div class="foot-grid">
+          <div class="foot-brand-col">
+            <p class="foot-kicker">Local · loopback · no telemetry</p>
+            <a class="foot-brand-lockup" href="/">
+              <img alt="Master Azoth" class="foot-azoth" decoding="async" height="72" loading="lazy" src="/assets/mascot/azoth-bust.jpg" width="72" />
+              <span class="foot-brand-text">
+                <img alt="" class="foot-brand-logo" decoding="async" height="28" loading="lazy" src="/assets/brand/zoth-golden-z-192.png" width="28" />
+                <strong class="foot-brand-title">Zoth Studio</strong>
+              </span>
+            </a>
+            <small class="foot-brand-desc">Local-first workspace for a team of AI agents. Files stay on this machine.</small>
+            <div class="foot-actions">
+              <a class="foot-btn foot-btn-on" href="/#install">Install locally</a>
+              <a class="foot-btn foot-btn-ghost" href="/pricing/">Support the forge</a>
+            </div>
+          </div>
+          <div class="foot-col">
+            <h3>Studio</h3>
+            <a class="mega-footer-link js-deck" href="http://127.0.0.1:8484/">Operator Deck</a>
+            <a class="mega-footer-link" href="/studio/">Workstations</a>
+            <a class="mega-footer-link" href="/studio/webgen.html">WebGen</a>
+            <a class="mega-footer-link" href="/studio/swarm.html">3D Swarm</a>
+            <a class="mega-footer-link" href="/studio/consensus.html">Consensus</a>
+          </div>
+          <div class="foot-col">
+            <h3>Agents</h3>
+            <a class="mega-footer-link" href="/zoth/">Master Azoth</a>
+            <a class="mega-footer-link" href="/agents/">21-Agent pantheon</a>
+            <a class="mega-footer-link" href="/pets/">Companions</a>
+            <a class="mega-footer-link" href="/vault/">Sovereign vault</a>
+            <a class="mega-footer-link" href="/adytum/">Adytum</a>
+          </div>
+          <div class="foot-col">
+            <h3>Universe</h3>
+            <a class="mega-footer-link" href="/comic/">Azoth comic</a>
+            <a class="mega-footer-link" href="/social/">Social wall</a>
+            <a class="mega-footer-link" href="/showcase.html">Showcase</a>
+            <a class="mega-footer-link" href="/signal/">Signal</a>
+            <a class="mega-footer-link" href="/article/">Manifesto</a>
+          </div>
+          <div class="foot-col">
+            <h3>Resources</h3>
+            <a class="mega-footer-link" href="/docs/">Docs</a>
+            <a class="mega-footer-link" href="/faq.html">FAQ</a>
+            <a class="mega-footer-link" href="/pricing/">Support / Patron</a>
+            <a class="mega-footer-link" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub ↗</a>
+            <a class="mega-footer-link" href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI ↗</a>
+          </div>
+        </div>
+        <div class="foot-bottom">
+          <p>© 2026 NullAI Tech. MIT. Local sovereign execution — zero telemetry.</p>
+          <nav aria-label="Footer meta" class="foot-meta">
+            <a href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub</a>
+            <a href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI</a>
+            <a href="/docs/">Docs</a>
+            <a href="/faq.html">FAQ</a>
+          </nav>
+        </div>
+      </div>
+    </footer>
+</body>
+</html>

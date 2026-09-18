@@ -1,0 +1,1613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    if (window.location.protocol === 'file:') {
+      const b = document.createElement('base');
+      b.href = window.location.pathname.replace(/\/public\/pets\/.*$/, '/public/');
+      document.head.prepend(b);
+    }
+  </script>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" name="viewport" />
+  <title>Zoth 3D Companion Laboratory & Model Studio — Volumetric PBR Shader Viewport</title>
+  <meta content="State-of-the-art 3D interactive laboratory & procedural model studio for Zoth spirit companions with 5 Elemental PBR shaders, real-time kinetic animation states, bond telemetry, and 4K portrait capture." name="description" />
+  <link href="https://zoth.nullai.tech/pets/pet-model-studio.html" rel="canonical" />
+
+  <!-- OpenGraph / Facebook -->
+  <meta content="website" property="og:type" />
+  <meta content="Zoth Studio" property="og:site_name" />
+  <meta content="https://zoth.nullai.tech/pets/pet-model-studio.html" property="og:url" />
+  <meta content="Zoth 3D Companion Laboratory & Model Studio — Volumetric PBR Shader Viewport" property="og:title" />
+  <meta content="State-of-the-art 3D interactive laboratory & procedural model studio for Zoth spirit companions with 5 Elemental PBR shaders, real-time kinetic animation states, bond telemetry, and 4K portrait capture." property="og:description" />
+  <meta content="https://zoth.nullai.tech/assets/media/land/pets-hangar.jpg" property="og:image" />
+  <meta content="1200" property="og:image:width" />
+  <meta content="630" property="og:image:height" />
+  <meta content="Zoth Studio 3D Mascot Voxel & Kinetic Hangar" property="og:image:alt" />
+
+  <!-- Twitter Cards -->
+  <meta content="summary_large_image" name="twitter:card" />
+  <meta content="Zoth 3D Companion Laboratory & Model Studio — Volumetric PBR Shader Viewport" name="twitter:title" />
+  <meta content="State-of-the-art 3D interactive laboratory & procedural model studio for Zoth spirit companions with 5 Elemental PBR shaders, real-time kinetic animation states, bond telemetry, and 4K portrait capture." name="twitter:description" />
+  <meta content="https://zoth.nullai.tech/assets/media/land/pets-hangar.jpg" name="twitter:image" />
+
+  <meta content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" name="robots" />
+  <meta content="#030306" name="theme-color" />
+  <link href="/assets/brand/zoth-seal-hermetic-on-dark.svg" rel="icon" type="image/svg+xml" />
+
+  <!-- Fonts matching Homepage -->
+  <link href="https://fonts.googleapis.com" rel="preconnect" />
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&amp;family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&amp;family=IBM+Plex+Mono:wght@400;500;600;700&amp;family=Syne:wght@600;700;800;900&amp;display=swap" rel="stylesheet" />
+
+  <!-- Core Theme & Framework -->
+  <link href="/assets/zoth-theme.css?v=11" rel="stylesheet" />
+  <script src="/assets/zoth-theme.js?v=11"></script>
+  <link href="/assets/zoth-nav.css?v=11" rel="stylesheet" />
+  <link href="/assets/zoth-footer.css" rel="stylesheet" />
+  <link href="/assets/zoth-workbench.css" rel="stylesheet" />
+  <link href="/assets/zoth-tip.css" rel="stylesheet" />
+  <link href="/assets/zoth-mobile.css" rel="stylesheet" />
+  <link href="/assets/zoth-annotator.css" rel="stylesheet" />
+
+  <!-- Local Sovereign Three.js Engine & Controls -->
+  <script src="/assets/vendor/three.min.js"></script>
+  <script src="/assets/vendor/OrbitControls.js"></script>
+
+  <style>
+    .skip {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    .skip:focus {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      width: auto;
+      height: auto;
+      padding: 10px 18px;
+      margin: 0;
+      overflow: visible;
+      clip: auto;
+      white-space: normal;
+      background: #fbbf24;
+      color: #050508;
+      font-family: monospace;
+      font-size: 0.82rem;
+      font-weight: 700;
+      border-radius: 8px;
+      z-index: 100000;
+      outline: 2px solid #fff;
+    }
+
+    :root {
+      --bg: #030408;
+      --panel: rgba(8, 12, 24, 0.90);
+      --panel-border: rgba(0, 240, 255, 0.24);
+      --panel-border-bright: rgba(0, 240, 255, 0.65);
+      --line: rgba(255, 255, 255, 0.08);
+      --text: #f8fafc;
+      --text-bright: #ffffff;
+      --text-body: #f1f5f9;
+      --muted: #94a3b8;
+      --cyan: #00f0ff;
+      --purple: #a855f7;
+      --gold: #fbbf24;
+      --emerald: #34d399;
+      --magenta: #ff007a;
+      --font-display: 'Syne', system-ui, sans-serif;
+      --font-serif: 'Fraunces', Georgia, serif;
+      --font-body: 'Figtree', system-ui, sans-serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+
+      /* Sacred Geometry & Fibonacci Scale Tokens */
+      --rad-xs: 5px;
+      --rad-sm: 8px;
+      --rad-md: 13px;
+      --rad-lg: 21px;
+      --rad-xl: 34px;
+    }
+
+    html[data-theme="light"] {
+      --bg: #f8fafc;
+      --panel: rgba(255, 255, 255, 0.92);
+      --panel-border: rgba(14, 165, 233, 0.35);
+      --panel-border-bright: rgba(14, 165, 233, 0.8);
+      --line: rgba(0, 0, 0, 0.10);
+      --text: #0f172a;
+      --text-bright: #020617;
+      --text-body: #1e293b;
+      --muted: #64748b;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      height: 100svh;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+      touch-action: manipulation;
+      max-width: 100vw;
+    }
+
+    /* 3D WebGL Host */
+    #host {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      touch-action: pan-y;
+    }
+    #host canvas {
+      width: 100% !important;
+      height: 100% !important;
+      display: block;
+      touch-action: pan-y;
+    }
+
+    /* Floating Studio Header */
+    .studio-kicker-bar {
+      position: fixed;
+      top: 68px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--rad-xl);
+      padding: 6px 18px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+      white-space: nowrap;
+    }
+    .studio-kicker-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--cyan);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+    .studio-kicker-badge::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 10px var(--cyan);
+      animation: pulse-dot 2s infinite ease-in-out;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.6; }
+    }
+
+    /* Studio Master Toolbar */
+    .studio-toolbar {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 25;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--rad-xl);
+      padding: 8px 16px;
+      backdrop-filter: blur(22px);
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.85), 0 0 24px rgba(0, 240, 255, 0.15);
+      max-width: min(1200px, calc(100vw - 24px));
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .pet-select {
+      background: rgba(14, 20, 36, 0.95);
+      border: 1px solid var(--panel-border-bright);
+      color: #fff;
+      font-family: var(--font-display);
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: var(--rad-sm);
+      outline: none;
+      cursor: pointer;
+      min-height: 40px;
+      touch-action: manipulation;
+    }
+    html[data-theme="light"] .pet-select {
+      background: #ffffff;
+      color: #0f172a;
+    }
+
+    .section-divider {
+      width: 1px;
+      height: 28px;
+      background: var(--line);
+      margin: 0 4px;
+    }
+
+    .anim-chips-group {
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .anim-chip {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--line);
+      color: var(--text-body);
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+      min-height: 40px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      touch-action: manipulation;
+    }
+    .anim-chip:hover {
+      color: #fff;
+      border-color: var(--cyan);
+      background: rgba(0, 240, 255, 0.08);
+    }
+    .anim-chip.active {
+      background: rgba(0, 240, 255, 0.20);
+      border-color: var(--cyan);
+      color: var(--cyan);
+      box-shadow: 0 0 14px rgba(0, 240, 255, 0.4);
+      font-weight: 700;
+    }
+
+    .tool-btns {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+    }
+    .btn-tool {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--line);
+      color: var(--text-body);
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: var(--rad-sm);
+      cursor: pointer;
+      transition: all 0.2s;
+      min-height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      touch-action: manipulation;
+    }
+    .btn-tool:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--cyan);
+      color: #fff;
+    }
+    .btn-tool.active {
+      background: var(--gold);
+      color: #050508;
+      border-color: var(--gold);
+      font-weight: 700;
+    }
+    .btn-tool-accent {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: var(--cyan);
+      color: var(--cyan);
+      font-weight: 700;
+    }
+    .btn-tool-accent:hover {
+      background: var(--cyan);
+      color: #030408;
+      box-shadow: 0 0 18px rgba(0, 240, 255, 0.6);
+    }
+
+    /* Companion Telemetry & Dossier Floating HUD Card */
+    .dossier-card {
+      position: fixed;
+      top: 84px;
+      left: 20px;
+      z-index: 20;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--rad-md);
+      padding: 16px 20px;
+      backdrop-filter: blur(24px);
+      width: 340px;
+      max-width: calc(100vw - 36px);
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .dossier-header {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .dossier-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: var(--rad-sm);
+      object-fit: cover;
+      border: 2px solid var(--cyan);
+      box-shadow: 0 0 16px rgba(0, 240, 255, 0.3);
+    }
+    .dossier-domain {
+      font-family: var(--font-mono);
+      font-size: 0.64rem;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+    .dossier-name {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.2;
+      text-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+    }
+    html[data-theme="light"] .dossier-name {
+      color: #0f172a;
+      text-shadow: none;
+    }
+    .dossier-role {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--cyan);
+    }
+    .dossier-desc {
+      font-size: 0.84rem;
+      color: var(--text-body);
+      line-height: 1.45;
+    }
+
+    /* Telemetry HUD Gauges */
+    .telemetry-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 8px 10px;
+      border-radius: var(--rad-sm);
+      border: 1px solid var(--line);
+    }
+    html[data-theme="light"] .telemetry-row {
+      background: rgba(0, 0, 0, 0.04);
+    }
+    .tel-stat-box {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      font-family: var(--font-mono);
+    }
+    .tel-stat-label {
+      font-size: 0.62rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .tel-stat-value {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--emerald);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Bond XP Progress Bar */
+    .bond-progress-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+    }
+    .bond-label-row {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+    }
+    .bond-bar {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .bond-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--cyan), var(--gold));
+      width: 78%;
+      transition: width 0.4s ease;
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+    }
+
+    /* Care Actions */
+    .care-actions-row {
+      display: flex;
+      gap: 6px;
+    }
+    .btn-care {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--line);
+      color: var(--text-body);
+      font-family: var(--font-mono);
+      font-size: 0.70rem;
+      padding: 6px 8px;
+      border-radius: var(--rad-xs);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+    .btn-care:hover {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: var(--cyan);
+      color: #fff;
+    }
+
+    /* Collapsible Right Studio Control Panels */
+    .studio-right-panel {
+      position: fixed;
+      top: 84px;
+      right: 20px;
+      z-index: 20;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--rad-md);
+      padding: 16px 20px;
+      backdrop-filter: blur(24px);
+      width: 290px;
+      max-width: calc(100vw - 36px);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.8);
+    }
+
+    .panel-section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--gold);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 4px;
+    }
+
+    /* 5 Elemental Shader Chips */
+    .shader-presets-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
+    }
+    .shader-chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--line);
+      color: var(--text-body);
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      padding: 6px 8px;
+      border-radius: var(--rad-xs);
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .shader-chip:hover {
+      border-color: var(--cyan);
+      background: rgba(0, 240, 255, 0.08);
+      color: #fff;
+    }
+    .shader-chip.active {
+      background: rgba(0, 240, 255, 0.20);
+      border-color: var(--cyan);
+      color: var(--cyan);
+      font-weight: 700;
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.3);
+    }
+    .shader-swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* Slider Rows */
+    .slider-row {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--muted);
+    }
+    .slider-label-val {
+      display: flex;
+      justify-content: space-between;
+    }
+    .slider-row input[type="range"] {
+      width: 100%;
+      accent-color: var(--cyan);
+      cursor: pointer;
+    }
+
+    /* Lighting Presets */
+    .lighting-presets-row {
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .light-chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--line);
+      color: var(--text-body);
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      padding: 4px 8px;
+      border-radius: var(--rad-xs);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .light-chip.active {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(251, 191, 36, 0.12);
+    }
+
+    /* Toast Notification */
+    .studio-toast {
+      position: fixed;
+      bottom: 96px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(14, 20, 36, 0.95);
+      border: 1px solid var(--cyan);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      padding: 8px 18px;
+      border-radius: 999px;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 8px 32px rgba(0, 240, 255, 0.35);
+    }
+    .studio-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 960px) {
+      .dossier-card {
+        top: 110px;
+        left: 12px;
+        width: 300px;
+      }
+      .studio-right-panel {
+        display: none;
+      }
+      .studio-kicker-bar {
+        display: none;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .dossier-card {
+        display: none;
+      }
+      .studio-toolbar {
+        bottom: 12px;
+        padding: 6px 10px;
+        width: calc(100vw - 20px);
+      }
+      .pet-select {
+        width: 100%;
+      }
+    }
+  </style>
+
+  <!-- Schema.org JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://zoth.nullai.tech/pets/pet-model-studio.html#softwareapplication",
+        "name": "Zoth 3D Companion Laboratory & Model Studio",
+        "description": "Interactive procedural volumetric 3D model studio and character shader viewport for 24 autonomous Zoth spirit companions.",
+        "url": "https://zoth.nullai.tech/pets/pet-model-studio.html",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Linux, macOS, Windows",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      }
+    ]
+  }
+  </script>
+<link href="/assets/zoth-hud-embedded.css" rel="stylesheet"/>
+<script src="/assets/zoth-hud-embedded.js"></script>
+</head>
+<body>
+  <a class="skip" href="#host">Skip to 3D Canvas</a>
+
+  <!-- Top Navigation Bar -->
+                          <header class="bar" id="topbar" role="banner">
+      <a class="brand js-hub" href="/" aria-label="Zoth Studio Home">
+        <div class="brand-emblem-wrap">
+          <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth Golden Z Emblem" width="34" height="34" class="brand-emblem-img" />
+          <span class="brand-emblem-halo"></span>
+        </div>
+        <span class="brand-text-wrap">
+          <strong>Zoth</strong>
+          <small>by NullAI</small>
+        </span>
+        <span class="brand-status-badge">SOVEREIGN</span>
+      </a>
+
+      <nav class="menu" aria-label="Primary navigation" role="navigation">
+        <a class="nav-link nav-for-everyone" href="/#for-everyone" data-tip="Zero-Code Showcases — How non-tech founders, creators & teams depend on Zoth.">✦ For You</a>
+
+        <!-- 🔮 Core AI -->
+        <div class="nav-dropdown" data-dropdown-id="core">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Core AI</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🔮 CORE AI ARCHITECTURE</span><span class="nav-item-badge">6 NODES</span></div>
+            <a href="/zoth/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+            <a href="/agents/"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+            <a href="/studio/consensus.html"><span class="nav-item-icon-box">⚔️</span><div class="nav-item-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+            <a href="/studio/swarm.html"><span class="nav-item-icon-box">🌐</span><div class="nav-item-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+            <a href="/memory/"><span class="nav-item-icon-box">🧠</span><div class="nav-item-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+            <a href="/zoth-world.html"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+          </div>
+        </div>
+
+        <!-- 🪐 Studio -->
+        <div class="nav-dropdown" data-dropdown-id="studio">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Studio</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu nav-dropdown-mega">
+            <div class="nav-dropdown-header"><span>🪐 14+ STUDIO WORKSTATIONS</span><span class="nav-item-badge">LOCAL DAGS</span></div>
+            <a href="/studio/cockpit.html"><span class="nav-item-icon-box">🪐</span><div class="nav-item-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+            <a href="/studio/cockpit.html?tool=webgen"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+            <a href="/studio/cockpit.html?tool=vos-sandbox"><span class="nav-item-icon-box">💻</span><div class="nav-item-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+            <a href="/studio/cockpit.html?tool=nexus-3d"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+            <a href="/studio/cockpit.html?tool=omnipost"><span class="nav-item-icon-box">🎬</span><div class="nav-item-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+            <a href="/studio/cockpit.html?tool=math-pillars"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+            <a href="/studio/cockpit.html?tool=secure-comms"><span class="nav-item-icon-box">🔒</span><div class="nav-item-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+            <a href="/studio/cockpit.html?tool=signal-bridge"><span class="nav-item-icon-box">📡</span><div class="nav-item-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+            <a href="/studio/cockpit.html?tool=web3-hub"><span class="nav-item-icon-box">🪙</span><div class="nav-item-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+            <a href="/studio/cockpit.html?tool=pets"><span class="nav-item-icon-box">💎</span><div class="nav-item-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+            <a href="/studio/cockpit.html?tool=tool-nexus"><span class="nav-item-icon-box">🛠️</span><div class="nav-item-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+          </div>
+        </div>
+
+        <!-- 🌌 Universe -->
+        <div class="nav-dropdown" data-dropdown-id="universe">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Universe</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🌌 UNIVERSE &amp; PUBLICATIONS</span><span class="nav-item-badge">STORIES</span></div>
+            <a href="/comic/"><span class="nav-item-icon-box">🎨</span><div class="nav-item-body"><strong>AZOTH Anime Comic</strong><small>Season 1 Ep 1: Genesis in Silicon Rain (Audio)</small></div><span class="nav-item-badge">AUDIO</span></a>
+            <a href="/social/"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+            <a href="/articles/"><span class="nav-item-icon-box">📜</span><div class="nav-item-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+            <a href="/article/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+            <a href="/ai-webgpu.html"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+            <a href="/adytum/"><span class="nav-item-icon-box">🏛️</span><div class="nav-item-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+          </div>
+        </div>
+
+        <!-- 📚 Docs & Vault -->
+        <div class="nav-dropdown" data-dropdown-id="docs">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Docs & Vault</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>📚 DOCUMENTATION &amp; SECURITY</span><span class="nav-item-badge">SPECS</span></div>
+            <a href="/docs/"><span class="nav-item-icon-box">📚</span><div class="nav-item-body"><strong>Master Documentation</strong><small>Port Topology, 1-Click Install Scripts & API Guide</small></div><span class="nav-item-badge">DOCS</span></a>
+            <a href="/vault/"><span class="nav-item-icon-box">🔐</span><div class="nav-item-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+            <a href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+            <a href="/faq.html"><span class="nav-item-icon-box">❓</span><div class="nav-item-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+          </div>
+        </div>
+
+        <!-- ⚡ Action Pills -->
+        <button type="button" class="nav-pill nav-telemetry-pill" title="View Live Studio Telemetry & Background Daemons" aria-label="Studio Telemetry Status">
+          <span class="tel-dot online"></span><span class="tel-text">6/6 DAEMONS</span>
+        </button>
+
+        <button type="button" class="nav-pill nav-pet-pill" title="Active Companion Spirit: Azoth (Click to Summon / Switch Mascot)" aria-label="Active Companion Spirit">
+          <span class="pet-emoji">🔮</span><span class="pet-name">Azoth</span>
+        </button>
+
+        <a class="nav-pill nav-deck-pill js-deck" href="http://127.0.0.1:8484/" title="Open Local Operator Deck (:8484)">
+          <span class="deck-pulse"></span><span>DECK</span>
+        </a>
+
+        <button type="button" class="nav-pill nav-palette-btn" title="Open Global Command Palette (Ctrl+K)" aria-label="Command Palette">
+          <span class="palette-icon">🔍</span><kbd class="nav-kbd">Ctrl+K</kbd>
+        </button>
+
+        <button type="button" class="nav-pill nav-annotate-btn" title="Toggle On-Screen Annotator & Feedback (Shift+A)" aria-label="Toggle Annotator">
+          <span class="annotate-icon">✏️</span><span class="annotate-text">Annotate</span><kbd class="nav-kbd">Shift+A</kbd>
+        </button>
+
+        <div class="nav-dropdown nav-theme-dropdown">
+          <button class="nav-dropdown-btn nav-theme-current-btn" type="button" aria-haspopup="true" aria-expanded="false" title="Switch Visual Theme (Shift+T)">
+            <span class="current-theme-swatch" style="background:#00f0ff;"></span>
+            <span class="current-theme-emoji">🌙</span>
+            <span class="current-theme-label">Dark Void</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+        </div>
+
+        <a class="nav-pill git" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank" title="GitHub Repository — Open Source code, Debian packages, and releases">
+          <span>🐙 GitHub ↗</span>
+        </a>
+      </nav>
+
+      <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Toggle navigation menu">
+        <span class="burger-lines"><span class="b-line b-1"></span><span class="b-line b-2"></span><span class="b-line b-3"></span></span>
+        <span class="burger-text">Menu</span>
+      </button>
+      <div class="zoth-scroll-progress" id="zoth-scroll-progress"></div>
+    </header>
+
+    <nav class="drawer" id="drawer" aria-label="Universal Mobile Navigation" role="navigation">
+      <div class="drawer-header-brand">
+        <div class="d-brand-left">
+          <div class="brand-emblem-wrap">
+            <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth" width="28" height="28" class="brand-emblem-img" />
+          </div>
+          <span class="d-brand-title"><strong>Zoth Studio</strong><small>v12.0 Sovereign</small></span>
+        </div>
+        <button type="button" class="drawer-telemetry-badge" title="View Diagnostics HUD">● 6/6 DAEMONS</button>
+        <button type="button" class="drawer-close-btn" aria-label="Close mobile menu">✕</button>
+      </div>
+
+      <div class="drawer-section drawer-tools-section">
+        <div class="drawer-heading">⚡ Quick Actions</div>
+        <div class="drawer-quick-tools-grid">
+          <button type="button" class="drawer-tool-pill drawer-palette-trigger"><span>🔍</span> Command Palette <kbd class="nav-kbd">Ctrl+K</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-annotate-trigger"><span>✏️</span> On-Screen Annotator <kbd class="nav-kbd">Shift+A</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-telemetry-trigger"><span>⚡</span> Telemetry HUD</button>
+          <button type="button" class="drawer-tool-pill drawer-audio-trigger"><span>🔊</span> Audio FX</button>
+        </div>
+      </div>
+
+      <div class="drawer-section drawer-theme-section">
+        <div class="drawer-heading">🎨 Visual Theme (16 Archetypes)</div>
+        <div class="drawer-search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="drawer-theme-search-input" placeholder="Search 16 themes..." autocomplete="off" />
+        </div>
+        <div class="theme-filter-chips drawer-filter-chips">
+          <button type="button" class="theme-chip-btn active" data-drawer-cat="all">All (16)</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="studio originals">Originals</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="frontier ai & tech">Frontier</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="developer archetypes">Dev</button>
+        </div>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">✦ Featured</div>
+        <a class="drawer-link drawer-hero-link" href="/#for-everyone"><span class="d-link-icon">✦</span><div class="d-link-body"><strong>For You (No-Code Showcases)</strong><small>How Non-Tech Founders, Creators & Teams Use Zoth</small></div><span class="nav-item-badge">SHOWCASE</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🔮 Core AI & Pantheon</div>
+        <a class="drawer-link" href="/zoth/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+        <a class="drawer-link" href="/agents/"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+        <a class="drawer-link" href="/studio/consensus.html"><span class="d-link-icon">⚔️</span><div class="d-link-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+        <a class="drawer-link" href="/studio/swarm.html"><span class="d-link-icon">🌐</span><div class="d-link-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+        <a class="drawer-link" href="/memory/"><span class="d-link-icon">🧠</span><div class="d-link-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+        <a class="drawer-link" href="/zoth-world.html"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🪐 Workstations & DAGs</div>
+        <a class="drawer-link" href="/studio/cockpit.html"><span class="d-link-icon">🪐</span><div class="d-link-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=webgen"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=vos-sandbox"><span class="d-link-icon">💻</span><div class="d-link-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=nexus-3d"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=omnipost"><span class="d-link-icon">🎬</span><div class="d-link-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=math-pillars"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=secure-comms"><span class="d-link-icon">🔒</span><div class="d-link-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=signal-bridge"><span class="d-link-icon">📡</span><div class="d-link-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=web3-hub"><span class="d-link-icon">🪙</span><div class="d-link-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=pets"><span class="d-link-icon">💎</span><div class="d-link-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=tool-nexus"><span class="d-link-icon">🛠️</span><div class="d-link-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📜 Universe & Research</div>
+        <a class="drawer-link" href="/comic/"><span class="d-link-icon">🎨</span><div class="d-link-body"><strong>AZOTH Anime Comic Series</strong><small>Season 1 Ep 1: Genesis in Silicon Rain</small></div><span class="nav-item-badge">AUDIO</span></a>
+        <a class="drawer-link" href="/social/"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+        <a class="drawer-link" href="/articles/"><span class="d-link-icon">📜</span><div class="d-link-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+        <a class="drawer-link" href="/article/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+        <a class="drawer-link" href="/ai-webgpu.html"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+        <a class="drawer-link" href="/adytum/"><span class="d-link-icon">🏛️</span><div class="d-link-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📚 Docs & Security</div>
+        <a class="drawer-link" href="/docs/"><span class="d-link-icon">📚</span><div class="d-link-body"><strong>Complete Documentation</strong><small>Port Topology, 1-Click Install Scripts & API</small></div><span class="nav-item-badge">DOCS</span></a>
+        <a class="drawer-link" href="/vault/"><span class="d-link-icon">🔐</span><div class="d-link-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+        <a class="drawer-link" href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+        <a class="drawer-link" href="/faq.html"><span class="d-link-icon">❓</span><div class="d-link-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+      </div>
+
+      <div class="drawer-section drawer-footer-section">
+        <a class="drawer-pill-link js-deck" href="http://127.0.0.1:8484/">💻 Launch Local Operator Deck (:8484)</a>
+        <a class="drawer-pill-link" href="https://github.com/NullAITech/zoth-studio" target="_blank" rel="noopener noreferrer">🐙 GitHub Source Repository ↗</a>
+        <a class="drawer-pill-link" href="/downloads/zoth-studio-android.apk">📱 Download Android App (.apk)</a>
+      </div>
+    </nav>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+  <main id="main-content" role="main">
+    <!-- Floating Studio Kicker -->
+    <div class="studio-kicker-bar">
+      <span class="studio-kicker-badge">3D COMPANION LABORATORY</span>
+      <span style="color: var(--line);">|</span>
+      <span style="font-family: var(--font-mono); font-size: 0.70rem; color: var(--gold);" id="kicker-status">PROCEDURAL VOLUMETRIC ENGINE ACTIVE</span>
+    </div>
+
+    <!-- 3D WebGL Canvas Host -->
+    <div id="host"></div>
+
+    <!-- Floating Companion Dossier HUD Card -->
+    <div class="dossier-card" id="dossier-card">
+      <div class="dossier-header">
+        <img alt="Mascot Avatar" class="dossier-avatar" id="dossier-avatar" src="/assets/pets/kai-neon.jpg" />
+        <div>
+          <div class="dossier-domain" id="dossier-domain">CODE DOMAIN</div>
+          <div class="dossier-name" id="dossier-name">Kai</div>
+          <div class="dossier-role" id="dossier-role">Site Inspector & A11y Auditor</div>
+        </div>
+      </div>
+
+      <p class="dossier-desc" id="dossier-desc">
+        Kai prowls the workspace for broken imports, dead code paths, and WCAG accessibility gaps.
+      </p>
+
+      <!-- Telemetry Status Grid -->
+      <div class="telemetry-row">
+        <div class="tel-stat-box">
+          <span class="tel-stat-label">Harness Socket</span>
+          <span class="tel-stat-value" id="tel-harness-status">● 127.0.0.1 (0.4ms)</span>
+        </div>
+        <div class="tel-stat-box">
+          <span class="tel-stat-label">Vibration Freq</span>
+          <span class="tel-stat-value" id="tel-vibe-freq" style="color: var(--cyan);">528 Hz (Theta)</span>
+        </div>
+      </div>
+
+      <!-- Bond Level Progress Bar -->
+      <div class="bond-progress-wrap">
+        <div class="bond-label-row">
+          <span>Bond Level: <strong id="bond-level" style="color: var(--gold);">14</strong></span>
+          <span id="bond-affinity">Affinity: 84%</span>
+        </div>
+        <div class="bond-bar">
+          <div class="bond-fill" id="bond-fill" style="width: 84%;"></div>
+        </div>
+      </div>
+
+      <!-- Interactive Companion Care Actions -->
+      <div class="care-actions-row">
+        <button class="btn-care" id="btn-care-feed">🍬 Quantum Snack</button>
+        <button class="btn-care" id="btn-care-praise">⭐ Praise Spirit</button>
+        <button class="btn-care" id="btn-care-voice">🔊 Voice Synthesis</button>
+      </div>
+
+      <!-- Real-Time Voice FFT Oscilloscope Spectrum -->
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <canvas id="spectrum-canvas" width="110" height="26" style="border-radius: 4px; background: rgba(0,0,0,0.6); border: 1px solid var(--line);"></canvas>
+        <span style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--muted); flex: 1;" id="dsp-status">DSP: IDLE</span>
+      </div>
+    </div>
+
+    <!-- Collapsible Right Studio Control Panel (Shaders, Lighting, & Export) -->
+    <div class="studio-right-panel" id="studio-right-panel">
+      <!-- 5 Elemental PBR Shaders -->
+      <div class="panel-section-title">
+        <span>🎛️ 5 Elemental Shaders</span>
+      </div>
+      <div class="shader-presets-grid">
+        <button class="shader-chip" data-shader="quintessence"><span class="shader-swatch" style="background:#fff5cc;"></span>Quintessence</button>
+        <button class="shader-chip" data-shader="solar"><span class="shader-swatch" style="background:#ffd700;"></span>Solar Prana</button>
+        <button class="shader-chip active" data-shader="frost"><span class="shader-swatch" style="background:#00f0ff;"></span>Void Frost</button>
+        <button class="shader-chip" data-shader="phosphor"><span class="shader-swatch" style="background:#10b981;"></span>Phosphor</button>
+        <button class="shader-chip" data-shader="obsidian" style="grid-column: span 2;"><span class="shader-swatch" style="background:#ff007a;"></span>Obsidian Quartz</button>
+      </div>
+
+      <!-- PBR Fine-Tuning Sliders -->
+      <div class="slider-row">
+        <div class="slider-label-val">
+          <label for="rng-metal">Metalness</label>
+          <span id="val-metal">0.35</span>
+        </div>
+        <input type="range" id="rng-metal" min="0" max="1" step="0.05" value="0.35" />
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-label-val">
+          <label for="rng-rough">Roughness</label>
+          <span id="val-rough">0.04</span>
+        </div>
+        <input type="range" id="rng-rough" min="0" max="1" step="0.02" value="0.04" />
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-label-val">
+          <label for="rng-glow">Emissive Corona</label>
+          <span id="val-glow">1.5</span>
+        </div>
+        <input type="range" id="rng-glow" min="0.2" max="3.5" step="0.1" value="1.5" />
+      </div>
+
+      <!-- Lighting Rig Customizer -->
+      <div class="panel-section-title" style="margin-top: 4px;">
+        <span>💡 Lighting Rig</span>
+      </div>
+      <div class="lighting-presets-row">
+        <button class="light-chip active" data-light="studio">Studio</button>
+        <button class="light-chip" data-light="neon">Cyber Neon</button>
+        <button class="light-chip" data-light="gold">Solar Gold</button>
+        <button class="light-chip" data-light="cryo">Glacial Cryo</button>
+      </div>
+    </div>
+
+    <!-- Master Studio Bottom Toolbar -->
+    <div class="studio-toolbar">
+      <!-- Mascot Companion Select -->
+      <select class="pet-select" id="pet-picker" aria-label="Select Mascot Companion"></select>
+
+      <div class="section-divider"></div>
+
+      <!-- 5 Interactive Animation State Chips -->
+      <div class="anim-chips-group">
+        <button class="anim-chip active" data-anim="idle">🧘 Idle</button>
+        <button class="anim-chip" data-anim="dash">⚡ Dash</button>
+        <button class="anim-chip" data-anim="supernova">✨ Supernova</button>
+        <button class="anim-chip" data-anim="tamagotchi">💖 Purr</button>
+        <button class="anim-chip" data-anim="battle">⚔️ Battle</button>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- Camera Presets -->
+      <div class="tool-btns">
+        <button class="btn-tool active" data-cam="hero" id="cam-hero" title="Hero Isometric View">📐 Hero</button>
+        <button class="btn-tool" data-cam="front" id="cam-front" title="Front Perspective">🎯 Front</button>
+        <button class="btn-tool" data-cam="face" id="cam-face" title="Close-up Portrait">🔍 Face</button>
+        <button class="btn-tool" data-cam="top" id="cam-top" title="Top Down">🛸 Top</button>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- Studio Tools -->
+      <div class="tool-btns">
+        <button class="btn-tool active" id="btn-orbit" title="Toggle Auto-Orbit">🔄 Orbit</button>
+        <button class="btn-tool" id="btn-wire" title="Toggle Wireframe Mesh">🕸️ Mesh</button>
+        <button class="btn-tool btn-tool-accent" id="btn-capture-4k" title="1-Click 4K Transparent PNG Portrait Capture">📸 4K PNG</button>
+        <button class="btn-tool" id="btn-export-obj" title="Download Wavefront OBJ 3D Model">💎 OBJ</button>
+      </div>
+    </div>
+
+    <!-- Floating Toast Notification -->
+    <div class="studio-toast" id="studio-toast">Captured 4K Portrait!</div>
+  </main>
+
+  <script type="module">
+    import * as PetModels from '/pets/pet-models.js';
+    window.PetModels = PetModels;
+
+    const MASCOTS = Object.keys(PetModels.PET_SPECIES).map(key => ({
+      id: key,
+      ...PetModels.PET_SPECIES[key]
+    }));
+
+    // Populate Mascot Select Dropdown
+    const picker = document.getElementById("pet-picker");
+    MASCOTS.forEach(m => {
+      const opt = document.createElement("option");
+      opt.value = m.id;
+      opt.textContent = `${m.name} (${m.species})`;
+      picker.appendChild(opt);
+    });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialPetId = urlParams.get("pet") || "kai";
+    if (MASCOTS.some(m => m.id === initialPetId)) {
+      picker.value = initialPetId;
+    }
+
+    // Three.js Scene, Camera, & Renderer
+    const container = document.getElementById("host");
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.3;
+    container.appendChild(renderer.domElement);
+
+    // Camera OrbitControls with smooth damping
+    let controls = null;
+    if (THREE.OrbitControls) {
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.minDistance = 1.5;
+      controls.maxDistance = 8.0;
+      controls.autoRotate = true;
+      controls.autoRotateSpeed = 1.2;
+      controls.target.set(0, 0.95, 0);
+    }
+
+    // Default Camera Position
+    const targetCamPos = new THREE.Vector3(0, 1.2, 4.4);
+    camera.position.copy(targetCamPos);
+    if (controls) controls.target.set(0, 0.95, 0);
+
+    // Studio Lighting Rig
+    const ambientLight = new THREE.AmbientLight(0xd4e4ff, 1.4);
+    scene.add(ambientLight);
+
+    const keyLight = new THREE.DirectionalLight(0xffffff, 2.4);
+    keyLight.position.set(5, 10, 7);
+    scene.add(keyLight);
+
+    const rimLight = new THREE.PointLight(0x00f0ff, 4.2, 18);
+    rimLight.position.set(-4, 3, -4);
+    scene.add(rimLight);
+
+    const fillLight = new THREE.PointLight(0xe8c872, 2.6, 16);
+    fillLight.position.set(4, -1, 3);
+    scene.add(fillLight);
+
+    // Procedural Grid Floor & Sanctuary Orbit Ring
+    const grid = new THREE.GridHelper(16, 16, 0x00f0ff, 0x141b30);
+    grid.position.y = -0.5;
+    scene.add(grid);
+
+    const groundRingGeo = new THREE.RingGeometry(1.6, 2.1, 64);
+    const groundRingMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, side: THREE.DoubleSide, transparent: true, opacity: 0.35 });
+    const groundRing = new THREE.Mesh(groundRingGeo, groundRingMat);
+    groundRing.rotation.x = Math.PI / 2;
+    groundRing.position.y = -0.49;
+    scene.add(groundRing);
+
+    // State Variables
+    let petFigure = null;
+    let autoRotate = true;
+    let wireframeMode = false;
+    let currentAnimState = "idle";
+    let currentShader = "frost";
+
+    function showToast(msg) {
+      const toast = document.getElementById("studio-toast");
+      if (!toast) return;
+      toast.textContent = msg;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2600);
+    }
+
+    // 5 Elemental Shaders Helper & Listener
+    const shaderChips = document.querySelectorAll("[data-shader]");
+    function updateShaderUISelection(shaderKey) {
+      shaderChips.forEach(c => {
+        c.classList.toggle("active", c.dataset.shader === shaderKey);
+      });
+      const preset = PetModels.ELEMENTAL_SHADERS[shaderKey];
+      if (preset) {
+        document.getElementById("rng-metal").value = preset.metalness;
+        document.getElementById("rng-rough").value = preset.roughness;
+        document.getElementById("rng-glow").value = preset.emissiveIntensity;
+        document.getElementById("val-metal").textContent = preset.metalness.toFixed(2);
+        document.getElementById("val-rough").textContent = preset.roughness.toFixed(2);
+        document.getElementById("val-glow").textContent = preset.emissiveIntensity.toFixed(1);
+      }
+    }
+
+    shaderChips.forEach(chip => {
+      chip.addEventListener("click", () => {
+        const key = chip.dataset.shader;
+        currentShader = key;
+        updateShaderUISelection(key);
+        if (petFigure && petFigure.setElementalShader) {
+          petFigure.setElementalShader(key);
+        }
+        playSynthesizedChirp(680, 0.25);
+      });
+    });
+
+    // Load & Render Selected Mascot
+    async function loadPet(id) {
+      const current = MASCOTS.find(m => m.id === id) || MASCOTS[0];
+
+      // Update Dossier Telemetry HUD
+      const avatarPath = PetModels.petPortrait(id);
+      document.getElementById("dossier-avatar").src = avatarPath;
+      document.getElementById("dossier-domain").textContent = (current.domain || "AUTONOMY").toUpperCase();
+      document.getElementById("dossier-name").textContent = current.name;
+      document.getElementById("dossier-role").textContent = current.role;
+      document.getElementById("dossier-desc").textContent = current.desc;
+      document.getElementById("tel-harness-status").textContent = `● ${current.harness.split(' ')[0]} (0.3ms)`;
+      document.getElementById("tel-vibe-freq").textContent = `${current.vibrationFreq || 528} Hz (${current.element || 'Quintessence'})`;
+
+      const bond = PetModels.getPetBond(id);
+      document.getElementById("bond-level").textContent = bond.level;
+      document.getElementById("bond-affinity").textContent = `Affinity: ${bond.affinity}%`;
+      document.getElementById("bond-fill").style.width = `${bond.affinity}%`;
+
+      // Set Rim Light Color
+      if (current.vibeColor) {
+        rimLight.color.set(current.vibeColor);
+        groundRingMat.color.set(current.vibeColor);
+      }
+
+      // Cleanup Previous Figure
+      if (petFigure && petFigure.group) {
+        scene.remove(petFigure.group);
+        if (petFigure.dispose) petFigure.dispose();
+        petFigure = null;
+      }
+
+      currentShader = current.shaderDefault || "frost";
+      updateShaderUISelection(currentShader);
+
+      const tex = await PetModels.loadPetTexture(THREE, avatarPath);
+      petFigure = PetModels.createPetFigure(THREE, {
+        id: id,
+        color: current.vibeColor || "#00f0ff",
+        texture: tex,
+        shader: currentShader,
+        animationState: currentAnimState,
+        roughness: parseFloat(document.getElementById("rng-rough").value),
+        metalness: parseFloat(document.getElementById("rng-metal").value),
+        emissiveIntensity: parseFloat(document.getElementById("rng-glow").value)
+      });
+
+      if (petFigure && petFigure.group) {
+        scene.add(petFigure.group);
+        if (wireframeMode) {
+          petFigure.materials.forEach(mat => mat.wireframe = true);
+        }
+      }
+    }
+
+    picker.addEventListener("change", (e) => loadPet(e.target.value));
+    loadPet(picker.value);
+
+    // Animation State Chips Listener
+    const animChips = document.querySelectorAll("[data-anim]");
+    animChips.forEach(chip => {
+      chip.addEventListener("click", () => {
+        animChips.forEach(c => c.classList.remove("active"));
+        chip.classList.add("active");
+        currentAnimState = chip.dataset.anim;
+        if (petFigure && petFigure.setAnimationState) {
+          petFigure.setAnimationState(currentAnimState);
+        }
+        playSynthesizedChirp(580, 0.2);
+      });
+    });
+
+    // PBR Sliders Listener
+    function updatePBRMaterials() {
+      const metal = parseFloat(document.getElementById("rng-metal").value);
+      const rough = parseFloat(document.getElementById("rng-rough").value);
+      const glow = parseFloat(document.getElementById("rng-glow").value);
+
+      document.getElementById("val-metal").textContent = metal.toFixed(2);
+      document.getElementById("val-rough").textContent = rough.toFixed(2);
+      document.getElementById("val-glow").textContent = glow.toFixed(1);
+
+      if (petFigure && petFigure.setMaterialParams) {
+        petFigure.setMaterialParams({
+          metalness: metal,
+          roughness: rough,
+          emissiveIntensity: glow
+        });
+      }
+    }
+
+    document.getElementById("rng-metal").addEventListener("input", updatePBRMaterials);
+    document.getElementById("rng-rough").addEventListener("input", updatePBRMaterials);
+    document.getElementById("rng-glow").addEventListener("input", updatePBRMaterials);
+
+    // Lighting Rig Presets
+    const lightChips = document.querySelectorAll("[data-light]");
+    lightChips.forEach(chip => {
+      chip.addEventListener("click", () => {
+        lightChips.forEach(c => c.classList.remove("active"));
+        chip.classList.add("active");
+        const mode = chip.dataset.light;
+        if (mode === "studio") {
+          keyLight.color.setHex(0xffffff);
+          fillLight.color.setHex(0xe8c872);
+          rimLight.color.setHex(0x00f0ff);
+        } else if (mode === "neon") {
+          keyLight.color.setHex(0x00f0ff);
+          fillLight.color.setHex(0xff007a);
+          rimLight.color.setHex(0xa855f7);
+        } else if (mode === "gold") {
+          keyLight.color.setHex(0xfbbf24);
+          fillLight.color.setHex(0xffaa00);
+          rimLight.color.setHex(0xffffff);
+        } else if (mode === "cryo") {
+          keyLight.color.setHex(0x38bdf8);
+          fillLight.color.setHex(0x00f0ff);
+          rimLight.color.setHex(0x10b981);
+        }
+      });
+    });
+
+    // Camera Presets
+    const camButtons = document.querySelectorAll("[data-cam]");
+    camButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        camButtons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        const mode = btn.dataset.cam;
+        if (mode === "hero") {
+          targetCamPos.set(0, 1.2, 4.4);
+        } else if (mode === "front") {
+          targetCamPos.set(0, 0.95, 3.8);
+        } else if (mode === "face") {
+          targetCamPos.set(0, 1.05, 2.2);
+        } else if (mode === "top") {
+          targetCamPos.set(0, 4.4, 0.2);
+        }
+        camera.position.copy(targetCamPos);
+        if (controls) controls.target.set(0, 0.95, 0);
+      });
+    });
+
+    // 1-Click 4K Transparent PNG Portrait Capture
+    document.getElementById("btn-capture-4k").addEventListener("click", async () => {
+      const current = MASCOTS.find(m => m.id === picker.value) || MASCOTS[0];
+      showToast("Generating 4K Ultra-Res Portrait...");
+      const blob = await PetModels.capture4KPortrait(THREE, renderer, scene, camera, petFigure);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `zoth-${current.id}-4k-companion-portrait.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast("4K Portrait downloaded!");
+    });
+
+    // Wavefront OBJ 3D Model Exporter
+    document.getElementById("btn-export-obj").addEventListener("click", () => {
+      const current = MASCOTS.find(m => m.id === picker.value) || MASCOTS[0];
+      if (!petFigure) return;
+      const objData = PetModels.exportFigureToOBJ(THREE, petFigure, current.name);
+      const blob = new Blob([objData], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `zoth-${current.id}-3d-model.obj`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast("3D OBJ Model downloaded!");
+    });
+
+    // Orbit & Wireframe Controls
+    const btnOrbit = document.getElementById("btn-orbit");
+    btnOrbit.addEventListener("click", () => {
+      autoRotate = !autoRotate;
+      btnOrbit.classList.toggle("active", autoRotate);
+      if (controls) controls.autoRotate = autoRotate;
+    });
+
+    const btnWire = document.getElementById("btn-wire");
+    btnWire.addEventListener("click", () => {
+      wireframeMode = !wireframeMode;
+      btnWire.classList.toggle("active", wireframeMode);
+      if (petFigure && petFigure.materials) {
+        petFigure.materials.forEach(mat => mat.wireframe = wireframeMode);
+      }
+    });
+
+    // Interactive Care Actions (Feed, Praise, Voice)
+    document.getElementById("btn-care-feed").addEventListener("click", () => {
+      const id = picker.value;
+      const updatedBond = PetModels.addPetBondXP(id, 60, "feed");
+      if (updatedBond) {
+        document.getElementById("bond-level").textContent = updatedBond.level;
+        document.getElementById("bond-affinity").textContent = `Affinity: ${updatedBond.affinity}%`;
+        document.getElementById("bond-fill").style.width = `${updatedBond.affinity}%`;
+      }
+      if (petFigure && petFigure.setAnimationState) {
+        petFigure.setAnimationState("tamagotchi");
+        animChips.forEach(c => c.classList.toggle("active", c.dataset.anim === "tamagotchi"));
+      }
+      playSynthesizedChirp(720, 0.4);
+      showToast("Nom! Fed quantum snack (+60 XP)");
+    });
+
+    document.getElementById("btn-care-praise").addEventListener("click", () => {
+      const id = picker.value;
+      const updatedBond = PetModels.addPetBondXP(id, 40, "praise");
+      if (updatedBond) {
+        document.getElementById("bond-level").textContent = updatedBond.level;
+        document.getElementById("bond-affinity").textContent = `Affinity: ${updatedBond.affinity}%`;
+        document.getElementById("bond-fill").style.width = `${updatedBond.affinity}%`;
+      }
+      if (petFigure && petFigure.setAnimationState) {
+        petFigure.setAnimationState("supernova");
+        animChips.forEach(c => c.classList.toggle("active", c.dataset.anim === "supernova"));
+      }
+      playSynthesizedChirp(840, 0.45);
+      showToast("Spirit harmonized! (+40 XP)");
+    });
+
+    document.getElementById("btn-care-voice").addEventListener("click", () => {
+      const current = MASCOTS.find(m => m.id === picker.value);
+      if (!current) return;
+      playSynthesizedChirp(current.vibrationFreq || 528, 0.5);
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(current.voicePrompt || `Greetings Operator. I am ${current.name}, ready for your command.`);
+        window.speechSynthesis.speak(utter);
+      }
+    });
+
+    // Real-Time Web Audio DSP Oscilloscope
+    let audioCtx = null;
+    let analyser = null;
+    const spectrumCanvas = document.getElementById("spectrum-canvas");
+    const spectrumCtx = spectrumCanvas ? spectrumCanvas.getContext("2d") : null;
+
+    function initAudioDSP() {
+      if (audioCtx) return audioCtx;
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return null;
+      audioCtx = new AudioContextClass();
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 64;
+      return audioCtx;
+    }
+
+    function playSynthesizedChirp(freq = 440, duration = 0.3) {
+      try {
+        const ctx = initAudioDSP();
+        if (!ctx) return;
+        if (ctx.state === "suspended") ctx.resume();
+
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(freq * 1.6, ctx.currentTime + duration);
+
+        gain.gain.setValueAtTime(0.18, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+
+        osc.connect(gain);
+        gain.connect(analyser);
+        analyser.connect(ctx.destination);
+
+        osc.start();
+        osc.stop(ctx.currentTime + duration);
+        const statusEl = document.getElementById("dsp-status");
+        if (statusEl) statusEl.textContent = "DSP: VOCALIZING";
+        setTimeout(() => { if (statusEl) statusEl.textContent = "DSP: ONLINE"; }, duration * 1000 + 100);
+      } catch (e) {}
+    }
+
+    function drawSpectrum() {
+      if (!spectrumCtx || !spectrumCanvas) return;
+      spectrumCtx.fillStyle = "rgba(0,0,0,0.3)";
+      spectrumCtx.fillRect(0, 0, spectrumCanvas.width, spectrumCanvas.height);
+
+      if (!analyser) {
+        spectrumCtx.fillStyle = "#00f0ff";
+        const t = Date.now() * 0.003;
+        for (let i = 0; i < 14; i++) {
+          const h = Math.sin(t + i * 0.4) * 3 + 6;
+          spectrumCtx.fillRect(i * 8 + 4, spectrumCanvas.height - h, 5, h);
+        }
+        return;
+      }
+
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      analyser.getByteFrequencyData(dataArray);
+      const barWidth = (spectrumCanvas.width / 14) - 1;
+      for (let i = 0; i < 14; i++) {
+        const v = (dataArray[i * 2] || 0) / 255;
+        const barHeight = Math.max(v * spectrumCanvas.height, 2);
+        spectrumCtx.fillStyle = i % 2 === 0 ? "#00f0ff" : "#fbbf24";
+        spectrumCtx.fillRect(i * (barWidth + 1) + 2, spectrumCanvas.height - barHeight, barWidth, barHeight);
+      }
+    }
+
+    // Theme Sync Listener
+    window.addEventListener("zoth-theme-change", (e) => {
+      const themeId = e.detail && e.detail.theme;
+      if (themeId === "light") {
+        grid.material.color.setHex(0x0ea5e9);
+        scene.background = null;
+      } else if (themeId === "matrix") {
+        grid.material.color.setHex(0x10b981);
+      } else if (themeId === "gold") {
+        grid.material.color.setHex(0xfbbf24);
+      } else {
+        grid.material.color.setHex(0x00f0ff);
+      }
+    });
+
+    // Pointer Gaze Tracking
+    window.addEventListener("pointermove", (e) => {
+      if (!petFigure || !petFigure.setGaze) return;
+      const nx = (e.clientX / window.innerWidth - 0.5) * 2;
+      const ny = (e.clientY / window.innerHeight - 0.5) * 2;
+      petFigure.setGaze(nx, ny);
+    });
+
+    // Resize Handler
+    function onResize() {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    }
+    window.addEventListener("resize", onResize, { passive: true });
+
+    // Main 60 FPS Render Loop
+    let clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = clock.getDelta();
+      const time = clock.getElapsedTime();
+
+      if (controls) controls.update();
+      if (petFigure && petFigure.tick) petFigure.tick(time, delta);
+      drawSpectrum();
+
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
+
+  <!-- Mega Footer -->
+                          <footer class="site" role="contentinfo">
+      <div class="foot-wrap">
+        <div aria-hidden="true" class="foot-watermark">ZOTH</div>
+        <div class="foot-grid">
+          <div class="foot-brand-col">
+            <p class="foot-kicker">Local · loopback · no telemetry</p>
+            <a class="foot-brand-lockup" href="/">
+              <img alt="Master Azoth" class="foot-azoth" decoding="async" height="72" loading="lazy" src="/assets/mascot/azoth-bust.jpg" width="72" />
+              <span class="foot-brand-text">
+                <img alt="" class="foot-brand-logo" decoding="async" height="28" loading="lazy" src="/assets/brand/zoth-golden-z-192.png" width="28" />
+                <strong class="foot-brand-title">Zoth Studio</strong>
+              </span>
+            </a>
+            <small class="foot-brand-desc">Local-first workspace for a team of AI agents. Files stay on this machine.</small>
+            <div class="foot-actions">
+              <a class="foot-btn foot-btn-on" href="/#install">Install locally</a>
+              <a class="foot-btn foot-btn-ghost" href="/pricing/">Support the forge</a>
+            </div>
+          </div>
+          <div class="foot-col">
+            <h3>Studio</h3>
+            <a class="mega-footer-link js-deck" href="http://127.0.0.1:8484/">Operator Deck</a>
+            <a class="mega-footer-link" href="/studio/">Workstations</a>
+            <a class="mega-footer-link" href="/studio/webgen.html">WebGen</a>
+            <a class="mega-footer-link" href="/studio/swarm.html">3D Swarm</a>
+            <a class="mega-footer-link" href="/studio/consensus.html">Consensus</a>
+          </div>
+          <div class="foot-col">
+            <h3>Agents</h3>
+            <a class="mega-footer-link" href="/zoth/">Master Azoth</a>
+            <a class="mega-footer-link" href="/agents/">21-Agent pantheon</a>
+            <a class="mega-footer-link" href="/pets/">Companions</a>
+            <a class="mega-footer-link" href="/vault/">Sovereign vault</a>
+            <a class="mega-footer-link" href="/adytum/">Adytum</a>
+          </div>
+          <div class="foot-col">
+            <h3>Universe</h3>
+            <a class="mega-footer-link" href="/comic/">Azoth comic</a>
+            <a class="mega-footer-link" href="/social/">Social wall</a>
+            <a class="mega-footer-link" href="/showcase.html">Showcase</a>
+            <a class="mega-footer-link" href="/signal/">Signal</a>
+            <a class="mega-footer-link" href="/article/">Manifesto</a>
+          </div>
+          <div class="foot-col">
+            <h3>Resources</h3>
+            <a class="mega-footer-link" href="/docs/">Docs</a>
+            <a class="mega-footer-link" href="/faq.html">FAQ</a>
+            <a class="mega-footer-link" href="/pricing/">Support / Patron</a>
+            <a class="mega-footer-link" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub ↗</a>
+            <a class="mega-footer-link" href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI ↗</a>
+          </div>
+        </div>
+        <div class="foot-bottom">
+          <p>© 2026 NullAI Tech. MIT. Local sovereign execution — zero telemetry.</p>
+          <nav aria-label="Footer meta" class="foot-meta">
+            <a href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub</a>
+            <a href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI</a>
+            <a href="/docs/">Docs</a>
+            <a href="/faq.html">FAQ</a>
+          </nav>
+        </div>
+      </div>
+    </footer>
+
+  <script defer="" src="/assets/zoth-nav.js?v=11"></script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+---
+import { services } from "../data/site";
+---
+
+<div class="service-grid">
+  {services.map((service) => (
+    <a href={`/services/#${service.slug}`} class="service-card">
+      <div class="service-card-visual img-tint">
+        {service.image ? (
+          <img
+            src={service.image}
+            alt={service.title}
+            loading="lazy"
+            class="service-card-image"
+          />
+        ) : (
+          <div class="media-placeholder service-placeholder">
+            <div class="media-placeholder-inner">
+              <svg class="media-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+              <span class="media-placeholder-label">{service.title}</span>
+            </div>
+          </div>
+        )}
+      </div>
+      <div class="service-card-content">
+        <h3>{service.title}</h3>
+        <p>{service.summary}</p>
+        <ul>
+          {service.points.map((pt) => <li>{pt}</li>)}
+        </ul>
+      </div>
+    </a>
+  ))}
+</div>
+
+<style>
+  .service-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+
+  .service-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 12px var(--shadow);
+  }
+
+  .service-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px var(--shadow);
+  }
+
+  .service-card-visual {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: var(--panel);
+  }
+
+  .service-card-visual::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background: linear-gradient(
+      160deg,
+      rgba(118, 168, 205, 0.10) 0%,
+      transparent 35%,
+      transparent 65%,
+      rgba(15, 23, 42, 0.08) 100%
+    );
+    mix-blend-mode: multiply;
+    transition: opacity 0.3s ease;
+  }
+
+  html.dark .service-card-visual::after {
+    background: linear-gradient(
+      160deg,
+      rgba(118, 168, 205, 0.08) 0%,
+      transparent 35%,
+      transparent 65%,
+      rgba(0, 0, 0, 0.25) 100%
+    );
+    mix-blend-mode: screen;
+  }
+
+  .service-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease, filter 0.4s ease;
+    filter: saturate(0.92) contrast(1.02);
+  }
+
+  .service-card:hover .service-card-image {
+    transform: scale(1.04);
+    filter: saturate(1) contrast(1.05);
+  }
+
+  html.dark .service-card-image {
+    filter: saturate(0.85) contrast(1.04) brightness(0.95);
+  }
+
+  html.dark .service-card:hover .service-card-image {
+    filter: saturate(0.95) contrast(1.06) brightness(1);
+  }
+
+  .service-card-content {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .service-card-content h3 {
+    font-size: 1rem;
+  }
+
+  .service-card-content p {
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .service-card-content ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+  }
+
+  .service-card-content li {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 100px;
+    color: var(--muted);
+    font-family: var(--font-display);
+  }
+
+  .service-placeholder {
+    aspect-ratio: auto;
+    height: 100%;
+    border: none;
+    border-radius: 0;
+  }
+
+  @media (max-width: 1024px) {
+    .service-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 560px) {
+    .service-grid { grid-template-columns: 1fr; }
+  }
+</style>

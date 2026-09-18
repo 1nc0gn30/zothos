@@ -1,0 +1,754 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Syne:wght@600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" type="image/svg+xml" href="/assets/brand/zoth-seal-hermetic-on-dark.svg" />
+
+    <title>Zoth Studio Engineering Dispatches & Architectural Whitepapers</title>
+    <meta
+      name="description"
+      content="Official technical essays, mathematical specifications, and architectural dispatches from Zoth Studio (NullAI Tech). Covering multi-agent consensus, local silicon inference, Rust cryptographic enclaves, and client-side 3D rendering."
+    />
+    <link rel="canonical" href="https://zoth.nullai.tech/articles/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content="Zoth Studio" />
+    <meta property="og:title" content="Zoth Studio Engineering Dispatches & Architecture Hub" />
+    <meta property="og:description" content="Read deep technical whitepapers on Multi-Agent Consensus Triangulation, Rust Memory Enclaves, WebCodecs GPU rendering, and Local Silicon Workstations." />
+    <meta property="og:url" content="https://zoth.nullai.tech/articles/" />
+    <meta property="og:image" content="/assets/brand/zoth-seal-hermetic-hd.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@NullAITech" />
+    <meta name="twitter:title" content="Zoth Studio Engineering Dispatches & Architecture Hub" />
+    <meta name="twitter:description" content="Deep technical whitepapers on Multi-Agent Consensus, Rust Enclaves, WebCodecs GPU rendering, and Local Silicon." />
+    <meta name="twitter:image" content="/assets/brand/zoth-seal-hermetic-hd.jpg" />
+    <style>
+      :root {
+        --cyan: var(--accent-cyan, #00e5ff);
+        --cyan-glow: rgba(0, 229, 255, 0.25);
+        --magenta: #ff007a;
+        --magenta-glow: rgba(255, 0, 122, 0.25);
+        --purple: #a855f7;
+        --emerald: #10b981;
+        --gold: #fbbf24;
+        --border: var(--line, rgba(0, 229, 255, 0.16));
+        --border-bright: rgba(0, 229, 255, 0.45);
+        --text: var(--text-body, #f1f5f9);
+        --text-muted: var(--text-subhead, #94a3b8);
+        --text-dim: #64748b;
+        --font-display: var(--font-theme-heading, 'Syne', system-ui, sans-serif);
+        --font-body: var(--font-theme-body, 'Figtree', system-ui, sans-serif);
+        --font-mono: var(--font-theme-mono, 'IBM Plex Mono', monospace);
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html { scroll-behavior: smooth; background: var(--bg, #030509); }
+      body {
+        background: var(--bg, #030509);
+        color: var(--text);
+        font-family: var(--font-body);
+        line-height: 1.75;
+        font-size: 1.05rem;
+        overflow-x: hidden;
+        position: relative;
+      }
+      body::before {
+        content: "";
+        position: fixed;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        width: min(880px, 90vw); height: min(880px, 90vw);
+        background-image: url("/assets/brand/zoth-seal-hermetic-on-dark.svg");
+        background-repeat: no-repeat; background-position: center; background-size: contain;
+        opacity: 0.032; pointer-events: none; z-index: 0;
+        filter: drop-shadow(0 0 50px rgba(0, 229, 255, 0.3));
+      }
+      .reading-progress {
+        position: fixed; top: 0; left: 0; height: 3px; width: 0%;
+        background: linear-gradient(90deg, var(--cyan), var(--magenta), var(--purple));
+        z-index: 1000; transition: width 0.08s ease-out; box-shadow: 0 0 10px var(--cyan);
+      }
+      
+      .hub-hero {
+        max-width: 1200px; margin: 0 auto; padding: 70px 24px 40px; text-align: center; position: relative; z-index: 1;
+      }
+      .hub-badge {
+        display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px;
+        background: rgba(0, 229, 255, 0.08); border: 1px solid var(--border-bright);
+        color: var(--cyan); border-radius: 999px; font-size: 0.82rem; font-family: var(--font-mono);
+        font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 24px;
+      }
+      .hub-title {
+        font-family: var(--font-display); font-size: clamp(2.4rem, 5vw, 4rem); font-weight: 900;
+        line-height: 1.1; letter-spacing: -0.02em; color: var(--text-primary, #ffffff); margin-bottom: 20px;
+      }
+      .hub-subtitle {
+        font-size: clamp(1.1rem, 1.8vw, 1.25rem); color: var(--text-muted); max-width: 780px; margin: 0 auto 36px; line-height: 1.7;
+      }
+
+      /* Filter & Search Bar */
+      .hub-controls {
+        max-width: 1200px; margin: 0 auto 40px; padding: 0 24px; display: flex;
+        justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; position: relative; z-index: 1;
+      }
+      .filter-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+      .filter-btn {
+        background: var(--surface-card, rgba(16, 22, 38, 0.7)); border: 1px solid var(--border); color: var(--text-muted);
+        padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-family: var(--font-mono);
+        cursor: pointer; transition: all 0.2s;
+      }
+      .filter-btn:hover, .filter-btn.active {
+        background: var(--cyan); color: #030509; border-color: var(--cyan); font-weight: 700;
+      }
+      .search-box {
+        position: relative; min-width: 260px;
+      }
+      .search-input {
+        width: 100%; background: var(--surface-card, rgba(16, 22, 38, 0.8)); border: 1px solid var(--border);
+        color: var(--text); padding: 9px 16px 9px 36px; border-radius: 8px; font-size: 0.88rem; outline: none;
+        transition: border-color 0.2s;
+      }
+      .search-input:focus { border-color: var(--cyan); box-shadow: 0 0 15px var(--cyan-glow); }
+      .search-icon {
+        position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-dim); pointer-events: none;
+      }
+
+      /* Grid of Articles */
+      .hub-grid {
+        max-width: 1200px; margin: 0 auto 80px; padding: 0 24px;
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 28px; position: relative; z-index: 1;
+      }
+      .hub-article-card {
+        background: var(--surface-card, rgba(16, 22, 38, 0.75)); border: 1px solid var(--border); border-radius: 14px;
+        padding: 30px; display: flex; flex-direction: column; transition: all 0.25s ease;
+        backdrop-filter: blur(10px);
+      }
+      .hub-article-card:hover {
+        background: var(--bg-card-hover, rgba(24, 32, 54, 0.95)); border-color: var(--cyan);
+        transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      }
+      .hub-card-meta {
+        display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; font-family: var(--font-mono); font-size: 0.78rem;
+      }
+      .hub-category-badge {
+        color: var(--cyan); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
+      }
+      .hub-read-time {
+        display: inline-flex; align-items: center; gap: 5px; color: var(--text-dim); font-size: 0.76rem;
+      }
+      .hub-card-title {
+        font-family: var(--font-display); font-size: 1.35rem; font-weight: 800; line-height: 1.3;
+        margin-bottom: 14px;
+      }
+      .hub-card-title a { color: var(--text-primary, #ffffff); text-decoration: none; transition: color 0.2s; }
+      .hub-card-title a:hover { color: var(--cyan); }
+      .hub-card-snippet {
+        color: var(--text-muted); font-size: 0.95rem; line-height: 1.65; margin-bottom: 24px; flex-grow: 1;
+      }
+      .hub-card-footer {
+        display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+        padding-top: 16px; border-top: 1px solid var(--line, rgba(255, 255, 255, 0.06));
+      }
+      .hub-tags-group { display: flex; gap: 6px; flex-wrap: wrap; }
+      .hub-tag {
+        font-family: var(--font-mono); font-size: 0.72rem; padding: 3px 8px;
+        background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 4px; color: var(--text-dim);
+      }
+      .hub-tag.magenta { color: var(--magenta); border-color: rgba(255, 0, 122, 0.25); }
+      .hub-tag.emerald { color: var(--emerald); border-color: rgba(16, 185, 129, 0.25); }
+      .hub-tag.gold { color: var(--gold); border-color: rgba(251, 191, 36, 0.25); }
+      .hub-tag.purple { color: var(--purple); border-color: rgba(168, 85, 247, 0.25); }
+      .hub-tag.cyan { color: var(--cyan); border-color: rgba(0, 229, 255, 0.25); }
+      .hub-read-link {
+        display: inline-flex; align-items: center; gap: 6px; color: var(--cyan);
+        font-family: var(--font-mono); font-size: 0.82rem; font-weight: 600; text-decoration: none;
+        transition: gap 0.2s;
+      }
+      .hub-read-link:hover { gap: 10px; text-decoration: underline; }
+
+      /* Light Mode Overrides */
+      html[data-theme="light"] {
+        --cyan: #2563eb;
+        --border: rgba(17, 24, 39, 0.12);
+        --text: #1f2937;
+        --text-muted: #4b5563;
+        --text-dim: #6b7280;
+      }
+      html[data-theme="light"] body { background: #f7f9fc !important; color: #1f2937 !important; }
+      html[data-theme="light"] body::before { opacity: 0.015; filter: none; }
+      html[data-theme="light"] .hub-title { color: #111827 !important; }
+      html[data-theme="light"] .hub-card-title a { color: #111827 !important; }
+      html[data-theme="light"] .hub-card-title a:hover { color: #2563eb !important; }
+      html[data-theme="light"] .hub-article-card { background: #ffffff !important; border-color: rgba(17, 24, 39, 0.1) !important; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); }
+      html[data-theme="light"] .hub-article-card:hover { background: #ffffff !important; border-color: #2563eb !important; box-shadow: 0 12px 30px rgba(37, 99, 235, 0.12); }
+      html[data-theme="light"] .filter-btn { background: #ffffff !important; color: #4b5563 !important; border-color: rgba(17, 24, 39, 0.14) !important; }
+      html[data-theme="light"] .filter-btn.active, html[data-theme="light"] .filter-btn:hover { background: #2563eb !important; color: #ffffff !important; }
+      html[data-theme="light"] .search-input { background: #ffffff !important; color: #111827 !important; border-color: rgba(17, 24, 39, 0.16) !important; }
+      html[data-theme="light"] .hub-tag { background: #f3f4f6 !important; border-color: rgba(17, 24, 39, 0.1) !important; color: #4b5563 !important; }
+
+      /* Matrix Mode */
+      html[data-theme="matrix"] {
+        --cyan: #00ff66;
+        --border: rgba(0, 255, 102, 0.3);
+      }
+      html[data-theme="matrix"] body { background: #020d04 !important; color: #e0ffe8 !important; font-family: 'Share Tech Mono', monospace; }
+      html[data-theme="matrix"] .hub-title { color: #00ff66 !important; font-family: 'Share Tech Mono', monospace; text-shadow: 0 0 16px rgba(0, 255, 102, 0.5); }
+      html[data-theme="matrix"] .hub-article-card { background: rgba(3, 20, 8, 0.85) !important; border-color: rgba(0, 255, 102, 0.3) !important; }
+      html[data-theme="matrix"] .hub-article-card:hover { border-color: #00ff66 !important; box-shadow: 0 0 24px rgba(0, 255, 102, 0.2); }
+      html[data-theme="matrix"] .hub-card-title a { color: #ffffff !important; }
+      html[data-theme="matrix"] .hub-card-title a:hover { color: #00ff66 !important; }
+
+      /* Gold Mode */
+      html[data-theme="gold"] {
+        --cyan: #fbbf24;
+        --border: rgba(251, 191, 36, 0.25);
+      }
+      html[data-theme="gold"] body { background: #080602 !important; color: #fbf5e6 !important; }
+      html[data-theme="gold"] .hub-title { font-family: 'Cinzel', 'Fraunces', serif; color: #fbbf24 !important; text-shadow: 0 0 20px rgba(251, 191, 36, 0.4); }
+      html[data-theme="gold"] .hub-article-card { background: rgba(18, 14, 6, 0.85) !important; border-color: rgba(251, 191, 36, 0.25) !important; }
+      html[data-theme="gold"] .hub-article-card:hover { border-color: #fbbf24 !important; box-shadow: 0 0 24px rgba(251, 191, 36, 0.15); }
+    </style>
+    <link href="/assets/zoth-theme.css?v=11" rel="stylesheet"/>
+    <link href="/assets/zoth-nav.css?v=11" rel="stylesheet"/>
+    <link href="/assets/zoth-articles-poster.css?v=11" rel="stylesheet"/>
+    <script src="/assets/zoth-theme.js?v=11"></script>
+    <script src="/assets/zoth-nav.js?v=11" defer></script>
+    <link rel="stylesheet" href="/assets/zoth-footer.css" />
+  </head>
+  <body>
+                                                                        <header class="bar" id="topbar" role="banner">
+      <a class="brand js-hub" href="/" aria-label="Zoth Studio Home">
+        <div class="brand-emblem-wrap">
+          <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth Golden Z Emblem" width="34" height="34" class="brand-emblem-img" />
+          <span class="brand-emblem-halo"></span>
+        </div>
+        <span class="brand-text-wrap">
+          <strong>Zoth</strong>
+          <small>by NullAI</small>
+        </span>
+        <span class="brand-status-badge">SOVEREIGN</span>
+      </a>
+
+      <nav class="menu" aria-label="Primary navigation" role="navigation">
+        <a class="nav-link nav-for-everyone" href="/#for-everyone" data-tip="Zero-Code Showcases — How non-tech founders, creators & teams depend on Zoth.">✦ For You</a>
+
+        <!-- 🔮 Core AI -->
+        <div class="nav-dropdown" data-dropdown-id="core">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Core AI</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🔮 CORE AI ARCHITECTURE</span><span class="nav-item-badge">6 NODES</span></div>
+            <a href="/zoth/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+            <a href="/agents/"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+            <a href="/studio/consensus.html"><span class="nav-item-icon-box">⚔️</span><div class="nav-item-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+            <a href="/studio/swarm.html"><span class="nav-item-icon-box">🌐</span><div class="nav-item-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+            <a href="/memory/"><span class="nav-item-icon-box">🧠</span><div class="nav-item-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+            <a href="/zoth-world.html"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+          </div>
+        </div>
+
+        <!-- 🪐 Studio -->
+        <div class="nav-dropdown" data-dropdown-id="studio">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Studio</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu nav-dropdown-mega">
+            <div class="nav-dropdown-header"><span>🪐 14+ STUDIO WORKSTATIONS</span><span class="nav-item-badge">LOCAL DAGS</span></div>
+            <a href="/studio/cockpit.html"><span class="nav-item-icon-box">🪐</span><div class="nav-item-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+            <a href="/studio/cockpit.html?tool=webgen"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+            <a href="/studio/cockpit.html?tool=vos-sandbox"><span class="nav-item-icon-box">💻</span><div class="nav-item-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+            <a href="/studio/cockpit.html?tool=nexus-3d"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+            <a href="/studio/cockpit.html?tool=omnipost"><span class="nav-item-icon-box">🎬</span><div class="nav-item-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+            <a href="/studio/cockpit.html?tool=math-pillars"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+            <a href="/studio/cockpit.html?tool=secure-comms"><span class="nav-item-icon-box">🔒</span><div class="nav-item-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+            <a href="/studio/cockpit.html?tool=signal-bridge"><span class="nav-item-icon-box">📡</span><div class="nav-item-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+            <a href="/studio/cockpit.html?tool=web3-hub"><span class="nav-item-icon-box">🪙</span><div class="nav-item-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+            <a href="/studio/cockpit.html?tool=pets"><span class="nav-item-icon-box">💎</span><div class="nav-item-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+            <a href="/studio/cockpit.html?tool=tool-nexus"><span class="nav-item-icon-box">🛠️</span><div class="nav-item-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+          </div>
+        </div>
+
+        <!-- 🌌 Universe -->
+        <div class="nav-dropdown" data-dropdown-id="universe">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Universe</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🌌 UNIVERSE &amp; PUBLICATIONS</span><span class="nav-item-badge">STORIES</span></div>
+            <a href="/comic/"><span class="nav-item-icon-box">🎨</span><div class="nav-item-body"><strong>AZOTH Anime Comic</strong><small>Season 1 Ep 1: Genesis in Silicon Rain (Audio)</small></div><span class="nav-item-badge">AUDIO</span></a>
+            <a href="/social/"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+            <a href="/articles/"><span class="nav-item-icon-box">📜</span><div class="nav-item-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+            <a href="/article/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+            <a href="/ai-webgpu.html"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+            <a href="/adytum/"><span class="nav-item-icon-box">🏛️</span><div class="nav-item-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+          </div>
+        </div>
+
+        <!-- 📚 Docs & Vault -->
+        <div class="nav-dropdown" data-dropdown-id="docs">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Docs & Vault</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>📚 DOCUMENTATION &amp; SECURITY</span><span class="nav-item-badge">SPECS</span></div>
+            <a href="/docs/"><span class="nav-item-icon-box">📚</span><div class="nav-item-body"><strong>Master Documentation</strong><small>Port Topology, 1-Click Install Scripts & API Guide</small></div><span class="nav-item-badge">DOCS</span></a>
+            <a href="/vault/"><span class="nav-item-icon-box">🔐</span><div class="nav-item-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+            <a href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+            <a href="/faq.html"><span class="nav-item-icon-box">❓</span><div class="nav-item-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+          </div>
+        </div>
+
+        <!-- ⚡ Action Pills -->
+        <button type="button" class="nav-pill nav-telemetry-pill" title="View Live Studio Telemetry & Background Daemons" aria-label="Studio Telemetry Status">
+          <span class="tel-dot online"></span><span class="tel-text">6/6 DAEMONS</span>
+        </button>
+
+        <button type="button" class="nav-pill nav-pet-pill" title="Active Companion Spirit: Azoth (Click to Summon / Switch Mascot)" aria-label="Active Companion Spirit">
+          <span class="pet-emoji">🔮</span><span class="pet-name">Azoth</span>
+        </button>
+
+        <a class="nav-pill nav-deck-pill js-deck" href="http://127.0.0.1:8484/" title="Open Local Operator Deck (:8484)">
+          <span class="deck-pulse"></span><span>DECK</span>
+        </a>
+
+        <button type="button" class="nav-pill nav-palette-btn" title="Open Global Command Palette (Ctrl+K)" aria-label="Command Palette">
+          <span class="palette-icon">🔍</span><kbd class="nav-kbd">Ctrl+K</kbd>
+        </button>
+
+        <button type="button" class="nav-pill nav-annotate-btn" title="Toggle On-Screen Annotator & Feedback (Shift+A)" aria-label="Toggle Annotator">
+          <span class="annotate-icon">✏️</span><span class="annotate-text">Annotate</span><kbd class="nav-kbd">Shift+A</kbd>
+        </button>
+
+        <div class="nav-dropdown nav-theme-dropdown">
+          <button class="nav-dropdown-btn nav-theme-current-btn" type="button" aria-haspopup="true" aria-expanded="false" title="Switch Visual Theme (Shift+T)">
+            <span class="current-theme-swatch" style="background:#00f0ff;"></span>
+            <span class="current-theme-emoji">🌙</span>
+            <span class="current-theme-label">Dark Void</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+        </div>
+
+        <a class="nav-pill git" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank" title="GitHub Repository — Open Source code, Debian packages, and releases">
+          <span>🐙 GitHub ↗</span>
+        </a>
+      </nav>
+
+      <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Toggle navigation menu">
+        <span class="burger-lines"><span class="b-line b-1"></span><span class="b-line b-2"></span><span class="b-line b-3"></span></span>
+        <span class="burger-text">Menu</span>
+      </button>
+      <div class="zoth-scroll-progress" id="zoth-scroll-progress"></div>
+    </header>
+
+    <nav class="drawer" id="drawer" aria-label="Universal Mobile Navigation" role="navigation">
+      <div class="drawer-header-brand">
+        <div class="d-brand-left">
+          <div class="brand-emblem-wrap">
+            <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth" width="28" height="28" class="brand-emblem-img" />
+          </div>
+          <span class="d-brand-title"><strong>Zoth Studio</strong><small>v12.0 Sovereign</small></span>
+        </div>
+        <button type="button" class="drawer-telemetry-badge" title="View Diagnostics HUD">● 6/6 DAEMONS</button>
+        <button type="button" class="drawer-close-btn" aria-label="Close mobile menu">✕</button>
+      </div>
+
+      <div class="drawer-section drawer-tools-section">
+        <div class="drawer-heading">⚡ Quick Actions</div>
+        <div class="drawer-quick-tools-grid">
+          <button type="button" class="drawer-tool-pill drawer-palette-trigger"><span>🔍</span> Command Palette <kbd class="nav-kbd">Ctrl+K</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-annotate-trigger"><span>✏️</span> On-Screen Annotator <kbd class="nav-kbd">Shift+A</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-telemetry-trigger"><span>⚡</span> Telemetry HUD</button>
+          <button type="button" class="drawer-tool-pill drawer-audio-trigger"><span>🔊</span> Audio FX</button>
+        </div>
+      </div>
+
+      <div class="drawer-section drawer-theme-section">
+        <div class="drawer-heading">🎨 Visual Theme (16 Archetypes)</div>
+        <div class="drawer-search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="drawer-theme-search-input" placeholder="Search 16 themes..." autocomplete="off" />
+        </div>
+        <div class="theme-filter-chips drawer-filter-chips">
+          <button type="button" class="theme-chip-btn active" data-drawer-cat="all">All (16)</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="studio originals">Originals</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="frontier ai & tech">Frontier</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="developer archetypes">Dev</button>
+        </div>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">✦ Featured</div>
+        <a class="drawer-link drawer-hero-link" href="/#for-everyone"><span class="d-link-icon">✦</span><div class="d-link-body"><strong>For You (No-Code Showcases)</strong><small>How Non-Tech Founders, Creators & Teams Use Zoth</small></div><span class="nav-item-badge">SHOWCASE</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🔮 Core AI & Pantheon</div>
+        <a class="drawer-link" href="/zoth/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+        <a class="drawer-link" href="/agents/"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+        <a class="drawer-link" href="/studio/consensus.html"><span class="d-link-icon">⚔️</span><div class="d-link-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+        <a class="drawer-link" href="/studio/swarm.html"><span class="d-link-icon">🌐</span><div class="d-link-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+        <a class="drawer-link" href="/memory/"><span class="d-link-icon">🧠</span><div class="d-link-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+        <a class="drawer-link" href="/zoth-world.html"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🪐 Workstations & DAGs</div>
+        <a class="drawer-link" href="/studio/cockpit.html"><span class="d-link-icon">🪐</span><div class="d-link-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=webgen"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=vos-sandbox"><span class="d-link-icon">💻</span><div class="d-link-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=nexus-3d"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=omnipost"><span class="d-link-icon">🎬</span><div class="d-link-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=math-pillars"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=secure-comms"><span class="d-link-icon">🔒</span><div class="d-link-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=signal-bridge"><span class="d-link-icon">📡</span><div class="d-link-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=web3-hub"><span class="d-link-icon">🪙</span><div class="d-link-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=pets"><span class="d-link-icon">💎</span><div class="d-link-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=tool-nexus"><span class="d-link-icon">🛠️</span><div class="d-link-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📜 Universe & Research</div>
+        <a class="drawer-link" href="/comic/"><span class="d-link-icon">🎨</span><div class="d-link-body"><strong>AZOTH Anime Comic Series</strong><small>Season 1 Ep 1: Genesis in Silicon Rain</small></div><span class="nav-item-badge">AUDIO</span></a>
+        <a class="drawer-link" href="/social/"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+        <a class="drawer-link" href="/articles/"><span class="d-link-icon">📜</span><div class="d-link-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+        <a class="drawer-link" href="/article/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+        <a class="drawer-link" href="/ai-webgpu.html"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+        <a class="drawer-link" href="/adytum/"><span class="d-link-icon">🏛️</span><div class="d-link-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📚 Docs & Security</div>
+        <a class="drawer-link" href="/docs/"><span class="d-link-icon">📚</span><div class="d-link-body"><strong>Complete Documentation</strong><small>Port Topology, 1-Click Install Scripts & API</small></div><span class="nav-item-badge">DOCS</span></a>
+        <a class="drawer-link" href="/vault/"><span class="d-link-icon">🔐</span><div class="d-link-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+        <a class="drawer-link" href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+        <a class="drawer-link" href="/faq.html"><span class="d-link-icon">❓</span><div class="d-link-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+      </div>
+
+      <div class="drawer-section drawer-footer-section">
+        <a class="drawer-pill-link js-deck" href="http://127.0.0.1:8484/">💻 Launch Local Operator Deck (:8484)</a>
+        <a class="drawer-pill-link" href="https://github.com/NullAITech/zoth-studio" target="_blank" rel="noopener noreferrer">🐙 GitHub Source Repository ↗</a>
+        <a class="drawer-pill-link" href="/downloads/zoth-studio-android.apk">📱 Download Android App (.apk)</a>
+      </div>
+    </nav>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="hub-hero">
+      <div class="hub-badge">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+        Zoth Architecture & Systems Dispatches · 2026
+      </div>
+      <h1 class="hub-title">Engineering Sovereignty</h1>
+      <p class="hub-subtitle">
+        Authoritative research whitepapers, mathematical consensus specifications, and cryptographic blueprints for autonomous local-first AI workstations.
+      </p>
+    </div>
+
+    <div class="hub-controls">
+      <div class="filter-tabs">
+        <button class="filter-btn active" onclick="filterCategory('all', this)">All Dispatches</button>
+        <button class="filter-btn" onclick="filterCategory('architecture', this)">Consensus</button>
+        <button class="filter-btn" onclick="filterCategory('cryptography', this)">Cryptography</button>
+        <button class="filter-btn" onclick="filterCategory('graphics', this)">Graphics & Silicon</button>
+        <button class="filter-btn" onclick="filterCategory('hardware', this)">Hardware AI</button>
+        <button class="filter-btn" onclick="filterCategory('workstations', this)">Developer Economics</button>
+        <button class="filter-btn" onclick="filterCategory('companionship', this)">Mascots & Pets</button>
+      </div>
+      <div class="search-box">
+        <svg class="search-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" id="articleSearch" class="search-input" placeholder="Search dispatches & topics..." oninput="searchArticles(this.value)" />
+      </div>
+    </div>
+
+    <main class="hub-grid" id="articlesGrid">
+      
+        <!-- Article 1: Consensus Triangulation -->
+        <article class="hub-article-card" data-category="distributed ai architecture">
+          <div class="hub-card-meta">
+            <span class="hub-category-badge">Distributed AI Architecture</span>
+            <span class="hub-read-time"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>11 min read</span>
+          </div>
+          <h2 class="hub-card-title">
+            <a href="/articles/consensus-triangulation.html">Why Single-Model Prompting is Dead: The Science of Multi-Agent Consensus Triangulation</a>
+          </h2>
+          <p class="hub-card-snippet">Mathematical formalization of consensus, AST fuzzing, and comparative benchmarks slashing LLM error rates from 14.2% to 0.4%.</p>
+          <div class="hub-card-footer">
+            <div class="hub-tags-group"><span class="hub-tag cyan">Consensus Triangulation</span><span class="hub-tag magenta">AST Fuzzing</span><span class="hub-tag emerald">0.4% Error Rate</span></div>
+            <a href="/articles/consensus-triangulation.html" class="hub-read-link">
+              Read Dispatch
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <!-- Article 2: Rust Argon2id Enclave -->
+        <article class="hub-article-card" data-category="systems & cryptography">
+          <div class="hub-card-meta">
+            <span class="hub-category-badge">Systems & Cryptography</span>
+            <span class="hub-read-time"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>12 min read</span>
+          </div>
+          <h2 class="hub-card-title">
+            <a href="/articles/rust-argon2id-enclave.html">Inside the Vault: Why We Built Zoth’s Sovereign Enclave in Rust with Argon2id</a>
+          </h2>
+          <p class="hub-card-snippet">Why Cloud KMS is a single point of failure and how Zoth secures secrets with 64MB Argon2id and DoD 5220.22-M memory sweeping.</p>
+          <div class="hub-card-footer">
+            <div class="hub-tags-group"><span class="hub-tag cyan">Cryptography</span><span class="hub-tag purple">Rust Enclave</span><span class="hub-tag emerald">Argon2id RFC 9106</span></div>
+            <a href="/articles/rust-argon2id-enclave.html" class="hub-read-link">
+              Read Dispatch
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <!-- Article 3: Client-Side 3D WebCodecs -->
+        <article class="hub-article-card" data-category="graphics & webassembly">
+          <div class="hub-card-meta">
+            <span class="hub-category-badge">Graphics & WebAssembly</span>
+            <span class="hub-read-time"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>10 min read</span>
+          </div>
+          <h2 class="hub-card-title">
+            <a href="/articles/client-side-3d-webcodecs.html">Client-Side Silicon: Rendering 60 FPS Video Shorts with WebGL, WebCodecs & Canvas</a>
+          </h2>
+          <p class="hub-card-snippet">Eliminating $0.08/min cloud GPU rendering bills with deterministic Three.js capture and hardware WebCodecs VideoEncoder.</p>
+          <div class="hub-card-footer">
+            <div class="hub-tags-group"><span class="hub-tag cyan">Graphics & Silicon</span><span class="hub-tag emerald">WebCodecs</span><span class="hub-tag gold">Three.js 60 FPS</span></div>
+            <a href="/articles/client-side-3d-webcodecs.html" class="hub-read-link">
+              Read Dispatch
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <!-- Article 4: Local Silicon Revolution -->
+        <article class="hub-article-card" data-category="hardware & local ai">
+          <div class="hub-card-meta">
+            <span class="hub-category-badge">Hardware & Local AI</span>
+            <span class="hub-read-time"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>11 min read</span>
+          </div>
+          <h2 class="hub-card-title">
+            <a href="/articles/local-silicon-revolution.html">The Silicon Shift: Running Sovereign AI on Local Silicon with Ollama & Grok</a>
+          </h2>
+          <p class="hub-card-snippet">Running 70B parameter models at 45 tok/s in local unified memory with zero cloud telemetry and airgap compliance.</p>
+          <div class="hub-card-footer">
+            <div class="hub-tags-group"><span class="hub-tag emerald">Local Silicon</span><span class="hub-tag gold">Apple UMA 800GB/s</span><span class="hub-tag cyan">Ollama 70B</span></div>
+            <a href="/articles/local-silicon-revolution.html" class="hub-read-link">
+              Read Dispatch
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <!-- Article 5: Death of SaaS Rent -->
+        <article class="hub-article-card" data-category="developer workstations">
+          <div class="hub-card-meta">
+            <span class="hub-category-badge">Developer Workstations</span>
+            <span class="hub-read-time"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>12 min read</span>
+          </div>
+          <h2 class="hub-card-title">
+            <a href="/articles/death-of-saas-rent.html">The Death of SaaS Rent: Why Developers are Migrating to Autonomous Local Workstations</a>
+          </h2>
+          <p class="hub-card-snippet">Escaping $500/mo subscription fatigue by migrating to 21-agent autonomous local workstations with terminal cockpits.</p>
+          <div class="hub-card-footer">
+            <div class="hub-tags-group"><span class="hub-tag magenta">Developer Economics</span><span class="hub-tag cyan">21-Agent Swarm</span><span class="hub-tag purple">Curses TUI</span></div>
+            <a href="/articles/death-of-saas-rent.html" class="hub-read-link">
+              Read Dispatch
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <!-- Article 6: Byzantine AST Fuzzing -->
+        <article class="hub-article-card" data-category="code integrity & security architecture">
+          <div class="hub-card-meta">
+            <span class="hub-category-badge">Code Integrity & Security</span>
+            <span class="hub-read-time"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>9 min read</span>
+          </div>
+          <h2 class="hub-card-title">
+            <a href="/articles/byzantine-ast-fuzzing.html">Byzantine AST Fuzzing: How Zoth Verifies Code Before Commits</a>
+          </h2>
+          <p class="hub-card-snippet">Inside the automated syntax verification, type tree validation, and edge-case fuzzing engine that gates all Zoth Studio agent code mutations before staging git commits.</p>
+          <div class="hub-card-footer">
+            <div class="hub-tags-group"><span class="hub-tag emerald">AST Tree-Sitter</span><span class="hub-tag purple">Byzantine Gates</span><span class="hub-tag cyan">0-Defect Commits</span></div>
+            <a href="/articles/byzantine-ast-fuzzing.html" class="hub-read-link">
+              Read Dispatch
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <!-- Article 7: Local Agent Mesh Topology -->
+        <article class="hub-article-card" data-category="distributed systems & ipc architecture">
+          <div class="hub-card-meta">
+            <span class="hub-category-badge">Distributed Systems & IPC</span>
+            <span class="hub-read-time"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>8 min read</span>
+          </div>
+          <h2 class="hub-card-title">
+            <a href="/articles/local-agent-mesh-topology.html">Sub-Millisecond IPC: The Local Agent Mesh Topology & File Bus</a>
+          </h2>
+          <p class="hub-card-snippet">Eliminating 20-second cloud webhook overhead with 0.18ms loopback Unix Domain Sockets and shared memory ring buffers for local agent swarms.</p>
+          <div class="hub-card-footer">
+            <div class="hub-tags-group"><span class="hub-tag cyan">Unix Sockets</span><span class="hub-tag emerald">0.18ms Latency</span><span class="hub-tag purple">Lock-Free Bus</span></div>
+            <a href="/articles/local-agent-mesh-topology.html" class="hub-read-link">
+              Read Dispatch
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <!-- Article 8: Why Pets Beat Bots -->
+        <article class="hub-article-card" data-category="digital companionship & philosophy companionship">
+          <div class="hub-card-meta">
+            <span class="hub-category-badge">Philosophy & Companionship</span>
+            <span class="hub-read-time"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>8 min read</span>
+          </div>
+          <h2 class="hub-card-title">
+            <a href="/articles/why-pets-beat-bots.html">Why Pets Are Better Than Bots: The Era of Embodied Digital Familiars</a>
+          </h2>
+          <p class="hub-card-snippet">Why corporate chatbots with stateless amnesia are obsolete, and how 24 sovereign 3D Mascot Spirits with evolving SOUL contracts redefine developer collaboration.</p>
+          <div class="hub-card-footer">
+            <div class="hub-tags-group"><span class="hub-tag gold">3D Mascot Spirits</span><span class="hub-tag cyan">SOUL.md Contracts</span><span class="hub-tag magenta">24 Familiars</span></div>
+            <a href="/articles/why-pets-beat-bots.html" class="hub-read-link">
+              Read Dispatch
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </article>
+    
+    </main>
+
+                                                                <footer class="site" role="contentinfo">
+      <div class="foot-wrap">
+        <div aria-hidden="true" class="foot-watermark">ZOTH</div>
+        <div class="foot-grid">
+          <div class="foot-brand-col">
+            <p class="foot-kicker">Local · loopback · no telemetry</p>
+            <a class="foot-brand-lockup" href="/">
+              <img alt="Master Azoth" class="foot-azoth" decoding="async" height="72" loading="lazy" src="/assets/mascot/azoth-bust.jpg" width="72" />
+              <span class="foot-brand-text">
+                <img alt="" class="foot-brand-logo" decoding="async" height="28" loading="lazy" src="/assets/brand/zoth-golden-z-192.png" width="28" />
+                <strong class="foot-brand-title">Zoth Studio</strong>
+              </span>
+            </a>
+            <small class="foot-brand-desc">Local-first workspace for a team of AI agents. Files stay on this machine.</small>
+            <div class="foot-actions">
+              <a class="foot-btn foot-btn-on" href="/#install">Install locally</a>
+              <a class="foot-btn foot-btn-ghost" href="/pricing/">Support the forge</a>
+            </div>
+          </div>
+          <div class="foot-col">
+            <h3>Studio</h3>
+            <a class="mega-footer-link js-deck" href="http://127.0.0.1:8484/">Operator Deck</a>
+            <a class="mega-footer-link" href="/studio/">Workstations</a>
+            <a class="mega-footer-link" href="/studio/webgen.html">WebGen</a>
+            <a class="mega-footer-link" href="/studio/swarm.html">3D Swarm</a>
+            <a class="mega-footer-link" href="/studio/consensus.html">Consensus</a>
+          </div>
+          <div class="foot-col">
+            <h3>Agents</h3>
+            <a class="mega-footer-link" href="/zoth/">Master Azoth</a>
+            <a class="mega-footer-link" href="/agents/">21-Agent pantheon</a>
+            <a class="mega-footer-link" href="/pets/">Companions</a>
+            <a class="mega-footer-link" href="/vault/">Sovereign vault</a>
+            <a class="mega-footer-link" href="/adytum/">Adytum</a>
+          </div>
+          <div class="foot-col">
+            <h3>Universe</h3>
+            <a class="mega-footer-link" href="/comic/">Azoth comic</a>
+            <a class="mega-footer-link" href="/social/">Social wall</a>
+            <a class="mega-footer-link" href="/showcase.html">Showcase</a>
+            <a class="mega-footer-link" href="/signal/">Signal</a>
+            <a class="mega-footer-link" href="/article/">Manifesto</a>
+          </div>
+          <div class="foot-col">
+            <h3>Resources</h3>
+            <a class="mega-footer-link" href="/docs/">Docs</a>
+            <a class="mega-footer-link" href="/faq.html">FAQ</a>
+            <a class="mega-footer-link" href="/pricing/">Support / Patron</a>
+            <a class="mega-footer-link" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub ↗</a>
+            <a class="mega-footer-link" href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI ↗</a>
+          </div>
+        </div>
+        <div class="foot-bottom">
+          <p>© 2026 NullAI Tech. MIT. Local sovereign execution — zero telemetry.</p>
+          <nav aria-label="Footer meta" class="foot-meta">
+            <a href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub</a>
+            <a href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI</a>
+            <a href="/docs/">Docs</a>
+            <a href="/faq.html">FAQ</a>
+          </nav>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      function filterCategory(cat, btn) {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const cards = document.querySelectorAll('.hub-article-card');
+        cards.forEach(card => {
+          const itemCat = card.getAttribute('data-category') || '';
+          if (cat === 'all' || itemCat.includes(cat)) {
+            card.style.display = 'flex';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      }
+
+      function searchArticles(q) {
+        const term = q.toLowerCase().trim();
+        const cards = document.querySelectorAll('.hub-article-card');
+        cards.forEach(card => {
+          const text = card.innerText.toLowerCase();
+          if (!term || text.includes(term)) {
+            card.style.display = 'flex';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

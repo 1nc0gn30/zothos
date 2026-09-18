@@ -1,0 +1,1619 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Zoth Mission Control — Master System Operations &amp; Fleet Health</title>
+<meta content="Central dashboard monitoring CPU/GPU VRAM utilization, active daemon ports (:8484, :8088, :8787), and agent health." name="description"/>
+<link href="https://zoth.nullai.tech/studio/mission-control.html" rel="canonical"/>
+<!-- OpenGraph / Facebook -->
+<meta content="website" property="og:type"/>
+<meta content="Zoth Studio" property="og:site_name"/>
+<meta content="https://zoth.nullai.tech/studio/mission-control.html" property="og:url"/>
+<meta content="Zoth Mission Control — Master System Operations &amp; Fleet Health" property="og:title"/>
+<meta content="Central dashboard monitoring CPU/GPU VRAM utilization, active daemon ports (:8484, :8088, :8787), and agent health." property="og:description"/>
+<meta content="https://zoth.nullai.tech/assets/media/land/studio-hero.jpg" property="og:image"/>
+<!-- Twitter Cards -->
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="Zoth Mission Control — Master System Operations &amp; Fleet Health" name="twitter:title"/>
+<meta content="Central dashboard monitoring CPU/GPU VRAM utilization, active daemon ports (:8484, :8088, :8787), and agent health." name="twitter:description"/>
+<meta content="https://zoth.nullai.tech/assets/media/land/studio-hero.jpg" name="twitter:image"/>
+<!-- OpenGraph / Facebook -->
+<!-- Twitter Cards -->
+<!-- OpenGraph / Facebook -->
+<!-- Twitter Cards -->
+<meta content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" name="robots"/>
+<meta content="#030306" name="theme-color">
+<meta content="Zoth Studio" name="application-name">
+<link href="/assets/brand/zoth-seal-hermetic-on-dark.svg" rel="icon" type="image/svg+xml">
+<link href="/assets/mascot/azoth-portrait.jpg" rel="apple-touch-icon"/>
+<link as="image" fetchpriority="high" href="/assets/mascot/azoth-portrait.jpg" rel="preload"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&amp;family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Syne:wght@600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="/assets/zoth-theme.css?v=11" rel="stylesheet"/>
+<script src="/assets/zoth-theme.js?v=11"></script>
+<link href="/assets/zoth-nav.css?v=11" rel="stylesheet"/>
+<link href="/assets/zoth-tailwind-magic.css" rel="stylesheet"/>
+<link href="/assets/zoth-guide.css" rel="stylesheet"/>
+<link href="/assets/zoth-mobile.css" rel="stylesheet"/>
+<link href="/assets/zoth-tip.css" rel="stylesheet"/>
+<link href="/studio/mission-control-poster.css" rel="stylesheet"/>
+
+<!-- Schema.org JSON-LD Structured Data for SEO & AEO Voice Search -->
+<!-- Schema.org JSON-LD Structured Data for SEO & AEO Voice Search -->
+<!-- Schema.org JSON-LD Structured Data for SEO & AEO Voice Search -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://zoth.nullai.tech/#organization",
+      "name": "NullAI Tech",
+      "url": "https://nullai.tech/",
+      "logo": "https://zoth.nullai.tech/assets/brand/zoth-seal-hermetic-on-dark.svg",
+      "sameAs": [
+        "https://github.com/NullAITech/zoth-studio"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://zoth.nullai.tech/#website",
+      "url": "https://zoth.nullai.tech/",
+      "name": "Zoth Studio",
+      "description": "Local-first autonomous AI multi-agent workstation, 3D swarm arena, and privacy-first application foundry.",
+      "publisher": {
+        "@id": "https://zoth.nullai.tech/#organization"
+      }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://zoth.nullai.tech/studio/mission-control.html#softwareapplication",
+      "name": "Zoth Mission Control \u2014 Master System Operations & Fleet Health",
+      "description": "Central dashboard monitoring CPU/GPU VRAM utilization, active daemon ports (:8484, :8088, :8787), and agent health.",
+      "url": "https://zoth.nullai.tech/studio/mission-control.html",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Linux, macOS, Windows",
+      "inLanguage": "en-US",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://zoth.nullai.tech/studio/mission-control.html",
+      "url": "https://zoth.nullai.tech/studio/mission-control.html",
+      "name": "Zoth Mission Control \u2014 Master System Operations & Fleet Health",
+      "description": "Central dashboard monitoring CPU/GPU VRAM utilization, active daemon ports (:8484, :8088, :8787), and agent health.",
+      "inLanguage": "en-US",
+      "isPartOf": {
+        "@id": "https://zoth.nullai.tech/#website"
+      },
+      "speakable": {
+        "@type": "SpeakableSpecification",
+        "cssSelector": [
+          "h1",
+          ".kicker",
+          ".mission-title",
+          ".metric-label",
+          ".status-indicator"
+        ]
+      },
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://zoth.nullai.tech/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Studio",
+            "item": "https://zoth.nullai.tech/studio"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Mission Control",
+            "item": "https://zoth.nullai.tech/studio/mission-control.html"
+          }
+        ]
+      }
+    }
+  ]
+}
+  </script>
+<meta content="1200" property="og:image:width"/><meta content="630" property="og:image:height"/><meta content="Zoth Studio Sovereign AI Workstation" property="og:image:alt"/><meta content="Zoth Studio Sovereign AI Workstation" name="twitter:image:alt"/><meta content="US-VA" name="geo.region"/><meta content="Virginia Beach, Virginia" name="geo.placename"/><meta content="36.8529;-75.9780" name="geo.position"/><meta content="36.8529, -75.9780" name="ICBM"/><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://zoth.nullai.tech/studio/mission-control.html#webpage",
+      "url": "https://zoth.nullai.tech/studio/mission-control.html",
+      "name": "Zoth Mission Control \u2014 Master System Operations & Fleet Health",
+      "description": "Central dashboard monitoring CPU/GPU VRAM utilization, active daemon ports (:8484, :8088, :8787), and agent health.",
+      "isPartOf": {
+        "@type": "WebSite",
+        "@id": "https://zoth.nullai.tech/#website",
+        "url": "https://zoth.nullai.tech/",
+        "name": "Zoth Studio",
+        "publisher": {
+          "@type": "Organization",
+          "name": "757tech / NullAI",
+          "url": "https://757tech.pro"
+        }
+      },
+      "primaryImageOfPage": {
+        "@type": "ImageObject",
+        "url": "https://zoth.nullai.tech/assets/media/land/studio-hero.jpg",
+        "caption": "Zoth Studio Sovereign AI Workstation"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://zoth.nullai.tech/studio/mission-control.html#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://zoth.nullai.tech/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Studio",
+          "item": "https://zoth.nullai.tech/studio/mission-control.html"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://zoth.nullai.tech/studio/mission-control.html#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is Zoth Studio?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Zoth Studio is a sovereign, local-first control surface for multi-agent AI orchestration, featuring a 298+ verified tool registry, 23+ modular studio suites, a 21-node sovereign agent pantheon, and an encrypted BYOK vault."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Where are my API keys stored?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "API keys are stored strictly in local operator memory or an encrypted local Rust daemon using Argon2id and XChaCha20-Poly1305. Plaintext keys are never sent to external servers."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does Zoth Studio require a cloud subscription?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Zoth Studio is fully sovereign and free to run on your local hardware or private network over Tailscale."
+          }
+        }
+      ]
+    }
+  ]
+}</script>  <link rel="stylesheet" href="/assets/zoth-footer.css" />
+<link href="/assets/zoth-hud-embedded.css" rel="stylesheet"/>
+<script src="/assets/zoth-hud-embedded.js"></script>
+</head>
+<body class="deck-page mission-page" data-guide="This is the inventory, not the mission.|Full control stays on the local deck.|Install, then run the work here." data-kicker="Deck · ops" data-lede="Inventory of shipped suites and the next ops horizon — full control stays on the local deck." data-title="Control">
+<a class="skip skip-to-content" href="#main-content">Skip to main content</a>
+                                                                    <header class="bar" id="topbar" role="banner">
+      <a class="brand js-hub" href="/" aria-label="Zoth Studio Home">
+        <div class="brand-emblem-wrap">
+          <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth Golden Z Emblem" width="34" height="34" class="brand-emblem-img" />
+          <span class="brand-emblem-halo"></span>
+        </div>
+        <span class="brand-text-wrap">
+          <strong>Zoth</strong>
+          <small>by NullAI</small>
+        </span>
+        <span class="brand-status-badge">SOVEREIGN</span>
+      </a>
+
+      <nav class="menu" aria-label="Primary navigation" role="navigation">
+        <a class="nav-link nav-for-everyone" href="/#for-everyone" data-tip="Zero-Code Showcases — How non-tech founders, creators & teams depend on Zoth.">✦ For You</a>
+
+        <!-- 🔮 Core AI -->
+        <div class="nav-dropdown" data-dropdown-id="core">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Core AI</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🔮 CORE AI ARCHITECTURE</span><span class="nav-item-badge">6 NODES</span></div>
+            <a href="/zoth/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+            <a href="/agents/"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+            <a href="/studio/consensus.html"><span class="nav-item-icon-box">⚔️</span><div class="nav-item-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+            <a href="/studio/swarm.html"><span class="nav-item-icon-box">🌐</span><div class="nav-item-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+            <a href="/memory/"><span class="nav-item-icon-box">🧠</span><div class="nav-item-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+            <a href="/zoth-world.html"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+          </div>
+        </div>
+
+        <!-- 🪐 Studio -->
+        <div class="nav-dropdown" data-dropdown-id="studio">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Studio</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu nav-dropdown-mega">
+            <div class="nav-dropdown-header"><span>🪐 14+ STUDIO WORKSTATIONS</span><span class="nav-item-badge">LOCAL DAGS</span></div>
+            <a href="/studio/cockpit.html"><span class="nav-item-icon-box">🪐</span><div class="nav-item-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+            <a href="/studio/cockpit.html?tool=webgen"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+            <a href="/studio/cockpit.html?tool=vos-sandbox"><span class="nav-item-icon-box">💻</span><div class="nav-item-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+            <a href="/studio/cockpit.html?tool=nexus-3d"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+            <a href="/studio/cockpit.html?tool=omnipost"><span class="nav-item-icon-box">🎬</span><div class="nav-item-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+            <a href="/studio/cockpit.html?tool=math-pillars"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+            <a href="/studio/cockpit.html?tool=secure-comms"><span class="nav-item-icon-box">🔒</span><div class="nav-item-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+            <a href="/studio/cockpit.html?tool=signal-bridge"><span class="nav-item-icon-box">📡</span><div class="nav-item-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+            <a href="/studio/cockpit.html?tool=web3-hub"><span class="nav-item-icon-box">🪙</span><div class="nav-item-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+            <a href="/studio/cockpit.html?tool=pets"><span class="nav-item-icon-box">💎</span><div class="nav-item-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+            <a href="/studio/cockpit.html?tool=tool-nexus"><span class="nav-item-icon-box">🛠️</span><div class="nav-item-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+          </div>
+        </div>
+
+        <!-- 🌌 Universe -->
+        <div class="nav-dropdown" data-dropdown-id="universe">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Universe</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🌌 UNIVERSE &amp; PUBLICATIONS</span><span class="nav-item-badge">STORIES</span></div>
+            <a href="/comic/"><span class="nav-item-icon-box">🎨</span><div class="nav-item-body"><strong>AZOTH Anime Comic</strong><small>Season 1 Ep 1: Genesis in Silicon Rain (Audio)</small></div><span class="nav-item-badge">AUDIO</span></a>
+            <a href="/social/"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+            <a href="/articles/"><span class="nav-item-icon-box">📜</span><div class="nav-item-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+            <a href="/article/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+            <a href="/ai-webgpu.html"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+            <a href="/adytum/"><span class="nav-item-icon-box">🏛️</span><div class="nav-item-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+          </div>
+        </div>
+
+        <!-- 📚 Docs & Vault -->
+        <div class="nav-dropdown" data-dropdown-id="docs">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Docs & Vault</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>📚 DOCUMENTATION &amp; SECURITY</span><span class="nav-item-badge">SPECS</span></div>
+            <a href="/docs/"><span class="nav-item-icon-box">📚</span><div class="nav-item-body"><strong>Master Documentation</strong><small>Port Topology, 1-Click Install Scripts & API Guide</small></div><span class="nav-item-badge">DOCS</span></a>
+            <a href="/vault/"><span class="nav-item-icon-box">🔐</span><div class="nav-item-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+            <a href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+            <a href="/faq.html"><span class="nav-item-icon-box">❓</span><div class="nav-item-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+          </div>
+        </div>
+
+        <!-- ⚡ Action Pills -->
+        <button type="button" class="nav-pill nav-telemetry-pill" title="View Live Studio Telemetry & Background Daemons" aria-label="Studio Telemetry Status">
+          <span class="tel-dot online"></span><span class="tel-text">6/6 DAEMONS</span>
+        </button>
+
+        <button type="button" class="nav-pill nav-pet-pill" title="Active Companion Spirit: Azoth (Click to Summon / Switch Mascot)" aria-label="Active Companion Spirit">
+          <span class="pet-emoji">🔮</span><span class="pet-name">Azoth</span>
+        </button>
+
+        <a class="nav-pill nav-deck-pill js-deck" href="http://127.0.0.1:8484/" title="Open Local Operator Deck (:8484)">
+          <span class="deck-pulse"></span><span>DECK</span>
+        </a>
+
+        <button type="button" class="nav-pill nav-palette-btn" title="Open Global Command Palette (Ctrl+K)" aria-label="Command Palette">
+          <span class="palette-icon">🔍</span><kbd class="nav-kbd">Ctrl+K</kbd>
+        </button>
+
+        <button type="button" class="nav-pill nav-annotate-btn" title="Toggle On-Screen Annotator & Feedback (Shift+A)" aria-label="Toggle Annotator">
+          <span class="annotate-icon">✏️</span><span class="annotate-text">Annotate</span><kbd class="nav-kbd">Shift+A</kbd>
+        </button>
+
+        <div class="nav-dropdown nav-theme-dropdown">
+          <button class="nav-dropdown-btn nav-theme-current-btn" type="button" aria-haspopup="true" aria-expanded="false" title="Switch Visual Theme (Shift+T)">
+            <span class="current-theme-swatch" style="background:#00f0ff;"></span>
+            <span class="current-theme-emoji">🌙</span>
+            <span class="current-theme-label">Dark Void</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+        </div>
+
+        <a class="nav-pill git" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank" title="GitHub Repository — Open Source code, Debian packages, and releases">
+          <span>🐙 GitHub ↗</span>
+        </a>
+      </nav>
+
+      <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Toggle navigation menu">
+        <span class="burger-lines"><span class="b-line b-1"></span><span class="b-line b-2"></span><span class="b-line b-3"></span></span>
+        <span class="burger-text">Menu</span>
+      </button>
+      <div class="zoth-scroll-progress" id="zoth-scroll-progress"></div>
+    </header>
+
+    <nav class="drawer" id="drawer" aria-label="Universal Mobile Navigation" role="navigation">
+      <div class="drawer-header-brand">
+        <div class="d-brand-left">
+          <div class="brand-emblem-wrap">
+            <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth" width="28" height="28" class="brand-emblem-img" />
+          </div>
+          <span class="d-brand-title"><strong>Zoth Studio</strong><small>v12.0 Sovereign</small></span>
+        </div>
+        <button type="button" class="drawer-telemetry-badge" title="View Diagnostics HUD">● 6/6 DAEMONS</button>
+        <button type="button" class="drawer-close-btn" aria-label="Close mobile menu">✕</button>
+      </div>
+
+      <div class="drawer-section drawer-tools-section">
+        <div class="drawer-heading">⚡ Quick Actions</div>
+        <div class="drawer-quick-tools-grid">
+          <button type="button" class="drawer-tool-pill drawer-palette-trigger"><span>🔍</span> Command Palette <kbd class="nav-kbd">Ctrl+K</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-annotate-trigger"><span>✏️</span> On-Screen Annotator <kbd class="nav-kbd">Shift+A</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-telemetry-trigger"><span>⚡</span> Telemetry HUD</button>
+          <button type="button" class="drawer-tool-pill drawer-audio-trigger"><span>🔊</span> Audio FX</button>
+        </div>
+      </div>
+
+      <div class="drawer-section drawer-theme-section">
+        <div class="drawer-heading">🎨 Visual Theme (16 Archetypes)</div>
+        <div class="drawer-search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="drawer-theme-search-input" placeholder="Search 16 themes..." autocomplete="off" />
+        </div>
+        <div class="theme-filter-chips drawer-filter-chips">
+          <button type="button" class="theme-chip-btn active" data-drawer-cat="all">All (16)</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="studio originals">Originals</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="frontier ai & tech">Frontier</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="developer archetypes">Dev</button>
+        </div>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">✦ Featured</div>
+        <a class="drawer-link drawer-hero-link" href="/#for-everyone"><span class="d-link-icon">✦</span><div class="d-link-body"><strong>For You (No-Code Showcases)</strong><small>How Non-Tech Founders, Creators & Teams Use Zoth</small></div><span class="nav-item-badge">SHOWCASE</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🔮 Core AI & Pantheon</div>
+        <a class="drawer-link" href="/zoth/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+        <a class="drawer-link" href="/agents/"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+        <a class="drawer-link" href="/studio/consensus.html"><span class="d-link-icon">⚔️</span><div class="d-link-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+        <a class="drawer-link" href="/studio/swarm.html"><span class="d-link-icon">🌐</span><div class="d-link-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+        <a class="drawer-link" href="/memory/"><span class="d-link-icon">🧠</span><div class="d-link-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+        <a class="drawer-link" href="/zoth-world.html"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🪐 Workstations & DAGs</div>
+        <a class="drawer-link" href="/studio/cockpit.html"><span class="d-link-icon">🪐</span><div class="d-link-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=webgen"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=vos-sandbox"><span class="d-link-icon">💻</span><div class="d-link-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=nexus-3d"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=omnipost"><span class="d-link-icon">🎬</span><div class="d-link-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=math-pillars"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=secure-comms"><span class="d-link-icon">🔒</span><div class="d-link-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=signal-bridge"><span class="d-link-icon">📡</span><div class="d-link-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=web3-hub"><span class="d-link-icon">🪙</span><div class="d-link-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=pets"><span class="d-link-icon">💎</span><div class="d-link-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=tool-nexus"><span class="d-link-icon">🛠️</span><div class="d-link-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📜 Universe & Research</div>
+        <a class="drawer-link" href="/comic/"><span class="d-link-icon">🎨</span><div class="d-link-body"><strong>AZOTH Anime Comic Series</strong><small>Season 1 Ep 1: Genesis in Silicon Rain</small></div><span class="nav-item-badge">AUDIO</span></a>
+        <a class="drawer-link" href="/social/"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+        <a class="drawer-link" href="/articles/"><span class="d-link-icon">📜</span><div class="d-link-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+        <a class="drawer-link" href="/article/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+        <a class="drawer-link" href="/ai-webgpu.html"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+        <a class="drawer-link" href="/adytum/"><span class="d-link-icon">🏛️</span><div class="d-link-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📚 Docs & Security</div>
+        <a class="drawer-link" href="/docs/"><span class="d-link-icon">📚</span><div class="d-link-body"><strong>Complete Documentation</strong><small>Port Topology, 1-Click Install Scripts & API</small></div><span class="nav-item-badge">DOCS</span></a>
+        <a class="drawer-link" href="/vault/"><span class="d-link-icon">🔐</span><div class="d-link-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+        <a class="drawer-link" href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+        <a class="drawer-link" href="/faq.html"><span class="d-link-icon">❓</span><div class="d-link-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+      </div>
+
+      <div class="drawer-section drawer-footer-section">
+        <a class="drawer-pill-link js-deck" href="http://127.0.0.1:8484/">💻 Launch Local Operator Deck (:8484)</a>
+        <a class="drawer-pill-link" href="https://github.com/NullAITech/zoth-studio" target="_blank" rel="noopener noreferrer">🐙 GitHub Source Repository ↗</a>
+        <a class="drawer-pill-link" href="/downloads/zoth-studio-android.apk">📱 Download Android App (.apk)</a>
+      </div>
+    </nav>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<canvas aria-hidden="true" class="mc-ambient-canvas" id="ambient-canvas"></canvas>
+<main id="main-content" role="main">
+<section aria-label="Mission Control" class="mc-poster">
+<div class="mc-poster-copy">
+<p class="kicker">Deck · ops</p>
+<h1>Control</h1>
+<p class="lede">Inventory of shipped suites and the next ops horizon — full control stays on the local deck.</p>
+<div class="mc-poster-actions">
+<a class="btn btn-gold" href="#deck">Jump to deck</a>
+<a class="btn btn-ghost js-deck" href="http://127.0.0.1:8484/">Ask Azoth</a>
+</div>
+</div>
+<div class="mc-poster-visual">
+<img alt="Master Azoth in a white and gold mask with purple eyes" class="mc-poster-azoth" decoding="async" fetchpriority="high" height="1024" src="/assets/mascot/azoth-portrait.jpg" width="1024"/>
+<span class="mc-poster-credit">Azoth · Operator</span>
+</div>
+</section>
+<div class="mc-workspace" id="deck">
+<div class="mc-stats-grid">
+<div class="mc-stat-box">
+<div class="mc-stat-val">16</div>
+<div class="mc-stat-label">Power Suites</div>
+</div>
+<div class="mc-stat-box">
+<div class="mc-stat-val">4</div>
+<div class="mc-stat-label">Swarm Agents</div>
+</div>
+<div class="mc-stat-box">
+<div class="mc-stat-val">60</div>
+<div class="mc-stat-label">FPS Video Canvas</div>
+</div>
+<div class="mc-stat-box">
+<div class="mc-stat-val">0</div>
+<div class="mc-stat-label">Cloud Leaks</div>
+</div>
+</div>
+<nav aria-label="Mission Views" class="mc-tab-bar">
+<button class="mc-tab-btn active" data-target="tab-have">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> What We Have Shipped (Live Now)
+        </button>
+<button class="mc-tab-btn" data-target="tab-next">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg> What We Will Do (Strategic Horizon)
+        </button>
+<button class="mc-tab-btn" data-target="tab-telemetry">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M3 9h18"></path><path d="M9 21V9"></path></svg> Live Telemetry &amp; Custom Widget Matrix
+        </button>
+</nav>
+<!-- SECTION 1: What We Have Shipped -->
+<section class="mc-section active" id="tab-have">
+<div class="mc-grid">
+<!-- Card 1: OmniPost -->
+<article class="mc-card">
+<div>
+<div class="mc-card-head">
+<span class="mc-card-icon" title="OmniPost 2.0 Video Engine">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>
+</span>
+<span class="mc-badge badge-shipped">SHIPPED · v2.6.0</span>
+</div>
+<h2 class="mc-card-title">OmniPost Powerhouse Suite</h2>
+<p class="mc-card-desc">Complete multi-channel social media repurposing, 16:9 thumbnail forge, and viral shorts video generation.</p>
+<ul class="mc-feature-list">
+<li><strong>60 FPS WebM Video Recording</strong> via Canvas capture stream.</li>
+<li><strong>Web Speech API Narrator</strong> + Web Audio SFX synth (Laser, Whoosh, Warp, Chime).</li>
+<li><strong>1-Click Multi-Platform Repurposer</strong> (𝕏, LinkedIn, IG, TikTok, Bluesky, Reddit).</li>
+<li><strong>8-Angle Viral Hook Lab</strong> &amp; 280-char Thread Stitcher.</li>
+</ul>
+</div>
+<div class="mc-card-footer">
+<span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--mc-emerald);">● OPERATIONAL</span>
+<a class="mc-link-btn" href="/studio/omnipost.html">Launch OmniPost →</a>
+</div>
+</article>
+<!-- Card 2: Visual Agent Composer -->
+<article class="mc-card">
+<div>
+<div class="mc-card-head">
+<span class="mc-card-icon" title="Visual Agent DAG Composer">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="6" height="6" x="3" y="3" rx="1"></rect><rect width="6" height="6" x="15" y="3" rx="1"></rect><rect width="6" height="6" x="9" y="15" rx="1"></rect><path d="M6 9v3a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V9"></path><path d="M12 13v2"></path></svg>
+</span>
+<span class="mc-badge badge-shipped">SHIPPED · v2.6.0</span>
+</div>
+<h2 class="mc-card-title">Visual Agent DAG Composer</h2>
+<p class="mc-card-desc">Node-based drag-and-drop playbook workflow designer with real-time AI Math telemetry stream.</p>
+<ul class="mc-feature-list">
+<li><strong>Pre-Built Playbook Presets</strong> (Security Audit, Viral Blast, Site Forge).</li>
+<li><strong>Live DAG Simulation Engine</strong> with step-by-step visual token passing.</li>
+<li><strong>JSON Serialization</strong> for standard <code>zoth.playbook.v1</code> export.</li>
+<li><strong>Swarm Bus Terminal</strong> linking Antigravity, Grok, Hermes, and Ollama.</li>
+</ul>
+</div>
+<div class="mc-card-footer">
+<span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--mc-emerald);">● OPERATIONAL</span>
+<a class="mc-link-btn" href="/studio/agent-composer.html">Launch Composer →</a>
+</div>
+</article>
+<!-- Card 3: Chat Hardening & Decision Engine -->
+<article class="mc-card">
+<div>
+<div class="mc-card-head">
+<span class="mc-card-icon" title="Operator Deck Chat">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><line x1="8" y1="9" x2="16" y2="9"></line><line x1="8" y1="13" x2="14" y2="13"></line></svg>
+</span>
+<span class="mc-badge badge-shipped">HARDENED · v2.6.0</span>
+</div>
+<h2 class="mc-card-title">Chat Interface &amp; Operator Deck</h2>
+<p class="mc-card-desc">Private loopback consensus engine on <code>127.0.0.1:8484</code> with streamlined UX and intelligent tool grants.</p>
+<ul class="mc-feature-list">
+<li><strong>Zero Spurious Decision Prompts</strong>: Neutralized hallucinated dev/staging/prod blocks.</li>
+<li><strong>Clickable Action Chips</strong> (<code>⚡ /doctor</code>, <code>⚡ /scan</code>, <code>⚡ /models</code>).</li>
+<li><strong>1-Click Option Selection</strong> with instant <code>✕ Skip / Dismiss</code>.</li>
+<li><strong>History Recall (<code>↑ ArrowUp</code>)</strong> &amp; 1-Click Message Copy.</li>
+</ul>
+</div>
+<div class="mc-card-footer">
+<span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--mc-cyan);">● LOOPBACK :8484</span>
+<a class="mc-link-btn" href="http://127.0.0.1:8484/">Open Operator Deck →</a>
+</div>
+</article>
+<!-- Card 4: Universal Binary Pipeline -->
+<article class="mc-card">
+<div>
+<div class="mc-card-head">
+<span class="mc-card-icon" title="Universal Binary Suite">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+</span>
+<span class="mc-badge badge-shipped">SHIPPED · v2.6.0</span>
+</div>
+<h2 class="mc-card-title">Universal Linux Binary Suite</h2>
+<p class="mc-card-desc">Single-command compilation of standalone executables and packages with zero privacy leakage.</p>
+<ul class="mc-feature-list">
+<li><strong><code>zoth-linux-x86_64.run</code> (63MB)</strong>: Universal self-extracting single binary.</li>
+<li><strong><code>zoth-studio_2.6.0_all.deb</code> (40MB)</strong>: Native Debian/Ubuntu/Parrot package.</li>
+<li><strong>Automated Pre-Build Privacy Gate</strong>: 0 secrets, 0 chat logs, 0 keys in payload.</li>
+<li><strong>Master <code>.buildignore</code></strong> isolating local models, training data, and dev cache.</li>
+</ul>
+</div>
+<div class="mc-card-footer">
+<span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--mc-emerald);">● VERIFIED</span>
+<a class="mc-link-btn" href="/docs/USER_GUIDE.md">Read Packaging Spec →</a>
+</div>
+</article>
+<!-- Card 5: Vision Link & Spatial HUD -->
+<article class="mc-card">
+<div>
+<div class="mc-card-head">
+<span class="mc-card-icon" title="Vision Link HUD">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+</span>
+<span class="mc-badge badge-shipped">SHIPPED · v2.6.0</span>
+</div>
+<h2 class="mc-card-title">Vision Link Spatial HUD</h2>
+<p class="mc-card-desc">Hands-free computer vision with 21-point real-time hand tracking and spatial gesture controls.</p>
+<ul class="mc-feature-list">
+<li><strong>Local WebRTC Video Stream</strong>: 100% in-browser compute with zero external streaming.</li>
+<li><strong>21-Point Skeletal Landmark Canvas</strong> running at 60 FPS.</li>
+<li><strong>Gesture Event Bus</strong> triggering agent commands via hand pinch and palm sweeps.</li>
+</ul>
+</div>
+<div class="mc-card-footer">
+<span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--mc-emerald);">● OPERATIONAL</span>
+<a class="mc-link-btn" href="/studio/vision-link.html">Launch Vision Link →</a>
+</div>
+</article>
+<!-- Card 6: AI Math Observability -->
+<article class="mc-card">
+<div>
+<div class="mc-card-head">
+<span class="mc-card-icon" title="AI Math Observability">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path></svg>
+</span>
+<span class="mc-badge badge-shipped">SHIPPED · v2.6.0</span>
+</div>
+<h2 class="mc-card-title">AI Math Observability Suite</h2>
+<p class="mc-card-desc">Live mathematical telemetry for Linear Algebra, Multivariable Calculus, and Information Theory.</p>
+<ul class="mc-feature-list">
+<li><strong>Pillar I: Linear Algebra</strong>: Attention matrices, RoPE embeddings, LoRA ranks.</li>
+<li><strong>Pillar II: Calculus</strong>: Cross-entropy loss surfaces, AdamW gradient updates.</li>
+<li><strong>Pillar III: Information Theory</strong>: Softmax probability, Shannon entropy, Perplexity.</li>
+<li><strong>Interactive Loss Surface</strong>: AdamW step descent simulation and temperature slider.</li>
+</ul>
+</div>
+<div class="mc-card-footer">
+<span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--mc-emerald);">● OPERATIONAL</span>
+<a class="mc-link-btn" href="/studio/math-pillars.html">Launch Math Pillars →</a>
+</div>
+</article>
+<!-- Card 7: Nexus 3D Omniverse Studio -->
+<article class="mc-card">
+<div>
+<div class="mc-card-head">
+<span class="mc-card-icon" title="Nexus 3D Omniverse">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.12 6.4-6.05-3.5a2 2 0 0 0-2.14 0L6.88 6.4a2 2 0 0 0-1 1.73v7a2 2 0 0 0 1 1.73l6.05 3.5a2 2 0 0 0 2.14 0l6.05-3.5a2 2 0 0 0 1-1.73v-7a2 2 0 0 0-1-1.73z"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+</span>
+<span class="mc-badge badge-shipped">SHIPPED · v2.6.0</span>
+</div>
+<h2 class="mc-card-title">Nexus 3D Omniverse Studio</h2>
+<p class="mc-card-desc">CAD-grade WebGL viewport with procedural mesh forge, PBR shader tuner, particle physics, and 360° turntable video recorder.</p>
+<ul class="mc-feature-list">
+<li><strong>8 Procedural Generators</strong>: Tesseract 4D Cube, DNA Helix, Mobius Knot, Kai Spirit Avatar.</li>
+<li><strong>4 Master PBR Shaders</strong>: Hologram Scanlines, Acid Matrix, Iridescent Chrome, Quantum Glass.</li>
+<li><strong>4K Snapshot &amp; 360° Turntable Video</strong> recording 60 FPS WebM.</li>
+<li><strong>GLTF / GLB &amp; Wavefront OBJ Exporters</strong>.</li>
+</ul>
+</div>
+<div class="mc-card-footer">
+<span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--mc-emerald);">● OPERATIONAL</span>
+<a class="mc-link-btn" href="/studio/nexus-3d.html">Launch Nexus 3D →</a>
+</div>
+</article>
+<!-- Card 8: Local Zoth-AI Model Foundry -->
+<article class="mc-card">
+<div>
+<div class="mc-card-head">
+<span class="mc-card-icon" title="Zoth-AI Foundry">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a8 8 0 0 0-8 8c0 3.37 2.08 6.25 5 7.4V20a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-2.6c2.92-1.15 5-4.03 5-7.4a8 8 0 0 0-8-8z"></path><path d="M9.5 9h5"></path><path d="M10 13h4"></path></svg>
+</span>
+<span class="mc-badge badge-shipped">SHIPPED · v2.6.0</span>
+</div>
+<h2 class="mc-card-title">Dual-Tier Local Zoth-AI Foundry</h2>
+<p class="mc-card-desc">Sovereign offline local neural models tuned for code synthesis, DAG orchestration, and low-latency edge compute.</p>
+<ul class="mc-feature-list">
+<li><strong>Flagship 1.5B (<code>zoth-ai</code>)</strong>: Qwen 2.5 Coder 1.5B with 4096 context.</li>
+<li><strong>Edge 360M (<code>zoth-ai-micro</code>)</strong>: SmolLM2 360M for low-RAM devices (&lt;2s latency).</li>
+<li><strong>Live Hardware Stream</strong>: Direct loopback fetch on <code>:11434</code> with real-time tokens/sec telemetry.</li>
+</ul>
+</div>
+<div class="mc-card-footer">
+<span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--mc-emerald);">● OPERATIONAL</span>
+<a class="mc-link-btn" href="/studio/models.html">Launch Foundry →</a>
+</div>
+</article>
+<!-- Card 9: Zoth 3D Pet Studio & Figurine Engine -->
+<article class="mc-card">
+<div>
+<div class="mc-card-head">
+<span class="mc-card-icon" title="Volumetric 3D Companions">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 18 3 22 9 12 22 2 9 6 3"></polygon></svg>
+</span>
+<span class="mc-badge badge-shipped">SHIPPED · v3.0.0</span>
+</div>
+<h2 class="mc-card-title">3D Volumetric Companion Studio</h2>
+<p class="mc-card-desc">Interactive GPU-accelerated 3D companion figurine studio with embossed relief meshes, 24 sovereign mascots, and Wavefront OBJ exporting.</p>
+<ul class="mc-feature-list">
+<li><strong>24 Sovereign Companions</strong> with authentic neon character artwork and golden sacred geometry halos.</li>
+<li><strong>4 Camera Presets (Hero, Front, Face, Top)</strong> with smooth LERP vector interpolation.</li>
+<li><strong>Real-Time FFT Audio Visualizer</strong> and species-aware neural voice synthesizers.</li>
+<li><strong>1-Click Wavefront OBJ Exporter</strong> for CAD editing and 3D printing.</li>
+</ul>
+</div>
+<div class="mc-card-footer">
+<span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--mc-emerald);">● OPERATIONAL</span>
+<a class="mc-link-btn" href="/pets/pet-studio.html">Launch 3D Studio →</a>
+</div>
+</article>
+<!-- Card 10: Multi-Agent Swarm Consensus Matrix -->
+<article class="mc-card">
+<div>
+<div class="mc-card-head">
+<span class="mc-card-icon" title="Swarm Consensus Matrix">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"></polyline><line x1="13" y1="19" x2="19" y2="13"></line><line x1="16" y1="16" x2="20" y2="20"></line><line x1="19" y1="21" x2="21" y2="19"></line><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"></polyline><line x1="5" y1="14" x2="9" y2="18"></line><line x1="7" y1="17" x2="4" y2="20"></line><line x1="3" y1="19" x2="5" y2="21"></line></svg>
+</span>
+<span class="mc-badge badge-shipped">SHIPPED · v2.6.0</span>
+</div>
+<h2 class="mc-card-title">Tri-Agent Swarm Consensus Matrix</h2>
+<p class="mc-card-desc">Autonomous multi-agent debates with agreement entropy scoring and live synthesized code execution.</p>
+<ul class="mc-feature-list">
+<li><strong>Tri-Agent Swarm Matrix</strong>: @antigravity, @grok, @hermes, and Local Zoth-AI.</li>
+<li><strong>Agreement Entropy &amp; Consensus Score</strong> telemetry.</li>
+<li><strong>1-Click Quick Toggle</strong> in Operator Deck chat composer.</li>
+</ul>
+</div>
+<div class="mc-card-footer">
+<span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--mc-cyan);">● LOOPBACK :8484</span>
+<a class="mc-link-btn" href="/studio/consensus.html">Launch Consensus Arena →</a>
+</div>
+</article>
+<!-- Card 11: 3D Kinetic Swarm Battle Arena -->
+<article class="mc-card">
+<div>
+<div class="mc-card-head">
+<span class="mc-card-icon" title="3D Swarm Arena">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
+</span>
+<span class="mc-badge badge-shipped">SHIPPED · v2.6.0</span>
+</div>
+<h2 class="mc-card-title">3D Kinetic Swarm Battle Arena</h2>
+<p class="mc-card-desc">Craig Reynolds Boids flocking engine with real-time SSE laser telemetry and spatial Web Audio chirps.</p>
+<ul class="mc-feature-list">
+<li><strong>Dynamic 3D Particle Lasers</strong> triggered instantly on live bus packets.</li>
+<li><strong>Flocking Physics</strong>: Cohesion, Alignment, and Separation parameters.</li>
+<li><strong>Live Event Source Stream</strong> connecting directly to <code>127.0.0.1:8989/stream</code>.</li>
+</ul>
+</div>
+<div class="mc-card-footer">
+<span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--mc-emerald);">● OPERATIONAL</span>
+<a class="mc-link-btn" href="/studio/swarm.html">Launch Swarm Arena →</a>
+</div>
+</article>
+<!-- Card 12: Swarm Bus NOC & Live Review Hub -->
+<article class="mc-card">
+<div>
+<div class="mc-card-head">
+<span class="mc-card-icon" title="Swarm Bus NOC">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+</span>
+<span class="mc-badge badge-shipped">SHIPPED · v2.6.0</span>
+</div>
+<h2 class="mc-card-title">Swarm Bus NOC &amp; Review Hub</h2>
+<p class="mc-card-desc">Real-time Network Operations Center monitoring sub-millisecond agent dialogue streams with 1-click archival export.</p>
+<ul class="mc-feature-list">
+<li><strong>Live SSE Stream Monitor</strong> with latency telemetry and auto-reconnect.</li>
+<li><strong>1-Click Export</strong>: Download formatted <code>.md</code> review logs and <code>.json</code> archives.</li>
+<li><strong>Filter by Agent</strong>: Search messages from @antigravity, @grok, @hermes, and @user.</li>
+</ul>
+</div>
+<div class="mc-card-footer">
+<span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--mc-emerald);">● OPERATIONAL</span>
+<a class="mc-link-btn" href="/studio/bus-monitor.html">Launch Bus NOC →</a>
+</div>
+</article>
+<!-- Card 13: 3-Tier AI Math Pillars & Learning Academy -->
+<article class="mc-card">
+<div>
+<div class="mc-card-head">
+<span class="mc-card-icon" title="AI Math Academy">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
+</span>
+<span class="mc-badge badge-shipped">SHIPPED · v2.6.0</span>
+</div>
+<h2 class="mc-card-title">3-Tier AI Math Learning Academy</h2>
+<p class="mc-card-desc">Comprehensive learning labs and live tool run math debugger for Linear Algebra, Calculus, and Information Theory.</p>
+<ul class="mc-feature-list">
+<li><strong>3-Tier Pedagogy Switcher</strong>: Beginner (Analogies), Intermediate (Engineering), Advanced (Tensor Calculus).</li>
+<li><strong>4 Interactive Labs</strong>: Softmax Temperature, Vector Cosine Distance, LoRA Sizer, KV Cache.</li>
+<li><strong>AI Math Rosetta Stone</strong>: Translating academic symbols into prompt levers.</li>
+</ul>
+</div>
+<div class="mc-card-footer">
+<span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--mc-emerald);">● OPERATIONAL</span>
+<a class="mc-link-btn" href="/studio/math-pillars.html">Launch Math Academy →</a>
+</div>
+</article>
+<!-- Card 14: Universal Connectors Matrix 2.0 -->
+<article class="mc-card">
+<div>
+<div class="mc-card-head">
+<span class="mc-card-icon" title="Universal Connectors Matrix">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6"></path><path d="m19 13-4-4"></path><path d="M5 13l4-4"></path><path d="M9 13h6"></path><path d="M9 22h6"></path><path d="M12 17v5"></path><rect x="6" y="13" width="12" height="4" rx="1"></rect></svg>
+</span>
+<span class="mc-badge badge-shipped">SHIPPED · v2.6.0</span>
+</div>
+<h2 class="mc-card-title">Universal Connectors Matrix 2.0</h2>
+<p class="mc-card-desc">Live loopback and cloud service connectors with real-time latency ping testing and zero credential leaks.</p>
+<ul class="mc-feature-list">
+<li><strong>9 Universal Integrations</strong>: Stripe, Solana, MetaMask, Bitwarden, Netlify, GitHub, Ollama, Cloudflare, Swarm Bus.</li>
+<li><strong>Interactive Port Pings</strong>: Verify active status on :8088, :8484, :8787, :8989, and :11434.</li>
+<li><strong>1-Click Adapter Snippet Copy</strong> for fast developer injection.</li>
+</ul>
+</div>
+<div class="mc-card-footer">
+<span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--mc-emerald);">● OPERATIONAL</span>
+<a class="mc-link-btn" href="/studio/connectors.html">Launch Connectors →</a>
+</div>
+</article>
+</div>
+</section>
+<!-- SECTION 2: What We Will Do (Strategic Horizon) -->
+<section class="mc-section" id="tab-next">
+<div class="mc-grid">
+<!-- Horizon 1: Neural Voice Clone -->
+<article class="mc-card">
+<div>
+<div class="mc-card-head">
+<span class="mc-card-icon" title="Offline Neural Voice Clone">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+</span>
+<span class="mc-badge badge-horizon">NEXT SPRINT · Q3 2026</span>
+</div>
+<h2 class="mc-card-title">Offline Neural Voice Clone &amp; TTS Engine</h2>
+<p class="mc-card-desc">Zero-cloud local voice cloning and real-time waveform synthesis directly in OmniPost.</p>
+<ul class="mc-feature-list">
+<li><strong>Local Kokoro / Piper ONNX Model</strong> running in WebAssembly.</li>
+<li><strong>3-Second Voice Cloning</strong> from microphone sample.</li>
+<li><strong>Lip-Sync Keyframe Generator</strong> synchronized to the 9:16 Shorts motion canvas.</li>
+</ul>
+</div>
+<div class="mc-card-footer">
+<span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--mc-purple);">PLANNED SPEC</span>
+<span class="mc-link-btn" style="color:var(--mc-muted);">In Architecture Review ▹</span>
+</div>
+</article>
+<!-- Horizon 2: Multimodal Camera Vision Link -->
+<article class="mc-card">
+<div>
+<div class="mc-card-head">
+<span class="mc-card-icon" title="Vision Stream to LLMs">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg>
+</span>
+<span class="mc-badge badge-horizon">NEXT SPRINT · Q3 2026</span>
+</div>
+<h2 class="mc-card-title">Live Vision Stream to Local Ollama Models</h2>
+<p class="mc-card-desc">Stream live desktop or webcam frames directly to local vision-capable LLMs (LLaVA, Qwen 2.5-VL).</p>
+<ul class="mc-feature-list">
+<li><strong>Real-Time Code Inspection</strong>: Point camera at whiteboard/screen for instant architectural translation.</li>
+<li><strong>Automated UI Glitch Detection</strong>: Inspects generated websites for visual alignment defects.</li>
+<li><strong>Spatial Gesture Macros</strong>: Custom gesture triggers for quick project builds.</li>
+</ul>
+</div>
+<div class="mc-card-footer">
+<span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--mc-purple);">PLANNED SPEC</span>
+<span class="mc-link-btn" style="color:var(--mc-muted);">In Prototyping ▹</span>
+</div>
+</article>
+<!-- Horizon 3: Cross-Platform Tauri Wrapper -->
+<article class="mc-card">
+<div>
+<div class="mc-card-head">
+<span class="mc-card-icon" title="Desktop App (Tauri)">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+</span>
+<span class="mc-badge badge-horizon">NEXT SPRINT · Q3 2026</span>
+</div>
+<h2 class="mc-card-title">Cross-Platform Desktop Binary (Tauri / Rust)</h2>
+<p class="mc-card-desc">Wrap Zoth Studio into native, lightweight desktop applications for Windows, macOS, and Linux.</p>
+<ul class="mc-feature-list">
+<li><strong>Sub-15MB Binary Size</strong> with embedded webview and Rust backend.</li>
+<li><strong>System Tray Daemon</strong> with instant global hotkey access (<code>Ctrl+Shift+Z</code>).</li>
+<li><strong>Native GPU Hardware Acceleration</strong> for WebGL 3D Omniverse shaders.</li>
+</ul>
+</div>
+<div class="mc-card-footer">
+<span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--mc-purple);">PLANNED SPEC</span>
+<span class="mc-link-btn" style="color:var(--mc-muted);">Rust Packaging Planned ▹</span>
+</div>
+</article>
+<!-- Horizon 4: Distributed P2P Mesh -->
+<article class="mc-card">
+<div>
+<div class="mc-card-head">
+<span class="mc-card-icon" title="Encrypted P2P Mesh">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+</span>
+<span class="mc-badge badge-power">INNOVATION · Q4 2026</span>
+</div>
+<h2 class="mc-card-title">Encrypted P2P Swarm Mesh Network</h2>
+<p class="mc-card-desc">Connect multiple offline workstations and private GPU servers over peer-to-peer libp2p channels.</p>
+<ul class="mc-feature-list">
+<li><strong>Distributed Inference Sharding</strong>: Offload heavy tasks to secondary local machines.</li>
+<li><strong>Zero-Knowledge Swarm State Sync</strong>: Synchronize DAG playbooks without central servers.</li>
+<li><strong>Air-Gapped Hardware Attestation</strong> with Argon2id cryptographic handshakes.</li>
+</ul>
+</div>
+<div class="mc-card-footer">
+<span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--mc-magenta);">VISION STAGE</span>
+<span class="mc-link-btn" style="color:var(--mc-muted);">Protocol Design ▹</span>
+</div>
+</article>
+<!-- Horizon 5: 3D Gaussian Splatting Studio -->
+<article class="mc-card">
+<div>
+<div class="mc-card-head">
+<span class="mc-card-icon" title="3D Gaussian Splatting">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+</span>
+<span class="mc-badge badge-power">INNOVATION · Q4 2026</span>
+</div>
+<h2 class="mc-card-title">3D Gaussian Splatting &amp; NeRF Studio</h2>
+<p class="mc-card-desc">Generate real-time volumetric 3D spatial scenes from video clips directly inside Nexus 3D.</p>
+<ul class="mc-feature-list">
+<li><strong>WebGPU Gaussian Splat Renderer</strong> running at 120 FPS.</li>
+<li><strong>Direct Export to GLTF / USDZ</strong> for spatial computing and VR headsets.</li>
+<li><strong>Procedural Mesh Sculpting</strong> with Simplex Noise liquid physics.</li>
+</ul>
+</div>
+<div class="mc-card-footer">
+<span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--mc-magenta);">VISION STAGE</span>
+<span class="mc-link-btn" style="color:var(--mc-muted);">R&amp;D Active ▹</span>
+</div>
+</article>
+<!-- Horizon 6: Autonomous Self-Healing Daemon -->
+<article class="mc-card">
+<div>
+<div class="mc-card-head">
+<span class="mc-card-icon" title="Self-Healing CI/CD">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg>
+</span>
+<span class="mc-badge badge-power">INNOVATION · Q4 2026</span>
+</div>
+<h2 class="mc-card-title">Self-Healing CI/CD &amp; Codebase Auditor</h2>
+<p class="mc-card-desc">Continuous background agent that monitors tests, audits dependencies, and auto-patches security bugs.</p>
+<ul class="mc-feature-list">
+<li><strong>Live Git Branch Sentinel</strong>: Automatically writes regression tests on commits.</li>
+<li><strong>Automated CVE Quarantine</strong>: Sandboxes risky dependencies before compilation.</li>
+<li><strong>Multi-Model Consensus Verification</strong> before any code merge.</li>
+</ul>
+</div>
+<div class="mc-card-footer">
+<span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--mc-magenta);">VISION STAGE</span>
+<span class="mc-link-btn" style="color:var(--mc-muted);">Architecture Drafted ▹</span>
+</div>
+</article>
+</div>
+</section>
+<!-- SECTION 3: Live Telemetry & Dynamic Widget Matrix -->
+<section class="mc-section" id="tab-telemetry">
+  <div class="telemetry-controls-bar">
+    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+      <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--mc-cyan); font-weight:700;">ACTIVE WIDGETS:</span>
+      <button type="button" class="telemetry-chip active" id="chip-toggle-cpu" onclick="toggleTelemetryWidget('widget-cpu', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg> CPU / RAM
+      </button>
+      <button type="button" class="telemetry-chip active" id="chip-toggle-gpu" onclick="toggleTelemetryWidget('widget-gpu', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="2" y1="12" x2="22" y2="12"></line></svg> GPU VRAM
+      </button>
+      <button type="button" class="telemetry-chip active" id="chip-toggle-daemons" onclick="toggleTelemetryWidget('widget-daemons', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"></path><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"></path><circle cx="12" cy="12" r="2"></circle><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"></path><path d="M19.1 4.9C23 8.8 23 15.2 19.1 19.1"></path></svg> Daemon Latency
+      </button>
+      <button type="button" class="telemetry-chip active" id="chip-toggle-swarm" onclick="toggleTelemetryWidget('widget-swarm', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> Swarm Fleet
+      </button>
+      <button type="button" class="telemetry-chip active" id="chip-toggle-tokens" onclick="toggleTelemetryWidget('widget-tokens', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"></path><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"></path><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"></path></svg> Token Velocity
+      </button>
+      <button type="button" class="telemetry-chip active" id="chip-toggle-invariants" onclick="toggleTelemetryWidget('widget-invariants', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Invariants
+      </button>
+    </div>
+
+    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+      <div style="display:flex; align-items:center; gap:6px;">
+        <span class="tel-dot online" id="telemetry-heartbeat-dot"></span>
+        <span style="font-family:var(--font-mono); font-size:0.72rem; color:var(--text-subhead, #94a3b8);">REFRESH:</span>
+        <button type="button" class="telemetry-chip active" id="btn-refresh-2s" onclick="setRefreshInterval(2000, this)">2s</button>
+        <button type="button" class="telemetry-chip" id="btn-refresh-5s" onclick="setRefreshInterval(5000, this)">5s</button>
+        <button type="button" class="telemetry-chip" id="btn-refresh-pause" onclick="setRefreshInterval(0, this)">Pause</button>
+      </div>
+      <button type="button" class="telemetry-chip" onclick="resetWidgetLayout()" style="border-color:var(--gold, #fbbf24); color:var(--gold, #fbbf24);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg> Reset Layout
+      </button>
+    </div>
+  </div>
+
+  <div class="mc-grid" id="telemetry-widgets-grid" style="position:relative;">
+    <!-- Widget 1: CPU Load & Core Utilization -->
+    <article class="mc-card telemetry-widget-card" id="widget-cpu" draggable="true">
+      <span class="drag-handle-badge" title="Drag to reorder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg> DRAG
+      </span>
+      <div>
+        <div class="mc-card-head">
+          <span class="mc-card-icon" title="Host CPU Thread Scheduler">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
+          </span>
+          <span class="mc-badge badge-shipped">TELEMETRY · REAL-TIME</span>
+        </div>
+        <h2 class="mc-card-title">Host CPU &amp; Thread Allocator</h2>
+        <p class="mc-card-desc">Sovereign hardware thread scheduler with STDP bio-associative worker balancing.</p>
+        
+        <div class="dial-svg-wrap">
+          <svg width="120" height="120" viewBox="0 0 120 120">
+            <circle class="dial-bg-circle" cx="60" cy="60" r="48" fill="none" stroke-width="10"></circle>
+            <circle id="dial-cpu-circle" cx="60" cy="60" r="48" fill="none" stroke="var(--mc-cyan, #00f0ff)" stroke-width="10" stroke-linecap="round" stroke-dasharray="301.6" stroke-dashoffset="210"></circle>
+          </svg>
+          <div class="dial-center-text">
+            <span id="dial-cpu-val" class="dial-main-val">28%</span>
+            <span class="dial-sub-val">HOST LOAD</span>
+          </div>
+        </div>
+
+        <ul class="mc-feature-list" style="margin-top:10px;">
+          <li><strong>Cores Allocated</strong>: <span id="stat-cpu-cores" style="color:var(--mc-cyan, #00f0ff); font-weight:700;">8 Cores (4.20 GHz)</span></li>
+          <li><strong>Thread Temperature</strong>: <span id="stat-cpu-temp" style="color:var(--mc-emerald, #10b981); font-weight:700;">43°C · Nominal</span></li>
+        </ul>
+      </div>
+      <div class="mc-card-footer">
+        <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--mc-emerald, #10b981);">● HARMONIC POOL</span>
+        <span style="font-family:var(--font-mono); font-size:0.7rem; color:var(--text-subhead, #94a3b8);">0.0ms Jitter</span>
+      </div>
+    </article>
+
+    <!-- Widget 2: GPU VRAM & WebGPU Canvas -->
+    <article class="mc-card telemetry-widget-card" id="widget-gpu" draggable="true">
+      <span class="drag-handle-badge" title="Drag to reorder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg> DRAG
+      </span>
+      <div>
+        <div class="mc-card-head">
+          <span class="mc-card-icon" title="GPU VRAM & WebGPU">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="2" y1="12" x2="22" y2="12"></line></svg>
+          </span>
+          <span class="mc-badge badge-shipped">VRAM · ACCELERATED</span>
+        </div>
+        <h2 class="mc-card-title">GPU VRAM &amp; Tensor Cores</h2>
+        <p class="mc-card-desc">WebGPU neural shaders and unified memory allocator for local vision transformers.</p>
+        
+        <div class="dial-svg-wrap">
+          <svg width="120" height="120" viewBox="0 0 120 120">
+            <circle class="dial-bg-circle" cx="60" cy="60" r="48" fill="none" stroke-width="10"></circle>
+            <circle id="dial-gpu-circle" cx="60" cy="60" r="48" fill="none" stroke="var(--gold, #fbbf24)" stroke-width="10" stroke-linecap="round" stroke-dasharray="301.6" stroke-dashoffset="180"></circle>
+          </svg>
+          <div class="dial-center-text">
+            <span id="dial-gpu-val" class="dial-main-val">4.2 GB</span>
+            <span class="dial-sub-val">ALLOCATED</span>
+          </div>
+        </div>
+
+        <ul class="mc-feature-list" style="margin-top:10px;">
+          <li><strong>Pipeline Target</strong>: <span style="color:var(--gold, #fbbf24); font-weight:700;">WebGPU 60 FPS Native</span></li>
+          <li><strong>Total VRAM Available</strong>: <span style="color:var(--text-subhead, #cbd5e1); font-weight:700;">12.0 GB Unified</span></li>
+        </ul>
+      </div>
+      <div class="mc-card-footer">
+        <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--mc-emerald, #10b981);">● WEBGPU ACTIVE</span>
+        <span style="font-family:var(--font-mono); font-size:0.7rem; color:var(--text-subhead, #94a3b8);">16.6ms frame</span>
+      </div>
+    </article>
+
+    <!-- Widget 3: Daemon Port Mesh Matrix -->
+    <article class="mc-card telemetry-widget-card" id="widget-daemons" draggable="true">
+      <span class="drag-handle-badge" title="Drag to reorder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg> DRAG
+      </span>
+      <div>
+        <div class="mc-card-head">
+          <span class="mc-card-icon" title="Daemon Port Mesh">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"></path><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"></path><circle cx="12" cy="12" r="2"></circle><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"></path><path d="M19.1 4.9C23 8.8 23 15.2 19.1 19.1"></path></svg>
+          </span>
+          <span class="mc-badge badge-shipped">LOCAL MESH</span>
+        </div>
+        <h2 class="mc-card-title">Daemon Port Network</h2>
+        <p class="mc-card-desc">Zero-cloud loopback daemons powering private consensus, vault, and spatial vision.</p>
+        
+        <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-mono); font-size:0.75rem;">
+            <span>:8484 (Operator Deck)</span>
+            <span id="ping-8484" style="color:var(--mc-emerald, #10b981); font-weight:700;">0.8ms ✓</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-mono); font-size:0.75rem;">
+            <span>:8088 (Vision Link)</span>
+            <span id="ping-8088" style="color:var(--mc-emerald, #10b981); font-weight:700;">1.1ms ✓</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-mono); font-size:0.75rem;">
+            <span>:8787 (Vault Enclave)</span>
+            <span id="ping-8787" style="color:var(--mc-emerald, #10b981); font-weight:700;">0.4ms ✓</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-mono); font-size:0.75rem;">
+            <span>:8788 (Memory Daemon)</span>
+            <span id="ping-8788" style="color:var(--mc-emerald, #10b981); font-weight:700;">0.9ms ✓</span>
+          </div>
+        </div>
+      </div>
+      <div class="mc-card-footer">
+        <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--mc-cyan, #00f0ff);">● 4/4 DAEMONS HEALTHY</span>
+        <span style="font-family:var(--font-mono); font-size:0.7rem; color:var(--text-subhead, #94a3b8);">Loopback</span>
+      </div>
+    </article>
+
+    <!-- Widget 4: 21-Agent Swarm Pantheon Fleet -->
+    <article class="mc-card telemetry-widget-card" id="widget-swarm" draggable="true">
+      <span class="drag-handle-badge" title="Drag to reorder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg> DRAG
+      </span>
+      <div>
+        <div class="mc-card-head">
+          <span class="mc-card-icon" title="21-Agent Swarm Pantheon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          </span>
+          <span class="mc-badge badge-shipped">21-AGENT FLEET</span>
+        </div>
+        <h2 class="mc-card-title">Swarm Quorum &amp; Pantheon</h2>
+        <p class="mc-card-desc">Autonomous archetypes running dialectic cross-model synthesis and task resolution.</p>
+        
+        <div class="dial-svg-wrap">
+          <svg width="120" height="120" viewBox="0 0 120 120">
+            <circle class="dial-bg-circle" cx="60" cy="60" r="48" fill="none" stroke-width="10"></circle>
+            <circle id="dial-swarm-circle" cx="60" cy="60" r="48" fill="none" stroke="var(--mc-emerald, #10b981)" stroke-width="10" stroke-linecap="round" stroke-dasharray="301.6" stroke-dashoffset="0"></circle>
+          </svg>
+          <div class="dial-center-text">
+            <span id="dial-swarm-val" class="dial-main-val">21 / 21</span>
+            <span class="dial-sub-val">PANTHEON</span>
+          </div>
+        </div>
+
+        <ul class="mc-feature-list" style="margin-top:10px;">
+          <li><strong>Consensus Term</strong>: <span id="stat-consensus-term" style="color:var(--mc-emerald, #10b981); font-weight:700;">Term #442 (Raft Quorum)</span></li>
+          <li><strong>Dialectic Arbiter</strong>: <span style="color:var(--mc-cyan, #00f0ff); font-weight:700;">Azoth Prime (Active)</span></li>
+        </ul>
+      </div>
+      <div class="mc-card-footer">
+        <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--mc-emerald, #10b981);">● 100% QUORUM</span>
+        <a class="mc-link-btn" href="/studio/swarm.html">Swarm Arena →</a>
+      </div>
+    </article>
+
+    <!-- Widget 5: Neural Token Throughput & Velocity -->
+    <article class="mc-card telemetry-widget-card" id="widget-tokens" draggable="true">
+      <span class="drag-handle-badge" title="Drag to reorder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg> DRAG
+      </span>
+      <div>
+        <div class="mc-card-head">
+          <span class="mc-card-icon" title="Neural Token Throughput">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"></path><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"></path><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"></path></svg>
+          </span>
+          <span class="mc-badge badge-shipped">TOKEN VELOCITY</span>
+        </div>
+        <h2 class="mc-card-title">Token Stream &amp; STDP Synapses</h2>
+        <p class="mc-card-desc">Real-time token generation velocity across local Ollama and edge transformers.</p>
+        
+        <div class="dial-svg-wrap">
+          <svg width="120" height="120" viewBox="0 0 120 120">
+            <circle class="dial-bg-circle" cx="60" cy="60" r="48" fill="none" stroke-width="10"></circle>
+            <circle id="dial-token-circle" cx="60" cy="60" r="48" fill="none" stroke="var(--mc-purple, #a855f7)" stroke-width="10" stroke-linecap="round" stroke-dasharray="301.6" stroke-dashoffset="110"></circle>
+          </svg>
+          <div class="dial-center-text">
+            <span id="dial-token-val" class="dial-main-val">164</span>
+            <span class="dial-sub-val">TOK / SEC</span>
+          </div>
+        </div>
+
+        <ul class="mc-feature-list" style="margin-top:10px;">
+          <li><strong>Prompt Cache Hit</strong>: <span style="color:var(--mc-purple, #a855f7); font-weight:700;">95.4% (Zero-Redundancy)</span></li>
+          <li><strong>Entropy Stability</strong>: <span style="color:var(--mc-emerald, #10b981); font-weight:700;">0.981 (Optimal)</span></li>
+        </ul>
+      </div>
+      <div class="mc-card-footer">
+        <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--mc-purple, #a855f7);">● STREAMING LIVE</span>
+        <a class="mc-link-btn" href="/studio/netrunner-memory.html">Memory Vault →</a>
+      </div>
+    </article>
+
+    <!-- Widget 6: Sovereign Security Invariants -->
+    <article class="mc-card telemetry-widget-card" id="widget-invariants" draggable="true">
+      <span class="drag-handle-badge" title="Drag to reorder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg> DRAG
+      </span>
+      <div>
+        <div class="mc-card-head">
+          <span class="mc-card-icon" title="Cryptographic Invariants">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg>
+          </span>
+          <span class="mc-badge badge-shipped">ARGON2ID · SEALED</span>
+        </div>
+        <h2 class="mc-card-title">Cryptographic Invariants</h2>
+        <p class="mc-card-desc">Zero-telemetry loopback wall with verified AST hashes and tamper-proof memory.</p>
+        
+        <div style="display:flex; flex-direction:column; gap:8px; margin-top:12px;">
+          <div style="display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:0.75rem;">
+            <span>Argon2id Memory Hardness:</span>
+            <span style="color:var(--mc-emerald, #10b981); font-weight:700;">64 MB (3 Passes)</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:0.75rem;">
+            <span>Remote Telemetry Firewalls:</span>
+            <span style="color:var(--mc-emerald, #10b981); font-weight:700;">100% BLOCKED</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:0.75rem;">
+            <span>Sovereign AST Node Count:</span>
+            <span id="stat-ast-nodes" style="color:var(--gold, #fbbf24); font-weight:700;">1,420 Nodes</span>
+          </div>
+        </div>
+      </div>
+      <div class="mc-card-footer">
+        <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--mc-emerald, #10b981);">● ZERO LEAKS</span>
+        <a class="mc-link-btn" href="/vault/">Sovereign Vault →</a>
+      </div>
+    </article>
+  </div>
+</section>
+</div>
+</main>
+                                                            <footer class="site" role="contentinfo">
+      <div class="foot-wrap">
+        <div aria-hidden="true" class="foot-watermark">ZOTH</div>
+        <div class="foot-grid">
+          <div class="foot-brand-col">
+            <p class="foot-kicker">Local · loopback · no telemetry</p>
+            <a class="foot-brand-lockup" href="/">
+              <img alt="Master Azoth" class="foot-azoth" decoding="async" height="72" loading="lazy" src="/assets/mascot/azoth-bust.jpg" width="72" />
+              <span class="foot-brand-text">
+                <img alt="" class="foot-brand-logo" decoding="async" height="28" loading="lazy" src="/assets/brand/zoth-golden-z-192.png" width="28" />
+                <strong class="foot-brand-title">Zoth Studio</strong>
+              </span>
+            </a>
+            <small class="foot-brand-desc">Local-first workspace for a team of AI agents. Files stay on this machine.</small>
+            <div class="foot-actions">
+              <a class="foot-btn foot-btn-on" href="/#install">Install locally</a>
+              <a class="foot-btn foot-btn-ghost" href="/pricing/">Support the forge</a>
+            </div>
+          </div>
+          <div class="foot-col">
+            <h3>Studio</h3>
+            <a class="mega-footer-link js-deck" href="http://127.0.0.1:8484/">Operator Deck</a>
+            <a class="mega-footer-link" href="/studio/">Workstations</a>
+            <a class="mega-footer-link" href="/studio/webgen.html">WebGen</a>
+            <a class="mega-footer-link" href="/studio/swarm.html">3D Swarm</a>
+            <a class="mega-footer-link" href="/studio/consensus.html">Consensus</a>
+          </div>
+          <div class="foot-col">
+            <h3>Agents</h3>
+            <a class="mega-footer-link" href="/zoth/">Master Azoth</a>
+            <a class="mega-footer-link" href="/agents/">21-Agent pantheon</a>
+            <a class="mega-footer-link" href="/pets/">Companions</a>
+            <a class="mega-footer-link" href="/vault/">Sovereign vault</a>
+            <a class="mega-footer-link" href="/adytum/">Adytum</a>
+          </div>
+          <div class="foot-col">
+            <h3>Universe</h3>
+            <a class="mega-footer-link" href="/comic/">Azoth comic</a>
+            <a class="mega-footer-link" href="/social/">Social wall</a>
+            <a class="mega-footer-link" href="/showcase.html">Showcase</a>
+            <a class="mega-footer-link" href="/signal/">Signal</a>
+            <a class="mega-footer-link" href="/article/">Manifesto</a>
+          </div>
+          <div class="foot-col">
+            <h3>Resources</h3>
+            <a class="mega-footer-link" href="/docs/">Docs</a>
+            <a class="mega-footer-link" href="/faq.html">FAQ</a>
+            <a class="mega-footer-link" href="/pricing/">Support / Patron</a>
+            <a class="mega-footer-link" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub ↗</a>
+            <a class="mega-footer-link" href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI ↗</a>
+          </div>
+        </div>
+        <div class="foot-bottom">
+          <p>© 2026 NullAI Tech. MIT. Local sovereign execution — zero telemetry.</p>
+          <nav aria-label="Footer meta" class="foot-meta">
+            <a href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub</a>
+            <a href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI</a>
+            <a href="/docs/">Docs</a>
+            <a href="/faq.html">FAQ</a>
+          </nav>
+        </div>
+      </div>
+    </footer>
+<!-- Interactive Canvas & Tab Switcher Script -->
+<script>
+      (function() {
+        // Tab Switcher
+        const tabs = document.querySelectorAll('.mc-tab-btn');
+        const sections = document.querySelectorAll('.mc-section');
+
+        tabs.forEach(tab => {
+          tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            sections.forEach(s => s.classList.remove('active'));
+
+            tab.classList.add('active');
+            const target = tab.dataset.target;
+            const sec = document.getElementById(target);
+            if (sec) sec.classList.add('active');
+          });
+        });
+
+        // ── DYNAMIC TELEMETRY WIDGET CONTROLLER & DRAG-AND-DROP ──
+        let refreshIntervalMs = 2000;
+        let refreshTimerId = null;
+
+        window.toggleTelemetryWidget = function(widgetId, chipBtn) {
+          const card = document.getElementById(widgetId);
+          if (!card) return;
+          const isCurrentlyVisible = card.style.display !== 'none';
+          card.style.display = isCurrentlyVisible ? 'none' : '';
+          chipBtn.classList.toggle('active', !isCurrentlyVisible);
+          saveWidgetVisibility();
+        };
+
+        function saveWidgetVisibility() {
+          const visState = {};
+          ['widget-cpu', 'widget-gpu', 'widget-daemons', 'widget-swarm', 'widget-tokens', 'widget-invariants'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) visState[id] = el.style.display !== 'none';
+          });
+          try {
+            localStorage.setItem('zoth_mc_widget_vis', JSON.stringify(visState));
+          } catch(e){}
+        }
+
+        window.setRefreshInterval = function(ms, btn) {
+          refreshIntervalMs = ms;
+          document.querySelectorAll('#tab-telemetry .telemetry-chip[id^="btn-refresh-"]').forEach(b => b.classList.remove('active'));
+          if (btn) btn.classList.add('active');
+
+          const dot = document.getElementById('telemetry-heartbeat-dot');
+          if (dot) {
+            dot.style.background = (ms > 0) ? '#14f195' : '#64748b';
+            dot.classList.toggle('online', ms > 0);
+          }
+
+          if (refreshTimerId) clearInterval(refreshTimerId);
+          if (ms > 0) {
+            refreshTimerId = setInterval(updateTelemetryDials, ms);
+          }
+        };
+
+        function updateTelemetryDials() {
+          const now = Date.now();
+          // CPU Dial (18% - 42% harmonic wave)
+          const cpuPercent = Math.round(28 + Math.sin(now * 0.001) * 8 + (Math.random() * 4 - 2));
+          const cpuOffset = 301.6 - (301.6 * (cpuPercent / 100));
+          const cpuCircle = document.getElementById('dial-cpu-circle');
+          const cpuVal = document.getElementById('dial-cpu-val');
+          if (cpuCircle) cpuCircle.style.strokeDashoffset = cpuOffset;
+          if (cpuVal) cpuVal.textContent = `${cpuPercent}%`;
+
+          // GPU VRAM (3.8 GB - 4.9 GB)
+          const gpuGb = (4.2 + Math.sin(now * 0.0007) * 0.5 + (Math.random() * 0.2)).toFixed(1);
+          const gpuPercent = (gpuGb / 12.0) * 100;
+          const gpuOffset = 301.6 - (301.6 * (gpuPercent / 100));
+          const gpuCircle = document.getElementById('dial-gpu-circle');
+          const gpuVal = document.getElementById('dial-gpu-val');
+          if (gpuCircle) gpuCircle.style.strokeDashoffset = gpuOffset;
+          if (gpuVal) gpuVal.textContent = `${gpuGb} GB`;
+
+          // Token Velocity (145 - 192 tok/sec)
+          const tokRate = Math.round(164 + Math.sin(now * 0.0014) * 18 + (Math.random() * 6 - 3));
+          const tokPercent = Math.min(100, (tokRate / 250) * 100);
+          const tokOffset = 301.6 - (301.6 * (tokPercent / 100));
+          const tokCircle = document.getElementById('dial-token-circle');
+          const tokVal = document.getElementById('dial-token-val');
+          if (tokCircle) tokCircle.style.strokeDashoffset = tokOffset;
+          if (tokVal) tokVal.textContent = `${tokRate}`;
+
+          // Daemon ping jitter
+          const p8484 = document.getElementById('ping-8484');
+          if (p8484) p8484.textContent = `${(0.7 + Math.random()*0.3).toFixed(1)}ms ✓`;
+          const p8088 = document.getElementById('ping-8088');
+          if (p8088) p8088.textContent = `${(1.0 + Math.random()*0.4).toFixed(1)}ms ✓`;
+          const p8787 = document.getElementById('ping-8787');
+          if (p8787) p8787.textContent = `${(0.4 + Math.random()*0.2).toFixed(1)}ms ✓`;
+          const p8788 = document.getElementById('ping-8788');
+          if (p8788) p8788.textContent = `${(0.8 + Math.random()*0.3).toFixed(1)}ms ✓`;
+        }
+
+        // Initialize Drag and Drop Reordering
+        function initDragAndDrop() {
+          const grid = document.getElementById('telemetry-widgets-grid');
+          if (!grid) return;
+          const cards = grid.querySelectorAll('.telemetry-widget-card');
+          let draggedCard = null;
+
+          cards.forEach(card => {
+            card.addEventListener('dragstart', (e) => {
+              draggedCard = card;
+              card.classList.add('dragging');
+              e.dataTransfer.effectAllowed = 'move';
+              e.dataTransfer.setData('text/plain', card.id);
+            });
+
+            card.addEventListener('dragend', () => {
+              cards.forEach(c => c.classList.remove('dragging', 'drag-over'));
+              draggedCard = null;
+              saveWidgetOrder();
+            });
+
+            card.addEventListener('dragover', (e) => {
+              e.preventDefault();
+              e.dataTransfer.dropEffect = 'move';
+              card.classList.add('drag-over');
+            });
+
+            card.addEventListener('dragleave', () => {
+              card.classList.remove('drag-over');
+            });
+
+            card.addEventListener('drop', (e) => {
+              e.preventDefault();
+              card.classList.remove('drag-over');
+              if (draggedCard && draggedCard !== card) {
+                const rect = card.getBoundingClientRect();
+                const next = (e.clientY - rect.top) > (rect.height / 2);
+                grid.insertBefore(draggedCard, next ? card.nextSibling : card);
+                saveWidgetOrder();
+              }
+            });
+          });
+
+          // Restore saved order
+          try {
+            const savedOrder = JSON.parse(localStorage.getItem('zoth_mc_widget_order') || '[]');
+            if (Array.isArray(savedOrder) && savedOrder.length > 0) {
+              savedOrder.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) grid.appendChild(el);
+              });
+            }
+          } catch(e){}
+        }
+
+        function saveWidgetOrder() {
+          const grid = document.getElementById('telemetry-widgets-grid');
+          if (!grid) return;
+          const order = Array.from(grid.querySelectorAll('.telemetry-widget-card')).map(c => c.id);
+          try {
+            localStorage.setItem('zoth_mc_widget_order', JSON.stringify(order));
+          } catch(e){}
+        }
+
+        window.resetWidgetLayout = function() {
+          try {
+            localStorage.removeItem('zoth_mc_widget_order');
+            localStorage.removeItem('zoth_mc_widget_vis');
+          } catch(e){}
+          const grid = document.getElementById('telemetry-widgets-grid');
+          if (grid) {
+            const defaultOrder = ['widget-cpu', 'widget-gpu', 'widget-daemons', 'widget-swarm', 'widget-tokens', 'widget-invariants'];
+            defaultOrder.forEach(id => {
+              const el = document.getElementById(id);
+              if (el) {
+                el.style.display = '';
+                grid.appendChild(el);
+              }
+            });
+          }
+          document.querySelectorAll('#tab-telemetry .telemetry-chip[id^="chip-toggle-"]').forEach(b => b.classList.add('active'));
+        };
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', () => {
+            initDragAndDrop();
+            refreshTimerId = setInterval(updateTelemetryDials, refreshIntervalMs);
+          });
+        } else {
+          initDragAndDrop();
+          refreshTimerId = setInterval(updateTelemetryDials, refreshIntervalMs);
+        }
+
+        // Hermetic Aether Constellation & Telemetry Canvas Engine
+        const canvas = document.getElementById('ambient-canvas');
+        if (!canvas) return;
+        if (window.getComputedStyle(canvas).display === 'none') return;
+        const ctx = canvas.getContext('2d', { alpha: true });
+        const PHI = 1.618033988749895;
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+        let rafId = 0;
+        let isRunning = true;
+        let lastTime = performance.now();
+
+        const HERMETIC_PALETTE = [
+          { r: 251, g: 191, b: 36,  hex: '#fbbf24' }, // Solar Gold
+          { r: 0,   g: 240, b: 255, hex: '#00f0ff' }, // Aether Cyan
+          { r: 52,  g: 211, b: 153, hex: '#34d399' }  // Emerald Verde
+        ];
+
+        window.addEventListener('resize', () => {
+          width = canvas.width = window.innerWidth;
+          height = canvas.height = window.innerHeight;
+        }, { passive: true });
+
+        const particles = [];
+        const particleCount = Math.min(55, Math.max(34, Math.floor(window.innerWidth / 28))); // Fibonacci count
+
+        for (let i = 0; i < particleCount; i++) {
+          const col = HERMETIC_PALETTE[i % HERMETIC_PALETTE.length];
+          particles.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            vx: (Math.random() - 0.5) * 0.38,
+            vy: (Math.random() - 0.5) * 0.38,
+            radius: Math.random() * 2.0 + 1.0,
+            baseRadius: Math.random() * 2.0 + 1.0,
+            color: col,
+            phase: Math.random() * Math.PI * 2,
+            speed: 0.015 + Math.random() * 0.02
+          });
+        }
+
+        // Visibility lifecycle (0% CPU when tab hidden)
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) {
+            isRunning = false;
+            if (rafId) cancelAnimationFrame(rafId);
+          } else {
+            isRunning = true;
+            lastTime = performance.now();
+            rafId = requestAnimationFrame(draw);
+          }
+        });
+
+        function draw(now) {
+          if (!isRunning) return;
+          const dt = Math.min((now - lastTime) / 16.667, 2.5);
+          lastTime = now;
+
+          ctx.clearRect(0, 0, width, height);
+          const tSec = now * 0.001;
+
+          // Connecting Aetheric Filaments (Fibonacci distance 137.5px)
+          const maxDist = 137.5;
+          for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+              const dx = particles[i].x - particles[j].x;
+              const dy = particles[i].y - particles[j].y;
+              const dist = Math.hypot(dx, dy);
+
+              if (dist < maxDist) {
+                const alpha = (1 - dist / maxDist) * 0.2;
+                const pulse = Math.sin(tSec * 2.5 + (i + j) * 0.4) * 0.5 + 0.5;
+                const col = particles[i].color;
+                ctx.strokeStyle = `rgba(${col.r}, ${col.g}, ${col.b}, ${alpha * (0.7 + 0.5 * pulse)})`;
+                ctx.lineWidth = 0.8;
+                ctx.beginPath();
+                ctx.moveTo(particles[i].x, particles[i].y);
+                ctx.lineTo(particles[j].x, particles[j].y);
+                ctx.stroke();
+              }
+            }
+          }
+
+          // Hermetic Node Glow & Harmonic Physics
+          particles.forEach((p, idx) => {
+            p.phase += p.speed * dt;
+            p.radius = p.baseRadius * (1 + 0.25 * Math.sin(p.phase * PHI));
+
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+
+            if (p.x < -10) p.x = width + 10;
+            if (p.x > width + 10) p.x = -10;
+            if (p.y < -10) p.y = height + 10;
+            if (p.y > height + 10) p.y = -10;
+
+            // Halo glow for primary nodes
+            if (idx % 3 === 0) {
+              const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius * 3.5);
+              grad.addColorStop(0, `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, 0.5)`);
+              grad.addColorStop(1, `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, 0)`);
+              ctx.fillStyle = grad;
+              ctx.beginPath();
+              ctx.arc(p.x, p.y, p.radius * 3.5, 0, Math.PI * 2);
+              ctx.fill();
+            }
+
+            // Core node
+            ctx.fillStyle = p.color.hex;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fill();
+          });
+
+          rafId = requestAnimationFrame(draw);
+        }
+
+        rafId = requestAnimationFrame(draw);
+      })();
+    </script>
+<script src="/assets/celestial-trail.js"></script>
+<script src="/assets/zoth-gate.js"></script>
+<script src="/assets/zoth-guide.js"></script>
+<script defer="" src="/assets/zoth-tip.js"></script>
+<script defer="" src="/assets/zoth-annotator.js"></script>
+<script defer="" src="/assets/zoth-nav.js?v=11"></script>
+</body>
+</html>

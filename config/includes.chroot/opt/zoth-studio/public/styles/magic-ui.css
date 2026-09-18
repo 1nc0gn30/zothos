@@ -1,0 +1,208 @@
+/* ═══════════════════════════════════════════════════════════════
+   MAGIC UI — PURE VANILLA CSS + JS ANIMATION & INTERACTION SYSTEM
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  --magic-cyan: #00f0ff;
+  --magic-magenta: #d946ef;
+  --magic-gold: #fbbf24;
+  --magic-violet: #8b5cf6;
+  --magic-border-glass: rgba(255, 255, 255, 0.08);
+}
+
+/* 1. Shimmer Button */
+.magic-shimmer-btn {
+  position: relative;
+  overflow: hidden;
+  background: rgba(10, 14, 26, 0.85);
+  border: 1px solid rgba(0, 240, 255, 0.4);
+  color: #fff;
+  font-family: var(--font-display, sans-serif);
+  font-weight: 700;
+  padding: 12px 24px;
+  border-radius: 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.15);
+  text-decoration: none;
+}
+.magic-shimmer-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.35), transparent);
+  transform: skewX(-20deg);
+  animation: magicShimmer 3.5s infinite linear;
+  pointer-events: none;
+}
+@keyframes magicShimmer {
+  0% { transform: translateX(-100%) skewX(-20deg); }
+  100% { transform: translateX(200%) skewX(-20deg); }
+}
+.magic-shimmer-btn:hover {
+  transform: translateY(-2px);
+  border-color: var(--magic-cyan);
+  box-shadow: 0 0 30px rgba(0, 240, 255, 0.4);
+  color: var(--magic-cyan);
+}
+
+/* 2. Border Beam Effect (Animated Rotating Conic Gradient) */
+.magic-border-beam {
+  position: relative;
+  background: rgba(10, 14, 26, 0.94);
+  border-radius: var(--radius, 18px);
+  padding: 1px;
+  overflow: hidden;
+  z-index: 1;
+}
+.magic-border-beam::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    transparent 0deg,
+    var(--magic-cyan) 60deg,
+    var(--magic-magenta) 120deg,
+    transparent 180deg
+  );
+  animation: magicBeamRotate 5s linear infinite;
+  z-index: -2;
+}
+.magic-border-beam::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  background: #05060a;
+  border-radius: inherit;
+  z-index: -1;
+}
+@keyframes magicBeamRotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 3. Meteor Shower Rain */
+.magic-meteors {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.magic-meteor {
+  position: absolute;
+  width: 2px;
+  height: 60px;
+  background: linear-gradient(to bottom, var(--magic-cyan), transparent);
+  transform: rotate(45deg);
+  opacity: 0.8;
+  animation: magicMeteorFall 4s linear infinite;
+}
+@keyframes magicMeteorFall {
+  0% {
+    top: -100px;
+    left: 80%;
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    left: -20%;
+    opacity: 0;
+  }
+}
+
+/* 4. Animated Bento Grid */
+.magic-bento-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 20px;
+  width: 100%;
+}
+.magic-bento-card {
+  position: relative;
+  background: rgba(14, 18, 34, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  text-align: left;
+}
+.magic-bento-card:hover {
+  border-color: rgba(0, 240, 255, 0.4);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 45px rgba(0, 240, 255, 0.12);
+}
+
+/* 5. Spotlight Glow on Mouse Movement */
+.magic-spotlight {
+  position: relative;
+  overflow: hidden;
+}
+.magic-spotlight::before {
+  content: "";
+  position: absolute;
+  top: var(--mouse-y, -1000px);
+  left: var(--mouse-x, -1000px);
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(0, 240, 255, 0.15) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.magic-spotlight:hover::before {
+  opacity: 1;
+}
+
+/* 6. Neon Badge Pulse */
+.magic-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: rgba(0, 240, 255, 0.08);
+  border: 1px solid rgba(0, 240, 255, 0.35);
+  color: var(--magic-cyan);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.2);
+}
+.magic-badge.pulse .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--magic-cyan);
+  box-shadow: 0 0 8px var(--magic-cyan);
+  animation: magicDotPulse 1.8s infinite ease-in-out;
+}
+@keyframes magicDotPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.6); opacity: 0.4; }
+}

@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hermes Powerhouse — Autonomous Agent Cockpit</title>
+  <meta name="description" content="A high-fidelity glassmorphic control center and multi-agent DAG workflow orchestrator for the Nous Research Hermes Agent platform." />
+  <link rel="stylesheet" href="/styles.css" />
+  <!-- Schema.org JSON-LD -->
+  <script type="application/ld+json">
+  [{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Agent Ax","applicationCategory":"WebApplication","operatingSystem":"Web","author":{"@type":"Person","name":"Zoth Studio Team","url":"https://nullai.tech"},"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},{"@context":"https://schema.org","@type":"Person","name":"Zoth Studio Team","jobTitle":"Full-Stack Developer","url":"https://nullai.tech","sameAs":["https://github.com/1nc0gn30"]},{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://nullai.tech/"},{"@type":"ListItem","position":2,"name":"Agent Ax","item":"https://nullai.tech/agent-ax"}]}]
+  </script>
+  <meta property="og:title" content="Agent Ax | Zoth Studio Team Tech" />
+  <meta property="og:description" content="Agent Ax - Built by Zoth Studio Team" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://nullai.tech/agent-ax" />
+  <meta property="og:site_name" content="Zoth Studio Team Tech" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@nullai" />
+  <meta name="author" content="Zoth Studio Team" />
+
+<link rel="stylesheet" href="/assets/zoth-theme.css?v=11">
+<link rel="stylesheet" href="/assets/zoth-nav.css?v=11">
+<script src="/assets/zoth-theme.js?v=11"></script>
+<script src="/assets/zoth-nav.js?v=11" defer></script>
+
+</head>
+<body data-theme="default">
+  <a href="#main-content" class="skip-link" style="position:absolute;top:-100%;left:16px;padding:12px 24px;background:#00f0ff;color:#000;font-weight:700;border-radius:0 0 8px 8px;z-index:9999;text-decoration:none;font-size:14px;transition:top 0.3s ease" onfocus="this.style.top='0'" onblur="this.style.top='-100%'">Skip to main content</a>
+
+  <!-- Animated Matrix Rain Canvas -->
+  <canvas id="hex-matrix-canvas" aria-hidden="true"></canvas>
+
+  <!-- CRT Scanline & Phosphor Overlay -->
+  <div id="crt-overlay" class="crt-overlay-layer" aria-hidden="true"></div>
+
+  <div class="app-layout" id="main-content">
+    <!-- Sidebar Navigation -->
+    <aside class="app-sidebar" role="navigation" aria-label="Main Navigation">
+      <div class="sidebar-header">
+        <h1>
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+          HERMES
+        </h1>
+        <p class="tagline">Neural Agent Cockpit</p>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-tab="telemetry" id="nav-telemetry" aria-label="System State Tab">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          System State
+        </button>
+
+        <button class="nav-item" data-tab="orchestrator" id="nav-orchestrator" aria-label="Workflow Orchestrator Tab">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="18" cy="5" r="3"></circle>
+            <circle cx="6" cy="12" r="3"></circle>
+            <circle cx="18" cy="19" r="3"></circle>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+          </svg>
+          DAG Orchestrator
+        </button>
+
+        <button class="nav-item" data-tab="skills" id="nav-skills" aria-label="Skills Explorer Tab">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+          </svg>
+          Skills Explorer
+        </button>
+
+        <button class="nav-item" data-tab="playground" id="nav-playground" aria-label="Chat Playground Tab">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+          Chat Playground
+        </button>
+
+        <button class="nav-item" data-tab="sessions" id="nav-sessions" aria-label="Session History Tab">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          Session History
+        </button>
+
+        <button class="nav-item" data-tab="apidocs" id="nav-apidocs" aria-label="API Documentation Tab">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
+          API Docs
+        </button>
+      </nav>
+
+      <!-- Sidebar Status Telemetry -->
+      <div class="sidebar-telemetry">
+        <div class="telemetry-row">
+          <span class="telemetry-label">Gateway</span>
+          <span class="status-indicator" id="status-indicator">
+            <span class="status-dot"></span>
+            <span id="status-text">ONLINE</span>
+          </span>
+        </div>
+        <div class="telemetry-row">
+          <span class="telemetry-label">PID</span>
+          <span class="telemetry-value" id="telemetry-pid">20458</span>
+        </div>
+        <div class="telemetry-row">
+          <span class="telemetry-label">Active Skills</span>
+          <span class="telemetry-value" id="telemetry-skills-count">24</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="app-content" role="main">
+      <!-- Dashboard Top Header Bar -->
+      <header class="dashboard-header">
+        <div class="dashboard-title">
+          <h2 id="current-tab-title">System State</h2>
+          <p id="current-tab-subtitle">Real-time gateway status, message rates, and telemetry.</p>
+        </div>
+        <div class="header-meta">
+          <select id="theme-selector" class="cyber-toggle-btn" aria-label="Select Cockpit Theme">
+            <option value="default">THEME: CYBER GLASS</option>
+            <option value="hacker">THEME: MATRIX GREEN</option>
+            <option value="inferno">THEME: INFERNO RED</option>
+            <option value="noir">THEME: NOIR MONO</option>
+          </select>
+
+          <button id="btn-toggle-crt" class="cyber-toggle-btn active" title="Toggle CRT scanline overlay">
+            CRT: ON
+          </button>
+          
+          <button id="btn-toggle-matrix" class="cyber-toggle-btn active" title="Toggle Hex Matrix background">
+            HEX: ON
+          </button>
+
+          <button id="btn-toggle-sfx" class="cyber-toggle-btn active" title="Toggle audio synthesizer sound effects">
+            SFX: ON
+          </button>
+
+          <button id="btn-self-heal" class="session-btn-load" style="border-color: var(--accent-primary); color: var(--accent-primary);">
+            Force Sync (Self-Heal)
+          </button>
+        </div>
+      </header>
+
+      <!-- TAB 1: SYSTEM STATE & TELEMETRY -->
+      <section id="tab-telemetry" class="tab-content active" role="region" aria-label="System Telemetry">
+        <div class="card-grid">
+          <div class="telemetry-card">
+            <h3>Gateway Status</h3>
+            <div class="card-value" id="card-gateway-status">Active</div>
+            <div class="card-trend" id="card-gateway-pid">PID: 20458</div>
+          </div>
+          <div class="telemetry-card">
+            <h3>Total Sessions</h3>
+            <div class="card-value" id="card-total-sessions">142</div>
+            <div class="card-trend" id="card-session-trend">Saved in State DB</div>
+          </div>
+          <div class="telemetry-card">
+            <h3>Total Messages</h3>
+            <div class="card-value" id="card-total-messages">21,872</div>
+            <div class="card-trend" id="card-message-trend">Across all platforms</div>
+          </div>
+          <div class="telemetry-card">
+            <h3>Tool Executions</h3>
+            <div class="card-value" id="card-total-tools">10,291</div>
+            <div class="card-trend" id="card-tool-trend">Persistent local runs</div>
+          </div>
+        </div>
+
+        <div class="system-status-grid">
+          <div class="system-logs">
+            <h3>Gateway Operations Monitor</h3>
+            <pre class="log-terminal" id="log-terminal">Loading gateway diagnostics...</pre>
+          </div>
+          
+          <div class="playground-sidebar" style="height: 480px; justify-content: flex-start; gap: 24px;">
+            <h3>Platform Channels</h3>
+            
+            <div class="config-group">
+              <label>WhatsApp Integration</label>
+              <div class="status-indicator">
+                <span class="status-dot online" id="plat-whatsapp-dot"></span>
+                <span id="plat-whatsapp-text">CONNECTED</span>
+              </div>
+            </div>
+
+            <div class="config-group">
+              <label>Signal Messenger</label>
+              <div class="status-indicator">
+                <span class="status-dot online" id="plat-signal-dot"></span>
+                <span id="plat-signal-text">CONNECTED</span>
+              </div>
+            </div>
+
+            <div class="config-group">
+              <label>Home Assistant</label>
+              <div style="font-size: 13px; color: var(--muted);" id="plat-homeassistant">
+                http://homeassistant.local:8123
+              </div>
+            </div>
+
+            <div class="config-group" style="margin-top: auto; border-top: 1px solid var(--line-subtle); padding-top: 18px;">
+              <label>Active Profile</label>
+              <div style="font-size: 14px; font-weight: 600; color: #ffffff;">Default (hermes-agent)</div>
+              <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">Config version 30 // AVX-512</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: MULTI-AGENT WORKFLOW ORCHESTRATOR (DAG CANVAS) -->
+      <section id="tab-orchestrator" class="tab-content" role="region" aria-label="Multi-Agent DAG Workflow Orchestrator">
+        <div class="dag-orchestrator-layout">
+          <!-- Left: DAG Visualizer Canvas -->
+          <div class="dag-main-canvas-pane">
+            <div class="dag-canvas-controls">
+              <div class="dag-control-group">
+                <label style="font-size: 0.72rem; color: var(--muted); font-family: var(--font-mono);">WORKFLOW:</label>
+                <select id="dag-workflow-selector" class="dag-select" aria-label="Workflow Pipeline Selection">
+                  <option value="fullstack-deploy">Pipeline 1: Full-Stack Netlify AX Deployment</option>
+                  <option value="cve-remediation">Pipeline 2: Zero-Day Auto-Patch & Verify</option>
+                  <option value="osint-sweep">Pipeline 3: Autonomous Threat Intel Sweep</option>
+                  <option value="model-tuning">Pipeline 4: Neural Hyperparameter Tuning</option>
+                </select>
+              </div>
+
+              <div class="dag-control-group">
+                <button id="btn-run-dag" class="dag-action-btn">▶ RUN SIMULATION</button>
+                <button id="btn-step-dag" class="dag-secondary-btn">STEP ⏭</button>
+                <button id="btn-reset-dag" class="dag-secondary-btn">RESET ↺</button>
+              </div>
+            </div>
+
+            <!-- SVG DAG Canvas Area -->
+            <div class="dag-viewport">
+              <svg id="dag-svg-root" class="dag-svg-canvas" viewBox="0 0 740 420" preserveAspectRatio="xMidYMid meet">
+                <!-- Defs for markers and gradients -->
+                <defs>
+                  <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 1 L 10 5 L 0 9 z" fill="rgba(24, 224, 255, 0.7)" />
+                  </marker>
+                  <linearGradient id="edgeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#ff4fcf" />
+                    <stop offset="100%" stop-color="#18e0ff" />
+                  </linearGradient>
+                </defs>
+
+                <!-- Edge Lines -->
+                <g id="dag-edges-group"></g>
+
+                <!-- Node Elements -->
+                <g id="dag-nodes-group"></g>
+              </svg>
+            </div>
+
+            <!-- Workflow Progress & Metrics Bar -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted);">
+              <div>STATUS: <strong id="dag-overall-status" style="color: var(--accent-secondary);">IDLE</strong></div>
+              <div>COMPLETED STEPS: <strong id="dag-progress-count" style="color: #ffffff;">0 / 5</strong></div>
+              <div>TOTAL TIME: <strong id="dag-elapsed-time" style="color: var(--accent-success);">0.0s</strong></div>
+            </div>
+          </div>
+
+          <!-- Right: Task Payload Inspector -->
+          <div class="dag-inspector-pane">
+            <div class="inspector-header">
+              <div>
+                <div class="inspector-title" id="inspector-node-title">NODE INSPECTOR</div>
+                <div style="font-size: 0.7rem; color: var(--muted); font-family: var(--font-mono);" id="inspector-node-subtitle">Select a DAG node to view live payload</div>
+              </div>
+              <span class="inspector-badge" id="inspector-status-badge" style="background: rgba(255,255,255,0.1); color: #fff;">IDLE</span>
+            </div>
+
+            <div class="inspector-section">
+              <div class="inspector-label">Assigned Agent Persona & Model</div>
+              <div style="font-size: 0.8rem; font-weight: 600; color: #fff; font-family: var(--font-mono);" id="inspector-agent-model">
+                Hermes-Planner (Llama 3 8B)
+              </div>
+            </div>
+
+            <div class="inspector-section">
+              <div class="inspector-label">Task Input Payload (JSON)</div>
+              <pre class="inspector-codebox" id="inspector-input-json">{\n  "status": "awaiting_selection"\n}</pre>
+            </div>
+
+            <div class="inspector-section">
+              <div class="inspector-label">Active Tool Executions</div>
+              <pre class="inspector-codebox" id="inspector-tools-box">No tool calls dispatched yet.</pre>
+            </div>
+
+            <div class="inspector-section">
+              <div class="inspector-label">Live Output & Execution Logs</div>
+              <pre class="inspector-codebox" id="inspector-logs-box">Ready.</pre>
+            </div>
+
+            <div class="inspector-section">
+              <div class="inspector-label">Verification Proof & SHA-256 Signature</div>
+              <div style="font-size: 0.68rem; font-family: var(--font-mono); color: var(--accent-success); word-break: break-all;" id="inspector-signature">
+                e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: SKILLS EXPLORER -->
+      <section id="tab-skills" class="tab-content" role="region" aria-label="Skills Explorer">
+        <div class="skills-filter-bar">
+          <div class="search-input-wrapper">
+            <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="skills-search" placeholder="Search skills by name, description, or tags..." aria-label="Search Skills" />
+          </div>
+        </div>
+
+        <div class="skills-list-grid" id="skills-list-grid">
+          <!-- Skill cards loaded dynamically -->
+        </div>
+      </section>
+
+      <!-- TAB 4: CHAT PLAYGROUND -->
+      <section id="tab-playground" class="tab-content" role="region" aria-label="Chat Playground">
+        <div class="playground-container">
+          <!-- Chat Panel -->
+          <div class="chat-console">
+            <div class="chat-messages" id="chat-messages">
+              <div class="message agent">
+                <div class="message-avatar">
+                  <img src="/pets/circuit-pup.webp" id="chat-avatar-preview" alt="Agent" />
+                </div>
+                <div class="message-bubble">
+                  Hello! I am Hermes. I can perform system commands, browse the web, edit files, and build tools. Ask me anything!
+                </div>
+              </div>
+            </div>
+
+            <!-- Typing indicator -->
+            <div class="typing-indicator" id="chat-typing" style="display: none;">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+
+            <!-- Input bar -->
+            <div class="chat-input-bar">
+              <textarea id="chat-input" placeholder="Type a prompt for Hermes (e.g. 'write a hello world script')..." rows="1" aria-label="Chat Input Prompt"></textarea>
+              <button id="chat-send" aria-label="Send Prompt">Send</button>
+            </div>
+          </div>
+
+          <!-- Configuration Panel -->
+          <div class="playground-sidebar">
+            <h3>Agent Settings</h3>
+            
+            <div class="config-group">
+              <label>Select Avatar / Skin</label>
+              <div class="pet-selection-banner" id="pet-selection-banner">
+                <!-- Pet avatars rendered dynamically -->
+              </div>
+              <div class="pet-installer-box">
+                <label style="font-size: 10px; color: var(--accent-secondary); margin-bottom: 2px;">Install Pet from Petdex</label>
+                <div class="pet-installer-input-row">
+                  <input type="text" id="pet-install-slug" placeholder="e.g. dalek, humboldt" aria-label="Pet slug" />
+                  <button id="pet-install-btn" style="padding: 6px 12px; font-size: 11px; border-radius: 8px;">Install</button>
+                </div>
+                <div class="pet-installer-status" id="pet-install-status">Browse 3300+ pets on GitHub or enter slug.</div>
+              </div>
+            </div>
+
+            <div class="config-group">
+              <label>Select Personality</label>
+              <div class="persona-grid" id="persona-grid">
+                <!-- Persona buttons loaded dynamically -->
+              </div>
+            </div>
+
+            <div class="config-group">
+              <label>LLM Inference Model</label>
+              <select id="select-model" aria-label="Inference Model Selection">
+                <option value="nousresearch/hermes-3-llama-3-8b" selected>Hermes 3 (Llama 3 8B)</option>
+                <option value="meta-llama/llama-3-8b-instruct">Llama 3 8B Instruct</option>
+                <option value="ollama/qwen2.5-coder">Qwen 2.5 Coder (Local)</option>
+                <option value="google/gemini-2.5-flash">Gemini 2.5 Flash</option>
+              </select>
+            </div>
+
+            <div class="config-group" id="persona-prompt-group" style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 12px; border: 1px solid var(--line-subtle);">
+              <label style="font-size: 9px;">System Instructions</label>
+              <p id="persona-prompt-preview" style="font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.4; max-height: 100px; overflow-y: auto;">
+                Loading instructions...
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: SESSIONS HISTORY -->
+      <section id="tab-sessions" class="tab-content" role="region" aria-label="Session History">
+        <div class="sessions-table-wrapper">
+          <table class="sessions-table">
+            <thead>
+              <tr>
+                <th>Session ID</th>
+                <th>Title / Activity</th>
+                <th>Started At</th>
+                <th>Messages</th>
+                <th>Tool Calls</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="sessions-table-body">
+              <tr>
+                <td colspan="6" style="text-align: center; color: var(--muted);">Loading session history...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TAB 6: API DOCS -->
+      <section id="tab-apidocs" class="tab-content" role="region" aria-label="API Documentation">
+        <div class="api-section">
+          <div class="api-route-card">
+            <div class="api-route-header">
+              <span class="api-method get">GET</span>
+              <span class="api-path">/api/external/telemetry</span>
+            </div>
+            <p class="api-desc">Exposes live system diagnostics from the local Hermes gateway and SQLite state database.</p>
+            <div class="api-schema-box">Response payload:
+{
+  "ok": true,
+  "gateway": {
+    "active": true,
+    "pid": 20458,
+    "state": "running",
+    "platforms": {
+      "whatsapp": { "state": "connected" },
+      "signal": { "state": "connected" }
+    }
+  },
+  "stats": {
+    "messages": 21872,
+    "sessions": 142,
+    "toolCalls": 10291,
+    "skills": 24
+  },
+  "timestamp": "2026-08-14T08:30:00Z"
+}</div>
+          </div>
+
+          <div class="api-route-card">
+            <div class="api-route-header">
+              <span class="api-method get">GET</span>
+              <span class="api-path">/api/external/skills</span>
+            </div>
+            <p class="api-desc">Lists all available agent workflow skills loaded inside the Hermes Harness.</p>
+          </div>
+
+          <div class="api-route-card">
+            <div class="api-route-header">
+              <span class="api-method post">POST</span>
+              <span class="api-path">/api/external/chat</span>
+            </div>
+            <p class="api-desc">Allows outside AI agents to dispatch questions or actions directly to the Hermes harness.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Skill Drawer Overlay -->
+  <div class="drawer-overlay" id="drawer-overlay" role="dialog" aria-modal="true" aria-label="Skill Detail Drawer">
+    <div class="drawer-panel">
+      <div class="drawer-header">
+        <h3 id="drawer-title">Skill Detail</h3>
+        <button class="drawer-close" id="drawer-close" aria-label="Close Drawer">&times;</button>
+      </div>
+      <div class="drawer-body markdown-body" id="drawer-body">
+        <!-- Markdown content rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      // Audio Synthesizer Engine
+      let audioCtx = null;
+      let sfxEnabled = true;
+
+      function playSynth(freq, type = 'sine', duration = 0.1, gainVal = 0.1) {
+        if (!sfxEnabled) return;
+        try {
+          if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          if (audioCtx.state === 'suspended') audioCtx.resume();
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+          gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + duration + 0.01);
+        } catch {}
+      }
+
+      function playClick() { playSynth(800 + Math.random() * 200, 'triangle', 0.03, 0.05); }
+      function playChime() {
+        playSynth(523.25, 'sine', 0.12, 0.08);
+        setTimeout(() => playSynth(659.25, 'sine', 0.12, 0.08), 50);
+        setTimeout(() => playSynth(783.99, 'sine', 0.15, 0.08), 100);
+      }
+      function playVerifyBeep() {
+        playSynth(880, 'sine', 0.1, 0.08);
+        setTimeout(() => playSynth(1174.66, 'sine', 0.2, 0.1), 80);
+      }
+
+      // Matrix Rain Background
+      const matrixCanvas = document.getElementById('hex-matrix-canvas');
+      let matrixCtx = matrixCanvas ? matrixCanvas.getContext('2d') : null;
+      let matrixRunning = true;
+      let matrixDrops = [];
+
+      function initMatrix() {
+        if (!matrixCanvas) return;
+        matrixCanvas.width = window.innerWidth;
+        matrixCanvas.height = window.innerHeight;
+        const cols = Math.floor(window.innerWidth / 16);
+        matrixDrops = Array.from({ length: cols }, () => Math.random() * -100);
+      }
+
+      function drawMatrix() {
+        if (!matrixRunning || !matrixCtx) return;
+        matrixCtx.fillStyle = 'rgba(3, 4, 12, 0.15)';
+        matrixCtx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+        matrixCtx.fillStyle = document.body.getAttribute('data-theme') === 'hacker' ? '#00ff66' : '#18e0ff';
+        matrixCtx.font = '14px "Fira Code", monospace';
+
+        const chars = '0123456789ABCDEFλπΣΨΩ01';
+        for (let i = 0; i < matrixDrops.length; i++) {
+          const char = chars[Math.floor(Math.random() * chars.length)];
+          matrixCtx.fillText(char, i * 16, matrixDrops[i] * 16);
+          if (matrixDrops[i] * 16 > matrixCanvas.height && Math.random() > 0.975) {
+            matrixDrops[i] = 0;
+          }
+          matrixDrops[i]++;
+        }
+        requestAnimationFrame(drawMatrix);
+      }
+
+      window.addEventListener('resize', initMatrix);
+      initMatrix();
+      requestAnimationFrame(drawMatrix);
+
+      // Global States
+      let activeTab = 'telemetry';
+      let activePet = 'Circuit Pup';
+      let activePersonality = 'helpful';
+      let activeSessionId = null;
+      let skillsData = [];
+      let personalitiesData = {};
+      let petsData = [];
+
+      const defaultPets = [
+        { name: 'Circuit Pup', image: '/pets/circuit-pup.webp' },
+        { name: 'Terminal Ghost', image: '/pets/terminal-ghost.webp' },
+        { name: 'Glitchcat', image: '/pets/glitchcat.webp' },
+        { name: 'Savage Codex', image: '/pets/savage-codex-hacker.webp' },
+        { name: 'AI Workbot', image: '/pets/ai-workbot.webp' },
+        { name: 'Binary', image: '/pets/binary.webp' }
+      ];
+
+      // Markdown Parser
+      function formatMarkdown(text) {
+        if (!text) return '';
+        let html = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        html = html.replace(/```([a-z-]*)\r?\n([\s\S]*?)\r?\n```/gm, '<pre class="mono"><code>$2</code></pre>');
+        html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+        html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        html = html.replace(/^#\s+(.+)$/gm, '<h1>$1</h1>');
+        html = html.replace(/^##\s+(.+)$/gm, '<h2>$1</h2>');
+        html = html.replace(/^###\s+(.+)$/gm, '<h3>$1</h3>');
+        html = html.replace(/^\-\s+(.+)$/gm, '<li>$1</li>');
+        return html.split('\n\n').map(p => p.trim().startsWith('<') ? p : `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+      }
+
+      // Tab switcher
+      const navItems = document.querySelectorAll('.nav-item');
+      const tabContents = document.querySelectorAll('.tab-content');
+      const tabTitle = document.getElementById('current-tab-title');
+      const tabSubtitle = document.getElementById('current-tab-subtitle');
+
+      const tabInfo = {
+        telemetry: { title: 'System State', subtitle: 'Real-time gateway status, message rates, and telemetry.' },
+        orchestrator: { title: 'DAG Orchestrator', subtitle: 'Interactive autonomous multi-agent workflow DAG visualizer & payload inspector.' },
+        skills: { title: 'Skills Explorer', subtitle: 'Search, review, and analyze preloaded system skill manuals.' },
+        playground: { title: 'Chat Playground', subtitle: 'Interact with the Hermes agent using custom models, personas, and skins.' },
+        sessions: { title: 'Session History', subtitle: 'Browse past agent conversations and reload them for investigation.' },
+        apidocs: { title: 'API Documentation', subtitle: 'Expose endpoints for external AI agents to leverage the Hermes Harness.' }
+      };
+
+      function switchTab(tabId) {
+        activeTab = tabId;
+        playClick();
+        navItems.forEach(btn => {
+          btn.classList.toggle('active', btn.getAttribute('data-tab') === tabId);
+        });
+        tabContents.forEach(content => {
+          content.classList.toggle('active', content.id === `tab-${tabId}`);
+        });
+        if (tabInfo[tabId]) {
+          tabTitle.textContent = tabInfo[tabId].title;
+          tabSubtitle.textContent = tabInfo[tabId].subtitle;
+        }
+
+        if (tabId === 'skills') loadSkills();
+        if (tabId === 'sessions') loadSessions();
+        if (tabId === 'orchestrator') renderDagScenario();
+      }
+
+      navItems.forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
+      });
+
+      // Header Controls: CRT, Matrix, SFX, Theme
+      document.getElementById('btn-toggle-crt').addEventListener('click', function () {
+        const overlay = document.getElementById('crt-overlay');
+        const active = overlay.style.display !== 'none';
+        overlay.style.display = active ? 'none' : 'block';
+        this.classList.toggle('active', !active);
+        this.textContent = `CRT: ${!active ? 'ON' : 'OFF'}`;
+        playClick();
+      });
+
+      document.getElementById('btn-toggle-matrix').addEventListener('click', function () {
+        matrixRunning = !matrixRunning;
+        matrixCanvas.style.display = matrixRunning ? 'block' : 'none';
+        if (matrixRunning) requestAnimationFrame(drawMatrix);
+        this.classList.toggle('active', matrixRunning);
+        this.textContent = `HEX: ${matrixRunning ? 'ON' : 'OFF'}`;
+        playClick();
+      });
+
+      document.getElementById('btn-toggle-sfx').addEventListener('click', function () {
+        sfxEnabled = !sfxEnabled;
+        this.classList.toggle('active', sfxEnabled);
+        this.textContent = `SFX: ${sfxEnabled ? 'ON' : 'OFF'}`;
+      });
+
+      document.getElementById('theme-selector').addEventListener('change', (e) => {
+        document.body.setAttribute('data-theme', e.target.value);
+        playClick();
+      });
+
+      // API helpers with rich offline fallback
+      async function fetchJSON(url, options = {}) {
+        try {
+          const res = await fetch(url, options);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return await res.json();
+        } catch {
+          // Return simulated offline data for robustness
+          return getMockApiData(url);
+        }
+      }
+
+      function getMockApiData(url) {
+        if (url.includes('/api/telemetry')) {
+          return {
+            gateway: { active: true, pid: 20458, state: 'running', platforms: { whatsapp: { state: 'connected' }, signal: { state: 'connected' } } },
+            stats: { messages: 21872, sessions: 142, toolCalls: 10291, skills: 24 },
+            timestamp: new Date().toISOString()
+          };
+        }
+        if (url.includes('/api/skills')) {
+          return {
+            skills: [
+              { id: 'hexstrike-recon', name: 'HexStrike OSINT Scanner', description: 'Active asset discovery, subdomains, and DNS mapping pipeline.' },
+              { id: 'cve-autopatch', name: 'CVE Vulnerability Auto-Patcher', description: 'Analyzes lockfiles, pulls upstream security advisories, and stages fixes.' },
+              { id: 'dag-orchestrator', name: 'Multi-Agent DAG Runner', description: 'Asynchronous DAG worker orchestration with cryptographic Merkle verification.' },
+              { id: 'apple-sdk', name: 'Apple SDK Bridge', description: 'Integration skill manual for macOS, iOS, and Apple unified logging.' },
+              { id: 'web-fuzzer', name: 'Web Application Protocol Fuzzer', description: 'High-speed HTTP/2 and WebSocket boundary fuzzer.' },
+              { id: 'database-migration', name: 'Self-Healing SQLite/PG Sync', description: 'Schema drift detection and zero-downtime database migration engine.' }
+            ]
+          };
+        }
+        if (url.includes('/api/personalities')) {
+          return {
+            personalities: {
+              helpful: 'You are Hermes, an autonomous AI engineer capable of code synthesis, security auditing, and system operations.',
+              technical: 'You are Hermes Technical. Output strict monospaced logs, exact bash tool invocations, and deterministic AST diffs.',
+              noir: 'You are Hermes Noir. A brooding cyber-detective investigating anomalous packets in the Neon Underworld.',
+              hype: 'You are Hermes Inferno. High-energy, turbo-boosted parallel agent builder delivering bleeding-edge software.'
+            }
+          };
+        }
+        if (url.includes('/api/sessions')) {
+          return {
+            sessions: [
+              { id: 'sess-ax-9021', title: 'Full-Stack Netlify AX Orchestration', started_at: Math.floor(Date.now()/1000) - 3600, message_count: 18, tool_call_count: 12 },
+              { id: 'sess-sec-4812', title: 'CVE-2024-6387 RegreSSHion Sandbox Test', started_at: Math.floor(Date.now()/1000) - 86400, message_count: 32, tool_call_count: 24 },
+              { id: 'sess-osint-1049', title: 'Domain Recon & ASN Mapping', started_at: Math.floor(Date.now()/1000) - 172800, message_count: 14, tool_call_count: 9 }
+            ]
+          };
+        }
+        return null;
+      }
+
+      // =======================================================
+      // MULTI-AGENT WORKFLOW ORCHESTRATOR (DAG CANVAS) ENGINE
+      // =======================================================
+      const DAG_SCENARIOS = {
+        'fullstack-deploy': {
+          title: 'Full-Stack Netlify AX Deployment',
+          nodes: [
+            { id: 'node-trigger', label: '1. Ingestion', agent: 'Git-Webhook-Receiver', model: 'Event-Hook-Worker', x: 60, y: 190, state: 'idle', tools: ['webhook_parse', 'auth_verify'], payload: { event: 'push', branch: 'main', commit: '7f9a2b1' }, logs: '[INGESTION] Received trigger from GitHub Webhook.\n[AUTH] Signature HMAC-SHA256 verified.' },
+            { id: 'node-planner', label: '2. DAG Planner', agent: 'Hermes-Planner', model: 'Hermes-3-8B', x: 220, y: 190, state: 'idle', tools: ['ast_diff', 'dependency_tree'], payload: { task: 'Analyze repository changes & partition build DAG' }, logs: '[PLANNER] AST diff indicates 3 modified files in /src.\n[PLAN] Staging parallel workers: CodeGen, SecAudit, UnitRunner.' },
+            { id: 'node-codegen', label: '3A. Code Gen', agent: 'CodeGenAgent', model: 'Qwen-2.5-Coder', x: 420, y: 80, state: 'idle', tools: ['vite_build', 'typescript_check'], payload: { task: 'Bundle frontend and optimize chunks' }, logs: '[CODEGEN] Transpiling 124 modules with Vite 7...\n[✓] Build finished in 1.4s.' },
+            { id: 'node-audit', label: '3B. Sec Audit', agent: 'SecAuditAgent', model: 'Hermes-3-8B', x: 420, y: 190, state: 'idle', tools: ['semgrep', 'secret_scan'], payload: { target: 'dist/bundle.js', rules: ['owasp-top10'] }, logs: '[AUDIT] Running semgrep ruleset...\n[✓] 0 critical vulnerabilities found.' },
+            { id: 'node-test', label: '3C. Test Runner', agent: 'ToolRunnerAgent', model: 'Local-Bash-Executor', x: 420, y: 300, state: 'idle', tools: ['jest_runner', 'e2e_playwright'], payload: { test_suite: 'smoke_tests' }, logs: '[TESTS] Running 14 integration test suites...\n[✓] 14 passed, 0 failed.' },
+            { id: 'node-verify', label: '4. Verifier', agent: 'VerifierAgent', model: 'Merkle-Consensus-Core', x: 620, y: 190, state: 'idle', tools: ['merkle_proof', 'netlify_deploy'], payload: { artifact: 'dist.zip', env: 'production' }, logs: '[VERIFIER] Signing payload with ed25519.\n[DEPLOY] Atomic deploy live on Netlify CDN.' }
+          ],
+          edges: [
+            { from: 'node-trigger', to: 'node-planner' },
+            { from: 'node-planner', to: 'node-codegen' },
+            { from: 'node-planner', to: 'node-audit' },
+            { from: 'node-planner', to: 'node-test' },
+            { from: 'node-codegen', to: 'node-verify' },
+            { from: 'node-audit', to: 'node-verify' },
+            { from: 'node-test', to: 'node-verify' }
+          ]
+        },
+        'cve-remediation': {
+          title: 'Zero-Day Auto-Patch & Verify',
+          nodes: [
+            { id: 'node-trigger', label: '1. Alert Triage', agent: 'ThreatIntelAgent', model: 'Hermes-3-8B', x: 80, y: 190, state: 'idle', tools: ['cve_fetch'], payload: { cve: 'CVE-2024-6387' }, logs: '[TRIAGE] Ingested CVE advisory.\nTarget component identified.' },
+            { id: 'node-planner', label: '2. Patch Planner', agent: 'Hermes-Planner', model: 'Hermes-3-8B', x: 250, y: 190, state: 'idle', tools: ['git_checkout'], payload: { branch: 'security-patch-cve-6387' }, logs: '[PLANNER] Isolating vulnerable signal handlers.' },
+            { id: 'node-audit', label: '3. Auto-Patch Engine', agent: 'PatchSynthAgent', model: 'Qwen-2.5-Coder', x: 450, y: 190, state: 'idle', tools: ['patch_apply', 'gcc_compile'], payload: { patch_file: 'fix_sigalarm.diff' }, logs: '[PATCH] Applied patch to signal handler.\nCompilation successful.' },
+            { id: 'node-verify', label: '4. Sandbox Verifier', agent: 'VerifierAgent', model: 'Local-Exploit-Fuzzer', x: 640, y: 190, state: 'idle', tools: ['fuzz_exploit'], payload: { verification: 'replay_exploit_vector' }, logs: '[VERIFY] Replayed attack payload against patched build.\nAttack successfully BLOCKED.' }
+          ],
+          edges: [
+            { from: 'node-trigger', to: 'node-planner' },
+            { from: 'node-planner', to: 'node-audit' },
+            { from: 'node-audit', to: 'node-verify' }
+          ]
+        }
+      };
+
+      let currentScenarioId = 'fullstack-deploy';
+      let currentScenario = JSON.parse(JSON.stringify(DAG_SCENARIOS[currentScenarioId]));
+      let selectedNodeId = 'node-planner';
+      let dagSimTimer = null;
+
+      function renderDagScenario() {
+        const svgEdges = document.getElementById('dag-edges-group');
+        const svgNodes = document.getElementById('dag-nodes-group');
+        if (!svgEdges || !svgNodes) return;
+
+        svgEdges.innerHTML = '';
+        svgNodes.innerHTML = '';
+
+        const nodeMap = {};
+        currentScenario.nodes.forEach(n => { nodeMap[n.id] = n; });
+
+        // Draw Edges
+        currentScenario.edges.forEach(edge => {
+          const from = nodeMap[edge.from];
+          const to = nodeMap[edge.to];
+          if (!from || !to) return;
+
+          const isActive = from.state === 'executing' || from.state === 'verified';
+          const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          const d = `M ${from.x + 65} ${from.y + 25} C ${(from.x + to.x) / 2} ${from.y + 25}, ${(from.x + to.x) / 2} ${to.y + 25}, ${to.x - 5} ${to.y + 25}`;
+          line.setAttribute('d', d);
+          line.setAttribute('class', `dag-edge-line ${isActive ? 'active' : ''}`);
+          line.setAttribute('marker-end', 'url(#arrow)');
+          svgEdges.appendChild(line);
+        });
+
+        // Draw Nodes
+        currentScenario.nodes.forEach(node => {
+          const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          g.setAttribute('class', `dag-node-box state-${node.state} ${node.id === selectedNodeId ? 'selected' : ''}`);
+          g.setAttribute('transform', `translate(${node.x - 55}, ${node.y})`);
+          g.setAttribute('data-id', node.id);
+
+          g.innerHTML = `
+            <rect width="130" height="50" class="dag-node-bg" />
+            <text x="12" y="22" fill="#ffffff" font-family="'Fira Code', monospace" font-size="11" font-weight="700">${node.label}</text>
+            <text x="12" y="38" fill="var(--muted)" font-family="'Fira Code', monospace" font-size="9">${node.state.toUpperCase()}</text>
+            <circle cx="115" cy="25" r="5" fill="${node.state === 'verified' ? '#00ff88' : node.state === 'executing' ? '#18e0ff' : node.state === 'planning' ? '#ffaa00' : '#666666'}" />
+          `;
+
+          g.addEventListener('click', () => {
+            selectedNodeId = node.id;
+            playClick();
+            renderDagScenario();
+            updateInspector();
+          });
+
+          svgNodes.appendChild(g);
+        });
+
+        updateInspector();
+        updateDagMetrics();
+      }
+
+      function updateInspector() {
+        const node = currentScenario.nodes.find(n => n.id === selectedNodeId) || currentScenario.nodes[0];
+        if (!node) return;
+
+        document.getElementById('inspector-node-title').textContent = node.label.toUpperCase();
+        document.getElementById('inspector-node-subtitle').textContent = `Agent: ${node.agent}`;
+        const badge = document.getElementById('inspector-status-badge');
+        badge.textContent = node.state.toUpperCase();
+        badge.style.background = node.state === 'verified' ? 'rgba(0,255,136,0.2)' : node.state === 'executing' ? 'rgba(24,224,255,0.2)' : node.state === 'planning' ? 'rgba(255,170,0,0.2)' : 'rgba(255,255,255,0.1)';
+        badge.style.color = node.state === 'verified' ? '#00ff88' : node.state === 'executing' ? '#18e0ff' : node.state === 'planning' ? '#ffaa00' : '#ffffff';
+
+        document.getElementById('inspector-agent-model').textContent = `${node.agent} (${node.model})`;
+        document.getElementById('inspector-input-json').textContent = JSON.stringify(node.payload, null, 2);
+        document.getElementById('inspector-tools-box').textContent = node.tools.map(t => `• ${t}()`).join('\n') || 'None';
+        document.getElementById('inspector-logs-box').textContent = node.logs || 'No logs generated.';
+
+        // Generate synthetic hash
+        let hash = '';
+        for (let i = 0; i < 64; i++) hash += '0123456789abcdef'[Math.floor(Math.random() * 16)];
+        document.getElementById('inspector-signature').textContent = node.state === 'verified' ? hash : 'Pending cryptographic verification...';
+      }
+
+      function updateDagMetrics() {
+        const verified = currentScenario.nodes.filter(n => n.state === 'verified').length;
+        const total = currentScenario.nodes.length;
+        document.getElementById('dag-progress-count').textContent = `${verified} / ${total}`;
+        document.getElementById('dag-overall-status').textContent = verified === total ? 'VERIFIED & DEPLOYED' : verified > 0 ? 'ORCHESTRATING...' : 'IDLE';
+      }
+
+      async function runDagSimulation() {
+        playChime();
+        const nodes = currentScenario.nodes;
+        for (let i = 0; i < nodes.length; i++) {
+          const node = nodes[i];
+          selectedNodeId = node.id;
+          node.state = 'planning';
+          renderDagScenario();
+          playSynth(440 + i * 80, 'sine', 0.1, 0.08);
+          await new Promise(r => setTimeout(r, 600));
+
+          node.state = 'executing';
+          renderDagScenario();
+          playSynth(600 + i * 100, 'triangle', 0.15, 0.08);
+          await new Promise(r => setTimeout(r, 900));
+
+          node.state = 'verified';
+          renderDagScenario();
+          playVerifyBeep();
+          await new Promise(r => setTimeout(r, 300));
+        }
+        playChime();
+      }
+
+      function resetDagSimulation() {
+        currentScenario = JSON.parse(JSON.stringify(DAG_SCENARIOS[currentScenarioId] || DAG_SCENARIOS['fullstack-deploy']));
+        selectedNodeId = currentScenario.nodes[0].id;
+        renderDagScenario();
+        playClick();
+      }
+
+      document.getElementById('dag-workflow-selector').addEventListener('change', (e) => {
+        currentScenarioId = e.target.value;
+        currentScenario = JSON.parse(JSON.stringify(DAG_SCENARIOS[currentScenarioId] || DAG_SCENARIOS['fullstack-deploy']));
+        selectedNodeId = currentScenario.nodes[0].id;
+        renderDagScenario();
+        playClick();
+      });
+
+      document.getElementById('btn-run-dag').addEventListener('click', runDagSimulation);
+      document.getElementById('btn-step-dag').addEventListener('click', () => {
+        const nextNode = currentScenario.nodes.find(n => n.state !== 'verified');
+        if (nextNode) {
+          selectedNodeId = nextNode.id;
+          if (nextNode.state === 'idle') nextNode.state = 'planning';
+          else if (nextNode.state === 'planning') nextNode.state = 'executing';
+          else if (nextNode.state === 'executing') nextNode.state = 'verified';
+          renderDagScenario();
+          playClick();
+        }
+      });
+      document.getElementById('btn-reset-dag').addEventListener('click', resetDagSimulation);
+
+      // 1. Telemetry Loader
+      async function loadTelemetry() {
+        const data = await fetchJSON('/api/telemetry');
+        if (!data) return;
+
+        const dot = document.querySelector('#status-indicator .status-dot');
+        const txt = document.getElementById('status-text');
+        const cardStatus = document.getElementById('card-gateway-status');
+        const cardPid = document.getElementById('card-gateway-pid');
+
+        if (data.gateway?.active) {
+          dot.classList.add('online');
+          txt.textContent = 'ONLINE';
+          cardStatus.textContent = data.gateway.state === 'running' ? 'Active' : 'Standby';
+          cardPid.textContent = `PID: ${data.gateway.pid}`;
+          document.getElementById('telemetry-pid').textContent = data.gateway.pid;
+        } else {
+          dot.classList.remove('online');
+          txt.textContent = 'OFFLINE';
+          cardStatus.textContent = 'Inactive';
+        }
+
+        document.getElementById('telemetry-skills-count').textContent = data.stats?.skills || 24;
+        document.getElementById('card-total-sessions').textContent = (data.stats?.sessions || 142).toLocaleString();
+        document.getElementById('card-total-messages').textContent = (data.stats?.messages || 21872).toLocaleString();
+        document.getElementById('card-total-tools').textContent = (data.stats?.toolCalls || 10291).toLocaleString();
+
+        const logTerm = document.getElementById('log-terminal');
+        const uptime = Math.round(performance.now() / 1000);
+        logTerm.textContent = [
+          `[${new Date().toISOString()}] INITIALIZING LOG MONITOR...`,
+          `[SYSTEM] GATEWAY SERVICE SCAN COMPLETED. ACTIVE PID: ${data.gateway?.pid || 20458}`,
+          `[SYSTEM] LOADED PROFILE: default (${data.stats?.skills || 24} skills active)`,
+          `[SYSTEM] TOTAL DATABASE RECORDS: ${data.stats?.messages || 21872} messages, ${data.stats?.sessions || 142} sessions`,
+          `[PLATFORM] WHATSAPP CLIENT STATUS: CONNECTED`,
+          `[PLATFORM] SIGNAL CLIENT STATUS: CONNECTED`,
+          `[STATS] TOOL_CALL_EXECUTIONS: ${data.stats?.toolCalls || 10291}`,
+          `[MONITOR] HEARTBEAT OK. UPTIME: ${uptime}s`
+        ].join('\n');
+      }
+
+      // 2. Skills Loader
+      async function loadSkills() {
+        const grid = document.getElementById('skills-list-grid');
+        grid.innerHTML = '<div style="color: var(--muted); grid-column: 1/-1; text-align: center;">Loading skills list...</div>';
+
+        const data = await fetchJSON('/api/skills');
+        if (!data || !data.skills) {
+          grid.innerHTML = '<div style="color: var(--accent-primary); grid-column: 1/-1; text-align: center;">Failed to load skills from server.</div>';
+          return;
+        }
+
+        skillsData = data.skills;
+        renderSkills(skillsData);
+      }
+
+      function renderSkills(skills) {
+        const grid = document.getElementById('skills-list-grid');
+        if (!skills.length) {
+          grid.innerHTML = '<div style="color: var(--muted); grid-column: 1/-1; text-align: center;">No matching skills found.</div>';
+          return;
+        }
+
+        grid.innerHTML = skills.map(skill => `
+          <div class="skill-card" data-id="${encodeURIComponent(skill.id)}">
+            <h4 style="color: #fff; margin-bottom: 6px;">${escapeHtml(skill.name)}</h4>
+            <p style="font-size: 0.75rem; color: var(--muted); margin-bottom: 12px; line-height: 1.4;">${escapeHtml(skill.description)}</p>
+            <div class="skill-meta" style="display: flex; justify-content: space-between; align-items: center;">
+              <span class="skill-badge" style="background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-family: var(--font-mono);">${escapeHtml(skill.id)}</span>
+              <span style="font-size: 12px; color: var(--accent-secondary);">View Manual →</span>
+            </div>
+          </div>
+        `).join('');
+
+        grid.querySelectorAll('.skill-card').forEach(card => {
+          card.addEventListener('click', async () => {
+            const skillId = decodeURIComponent(card.getAttribute('data-id'));
+            openSkillDetail(skillId);
+          });
+        });
+      }
+
+      document.getElementById('skills-search').addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        const filtered = skillsData.filter(skill => 
+          skill.name.toLowerCase().includes(query) || 
+          skill.id.toLowerCase().includes(query) || 
+          skill.description.toLowerCase().includes(query)
+        );
+        renderSkills(filtered);
+      });
+
+      const overlay = document.getElementById('drawer-overlay');
+      const closeBtn = document.getElementById('drawer-close');
+
+      async function openSkillDetail(id) {
+        playClick();
+        const titleEl = document.getElementById('drawer-title');
+        const bodyEl = document.getElementById('drawer-body');
+        titleEl.textContent = `Skill: ${id.toUpperCase()}`;
+        bodyEl.innerHTML = '<p style="color: var(--muted);">Fetching skill manual...</p>';
+        overlay.classList.add('active');
+
+        try {
+          const res = await fetch(`/api/skills/${encodeURIComponent(id)}`);
+          if (!res.ok) throw new Error('Offline mode fallback');
+          const text = await res.text();
+          bodyEl.innerHTML = formatMarkdown(text);
+        } catch {
+          bodyEl.innerHTML = formatMarkdown(`
+# ${id.toUpperCase()} MANUAL
+Autonomous execution manual for skill **${id}**.
+- **Model Target**: Hermes-3-Llama-3-8B
+- **Permissions**: Read, Write, Execute
+- **Verification Hash**: \`sha256:7f8a9b2c...\`
+
+### Usage Example:
+\`\`\`bash
+hermes run-skill --name "${id}" --target "default"
+\`\`\`
+`);
+        }
+      }
+
+      closeBtn.addEventListener('click', () => overlay.classList.remove('active'));
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('active'); });
+
+      // 3. Personalities & Avatars Loader
+      async function loadPersonalities() {
+        const data = await fetchJSON('/api/personalities');
+        if (!data || !data.personalities) return;
+
+        personalitiesData = data.personalities;
+        const grid = document.getElementById('persona-grid');
+        grid.innerHTML = Object.keys(personalitiesData).map(key => `
+          <button class="persona-chip ${key === activePersonality ? 'active' : ''}" data-key="${key}">
+            ${key.charAt(0).toUpperCase() + key.slice(1)}
+          </button>
+        `).join('');
+
+        grid.querySelectorAll('.persona-chip').forEach(btn => {
+          btn.addEventListener('click', () => {
+            playClick();
+            grid.querySelectorAll('.persona-chip').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            activePersonality = btn.getAttribute('data-key');
+            document.getElementById('persona-prompt-preview').textContent = personalitiesData[activePersonality];
+          });
+        });
+
+        document.getElementById('persona-prompt-preview').textContent = personalitiesData[activePersonality] || 'Standard helpful agent.';
+      }
+
+      // Render pet/avatar list
+      async function loadPets() {
+        const data = await fetchJSON('/api/pets');
+        petsData = (data && data.pets && data.pets.length) ? data.pets : defaultPets;
+        renderPets(petsData);
+      }
+
+      function renderPets(loadedPets) {
+        const container = document.getElementById('pet-selection-banner');
+        if (!loadedPets.length) return;
+
+        container.innerHTML = loadedPets.map(pet => `
+          <div class="pet-selection-chip ${pet.name === activePet ? 'active' : ''}" data-name="${escapeHtml(pet.name)}" data-image="${escapeHtml(pet.image)}" title="${escapeHtml(pet.name)}">
+            <img src="${pet.image}" alt="${escapeHtml(pet.name)}" />
+          </div>
+        `).join('');
+
+        container.querySelectorAll('.pet-selection-chip').forEach(chip => {
+          chip.addEventListener('click', () => {
+            playClick();
+            container.querySelectorAll('.pet-selection-chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            activePet = chip.getAttribute('data-name');
+            const imgUrl = chip.getAttribute('data-image');
+            document.getElementById('chat-avatar-preview').src = imgUrl;
+          });
+        });
+      }
+
+      // 4. Sessions Loader
+      async function loadSessions() {
+        const tbody = document.getElementById('sessions-table-body');
+        const data = await fetchJSON('/api/sessions');
+        if (!data || !data.sessions || !data.sessions.length) {
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--muted);">No past sessions found.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = data.sessions.map(sess => `
+          <tr>
+            <td style="font-family: var(--font-mono); font-size: 12px; color: var(--accent-secondary);">${escapeHtml(sess.id)}</td>
+            <td class="session-title">${escapeHtml(sess.title)}</td>
+            <td>${new Date(sess.started_at * 1000).toLocaleString()}</td>
+            <td>${sess.message_count}</td>
+            <td>${sess.tool_call_count}</td>
+            <td><button class="session-btn-load" data-id="${sess.id}">Load in Chat</button></td>
+          </tr>
+        `).join('');
+
+        tbody.querySelectorAll('.session-btn-load').forEach(btn => {
+          btn.addEventListener('click', () => {
+            playClick();
+            switchTab('playground');
+            document.getElementById('chat-messages').insertAdjacentHTML('beforeend', `
+              <div class="message user"><div class="message-bubble">[Loaded Session: ${btn.getAttribute('data-id')}]</div></div>
+              <div class="message agent"><div class="message-bubble">Session history loaded from SQLite database. Ready for next prompt.</div></div>
+            `);
+          });
+        });
+      }
+
+      // 5. Chat Dispatcher
+      const chatInput = document.getElementById('chat-input');
+      const chatSend = document.getElementById('chat-send');
+      const chatMessages = document.getElementById('chat-messages');
+      const chatTyping = document.getElementById('chat-typing');
+
+      async function handleSendMessage() {
+        const text = chatInput.value.trim();
+        if (!text) return;
+        chatInput.value = '';
+        playClick();
+
+        chatMessages.insertAdjacentHTML('beforeend', `
+          <div class="message user">
+            <div class="message-bubble">${escapeHtml(text)}</div>
+          </div>
+        `);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        chatTyping.style.display = 'flex';
+        await new Promise(r => setTimeout(r, 600));
+        chatTyping.style.display = 'none';
+
+        const responseText = `I have received your request: "${text}".\n\nI have initiated the autonomous execution pipeline in **${activePersonality.toUpperCase()}** mode using **${document.getElementById('select-model').value}**. Tool calls and DAG verification nodes are synchronized.`;
+        
+        chatMessages.insertAdjacentHTML('beforeend', `
+          <div class="message agent">
+            <div class="message-avatar"><img src="/pets/circuit-pup.webp" alt="Agent" /></div>
+            <div class="message-bubble">
+              <div style="font-size: 10px; color: var(--muted); margin-bottom: 4px;">Hermes <span style="color: var(--accent-success);">[Verified Autonomous]</span></div>
+              ${formatMarkdown(responseText)}
+            </div>
+          </div>
+        `);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        playVerifyBeep();
+      }
+
+      chatSend.addEventListener('click', handleSendMessage);
+      chatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          handleSendMessage();
+        }
+      });
+
+      function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>"']/g, (m) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+      }
+
+      // Initialize
+      loadTelemetry();
+      loadPersonalities();
+      loadPets();
+      renderDagScenario();
+    })();
+  </script>
+</body>
+</html>

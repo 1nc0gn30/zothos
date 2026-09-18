@@ -1,0 +1,2695 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta name="keywords" content="webgen, website builder, describe a website, live preview, zoth studio"/>
+
+<meta name="description" content="Describe a website in plain language. Pick a starting idea, tap Build, and watch a live preview appear. Free on Zoth Studio."/>
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WebGen — Describe a website. Watch it appear.</title>
+  
+  <link rel="icon" href="/assets/brand/zoth-seal-hermetic-on-dark.svg" type="image/svg+xml"/>
+  <link rel="apple-touch-icon" href="/assets/mascot/azoth-portrait.jpg"/>
+  <link as="image" fetchpriority="high" href="/assets/mascot/azoth-portrait.jpg" rel="preload"/>
+  <link rel="stylesheet" href="/assets/zoth-theme.css?v=12" />
+  <link rel="stylesheet" href="/assets/zoth-hud-embedded.css" />
+  <script src="/assets/zoth-hud-embedded.js"></script>
+  <script src="/assets/zoth-theme.js?v=11"></script>
+  <link rel="stylesheet" href="/assets/zoth-agent-avatars.css" />
+  <link rel="stylesheet" href="/assets/zoth-webgen-poster.css?v=20260913h" />
+  <link rel="stylesheet" href="/assets/zoth-nav.css?v=12" />
+  <link rel="stylesheet" href="/assets/zoth-tailwind-magic.css" />
+  <link rel="stylesheet" href="/assets/zoth-guide.css" />
+  <link rel="stylesheet" href="/assets/vendor/xterm/xterm.css" />
+
+  <script src="/assets/vendor/three.min.js"></script>
+  <script src="/assets/zoth-nav.js?v=12"></script>
+  <script src="/assets/vendor/xterm/xterm.js"></script>
+  <script src="/assets/vendor/xterm/addon-fit.js"></script>
+  <script src="/assets/zoth-terminal.js"></script>
+  <script src="/assets/zoth-three-orb.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Syne:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── WebGen Workstation 4-Theme Custom Properties & Typography ── */
+    :root {
+      --webgen-bg: var(--bg, #050508);
+      --webgen-surface: var(--surface, rgba(8, 12, 24, 0.94));
+      --webgen-surface-alt: var(--surface2, rgba(14, 20, 38, 0.8));
+      --webgen-line: var(--line, rgba(0, 240, 255, 0.18));
+      --webgen-gold: var(--gold, #fbbf24);
+      --webgen-cyan: var(--cyan, #00f0ff);
+      --webgen-green: var(--green, #34d399);
+      --webgen-magenta: var(--magenta, #d946ef);
+      --webgen-text: var(--text-primary, #ffffff);
+      --webgen-mute: var(--text-subhead, #94a3b8);
+      --webgen-border-glow: rgba(0, 240, 255, 0.25);
+    }
+
+    /* 4-Theme High-Contrast System */
+    html[data-theme="light"] {
+      --webgen-bg: #f8fafc;
+      --webgen-surface: #ffffff;
+      --webgen-surface-alt: #f1f5f9;
+      --webgen-line: rgba(15, 23, 42, 0.12);
+      --webgen-gold: #d97706;
+      --webgen-cyan: #0284c7;
+      --webgen-green: #059669;
+      --webgen-magenta: #c026d3;
+      --webgen-text: #0f172a;
+      --webgen-mute: #475569;
+      --webgen-border-glow: rgba(2, 132, 199, 0.25);
+    }
+    html[data-theme="light"] .webgen-poster {
+      background: #f8fafc !important;
+    }
+    html[data-theme="light"] .webgen-console-card,
+    html[data-theme="light"] .webgen-preview-viewport,
+    html[data-theme="light"] .webgen-modal-card,
+    html[data-theme="light"] .webgen-drawer-card {
+      background: #ffffff !important;
+      border-color: rgba(15, 23, 42, 0.12) !important;
+      color: #0f172a !important;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06) !important;
+    }
+    html[data-theme="light"] .webgen-input,
+    html[data-theme="light"] .webgen-textarea,
+    html[data-theme="light"] .webgen-registry-select {
+      background: #f1f5f9 !important;
+      color: #0f172a !important;
+      border-color: rgba(15, 23, 42, 0.16) !important;
+    }
+    html[data-theme="light"] .webgen-chip {
+      background: #f1f5f9 !important;
+      color: #334155 !important;
+      border-color: rgba(15, 23, 42, 0.12) !important;
+    }
+    html[data-theme="light"] .webgen-chip.is-on {
+      background: #0284c7 !important;
+      color: #ffffff !important;
+      border-color: #0284c7 !important;
+    }
+    html[data-theme="light"] .webgen-hud-box {
+      background: #f8fafc !important;
+      border-color: rgba(15, 23, 42, 0.12) !important;
+    }
+    html[data-theme="light"] .webgen-step-head,
+    html[data-theme="light"] .webgen-h1,
+    html[data-theme="light"] .webgen-label,
+    html[data-theme="light"] .webgen-template-title,
+    html[data-theme="light"] .webgen-telemetry-chip {
+      color: #0f172a !important;
+    }
+    html[data-theme="light"] .webgen-registry-toolbar {
+      background: rgba(2, 132, 199, 0.05) !important;
+      border-color: rgba(2, 132, 199, 0.2) !important;
+    }
+    html[data-theme="light"] .webgen-btn-subtle {
+      background: #f1f5f9 !important;
+      color: #0f172a !important;
+      border-color: rgba(15, 23, 42, 0.15) !important;
+    }
+
+    html[data-theme="matrix"] {
+      --webgen-bg: #010a03;
+      --webgen-surface: rgba(2, 20, 7, 0.95);
+      --webgen-surface-alt: rgba(4, 30, 12, 0.85);
+      --webgen-line: rgba(34, 197, 94, 0.25);
+      --webgen-gold: #a3e635;
+      --webgen-cyan: #22c55e;
+      --webgen-green: #10b981;
+      --webgen-magenta: #4ade80;
+      --webgen-text: #86efac;
+      --webgen-mute: #4ade80;
+      --webgen-border-glow: rgba(34, 197, 94, 0.35);
+    }
+
+    html[data-theme="gold"] {
+      --webgen-bg: #0c0902;
+      --webgen-surface: rgba(26, 19, 6, 0.95);
+      --webgen-surface-alt: rgba(36, 26, 8, 0.85);
+      --webgen-line: rgba(251, 191, 36, 0.25);
+      --webgen-gold: #fbbf24;
+      --webgen-cyan: #f59e0b;
+      --webgen-green: #10b981;
+      --webgen-magenta: #fde68a;
+      --webgen-text: #fef3c7;
+      --webgen-mute: #fde68a;
+      --webgen-border-glow: rgba(251, 191, 36, 0.35);
+    }
+
+    /* Layout Breathing Room & Grid Delimiters */
+    .webgen-hero-stage {
+      display: grid !important;
+      grid-template-columns: minmax(360px, 520px) minmax(0, 1fr) !important;
+      gap: 28px !important;
+      padding: 0 clamp(16px, 3vw, 36px) 60px !important;
+      max-width: 1720px !important;
+      margin: 0 auto !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+
+    .webgen-console-card {
+      padding: 30px 28px !important;
+      border-radius: 20px !important;
+      border: 1px solid var(--webgen-line) !important;
+      background: var(--webgen-surface) !important;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5) !important;
+      backdrop-filter: blur(20px) !important;
+      position: relative;
+    }
+
+    .webgen-preview-viewport {
+      padding: 24px !important;
+      border-radius: 20px !important;
+      border: 1px solid var(--webgen-line) !important;
+      background: var(--webgen-surface) !important;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5) !important;
+      backdrop-filter: blur(20px) !important;
+      display: flex !important;
+      flex-direction: column !important;
+      min-height: 720px !important;
+      position: relative;
+    }
+
+    /* Framework Badges Strip & Telemetry HUD */
+    .webgen-framework-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 18px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: var(--webgen-surface-alt);
+      border: 1px solid var(--webgen-line);
+      flex-wrap: wrap;
+    }
+    .webgen-framework-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .webgen-fw-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-family: var(--font-mono, monospace);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--webgen-text);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--webgen-line);
+      cursor: pointer;
+      transition: all 0.18s ease;
+      text-decoration: none;
+    }
+    .webgen-fw-badge:hover {
+      border-color: var(--webgen-cyan);
+      background: rgba(0, 240, 255, 0.12);
+      transform: translateY(-1px);
+    }
+    .webgen-fw-badge.astro {
+      color: #ff5d01;
+      border-color: rgba(255, 93, 1, 0.35);
+      background: rgba(255, 93, 1, 0.08);
+    }
+    .webgen-fw-badge.astro:hover {
+      background: rgba(255, 93, 1, 0.18);
+      border-color: #ff5d01;
+    }
+    .webgen-fw-badge.vite {
+      color: #bd34fe;
+      border-color: rgba(189, 52, 254, 0.35);
+      background: rgba(189, 52, 254, 0.08);
+    }
+    .webgen-fw-badge.vite:hover {
+      background: rgba(189, 52, 254, 0.18);
+      border-color: #bd34fe;
+    }
+    .webgen-fw-badge.nextjs {
+      color: var(--webgen-text);
+      border-color: rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .webgen-fw-badge.nextjs:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: #ffffff;
+    }
+    .webgen-telemetry-chips {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .webgen-telemetry-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--font-mono, monospace);
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: rgba(0, 240, 255, 0.06);
+      border: 1px solid var(--webgen-line);
+      color: var(--webgen-cyan);
+    }
+    .webgen-telemetry-chip.schema {
+      color: var(--webgen-green);
+      border-color: rgba(52, 211, 153, 0.35);
+      background: rgba(52, 211, 153, 0.08);
+    }
+    .webgen-telemetry-chip.latency {
+      color: var(--webgen-gold);
+      border-color: rgba(251, 191, 36, 0.35);
+      background: rgba(251, 191, 36, 0.08);
+    }
+
+    /* Device Preview Bezel Frame (WebGen Studio - additive, scoped to #webgenDeviceFrame) */
+    #webgenDeviceFrame {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background: transparent;
+      transition: all 0.25s ease;
+      min-height: 520px;
+    }
+    #webgenDeviceFrame .device-frame-bezel-top,
+    #webgenDeviceFrame .device-frame-bezel-bottom {
+      display: none;
+      flex-shrink: 0;
+      background: var(--surface2, #0b0e14);
+    }
+    #webgenDeviceFrame .device-frame-viewport {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+      min-height: 500px;
+      border-radius: 12px;
+    }
+    #webgenDeviceFrame .device-frame-viewport iframe {
+      display: block;
+      border: none;
+      width: 100%;
+      height: 100%;
+    }
+    /* Tablet mode: visible bezel chrome + scaled native-width iframe */
+    #webgenDeviceFrame.device-mode-tablet {
+      align-items: center;
+      justify-content: flex-start;
+      background: var(--webgen-bg, #05070d);
+      padding: 18px 0 24px;
+      overflow: auto;
+    }
+    #webgenDeviceFrame.device-mode-tablet .device-frame-bezel-top,
+    #webgenDeviceFrame.device-mode-tablet .device-frame-bezel-bottom {
+      display: block;
+      width: 768px;
+      max-width: 100%;
+      margin: 0 auto;
+    }
+    #webgenDeviceFrame.device-mode-tablet .device-frame-bezel-top {
+      height: 22px;
+      border-radius: 22px 22px 0 0;
+      border: 1px solid var(--webgen-line, #2a2f3d);
+      border-bottom: none;
+    }
+    #webgenDeviceFrame.device-mode-tablet .device-frame-bezel-bottom {
+      height: 22px;
+      border-radius: 0 0 22px 22px;
+      border: 1px solid var(--webgen-line, #2a2f3d);
+      border-top: none;
+      position: relative;
+    }
+    #webgenDeviceFrame.device-mode-tablet .device-frame-bezel-bottom::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #1e2330;
+    }
+    #webgenDeviceFrame.device-mode-tablet .device-frame-viewport {
+      width: 768px;
+      max-width: 100%;
+      margin: 0 auto;
+      border-left: 1px solid var(--webgen-line, #2a2f3d);
+      border-right: 1px solid var(--webgen-line, #2a2f3d);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.55);
+    }
+    /* Mobile mode: taller/narrower bezel chrome mimicking a phone chassis */
+    #webgenDeviceFrame.device-mode-mobile {
+      align-items: center;
+      justify-content: flex-start;
+      background: var(--webgen-bg, #05070d);
+      padding: 18px 0 24px;
+      overflow: auto;
+    }
+    #webgenDeviceFrame.device-mode-mobile .device-frame-bezel-top,
+    #webgenDeviceFrame.device-mode-mobile .device-frame-bezel-bottom {
+      display: block;
+      width: 390px;
+      max-width: 100%;
+      margin: 0 auto;
+    }
+    #webgenDeviceFrame.device-mode-mobile .device-frame-bezel-top {
+      height: 32px;
+      border-radius: 34px 34px 0 0;
+      border: 1px solid var(--webgen-line, #2a2f3d);
+      border-bottom: none;
+      position: relative;
+    }
+    #webgenDeviceFrame.device-mode-mobile .device-frame-bezel-top::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 10px;
+      transform: translateX(-50%);
+      width: 90px;
+      height: 8px;
+      border-radius: 6px;
+      background: #1e2330;
+    }
+    #webgenDeviceFrame.device-mode-mobile .device-frame-bezel-bottom {
+      height: 32px;
+      border-radius: 0 0 34px 34px;
+      border: 1px solid var(--webgen-line, #2a2f3d);
+      border-top: none;
+      position: relative;
+    }
+    #webgenDeviceFrame.device-mode-mobile .device-frame-bezel-bottom::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 44px;
+      height: 4px;
+      border-radius: 2px;
+      background: #1e2330;
+    }
+    #webgenDeviceFrame.device-mode-mobile .device-frame-viewport {
+      width: 390px;
+      max-width: 100%;
+      margin: 0 auto;
+      border-left: 1px solid var(--webgen-line, #2a2f3d);
+      border-right: 1px solid var(--webgen-line, #2a2f3d);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.55);
+    }
+
+    #zothXtermContainer,
+    #zothXtermContainer .xterm,
+    #zothXtermContainer .xterm-screen,
+    #zothXtermContainer .xterm-viewport {
+      max-width: 100% !important;
+      overflow-x: auto !important;
+    }
+
+    /* URL Pill and preview label truncation */
+    .webgen-url-pill {
+      min-width: 0 !important;
+      max-width: 100%;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: var(--webgen-surface-alt);
+      border: 1px solid var(--webgen-line);
+      border-radius: 8px;
+      font-family: var(--font-mono, monospace);
+      font-size: 0.74rem;
+      color: var(--webgen-text);
+    }
+    #previewUrlLabel {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+      display: inline-block;
+    }
+
+    /* Modal theme styling */
+    .webgen-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 9999;
+      backdrop-filter: blur(8px);
+      align-items: center;
+      justify-content: center;
+    }
+    .webgen-modal-card {
+      background: var(--webgen-surface, #080c18);
+      border: 1px solid var(--webgen-gold, #fbbf24);
+      border-radius: 16px;
+      max-width: 540px;
+      width: 90%;
+      padding: 28px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+      font-family: var(--font-sans);
+      color: var(--webgen-text, #ffffff);
+    }
+    .webgen-hotkey-cell {
+      background: var(--surface2, rgba(255,255,255,0.04));
+      border: 1px solid var(--webgen-line, rgba(255,255,255,0.08));
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    /* Zoth Registry Snippet & Component Drawer Styling */
+    .webgen-registry-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin: 10px 0 14px;
+      padding: 10px 12px;
+      background: rgba(0, 240, 255, 0.04);
+      border: 1px solid var(--webgen-line);
+      border-radius: 10px;
+    }
+    .webgen-registry-select {
+      flex: 1;
+      min-width: 160px;
+      background: var(--surface2, #0b0f19);
+      border: 1px solid var(--webgen-line, rgba(255,255,255,0.12));
+      color: var(--webgen-text, #ffffff);
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.76rem;
+      font-family: var(--font-mono, monospace);
+    }
+    .webgen-btn-subtle {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--webgen-line, rgba(255,255,255,0.15));
+      color: var(--webgen-text, #ffffff);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.74rem;
+      font-family: var(--font-mono, monospace);
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.18s ease;
+      white-space: nowrap;
+    }
+    .webgen-btn-subtle:hover {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: var(--webgen-cyan, #00f0ff);
+      color: var(--webgen-text);
+    }
+    .webgen-btn-gold-subtle {
+      background: rgba(251, 191, 36, 0.12);
+      border: 1px solid rgba(251, 191, 36, 0.35);
+      color: var(--webgen-gold, #fbbf24);
+    }
+    .webgen-btn-gold-subtle:hover {
+      background: var(--webgen-gold, #fbbf24);
+      color: #050508;
+      border-color: var(--webgen-gold, #fbbf24);
+    }
+
+    /* Template Drawer Modal */
+    .webgen-drawer-card {
+      background: var(--webgen-surface, #090d1a);
+      border: 1px solid var(--webgen-cyan, #00f0ff);
+      border-radius: 16px;
+      max-width: 860px;
+      width: 95%;
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.85);
+      overflow: hidden;
+      color: var(--webgen-text, #ffffff);
+      font-family: var(--font-sans);
+    }
+    .webgen-drawer-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--webgen-line, rgba(255,255,255,0.1));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(0,0,0,0.25);
+    }
+    .webgen-drawer-body {
+      padding: 16px 20px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .webgen-template-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .webgen-template-card {
+      background: var(--surface2, rgba(255,255,255,0.03));
+      border: 1px solid var(--webgen-line, rgba(255,255,255,0.08));
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+    }
+    .webgen-template-card:hover {
+      border-color: var(--webgen-cyan, #00f0ff);
+      background: rgba(0, 240, 255, 0.05);
+      transform: translateY(-2px);
+    }
+    .webgen-template-title {
+      font-weight: 700;
+      font-size: 0.88rem;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .webgen-template-desc {
+      font-size: 0.74rem;
+      color: var(--webgen-mute, #94a3b8);
+      line-height: 1.4;
+      margin-bottom: 10px;
+    }
+    .webgen-template-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 12px;
+    }
+    .webgen-template-tag {
+      font-size: 0.62rem;
+      font-family: var(--font-mono, monospace);
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.06);
+      color: var(--webgen-mute, #cbd5e1);
+    }
+    .webgen-template-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    /* Responsive Viewport Overrides */
+    @media (max-width: 960px) {
+      .webgen-poster {
+        grid-template-columns: 1fr !important;
+        min-height: auto;
+      }
+      .webgen-poster-visual {
+        min-height: 240px;
+      }
+      .webgen-hero-stage {
+        grid-template-columns: 1fr !important;
+      }
+    }
+    @media (max-width: 640px) {
+      .webgen-preview-header {
+        padding: 8px 10px;
+      }
+      .webgen-field-row {
+        grid-template-columns: 1fr !important;
+      }
+      .webgen-modal-grid {
+        grid-template-columns: 1fr !important;
+      }
+    }
+    @media (max-width: 420px) {
+      .webgen-poster-copy {
+        padding: 24px 16px !important;
+      }
+      .webgen-console-card {
+        padding: 20px 16px !important;
+      }
+      .webgen-preview-header {
+        gap: 6px;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="/assets/zoth-footer.css" />
+</head>
+<body>
+  <a class="skip skip-to-content" href="#main-content">Skip to main content</a>
+  
+  <!-- Master Topbar (Matching index.html & Zoth Hubs) -->
+                                                                  <header class="bar" id="topbar" role="banner">
+      <a class="brand js-hub" href="/" aria-label="Zoth Studio Home">
+        <div class="brand-emblem-wrap">
+          <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth Golden Z Emblem" width="34" height="34" class="brand-emblem-img" />
+          <span class="brand-emblem-halo"></span>
+        </div>
+        <span class="brand-text-wrap">
+          <strong>Zoth</strong>
+          <small>by NullAI</small>
+        </span>
+        <span class="brand-status-badge">SOVEREIGN</span>
+      </a>
+
+      <nav class="menu" aria-label="Primary navigation" role="navigation">
+        <a class="nav-link nav-for-everyone" href="/#for-everyone" data-tip="Zero-Code Showcases — How non-tech founders, creators & teams depend on Zoth.">✦ For You</a>
+
+        <!-- 🔮 Core AI -->
+        <div class="nav-dropdown" data-dropdown-id="core">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Core AI</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🔮 CORE AI ARCHITECTURE</span><span class="nav-item-badge">6 NODES</span></div>
+            <a href="/zoth/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+            <a href="/agents/"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+            <a href="/studio/consensus.html"><span class="nav-item-icon-box">⚔️</span><div class="nav-item-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+            <a href="/studio/swarm.html"><span class="nav-item-icon-box">🌐</span><div class="nav-item-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+            <a href="/memory/"><span class="nav-item-icon-box">🧠</span><div class="nav-item-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+            <a href="/zoth-world.html"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+          </div>
+        </div>
+
+        <!-- 🪐 Studio -->
+        <div class="nav-dropdown" data-dropdown-id="studio">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Studio</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu nav-dropdown-mega">
+            <div class="nav-dropdown-header"><span>🪐 14+ STUDIO WORKSTATIONS</span><span class="nav-item-badge">LOCAL DAGS</span></div>
+            <a href="/studio/cockpit.html"><span class="nav-item-icon-box">🪐</span><div class="nav-item-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+            <a href="/studio/cockpit.html?tool=webgen"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+            <a href="/studio/cockpit.html?tool=vos-sandbox"><span class="nav-item-icon-box">💻</span><div class="nav-item-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+            <a href="/studio/cockpit.html?tool=nexus-3d"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+            <a href="/studio/cockpit.html?tool=omnipost"><span class="nav-item-icon-box">🎬</span><div class="nav-item-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+            <a href="/studio/cockpit.html?tool=math-pillars"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+            <a href="/studio/cockpit.html?tool=secure-comms"><span class="nav-item-icon-box">🔒</span><div class="nav-item-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+            <a href="/studio/cockpit.html?tool=signal-bridge"><span class="nav-item-icon-box">📡</span><div class="nav-item-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+            <a href="/studio/cockpit.html?tool=web3-hub"><span class="nav-item-icon-box">🪙</span><div class="nav-item-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+            <a href="/studio/cockpit.html?tool=pets"><span class="nav-item-icon-box">💎</span><div class="nav-item-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+            <a href="/studio/cockpit.html?tool=tool-nexus"><span class="nav-item-icon-box">🛠️</span><div class="nav-item-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+          </div>
+        </div>
+
+        <!-- 🌌 Universe -->
+        <div class="nav-dropdown" data-dropdown-id="universe">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Universe</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🌌 UNIVERSE &amp; PUBLICATIONS</span><span class="nav-item-badge">STORIES</span></div>
+            <a href="/comic/"><span class="nav-item-icon-box">🎨</span><div class="nav-item-body"><strong>AZOTH Anime Comic</strong><small>Season 1 Ep 1: Genesis in Silicon Rain (Audio)</small></div><span class="nav-item-badge">AUDIO</span></a>
+            <a href="/social/"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+            <a href="/articles/"><span class="nav-item-icon-box">📜</span><div class="nav-item-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+            <a href="/article/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+            <a href="/ai-webgpu.html"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+            <a href="/adytum/"><span class="nav-item-icon-box">🏛️</span><div class="nav-item-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+          </div>
+        </div>
+
+        <!-- 📚 Docs & Vault -->
+        <div class="nav-dropdown" data-dropdown-id="docs">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Docs & Vault</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>📚 DOCUMENTATION &amp; SECURITY</span><span class="nav-item-badge">SPECS</span></div>
+            <a href="/docs/"><span class="nav-item-icon-box">📚</span><div class="nav-item-body"><strong>Master Documentation</strong><small>Port Topology, 1-Click Install Scripts & API Guide</small></div><span class="nav-item-badge">DOCS</span></a>
+            <a href="/vault/"><span class="nav-item-icon-box">🔐</span><div class="nav-item-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+            <a href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+            <a href="/faq.html"><span class="nav-item-icon-box">❓</span><div class="nav-item-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+          </div>
+        </div>
+
+        <!-- ⚡ Action Pills -->
+        <button type="button" class="nav-pill nav-telemetry-pill" title="View Live Studio Telemetry & Background Daemons" aria-label="Studio Telemetry Status">
+          <span class="tel-dot online"></span><span class="tel-text">6/6 DAEMONS</span>
+        </button>
+
+        <button type="button" class="nav-pill nav-pet-pill" title="Active Companion Spirit: Azoth (Click to Summon / Switch Mascot)" aria-label="Active Companion Spirit">
+          <span class="pet-emoji">🔮</span><span class="pet-name">Azoth</span>
+        </button>
+
+        <a class="nav-pill nav-deck-pill js-deck" href="http://127.0.0.1:8484/" title="Open Local Operator Deck (:8484)">
+          <span class="deck-pulse"></span><span>DECK</span>
+        </a>
+
+        <button type="button" class="nav-pill nav-palette-btn" title="Open Global Command Palette (Ctrl+K)" aria-label="Command Palette">
+          <span class="palette-icon">🔍</span><kbd class="nav-kbd">Ctrl+K</kbd>
+        </button>
+
+        <button type="button" class="nav-pill nav-annotate-btn" title="Toggle On-Screen Annotator & Feedback (Shift+A)" aria-label="Toggle Annotator">
+          <span class="annotate-icon">✏️</span><span class="annotate-text">Annotate</span><kbd class="nav-kbd">Shift+A</kbd>
+        </button>
+
+        <div class="nav-dropdown nav-theme-dropdown">
+          <button class="nav-dropdown-btn nav-theme-current-btn" type="button" aria-haspopup="true" aria-expanded="false" title="Switch Visual Theme (Shift+T)">
+            <span class="current-theme-swatch" style="background:#00f0ff;"></span>
+            <span class="current-theme-emoji">🌙</span>
+            <span class="current-theme-label">Dark Void</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+        </div>
+
+        <a class="nav-pill git" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank" title="GitHub Repository — Open Source code, Debian packages, and releases">
+          <span>🐙 GitHub ↗</span>
+        </a>
+      </nav>
+
+      <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Toggle navigation menu">
+        <span class="burger-lines"><span class="b-line b-1"></span><span class="b-line b-2"></span><span class="b-line b-3"></span></span>
+        <span class="burger-text">Menu</span>
+      </button>
+      <div class="zoth-scroll-progress" id="zoth-scroll-progress"></div>
+    </header>
+
+    <nav class="drawer" id="drawer" aria-label="Universal Mobile Navigation" role="navigation">
+      <div class="drawer-header-brand">
+        <div class="d-brand-left">
+          <div class="brand-emblem-wrap">
+            <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth" width="28" height="28" class="brand-emblem-img" />
+          </div>
+          <span class="d-brand-title"><strong>Zoth Studio</strong><small>v12.0 Sovereign</small></span>
+        </div>
+        <button type="button" class="drawer-telemetry-badge" title="View Diagnostics HUD">● 6/6 DAEMONS</button>
+        <button type="button" class="drawer-close-btn" aria-label="Close mobile menu">✕</button>
+      </div>
+
+      <div class="drawer-section drawer-tools-section">
+        <div class="drawer-heading">⚡ Quick Actions</div>
+        <div class="drawer-quick-tools-grid">
+          <button type="button" class="drawer-tool-pill drawer-palette-trigger"><span>🔍</span> Command Palette <kbd class="nav-kbd">Ctrl+K</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-annotate-trigger"><span>✏️</span> On-Screen Annotator <kbd class="nav-kbd">Shift+A</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-telemetry-trigger"><span>⚡</span> Telemetry HUD</button>
+          <button type="button" class="drawer-tool-pill drawer-audio-trigger"><span>🔊</span> Audio FX</button>
+        </div>
+      </div>
+
+      <div class="drawer-section drawer-theme-section">
+        <div class="drawer-heading">🎨 Visual Theme (16 Archetypes)</div>
+        <div class="drawer-search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="drawer-theme-search-input" placeholder="Search 16 themes..." autocomplete="off" />
+        </div>
+        <div class="theme-filter-chips drawer-filter-chips">
+          <button type="button" class="theme-chip-btn active" data-drawer-cat="all">All (16)</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="studio originals">Originals</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="frontier ai & tech">Frontier</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="developer archetypes">Dev</button>
+        </div>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">✦ Featured</div>
+        <a class="drawer-link drawer-hero-link" href="/#for-everyone"><span class="d-link-icon">✦</span><div class="d-link-body"><strong>For You (No-Code Showcases)</strong><small>How Non-Tech Founders, Creators & Teams Use Zoth</small></div><span class="nav-item-badge">SHOWCASE</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🔮 Core AI & Pantheon</div>
+        <a class="drawer-link" href="/zoth/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+        <a class="drawer-link" href="/agents/"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+        <a class="drawer-link" href="/studio/consensus.html"><span class="d-link-icon">⚔️</span><div class="d-link-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+        <a class="drawer-link" href="/studio/swarm.html"><span class="d-link-icon">🌐</span><div class="d-link-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+        <a class="drawer-link" href="/memory/"><span class="d-link-icon">🧠</span><div class="d-link-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+        <a class="drawer-link" href="/zoth-world.html"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🪐 Workstations & DAGs</div>
+        <a class="drawer-link" href="/studio/cockpit.html"><span class="d-link-icon">🪐</span><div class="d-link-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=webgen"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=vos-sandbox"><span class="d-link-icon">💻</span><div class="d-link-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=nexus-3d"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=omnipost"><span class="d-link-icon">🎬</span><div class="d-link-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=math-pillars"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=secure-comms"><span class="d-link-icon">🔒</span><div class="d-link-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=signal-bridge"><span class="d-link-icon">📡</span><div class="d-link-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=web3-hub"><span class="d-link-icon">🪙</span><div class="d-link-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=pets"><span class="d-link-icon">💎</span><div class="d-link-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=tool-nexus"><span class="d-link-icon">🛠️</span><div class="d-link-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📜 Universe & Research</div>
+        <a class="drawer-link" href="/comic/"><span class="d-link-icon">🎨</span><div class="d-link-body"><strong>AZOTH Anime Comic Series</strong><small>Season 1 Ep 1: Genesis in Silicon Rain</small></div><span class="nav-item-badge">AUDIO</span></a>
+        <a class="drawer-link" href="/social/"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+        <a class="drawer-link" href="/articles/"><span class="d-link-icon">📜</span><div class="d-link-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+        <a class="drawer-link" href="/article/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+        <a class="drawer-link" href="/ai-webgpu.html"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+        <a class="drawer-link" href="/adytum/"><span class="d-link-icon">🏛️</span><div class="d-link-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📚 Docs & Security</div>
+        <a class="drawer-link" href="/docs/"><span class="d-link-icon">📚</span><div class="d-link-body"><strong>Complete Documentation</strong><small>Port Topology, 1-Click Install Scripts & API</small></div><span class="nav-item-badge">DOCS</span></a>
+        <a class="drawer-link" href="/vault/"><span class="d-link-icon">🔐</span><div class="d-link-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+        <a class="drawer-link" href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+        <a class="drawer-link" href="/faq.html"><span class="d-link-icon">❓</span><div class="d-link-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+      </div>
+
+      <div class="drawer-section drawer-footer-section">
+        <a class="drawer-pill-link js-deck" href="http://127.0.0.1:8484/">💻 Launch Local Operator Deck (:8484)</a>
+        <a class="drawer-pill-link" href="https://github.com/NullAITech/zoth-studio" target="_blank" rel="noopener noreferrer">🐙 GitHub Source Repository ↗</a>
+        <a class="drawer-pill-link" href="/downloads/zoth-studio-android.apk">📱 Download Android App (.apk)</a>
+      </div>
+    </nav>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+  <!-- Mobile Drawer -->
+  
+
+  <main id="main-content" role="main" tabindex="-1">
+    <section aria-label="WebGen" class="webgen-poster">
+      <div class="webgen-poster-copy">
+        <p class="kicker">Website builder</p>
+        <h1>WebGen</h1>
+        <p class="lede">Describe a website in plain language. Pick a starting idea, tap Build, and watch a live preview appear.</p>
+        <div class="webgen-poster-actions">
+          <a class="btn btn-gold" href="#webgen-terminal">Start building</a>
+          <button type="button" class="btn btn-ghost" onclick="if (window.ZothGate) window.ZothGate.show();">Install locally</button>
+        </div>
+      </div>
+      <div class="webgen-poster-visual">
+        <img alt="Master Azoth in a white and gold mask with purple eyes" class="webgen-poster-azoth agent-avatar-pingpong" data-agent="azoth" decoding="async" fetchpriority="high" height="1024" src="/assets/mascot/azoth-portrait.jpg" width="1024"/>
+        <span class="webgen-poster-credit">Azoth · Operator</span>
+      </div>
+    </section>
+
+    <!-- PTY foundry — below the poster. JS ids on this stage stay intact. -->
+    <div class="webgen-hero-stage" id="webgen-terminal">
+    <!-- LEFT: Universal Sovereign Terminal & Foundry Console -->
+    <aside class="webgen-console-card">
+      <div class="webgen-kicker">
+        <span class="webgen-kicker-dot"></span>
+        <span>Start here</span>
+      </div>
+
+      <h2 class="webgen-h1">Your website</h2>
+      <p class="webgen-lede">Tap an idea or type your own. Give it a short name, then hit Build. The preview fills in as it is made.</p>
+
+      <ol class="webgen-steps">
+        <li class="webgen-step">
+          <div class="webgen-step-head"><span class="webgen-step-num">1</span> What should it be?</div>
+          
+          <!-- Zoth Registry Snippet & Component Library Toolbar -->
+          <div class="webgen-registry-toolbar">
+            <span style="font-size:0.75rem;font-weight:700;color:var(--webgen-cyan);display:flex;align-items:center;gap:6px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+              Registry:
+            </span>
+            <select id="webgenRegistrySelect" class="webgen-registry-select" onchange="onRegistrySelectChange(this.value)" aria-label="Select Zoth Registry Snippet">
+              <option value="">— Select Zoth Registry Snippet —</option>
+              <option value="defi-terminal">DeFi Yield Matrix &amp; DEX Swarm</option>
+              <option value="e2ee-messenger">SimpleX Zero-Knowledge E2EE Messenger</option>
+              <option value="hermetic-sanctum">Hermetic Alchemical Sanctum (3D Gold)</option>
+              <option value="agent-cockpit">Autonomous 21-Agent Swarm Cockpit</option>
+              <option value="neural-benchmark">Neural WebGPU Model Arena &amp; FLOPs</option>
+              <option value="bento-saas">Bento SaaS Platform &amp; Waitlist</option>
+              <option value="minimal-portfolio">Minimalist Dark Portfolio &amp; Gallery</option>
+            </select>
+            <button type="button" class="webgen-btn-subtle webgen-btn-gold-subtle" onclick="importSelectedRegistrySnippet()" title="1-Click Import selected Registry Snippet">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              1-Click Import
+            </button>
+            <button type="button" class="webgen-btn-subtle" onclick="toggleComponentDrawer(true)" title="Open Modular Component Template Library Drawer">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+              Component Library
+            </button>
+          </div>
+
+          <p class="webgen-step-hint">Tap a starting idea. You can edit the words after.</p>
+          <div class="webgen-chips" id="webgenIdeaChips">
+            <button type="button" class="webgen-chip" data-slug="my-portfolio" aria-pressed="false" onclick="setPrompt('A calm portfolio for a designer: large photos, short bio, and a simple contact form. Dark background, gold accents, easy to read on a phone.', 'my-portfolio')">Portfolio</button>
+            <button type="button" class="webgen-chip" data-slug="local-shop" aria-pressed="false" onclick="setPrompt('A local shop landing page: hours, map, three services, and a phone number. Clean and friendly, works on mobile.', 'local-shop')">Local shop</button>
+            <button type="button" class="webgen-chip" data-slug="my-blog" aria-pressed="false" onclick="setPrompt('A personal blog home: featured posts, about blurb, and a newsletter box. Warm dark theme, big readable type.', 'my-blog')">Blog</button>
+            <button type="button" class="webgen-chip" data-slug="waitlist" aria-pressed="false" onclick="setPrompt('A product waitlist page: one headline, three benefits, email signup, and a short FAQ. Modern, high contrast.', 'waitlist')">Waitlist</button>
+            <button type="button" class="webgen-chip" data-slug="stoic-app" aria-pressed="false" onclick="setPrompt('A 3D website about Stoicism with a particle canvas, Marcus Aurelius quotes, dark mode, and simple navigation.', 'stoic-app')">Stoicism 3D</button>
+            <button type="button" class="webgen-chip" data-slug="skate-collective" aria-pressed="false" onclick="setPrompt('A skate collective site: video clips, spot list, sticker wall. Free, no checkout, raw street energy.', 'skate-collective')">Skate crew</button>
+            <button type="button" class="webgen-chip" data-slug="local-eats" aria-pressed="false" onclick="setPrompt('A restaurant site: menu with prices, hours, address, and a reservation note. Warm photos, easy on a phone.', 'local-eats')">Restaurant</button>
+            <button type="button" class="webgen-chip" data-slug="photo-studio" aria-pressed="false" onclick="setPrompt('A photographer site: large image grid, about blurb, and a contact form. Clean, lots of whitespace.', 'photo-studio')">Photographer</button>
+            <button type="button" class="webgen-chip" data-slug="event-night" aria-pressed="false" onclick="setPrompt('An event landing page: date, venue, three speakers, and a signup form. Bold type, high contrast.', 'event-night')">Event</button>
+          </div>
+          <p class="webgen-step-hint">Or open an example in the preview (does not start a build).</p>
+          <div class="webgen-chips" id="webgenExampleChips">
+            <button type="button" class="webgen-chip webgen-chip-ghost" onclick="previewExample('/workspaces/dogs-and-cats/index.html', 'dogs-and-cats')">Pets example</button>
+            <button type="button" class="webgen-chip webgen-chip-ghost" onclick="previewExample('/workspaces/stoic-app/index.html', 'stoic-app')">Stoicism example</button>
+            <button type="button" class="webgen-chip webgen-chip-ghost" onclick="previewExample('/workspaces/key/index.html', 'key')">Music example</button>
+          </div>
+          <div class="webgen-field-wrap">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <label class="webgen-label" for="promptInput" style="margin:0;">Or write it yourself</label>
+              <span id="promptCharCounter" style="font-size:0.68rem;color:var(--webgen-mute);font-family:var(--font-mono);">0</span>
+            </div>
+            <textarea id="promptInput" class="webgen-textarea" oninput="updateCharCount()" placeholder="Example: A bakery site with photos, hours, and a contact form. Warm colors, easy on a phone."></textarea>
+          </div>
+        </li>
+
+        <li class="webgen-step">
+          <div class="webgen-step-head"><span class="webgen-step-num">2</span> Name and look</div>
+          <div class="webgen-field-row">
+            <div class="webgen-field-wrap">
+              <label class="webgen-label" for="projNameInput">Site name</label>
+              <input type="text" id="projNameInput" class="webgen-input" value="my-site" placeholder="my-site" autocomplete="off" spellcheck="false" />
+              <p class="webgen-step-hint">Short name. Letters, numbers, and dashes.</p>
+            </div>
+            <div class="webgen-field-wrap">
+              <label class="webgen-label" for="stylePresetSelect">Look</label>
+              <select id="stylePresetSelect" class="webgen-input" style="cursor:pointer;">
+                <option value="dark-kinetic" selected>Dark + motion</option>
+                <option value="clean-modern">Clean and simple</option>
+                <option value="alchemical-gold">Gold glass</option>
+                <option value="cyber-matrix">Matrix HUD</option>
+              </select>
+            </div>
+          </div>
+          <div class="webgen-pages" id="webgenPageOpts">
+            <span class="webgen-label">Pages to include</span>
+            <label class="webgen-check"><input type="checkbox" value="Home" checked> Home</label>
+            <label class="webgen-check"><input type="checkbox" value="About" checked> About</label>
+            <label class="webgen-check"><input type="checkbox" value="Contact" checked> Contact</label>
+            <label class="webgen-check"><input type="checkbox" value="Gallery"> Gallery</label>
+          </div>
+          <div class="webgen-skills" id="webgenSkillOpts">
+            <span class="webgen-label">Skills to use</span>
+            <p class="webgen-step-hint">Optional. Tap any that should guide the builder.</p>
+            <div class="webgen-chips" id="webgenSkillChips">
+              <button type="button" class="webgen-chip" data-skill="visual" aria-pressed="false" onclick="toggleWebgenSkill(this)">Visual design</button>
+              <button type="button" class="webgen-chip" data-skill="seo" aria-pressed="false" onclick="toggleWebgenSkill(this)">SEO</button>
+              <button type="button" class="webgen-chip" data-skill="a11y" aria-pressed="false" onclick="toggleWebgenSkill(this)">Accessibility</button>
+              <button type="button" class="webgen-chip" data-skill="motion" aria-pressed="false" onclick="toggleWebgenSkill(this)">3D / motion</button>
+              <button type="button" class="webgen-chip" data-skill="business" aria-pressed="false" onclick="toggleWebgenSkill(this)">Small business</button>
+              <button type="button" class="webgen-chip" data-skill="blog" aria-pressed="false" onclick="toggleWebgenSkill(this)">Blog</button>
+              <button type="button" class="webgen-chip" data-skill="gallery" aria-pressed="false" onclick="toggleWebgenSkill(this)">Photo gallery</button>
+              <button type="button" class="webgen-chip" data-skill="forms" aria-pressed="false" onclick="toggleWebgenSkill(this)">Forms</button>
+            </div>
+          </div>
+        </li>
+      </ol>
+
+      <button class="webgen-btn-launch" id="btnSpawnAgent" onclick="spawnPTYSession()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        Build this site
+      </button>
+      <p class="webgen-build-hint">Takes a minute. Watch the preview. Ctrl+Enter also builds.</p>
+      <p id="webgenBuildStatus" class="webgen-status" hidden></p>
+      <div class="webgen-tweak" id="webgenTweakWrap" hidden>
+        <label class="webgen-label" for="webgenTweakInput">Want a change?</label>
+        <div class="webgen-tweak-row">
+          <input type="text" id="webgenTweakInput" class="webgen-input" placeholder="Example: Make the header blue and add a photo of bread" autocomplete="off" />
+          <button type="button" class="webgen-btn-tweak" id="btnTweakSite" onclick="tweakCurrentSite()">Update</button>
+        </div>
+      </div>
+
+      <details class="webgen-advanced" id="webgenMoreOptions">
+        <summary>More options</summary>
+        <div class="webgen-field-wrap" style="margin-top:10px;">
+          <label class="webgen-label" for="agentHarnessSelect">Builder</label>
+          <select id="agentHarnessSelect" class="webgen-input" style="cursor:pointer;">
+            <option value="antigravity" selected>Fast (recommended)</option>
+            <option value="ollama">Local / offline</option>
+            <option value="grok">Grok</option>
+            <option value="hermes">Hermes</option>
+            <option value="triad">Team of three (slower)</option>
+          </select>
+          <p class="webgen-step-hint">Leave this unless you already know which builder you want.</p>
+        </div>
+      </details>
+
+      <details class="webgen-advanced" id="webgenPastBuilds">
+        <summary>Past builds</summary>
+        <div class="webgen-field-wrap" style="margin-top:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <label class="webgen-label">Saved workspaces</label>
+            <span onclick="fetchTrackedSessions()" style="font-size:0.7rem;color:var(--webgen-cyan);cursor:pointer;font-family:var(--font-mono);">Refresh</span>
+          </div>
+          <div class="webgen-sessions-tray" id="trackedSessionsTray">
+            <div style="font-size:0.72rem;color:var(--webgen-mute);font-family:var(--font-mono);">No builds yet.</div>
+          </div>
+        </div>
+      </details>
+
+      <details class="webgen-advanced" id="webgenBuildLog">
+        <summary>Build log <span id="termStatusBadge" style="color:#34d399;font-weight:700;">idle</span></summary>
+        <div class="webgen-telemetry-strip">
+          <div>
+            <span class="webgen-tel-k">Checks</span>
+            <span id="telemetryAstStatus" style="color:#34d399;font-weight:700;">Ready</span>
+          </div>
+          <div>
+            <span class="webgen-tel-k">Speed</span>
+            <span id="telemetryLatency" style="color:var(--webgen-cyan);font-weight:700;">—</span>
+          </div>
+          <div>
+            <span class="webgen-tel-k">Size</span>
+            <span id="telemetryTokenEst" style="color:var(--webgen-gold);font-weight:700;">—</span>
+          </div>
+        </div>
+        <div class="webgen-hud-box">
+          <div class="webgen-hud-top">
+            <span id="termSessionLabel">Waiting for a build</span>
+          </div>
+          <div id="zothXtermContainer" style="width:100%;height:180px;background:#000000;border-radius:6px;overflow:hidden;padding:4px;"></div>
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <span style="font-size:0.7rem;color:var(--webgen-mute);font-family:var(--font-mono);">Files</span>
+              <span id="fileCountBadge" style="font-size:0.68rem;color:var(--webgen-gold);font-family:var(--font-mono);font-weight:700;">0</span>
+            </div>
+            <div class="file-badge-list" id="workspaceFilesList">
+              <span style="font-size:0.7rem;color:#64748b;font-family:var(--font-mono);">Nothing written yet.</span>
+            </div>
+          </div>
+        </div>
+      </details>
+    </aside>
+
+    <!-- RIGHT: Live Website Viewport with Three.js Kinetic Loading Overlay -->
+    <section class="webgen-preview-viewport">
+      <!-- Framework Badges & Telemetry Header Strip -->
+      <div class="webgen-framework-strip">
+        <div class="webgen-framework-group">
+          <span style="font-size:0.72rem;font-weight:700;font-family:var(--font-mono);color:var(--webgen-mute);margin-right:2px;">EXPORTS:</span>
+          <button type="button" class="webgen-fw-badge astro" onclick="openFrameworkModal('astro')" title="Export to Astro 5 SSR/Static project">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>
+            Astro 5
+          </button>
+          <button type="button" class="webgen-fw-badge vite" onclick="openFrameworkModal('vite')" title="Export to Vite 6 Single Page App">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            Vite
+          </button>
+          <button type="button" class="webgen-fw-badge nextjs" onclick="openFrameworkModal('nextjs')" title="Export to Next.js 15 App Router">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            Next.js 15
+          </button>
+        </div>
+        <div class="webgen-telemetry-chips">
+          <span class="webgen-telemetry-chip latency" title="Serverless V8 isolate execution simulation">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            12ms Edge Isolate
+          </span>
+          <span class="webgen-telemetry-chip schema" title="Schema contract verified">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            JSON-Schema 2020-12: Valid
+          </span>
+        </div>
+      </div>
+
+      <div class="webgen-preview-header">
+        <div class="webgen-url-pill">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          <span id="previewUrlLabel">Your preview will show here</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <!-- Device Mode Buttons -->
+          <div style="display:inline-flex;background:rgba(255,255,255,0.06);padding:2px;border-radius:6px;border:1px solid var(--webgen-line);margin-right:6px;">
+            <button id="btnViewDesktop" onclick="setDeviceMode('desktop')" title="Desktop View (100%)" style="background:var(--webgen-gold);color:#000;border:none;border-radius:4px;padding:5px 8px;font-size:0.75rem;cursor:pointer;font-weight:700;display:inline-flex;align-items:center;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+            </button>
+            <button id="btnViewTablet" onclick="setDeviceMode('tablet')" title="Tablet View (768px)" style="background:transparent;color:var(--webgen-mute);border:none;border-radius:4px;padding:5px 8px;font-size:0.75rem;cursor:pointer;display:inline-flex;align-items:center;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+            </button>
+            <button id="btnViewMobile" onclick="setDeviceMode('mobile')" title="Mobile View (375px)" style="background:transparent;color:var(--webgen-mute);border:none;border-radius:4px;padding:5px 8px;font-size:0.75rem;cursor:pointer;display:inline-flex;align-items:center;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+            </button>
+          </div>
+          <button type="button" onclick="copyPreviewLink()" title="Copy preview link" style="background:rgba(255,255,255,0.08);border:1px solid var(--webgen-line);color:var(--webgen-text);padding:6px 12px;border-radius:6px;font-size:0.75rem;cursor:pointer;font-family:var(--font-mono);display:inline-flex;align-items:center;gap:5px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            Copy link
+          </button>
+          <button type="button" onclick="downloadPreviewSite()" title="Download this site" style="background:rgba(255,255,255,0.08);border:1px solid var(--webgen-line);color:var(--webgen-text);padding:6px 12px;border-radius:6px;font-size:0.75rem;cursor:pointer;font-family:var(--font-mono);display:inline-flex;align-items:center;gap:5px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Download
+          </button>
+          <button type="button" onclick="reloadPreview()" style="background:rgba(255,255,255,0.08);border:1px solid var(--webgen-line);color:var(--webgen-text);padding:6px 12px;border-radius:6px;font-size:0.75rem;cursor:pointer;font-family:var(--font-mono);display:inline-flex;align-items:center;gap:5px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+            Refresh
+          </button>
+          <a id="previewNewTabBtn" href="#" target="_blank" rel="noopener" style="background:var(--webgen-gold);color:#050508;font-weight:800;text-decoration:none;padding:6px 14px;border-radius:6px;font-size:0.75rem;font-family:var(--font-mono);display:inline-flex;align-items:center;gap:5px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+            Open
+          </a>
+        </div>
+      </div>
+
+      <!-- Kinetic 3D Three.js Synthesis Overlay -->
+      <div class="webgen-loading-overlay hidden" id="previewLoadingOverlay">
+        <div class="webgen-three-canvas-wrap" id="threeOrbCanvasContainer"></div>
+        
+        <div class="webgen-progress-card">
+          <div class="webgen-progress-top">
+            <div class="webgen-progress-title">
+              <span>⚡</span>
+              <span id="overlayProjectTitle">Building your site…</span>
+            </div>
+            <div class="webgen-progress-pct" id="overlayProgressPct">15%</div>
+          </div>
+
+          <div class="webgen-progress-track">
+            <div class="webgen-progress-fill" id="overlayProgressFill" style="width: 15%;"></div>
+          </div>
+
+          <div class="webgen-log-ticker" id="overlayLogTicker">
+            <span>Starting the builder…</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="device-frame" id="webgenDeviceFrame">
+        <div class="device-frame-bezel-top"></div>
+        <div class="device-frame-viewport">
+          <div id="webgenEmptyPreview" class="webgen-empty-preview">
+            <p class="webgen-empty-title">Your site will show up here</p>
+            <p class="webgen-empty-copy">Pick a starting idea or type what you want, then tap <strong>Build this site</strong>.</p>
+          </div>
+          <iframe id="webgenPreviewIframe" class="webgen-iframe is-waiting" src="about:blank" title="Website preview" referrerpolicy="no-referrer"></iframe>
+        </div>
+        <div class="device-frame-bezel-bottom"></div>
+      </div>
+    </section>
+    </div>
+  </main>
+                                                        <footer class="site" role="contentinfo">
+      <div class="foot-wrap">
+        <div aria-hidden="true" class="foot-watermark">ZOTH</div>
+        <div class="foot-grid">
+          <div class="foot-brand-col">
+            <p class="foot-kicker">Local · loopback · no telemetry</p>
+            <a class="foot-brand-lockup" href="/">
+              <img alt="Master Azoth" class="foot-azoth" decoding="async" height="72" loading="lazy" src="/assets/mascot/azoth-bust.jpg" width="72" />
+              <span class="foot-brand-text">
+                <img alt="" class="foot-brand-logo" decoding="async" height="28" loading="lazy" src="/assets/brand/zoth-golden-z-192.png" width="28" />
+                <strong class="foot-brand-title">Zoth Studio</strong>
+              </span>
+            </a>
+            <small class="foot-brand-desc">Local-first workspace for a team of AI agents. Files stay on this machine.</small>
+            <div class="foot-actions">
+              <a class="foot-btn foot-btn-on" href="/#install">Install locally</a>
+              <a class="foot-btn foot-btn-ghost" href="/pricing/">Support the forge</a>
+            </div>
+          </div>
+          <div class="foot-col">
+            <h3>Studio</h3>
+            <a class="mega-footer-link js-deck" href="http://127.0.0.1:8484/">Operator Deck</a>
+            <a class="mega-footer-link" href="/studio/">Workstations</a>
+            <a class="mega-footer-link" href="/studio/webgen.html">WebGen</a>
+            <a class="mega-footer-link" href="/studio/swarm.html">3D Swarm</a>
+            <a class="mega-footer-link" href="/studio/consensus.html">Consensus</a>
+          </div>
+          <div class="foot-col">
+            <h3>Agents</h3>
+            <a class="mega-footer-link" href="/zoth/">Master Azoth</a>
+            <a class="mega-footer-link" href="/agents/">21-Agent pantheon</a>
+            <a class="mega-footer-link" href="/pets/">Companions</a>
+            <a class="mega-footer-link" href="/vault/">Sovereign vault</a>
+            <a class="mega-footer-link" href="/adytum/">Adytum</a>
+          </div>
+          <div class="foot-col">
+            <h3>Universe</h3>
+            <a class="mega-footer-link" href="/comic/">Azoth comic</a>
+            <a class="mega-footer-link" href="/social/">Social wall</a>
+            <a class="mega-footer-link" href="/showcase.html">Showcase</a>
+            <a class="mega-footer-link" href="/signal/">Signal</a>
+            <a class="mega-footer-link" href="/article/">Manifesto</a>
+          </div>
+          <div class="foot-col">
+            <h3>Resources</h3>
+            <a class="mega-footer-link" href="/docs/">Docs</a>
+            <a class="mega-footer-link" href="/faq.html">FAQ</a>
+            <a class="mega-footer-link" href="/pricing/">Support / Patron</a>
+            <a class="mega-footer-link" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub ↗</a>
+            <a class="mega-footer-link" href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI ↗</a>
+          </div>
+        </div>
+        <div class="foot-bottom">
+          <p>© 2026 NullAI Tech. MIT. Local sovereign execution — zero telemetry.</p>
+          <nav aria-label="Footer meta" class="foot-meta">
+            <a href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub</a>
+            <a href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI</a>
+            <a href="/docs/">Docs</a>
+            <a href="/faq.html">FAQ</a>
+          </nav>
+        </div>
+      </div>
+    </footer>
+  <!-- Keyboard Shortcuts Modal -->
+  <div id="hotkeysModal" class="webgen-modal-overlay">
+    <div class="webgen-modal-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <h3 style="margin:0;font-family:var(--font-display);font-size:1.3rem;color:var(--webgen-gold);">Keyboard shortcuts</h3>
+        <button onclick="toggleHotkeysModal()" style="background:none;border:none;color:var(--webgen-mute);font-size:1.4rem;cursor:pointer;">✕</button>
+      </div>
+      <div class="webgen-modal-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-family:var(--font-mono);font-size:0.8rem;">
+        <div class="webgen-hotkey-cell"><strong style="color:var(--webgen-cyan);">Ctrl + Enter</strong><br/><span style="color:var(--webgen-mute);">Build this site</span></div>
+        <div class="webgen-hotkey-cell"><strong style="color:var(--webgen-cyan);">Ctrl + R</strong><br/><span style="color:var(--webgen-mute);">Reload Preview</span></div>
+        <div class="webgen-hotkey-cell"><strong style="color:var(--webgen-cyan);">Alt + 1 / 2 / 3</strong><br/><span style="color:var(--webgen-mute);">Desktop/Tab/Mobile</span></div>
+        <div class="webgen-hotkey-cell"><strong style="color:var(--webgen-cyan);">Shift + T</strong><br/><span style="color:var(--webgen-mute);">Cycle Theme</span></div>
+        <div class="webgen-hotkey-cell"><strong style="color:var(--webgen-cyan);">?</strong><br/><span style="color:var(--webgen-mute);">Toggle This Modal</span></div>
+        <div class="webgen-hotkey-cell"><strong style="color:var(--webgen-cyan);">Esc</strong><br/><span style="color:var(--webgen-mute);">Close Modals / Overlays</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Framework Export Modal -->
+  <div id="frameworkExportModal" class="webgen-modal-overlay">
+    <div class="webgen-modal-card" style="max-width: 680px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span id="fwModalIcon" style="display:inline-flex;align-items:center;"></span>
+          <div>
+            <h3 id="fwModalTitle" style="margin:0;font-family:var(--font-display);font-size:1.3rem;color:var(--webgen-cyan);">Framework Export</h3>
+            <small id="fwModalSubtitle" style="color:var(--webgen-mute);font-size:0.75rem;font-family:var(--font-mono);">Astro 5 · SSR &amp; Islands Ready</small>
+          </div>
+        </div>
+        <button onclick="toggleFrameworkModal(false)" style="background:none;border:none;color:var(--webgen-mute);font-size:1.4rem;cursor:pointer;">✕</button>
+      </div>
+      <p id="fwModalDesc" style="color:var(--webgen-mute);font-size:0.85rem;line-height:1.5;margin-top:0;margin-bottom:16px;">Export your generated site directly into a production-ready framework scaffold.</p>
+      
+      <div style="background:var(--webgen-surface-alt);border:1px solid var(--webgen-line);border-radius:10px;padding:14px;margin-bottom:18px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span style="font-family:var(--font-mono);font-size:0.75rem;font-weight:700;color:var(--webgen-gold);">GENERATED SCAFFOLD CONFIG</span>
+          <span id="fwConfigName" style="font-family:var(--font-mono);font-size:0.72rem;color:var(--webgen-cyan);">package.json</span>
+        </div>
+        <pre id="fwConfigPreview" style="margin:0;max-height:220px;overflow-y:auto;font-family:var(--font-mono);font-size:0.75rem;line-height:1.5;color:var(--webgen-text);background:rgba(0,0,0,0.4);padding:10px;border-radius:6px;"></pre>
+      </div>
+
+      <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;">
+        <button type="button" class="webgen-btn-subtle" onclick="copyFrameworkConfig(this)" style="padding:8px 16px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          Copy Config
+        </button>
+        <button type="button" class="webgen-btn-subtle webgen-btn-gold-subtle" onclick="downloadFrameworkProject()" style="padding:8px 18px;font-weight:700;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Download Scaffold ZIP
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Component Template Library Drawer Modal -->
+  <div id="componentDrawerModal" class="webgen-modal-overlay">
+    <div class="webgen-drawer-card">
+      <div class="webgen-drawer-header">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--webgen-cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          <div>
+            <h3 style="margin:0;font-size:1.1rem;color:var(--webgen-cyan);font-family:var(--font-display);">Component Template Library</h3>
+            <small style="color:var(--webgen-mute);font-size:0.75rem;">1-click inject curated modular HTML/CSS/3D components into your prompt</small>
+          </div>
+        </div>
+        <button onclick="toggleComponentDrawer(false)" style="background:none;border:none;color:var(--webgen-mute);font-size:1.4rem;cursor:pointer;">✕</button>
+      </div>
+      
+      <div style="padding:12px 20px;border-bottom:1px solid var(--webgen-line, rgba(255,255,255,0.08));display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;background:rgba(0,0,0,0.15);">
+        <div class="theme-filter-chips" style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button type="button" class="theme-chip-btn active" data-drawer-cat="all" onclick="filterDrawerCategory('all', this)">All (11)</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="hero" onclick="filterDrawerCategory('hero', this)">Heroes (3)</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="bento" onclick="filterDrawerCategory('bento', this)">Bento Grids (2)</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="pricing" onclick="filterDrawerCategory('pricing', this)">Pricing (2)</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="proof" onclick="filterDrawerCategory('proof', this)">Proof (2)</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="widgets" onclick="filterDrawerCategory('widgets', this)">Widgets (2)</button>
+        </div>
+        <div style="min-width:200px;flex:1;max-width:280px;">
+          <input type="text" id="componentSearchInput" oninput="filterDrawerSearch(this.value)" placeholder="Search components..." class="webgen-input" style="padding:4px 10px;font-size:0.75rem;height:30px;" />
+        </div>
+      </div>
+
+      <div class="webgen-drawer-body">
+        <div id="componentTemplatesGrid" class="webgen-template-grid">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var currentSlug = 'defi';
+    var currentPreviewUrl = '';
+    var zothTerm = null;
+    var threeOrbInstance = null;
+    var isBuilding = false;
+    var buildProgress = 15;
+    var buildInterval = null;
+    var activeDrawerCategory = 'all';
+    var activeDrawerSearch = '';
+    var activeExportFramework = 'astro';
+
+    var ZOTH_REGISTRY_SNIPPETS = {
+      'defi-terminal': {
+        title: 'DeFi Yield Matrix & DEX Swarm',
+        slug: 'defi-terminal',
+        look: 'dark-kinetic',
+        pages: ['Home', 'Analytics', 'Pools', 'Contact'],
+        skills: ['visual', 'motion', 'business'],
+        prompt: 'A sovereign DeFi Yield & DEX terminal: live APY matrix, interactive liquidity pool simulation, particle kinetic charts, multi-wallet connect modal, and dark kinetic styling.'
+      },
+      'e2ee-messenger': {
+        title: 'SimpleX Zero-Knowledge E2EE Messenger',
+        slug: 'e2ee-messenger',
+        look: 'cyber-matrix',
+        pages: ['Home', 'Security', 'Channels', 'Contact'],
+        skills: ['visual', 'a11y', 'forms'],
+        prompt: 'A SimpleX Zero-Knowledge E2EE Messenger web client: ephemeral ratcheted chat UI, QR code key exchange, cryptographic fingerprint verifier, and dark matrix HUD theme.'
+      },
+      'hermetic-sanctum': {
+        title: 'Hermetic Alchemical Sanctum (3D Gold)',
+        slug: 'hermetic-sanctum',
+        look: 'alchemical-gold',
+        pages: ['Home', 'Sanctum', 'Aphorisms', 'Gallery'],
+        skills: ['visual', 'motion', 'gallery'],
+        prompt: 'A Hermetic Alchemical Sanctum: 3D sacred geometry canvas, Emerald Tablet aphorisms, gold leaf typography, particle vortex, and interactive quote oracle.'
+      },
+      'agent-cockpit': {
+        title: 'Autonomous 21-Agent Swarm Cockpit',
+        slug: 'agent-cockpit',
+        look: 'cyber-matrix',
+        pages: ['Home', 'Swarm', 'DAGs', 'Telemetry'],
+        skills: ['visual', 'seo', 'motion'],
+        prompt: 'An Autonomous 21-Agent Swarm Cockpit: live model health matrix, DAG execution inspector, real-time telemetry stream, and agent task dispatcher console.'
+      },
+      'neural-benchmark': {
+        title: 'Neural WebGPU Model Arena & FLOPs',
+        slug: 'neural-benchmark',
+        look: 'clean-modern',
+        pages: ['Home', 'Benchmarks', 'Models', 'Docs'],
+        skills: ['visual', 'seo', 'a11y'],
+        prompt: 'A Neural Model Arena & Hardware FLOPs Benchmark: in-browser WebGPU transformer evaluator, real-time tokens/sec gauge, latency histogram, and model leaderboard.'
+      },
+      'bento-saas': {
+        title: 'Bento SaaS Platform & Waitlist',
+        slug: 'bento-saas',
+        look: 'clean-modern',
+        pages: ['Home', 'Features', 'Pricing', 'Contact'],
+        skills: ['visual', 'business', 'forms', 'seo'],
+        prompt: 'A modern Bento SaaS Platform landing page: high-contrast bento grid with interactive metric cards, customer proof carousel, animated pricing tiers, and waitlist form.'
+      },
+      'minimal-portfolio': {
+        title: 'Minimalist Dark Portfolio & Gallery',
+        slug: 'minimal-portfolio',
+        look: 'dark-kinetic',
+        pages: ['Home', 'About', 'Work', 'Contact'],
+        skills: ['visual', 'gallery', 'a11y'],
+        prompt: 'A minimalist dark design portfolio: full-bleed case studies, typography-led hierarchy, interactive project modal viewer, and contact form with validation.'
+      }
+    };
+
+    var SVG_ICONS = {
+      lightning: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>',
+      crystal: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12l4 6-10 12L2 9z"></path></svg>',
+      ruler: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.3 8.7 8.7 21.3c-1 1-2.5 1-3.4 0l-2.6-2.6c-1-1-1-2.5 0-3.4L15.3 2.7c1-1 2.5-1 3.4 0l2.6 2.6c1 1 1 2.5 0 3.4Z"></path></svg>',
+      grid: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>',
+      chart: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>',
+      card: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>',
+      scale: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="M7 21h10"></path><path d="M12 3v18"></path><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"></path></svg>',
+      terminal: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>',
+      star: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>',
+      sparkle: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"></path></svg>',
+      key: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21 2-2 2m-1.5 1.5L14 9l-4-4-6 6 4 4 6-6 3.5-3.5"></path><circle cx="7.5" cy="16.5" r="3.5"></circle></svg>'
+    };
+
+    var ZOTH_COMPONENT_TEMPLATES = [
+      {
+        id: 'hero-kinetic',
+        cat: 'hero',
+        iconSvg: SVG_ICONS.lightning,
+        title: 'Hero: Kinetic Mesh',
+        desc: 'Kinetic WebGL/Canvas hero with animated gradient headline, sovereign badge pill, and dual CTA buttons.',
+        tags: ['hero', 'threejs', 'kinetic'],
+        promptSpec: '\n[Component: Hero Kinetic Mesh] Fullscreen dark hero (#050508) with animated Three.js particle wave background, glowing headline "The Sovereign Edge", subtitle pill "v12.0 Active", and primary "Launch Deck" + ghost "Explore Docs" CTAs.',
+        htmlCode: '<section class="hero-kinetic-section" style="min-height:80vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;position:relative;background:#050508;color:#fff;padding:40px 20px;">\n  <div class="badge" style="background:rgba(0,240,255,0.1);border:1px solid #00f0ff;color:#00f0ff;padding:4px 12px;border-radius:20px;font-size:0.75rem;margin-bottom:16px;">✦ SOVEREIGN v12.0</div>\n  <h1 style="font-size:clamp(2.5rem,6vw,4.5rem);font-weight:800;letter-spacing:-0.03em;margin:0 0 16px;">The Sovereign Edge</h1>\n  <p style="max-width:600px;color:#94a3b8;font-size:1.1rem;line-height:1.6;margin:0 0 28px;">Autonomous multi-agent synthesis executed entirely local-first without central dependencies.</p>\n  <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">\n    <a href="#launch" style="background:#00f0ff;color:#000;font-weight:700;padding:12px 24px;border-radius:8px;text-decoration:none;">Launch Deck ↗</a>\n    <a href="#docs" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;">Explore Docs</a>\n  </div>\n</section>'
+      },
+      {
+        id: 'hero-alchemical',
+        cat: 'hero',
+        iconSvg: SVG_ICONS.crystal,
+        title: 'Hero: Alchemical Gold',
+        desc: 'Hermetic obsidian hero with radiant gold seal halo, Latin aphorism kicker, and glassmorphism action cards.',
+        tags: ['hero', 'gold', 'hermetic'],
+        promptSpec: '\n[Component: Hero Alchemical Gold] Obsidian glass hero with gold trim (#fbbf24), radiant seal emblem, serif Fraunces/Cinzel headline "As Above, So Below", and ambient golden particle shimmer.',
+        htmlCode: '<section class="hero-gold-section" style="min-height:80vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;background:#080a10;border-bottom:1px solid rgba(251,191,36,0.2);color:#fff;padding:60px 20px;">\n  <div style="width:64px;height:64px;border-radius:50%;border:2px solid #fbbf24;box-shadow:0 0 30px rgba(251,191,36,0.4);display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin-bottom:20px;">✦</div>\n  <p style="font-family:serif;font-style:italic;color:#fbbf24;letter-spacing:0.1em;margin-bottom:8px;">QUOD EST SUPERIUS EST SICUT QUOD EST INFERIUS</p>\n  <h1 style="font-size:3.2rem;font-weight:800;color:#fef08a;margin:0 0 20px;">Sovereign Alchemy</h1>\n  <p style="max-width:580px;color:#cbd5e1;font-size:1.05rem;">Transmuting raw computational entropy into deterministic crystalline logic.</p>\n</section>'
+      },
+      {
+        id: 'hero-minimal',
+        cat: 'hero',
+        iconSvg: SVG_ICONS.ruler,
+        title: 'Hero: Minimal Typography',
+        desc: 'High-contrast typography hero with giant bold title, live monospace timecode ticker, and understated nav.',
+        tags: ['hero', 'minimal', 'typography'],
+        promptSpec: '\n[Component: Hero Minimal Typography] Stark high-contrast dark hero with ultra-large title (80px), subtle mono date/telemetry ticker, clean border-bottom rule, and one primary link.',
+        htmlCode: '<section style="padding:100px 30px 60px;max-width:1200px;margin:0 auto;border-bottom:1px solid rgba(255,255,255,0.1);">\n  <div style="font-family:monospace;font-size:0.8rem;color:#64748b;margin-bottom:20px;">[0x7F] SYSTEM_ACTIVE // PARROT_OS_x86_64</div>\n  <h1 style="font-size:clamp(3rem,8vw,5.5rem);font-weight:900;letter-spacing:-0.04em;line-height:0.95;margin:0 0 24px;color:#fff;">AUTONOMOUS<br/><span style="color:#00f0ff;">FOUNDRY.</span></h1>\n  <p style="font-size:1.25rem;color:#94a3b8;max-width:650px;line-height:1.5;">Deterministic code synthesis and zero-telemetry agent swarms designed for high-conviction teams.</p>\n</section>'
+      },
+      {
+        id: 'bento-features',
+        cat: 'bento',
+        iconSvg: SVG_ICONS.grid,
+        title: 'Bento: 3x3 Feature Grid',
+        desc: 'Modular 6-tile bento grid with glassmorphic depth, hover lift effects, micro-metrics, and feature tags.',
+        tags: ['bento', 'features', 'cards'],
+        promptSpec: '\n[Component: Bento 3x3 Grid] Modern bento box layout with 6 asymmetric cards (2 span-2, 4 span-1), glowing borders on hover, icon headers, and metric labels (e.g. 60 FPS, 0ms latency).',
+        htmlCode: '<section style="padding:60px 20px;max-width:1200px;margin:0 auto;">\n  <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:20px;">\n    <div style="grid-column:span 2;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:28px;">\n      <span style="font-size:1.4rem;color:#00f0ff;">⚡</span>\n      <h3 style="font-size:1.4rem;color:#fff;margin:12px 0 8px;">Zero-Latency Local Foundry</h3>\n      <p style="color:#94a3b8;line-height:1.5;">Direct hardware acceleration via WebGPU & local LLMs with 100% offline persistence.</p>\n    </div>\n    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:28px;">\n      <span style="font-size:1.4rem;color:#34d399;">🔒</span>\n      <h3 style="font-size:1.2rem;color:#fff;margin:12px 0 8px;">Argon2id Vault</h3>\n      <p style="color:#94a3b8;font-size:0.9rem;">E2EE zero-knowledge key rings.</p>\n    </div>\n  </div>\n</section>'
+      },
+      {
+        id: 'bento-telemetry',
+        cat: 'bento',
+        iconSvg: SVG_ICONS.chart,
+        title: 'Bento: Live Telemetry Matrix',
+        desc: 'HUD metric widgets featuring pulsing online LEDs, mini sparkline bars, and monospace throughput counters.',
+        tags: ['bento', 'telemetry', 'metrics'],
+        promptSpec: '\n[Component: Bento Telemetry Matrix] 4-card telemetry status row with live FPS gauge, Token Generation speed (tok/s), Memory Whitespace buffer, and Daemon status badges.',
+        htmlCode: '<div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:14px;padding:20px;background:rgba(0,0,0,0.4);border-radius:12px;border:1px solid rgba(0,240,255,0.2);">\n  <div style="padding:14px;border-left:3px solid #00f0ff;background:rgba(255,255,255,0.02);">\n    <div style="font-size:0.75rem;color:#94a3b8;font-family:monospace;">THROUGHPUT</div>\n    <div style="font-size:1.6rem;font-weight:800;color:#00f0ff;">142.8 <small style="font-size:0.8rem;">t/s</small></div>\n  </div>\n  <div style="padding:14px;border-left:3px solid #34d399;background:rgba(255,255,255,0.02);">\n    <div style="font-size:0.75rem;color:#94a3b8;font-family:monospace;">FRAME RATE</div>\n    <div style="font-size:1.6rem;font-weight:800;color:#34d399;">60.0 <small style="font-size:0.8rem;">FPS</small></div>\n  </div>\n</div>'
+      },
+      {
+        id: 'pricing-matrix',
+        cat: 'pricing',
+        iconSvg: SVG_ICONS.card,
+        title: 'Pricing: 3-Tier Sovereign Matrix',
+        desc: 'Clean 3-tier pricing matrix with monthly/annual switch, "Most Popular" glow pill, and checkmark list.',
+        tags: ['pricing', 'tiers', 'cards'],
+        promptSpec: '\n[Component: 3-Tier Pricing Matrix] 3 pricing cards (Free / Pro Sovereign / Enterprise Pantheon) with feature lists, price tags ($0 / $19 / $99), highlight ribbon, and checkout buttons.',
+        htmlCode: '<section style="padding:60px 20px;max-width:1100px;margin:0 auto;text-align:center;">\n  <h2 style="font-size:2.2rem;color:#fff;margin-bottom:10px;">Transparent Sovereign Tiers</h2>\n  <p style="color:#94a3b8;margin-bottom:40px;">No hidden telemetry or seat lock-in.</p>\n  <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:24px;text-align:left;">\n    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:32px;">\n      <h3 style="color:#fff;margin:0 0 12px;">Sovereign Core</h3>\n      <div style="font-size:2.4rem;font-weight:800;color:#fff;margin-bottom:16px;">$0 <span style="font-size:1rem;color:#64748b;font-weight:400;">/ forever</span></div>\n      <ul style="color:#cbd5e1;font-size:0.9rem;line-height:2;padding-left:20px;margin-bottom:24px;">\n        <li>Full Local Agent Pantheon</li>\n        <li>Offline WebGen Studio</li>\n        <li>Argon2id Encrypted Vault</li>\n      </ul>\n      <button style="width:100%;padding:12px;background:rgba(255,255,255,0.1);border:none;border-radius:8px;color:#fff;font-weight:700;cursor:pointer;">Get Started</button>\n    </div>\n    <div style="background:rgba(0,240,255,0.04);border:2px solid #00f0ff;border-radius:14px;padding:32px;position:relative;">\n      <span style="position:absolute;top:-12px;right:20px;background:#00f0ff;color:#000;font-size:0.7rem;font-weight:800;padding:2px 10px;border-radius:10px;">RECOMMENDED</span>\n      <h3 style="color:#00f0ff;margin:0 0 12px;">Pantheon Pro</h3>\n      <div style="font-size:2.4rem;font-weight:800;color:#fff;margin-bottom:16px;">$19 <span style="font-size:1rem;color:#64748b;font-weight:400;">/ mo</span></div>\n      <ul style="color:#cbd5e1;font-size:0.9rem;line-height:2;padding-left:20px;margin-bottom:24px;">\n        <li>Everything in Core</li>\n        <li>Multi-Agent Consensus Battles</li>\n        <li>60 FPS High-Bitrate Video Export</li>\n      </ul>\n      <button style="width:100%;padding:12px;background:#00f0ff;border:none;border-radius:8px;color:#000;font-weight:800;cursor:pointer;">Upgrade to Pro</button>\n    </div>\n  </div>\n</section>'
+      },
+      {
+        id: 'pricing-slider',
+        cat: 'pricing',
+        iconSvg: SVG_ICONS.scale,
+        title: 'Pricing: Sliding Patron Scale',
+        desc: 'Interactive pay-what-you-want patron slider with dynamic perk unlocks and tier medal badges.',
+        tags: ['pricing', 'patron', 'slider'],
+        promptSpec: '\n[Component: Sliding Scale Patron Pricing] Interactive range slider ($5 - $100/mo) that dynamically updates benefit badges and displays custom patron quote.',
+        htmlCode: '<div style="background:#0b0f19;border:1px solid #fbbf24;border-radius:14px;padding:32px;max-width:600px;margin:0 auto;text-align:center;color:#fff;">\n  <h3 style="color:#fbbf24;margin-bottom:8px;">Alchemical Patron Forge</h3>\n  <p style="color:#94a3b8;font-size:0.9rem;margin-bottom:24px;">Support independent sovereign research and open source tooling.</p>\n  <input type="range" min="5" max="100" value="25" style="width:100%;accent-color:#fbbf24;" oninput="document.getElementById(\'patronAmt\').textContent=\'$\'+this.value+\'/mo\'"/>\n  <div id="patronAmt" style="font-size:2rem;font-weight:800;color:#fbbf24;margin-top:14px;">$25/mo</div>\n</div>'
+      },
+      {
+        id: 'proof-terminal',
+        cat: 'proof',
+        iconSvg: SVG_ICONS.terminal,
+        title: 'Proof: Live Terminal Feed',
+        desc: 'Simulated real-time transaction/build activity log with timestamps, green status dots, and live feed scroll.',
+        tags: ['proof', 'terminal', 'logs'],
+        promptSpec: '\n[Component: Live Terminal Activity Proof] Embedded mock terminal showing live agent task execution timestamps, git commit hashes, and consensus verifications.',
+        htmlCode: '<div style="background:#000;border:1px solid #334155;border-radius:10px;padding:16px;font-family:monospace;font-size:0.8rem;color:#34d399;max-width:700px;margin:0 auto;">\n  <div style="color:#64748b;margin-bottom:8px;border-bottom:1px solid #1e293b;padding-bottom:6px;">● LIVE AUTONOMOUS SYNTHESIS FEED</div>\n  <div>[23:30:14] <span style="color:#00f0ff;">DAG_DISPATCH</span> -> Triad Consensus verified on workspace/defi-terminal</div>\n  <div>[23:30:18] <span style="color:#fbbf24;">AST_VALIDATE</span> -> 0 syntax errors across 4 files</div>\n  <div>[23:30:22] <span style="color:#34d399;">DEPLOY_OK</span> -> Live preview spawned on :8484</div>\n</div>'
+      },
+      {
+        id: 'proof-testimonials',
+        cat: 'proof',
+        iconSvg: SVG_ICONS.star,
+        title: 'Proof: Testimonial Cards',
+        desc: 'Dark glass testimonial cards with avatar rings, verified credentials, and star ratings.',
+        tags: ['proof', 'testimonials', 'reviews'],
+        promptSpec: '\n[Component: Social Proof Testimonials] 3 dark glass quote cards with avatar icons, founder titles, star ratings, and punchy pull-quotes about local speed.',
+        htmlCode: '<div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:16px;padding:40px 20px;max-width:1100px;margin:0 auto;">\n  <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:24px;border-radius:12px;color:#fff;">\n    <div style="color:#fbbf24;margin-bottom:10px;">★★★★★</div>\n    <p style="color:#cbd5e1;font-size:0.95rem;line-height:1.5;margin-bottom:16px;">"Zoth transformed how our engineering team prototypes. 100% offline and zero telemetry."</p>\n    <strong style="font-size:0.85rem;color:#00f0ff;">Alex R. — Lead Architect</strong>\n  </div>\n</div>'
+      },
+      {
+        id: 'widget-particles',
+        cat: 'widgets',
+        iconSvg: SVG_ICONS.sparkle,
+        title: 'Widget: Particle Canvas',
+        desc: 'Self-contained interactive WebGL/2D particle network that flows and connects lines on mouse movement.',
+        tags: ['widget', 'canvas', 'interactive'],
+        promptSpec: '\n[Component: Interactive Particle Canvas] Embedded HTML5 canvas with a kinetic particle web reacting to cursor coordinates, glowing cyan nodes, and connecting line web.',
+        htmlCode: '<canvas id="particleCanvas" style="width:100%;height:300px;background:#05070d;border-radius:12px;border:1px solid rgba(0,240,255,0.2);display:block;"></canvas>'
+      },
+      {
+        id: 'widget-keygen',
+        cat: 'widgets',
+        iconSvg: SVG_ICONS.key,
+        title: 'Widget: Crypto Keygen',
+        desc: 'Client-side cryptographic keypair generator with copyable public/private keys and hash verification.',
+        tags: ['widget', 'crypto', 'e2ee'],
+        promptSpec: '\n[Component: Client-Side Crypto Keygen] Interactive cryptographic key generator tool with Generate button, hex key strings, fingerprint badge, and 1-click copy.',
+        htmlCode: '<div style="background:#090d18;border:1px solid rgba(0,240,255,0.3);border-radius:12px;padding:24px;max-width:550px;margin:0 auto;color:#fff;">\n  <h4 style="margin:0 0 10px;color:#00f0ff;">Cryptographic Identity Generator</h4>\n  <p style="color:#94a3b8;font-size:0.8rem;margin-bottom:14px;">Generate ephemeral Ed25519 / Argon2 keypairs in your local browser runtime.</p>\n  <button style="background:#00f0ff;color:#000;border:none;padding:8px 16px;border-radius:6px;font-weight:700;cursor:pointer;">Generate Keypair</button>\n</div>'
+      }
+    ];
+
+    function onRegistrySelectChange(slug) {
+      if (slug) {
+        importRegistrySnippet(slug);
+      }
+    }
+
+    function importSelectedRegistrySnippet() {
+      var sel = document.getElementById('webgenRegistrySelect');
+      var slug = (sel && sel.value) ? sel.value : 'defi-terminal';
+      if (sel) sel.value = slug;
+      importRegistrySnippet(slug);
+    }
+
+    function importRegistrySnippet(slug) {
+      var item = ZOTH_REGISTRY_SNIPPETS[slug];
+      if (!item) return;
+
+      var p = document.getElementById('promptInput');
+      var s = document.getElementById('projNameInput');
+      var look = document.getElementById('stylePresetSelect');
+      var regSel = document.getElementById('webgenRegistrySelect');
+
+      if (p) {
+        p.value = item.prompt;
+        updateCharCount();
+      }
+      if (s) {
+        s.value = item.slug;
+      }
+      if (look && item.look) {
+        look.value = item.look;
+      }
+      if (regSel) {
+        regSel.value = slug;
+      }
+
+      // Configure pages
+      if (item.pages && item.pages.length) {
+        var pageBoxes = document.querySelectorAll('#webgenPageOpts input[type="checkbox"]');
+        pageBoxes.forEach(function (b) {
+          b.checked = (item.pages.indexOf(b.value) !== -1);
+        });
+      }
+
+      // Configure skills
+      if (item.skills && item.skills.length) {
+        var skillChips = document.querySelectorAll('#webgenSkillChips .webgen-chip');
+        skillChips.forEach(function (c) {
+          var k = c.getAttribute('data-skill');
+          var on = (item.skills.indexOf(k) !== -1);
+          c.classList.toggle('is-on', on);
+          c.setAttribute('aria-pressed', on ? 'true' : 'false');
+        });
+      }
+
+      // Clear idea chip highlight
+      var ideaChips = document.querySelectorAll('#webgenIdeaChips .webgen-chip');
+      ideaChips.forEach(function (c) {
+        c.classList.remove('is-on');
+        c.setAttribute('aria-pressed', 'false');
+      });
+
+      setWebgenStatus('📦 Registry snippet “' + item.title + '” imported (look: ' + item.look + '). Tap "Build this site".', 'ok');
+    }
+
+    function toggleComponentDrawer(show) {
+      var m = document.getElementById('componentDrawerModal');
+      if (!m) return;
+      var isVisible = (m.style.display === 'flex');
+      var nextState = (typeof show === 'boolean') ? show : !isVisible;
+      m.style.display = nextState ? 'flex' : 'none';
+      if (nextState) {
+        renderComponentTemplates();
+      }
+    }
+
+    function filterDrawerCategory(cat, btn) {
+      activeDrawerCategory = cat || 'all';
+      if (btn) {
+        var parent = btn.parentElement;
+        if (parent) {
+          parent.querySelectorAll('.theme-chip-btn').forEach(function(b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+        }
+      }
+      renderComponentTemplates();
+    }
+
+    function filterDrawerSearch(query) {
+      activeDrawerSearch = (query || '').toLowerCase().trim();
+      renderComponentTemplates();
+    }
+
+    function renderComponentTemplates() {
+      var grid = document.getElementById('componentTemplatesGrid');
+      if (!grid) return;
+
+      var filtered = ZOTH_COMPONENT_TEMPLATES.filter(function (t) {
+        var matchCat = (activeDrawerCategory === 'all' || t.cat === activeDrawerCategory);
+        var matchQuery = true;
+        if (activeDrawerSearch) {
+          var corpus = (t.title + ' ' + t.desc + ' ' + t.tags.join(' ')).toLowerCase();
+          matchQuery = corpus.indexOf(activeDrawerSearch) !== -1;
+        }
+        return matchCat && matchQuery;
+      });
+
+      if (!filtered.length) {
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px 20px;color:var(--webgen-mute);font-family:var(--font-mono);font-size:0.85rem;">No component templates found matching filter.</div>';
+        return;
+      }
+
+      grid.innerHTML = '';
+      filtered.forEach(function (t) {
+        var card = document.createElement('div');
+        card.className = 'webgen-template-card';
+        card.innerHTML = 
+          '<div>' +
+            '<div class="webgen-template-title">' + (t.iconSvg || t.icon || '') + ' <span>' + t.title + '</span></div>' +
+            '<div class="webgen-template-desc">' + t.desc + '</div>' +
+            '<div class="webgen-template-tags">' +
+              t.tags.map(function(tag) { return '<span class="webgen-template-tag">#' + tag + '</span>'; }).join('') +
+            '</div>' +
+          '</div>' +
+          '<div class="webgen-template-actions">' +
+            '<button type="button" class="webgen-btn-subtle webgen-btn-gold-subtle" style="flex:1;justify-content:center;" onclick="appendTemplateToPrompt(\'' + t.id + '\')">' +
+              '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Append to Prompt' +
+            '</button>' +
+            '<button type="button" class="webgen-btn-subtle" style="padding:6px 8px;" title="Copy Component HTML Code" onclick="copyTemplateCode(\'' + t.id + '\', this)">' +
+              '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Code' +
+            '</button>' +
+          '</div>';
+        grid.appendChild(card);
+      });
+    }
+
+    function appendTemplateToPrompt(templateId) {
+      var tmpl = ZOTH_COMPONENT_TEMPLATES.find(function (t) { return t.id === templateId; });
+      if (!tmpl) return;
+
+      var p = document.getElementById('promptInput');
+      if (p) {
+        var cur = p.value.trim();
+        p.value = cur ? (cur + '\n\n' + tmpl.promptSpec) : tmpl.promptSpec.trim();
+        updateCharCount();
+        p.focus();
+      }
+
+      toggleComponentDrawer(false);
+      setWebgenStatus('Component template "' + tmpl.title + '" appended to prompt.', 'ok');
+    }
+
+    function copyTemplateCode(templateId, btn) {
+      var tmpl = ZOTH_COMPONENT_TEMPLATES.find(function (t) { return t.id === templateId; });
+      if (!tmpl) return;
+
+      var text = tmpl.htmlCode;
+      var origText = btn ? btn.innerHTML : '';
+      var done = function () {
+        if (btn) {
+          btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Copied!';
+          setTimeout(function () { btn.innerHTML = origText; }, 1800);
+        }
+        setWebgenStatus('Component HTML copied to clipboard.', 'ok');
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(function () {
+          window.prompt('Copy component HTML:', text);
+        });
+      } else {
+        window.prompt('Copy component HTML:', text);
+      }
+    }
+
+    var currentExportFramework = 'astro';
+    var FRAMEWORK_EXPORT_PRESETS = {
+      astro: {
+        title: 'Astro 5 Project Export',
+        subtitle: 'Astro 5.4 · Islands Architecture & SSR / Static Output',
+        icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff5d01" stroke-width="2"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>',
+        desc: 'Pre-configured Astro 5 template with Tailwind CSS, Lucide icons, and serverless Netlify adapters.',
+        configName: 'astro.config.mjs',
+        config: '// astro.config.mjs\\nimport { defineConfig } from "astro/config";\\nimport tailwind from "@astrojs/tailwind";\\nimport netlify from "@astrojs/netlify";\\n\\nexport default defineConfig({\\n  output: "server",\\n  adapter: netlify(),\\n  integrations: [tailwind({ applyBaseStyles: false })],\\n  server: { port: 4321, host: true }\\n});'
+      },
+      vite: {
+        title: 'Vite 6 SPA Export',
+        subtitle: 'Vite 6.1 · Ultra-Fast HMR & TypeScript Bundling',
+        icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>',
+        desc: 'Pre-configured Vite single-page application scaffold with TypeScript, PostCSS, and dark-mode tokens.',
+        configName: 'vite.config.ts',
+        config: '// vite.config.ts\\nimport { defineConfig } from "vite";\\n\\nexport default defineConfig({\\n  root: ".",\\n  server: {\\n    port: 5173,\\n    host: "127.0.0.1"\\n  },\\n  build: {\\n    outDir: "dist",\\n    target: "esnext",\\n    sourcemap: true\\n  }\\n});'
+      },
+      nextjs: {
+        title: 'Next.js 15 App Router Export',
+        subtitle: 'Next.js 15.1 · React 19 Server Components & Turbopack',
+        icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M16 8l-8 8"></path><path d="M16 12v4"></path></svg>',
+        desc: 'Production Next.js 15 boilerplate featuring React 19 Server Components and Edge runtime handler.',
+        configName: 'next.config.mjs',
+        config: '/** @type {import("next").NextConfig} */\\nconst nextConfig = {\\n  reactStrictMode: true,\\n  experimental: {\\n    serverActions: {\\n      bodySizeLimit: "2mb"\\n    }\\n  }\\n};\\n\\nexport default nextConfig;'
+      }
+    };
+
+    function openFrameworkModal(fwKey) {
+      currentExportFramework = fwKey || 'astro';
+      var fw = FRAMEWORK_EXPORT_PRESETS[currentExportFramework] || FRAMEWORK_EXPORT_PRESETS.astro;
+      
+      var icon = document.getElementById('fwModalIcon');
+      var title = document.getElementById('fwModalTitle');
+      var subtitle = document.getElementById('fwModalSubtitle');
+      var desc = document.getElementById('fwModalDesc');
+      var configName = document.getElementById('fwConfigName');
+      var configPreview = document.getElementById('fwConfigPreview');
+      
+      if (icon) icon.innerHTML = fw.icon;
+      if (title) title.textContent = fw.title;
+      if (subtitle) subtitle.textContent = fw.subtitle;
+      if (desc) desc.textContent = fw.desc;
+      if (configName) configName.textContent = fw.configName;
+      if (configPreview) configPreview.textContent = fw.config.replace(/\\n/g, '\n');
+      
+      toggleFrameworkModal(true);
+    }
+
+    function toggleFrameworkModal(show) {
+      var m = document.getElementById('frameworkExportModal');
+      if (m) {
+        m.style.display = show ? 'flex' : 'none';
+      }
+    }
+
+    function copyFrameworkConfig(btn) {
+      var fw = FRAMEWORK_EXPORT_PRESETS[currentExportFramework] || FRAMEWORK_EXPORT_PRESETS.astro;
+      var text = fw.config.replace(/\\n/g, '\n');
+      var origText = btn ? btn.innerHTML : '';
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function() {
+          if (btn) {
+            btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Copied!';
+            setTimeout(function() { btn.innerHTML = origText; }, 1800);
+          }
+          setWebgenStatus('Framework configuration copied to clipboard.', 'ok');
+        });
+      } else {
+        window.prompt('Copy configuration:', text);
+      }
+    }
+
+    function downloadFrameworkProject() {
+      var fw = FRAMEWORK_EXPORT_PRESETS[currentExportFramework] || FRAMEWORK_EXPORT_PRESETS.astro;
+      var text = fw.config.replace(/\\n/g, '\n');
+      var blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = fw.configName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setWebgenStatus('Downloaded ' + fw.configName + ' scaffold file.', 'ok');
+    }
+
+    function checkUrlHashAndParams() {
+      try {
+        var hash = (window.location.hash || '').replace(/^#/, '');
+        var params = new URLSearchParams(window.location.search);
+        var targetSlug = '';
+
+        if (params.has('registry')) targetSlug = params.get('registry');
+        else if (params.has('snippet')) targetSlug = params.get('snippet');
+        else if (params.has('import')) targetSlug = params.get('import');
+        else if (hash.indexOf('registry=') !== -1) {
+          var m = hash.match(/registry=([a-zA-Z0-9_-]+)/);
+          if (m) targetSlug = m[1];
+        } else if (hash.indexOf('import=') !== -1) {
+          var m2 = hash.match(/import=([a-zA-Z0-9_-]+)/);
+          if (m2) targetSlug = m2[1];
+        } else if (hash.indexOf('drawer') !== -1 || hash.indexOf('components') !== -1) {
+          toggleComponentDrawer(true);
+        }
+
+        if (targetSlug && ZOTH_REGISTRY_SNIPPETS[targetSlug]) {
+          importRegistrySnippet(targetSlug);
+        }
+      } catch (e) {
+        console.warn('URL hash parse notice:', e);
+      }
+    }
+
+
+    function getApiBase() {
+      var proto = (window.location.protocol === 'https:') ? 'https:' : 'http:';
+      var host = window.location.hostname;
+      if (!host || host === 'localhost' || host === '127.0.0.1' || host === '0.0.0.0') {
+        return 'http://127.0.0.1:8484';
+      }
+      return proto + '//' + host + ':8484';
+    }
+
+    
+    function setDeviceMode(mode) {
+      var frame = document.getElementById('webgenDeviceFrame');
+      var iframe = document.getElementById('webgenPreviewIframe');
+      var viewport = frame ? frame.querySelector('.device-frame-viewport') : null;
+      var btnDesktop = document.getElementById('btnViewDesktop');
+      var btnTablet = document.getElementById('btnViewTablet');
+      var btnMobile = document.getElementById('btnViewMobile');
+
+      [btnDesktop, btnTablet, btnMobile].forEach(function(b) {
+        if (b) {
+          b.style.background = 'transparent';
+          b.style.color = 'var(--webgen-mute)';
+        }
+      });
+
+      if (!iframe || !frame) return;
+
+      // Reset any prior device-mode classes/inline scale state
+      frame.classList.remove('device-mode-tablet', 'device-mode-mobile');
+      if (viewport) { viewport.style.transform = ''; viewport.style.transformOrigin = ''; viewport.style.height = ''; }
+      iframe.removeAttribute('width');
+      iframe.removeAttribute('height');
+      iframe.style.width = '';
+      iframe.style.height = '';
+      iframe.style.maxWidth = '';
+      iframe.style.margin = '';
+
+      var DEVICE_DIMS = {
+        tablet: { w: 768, h: 1024 },
+        mobile: { w: 390, h: 844 }
+      };
+
+      if (mode === 'desktop') {
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        if (btnDesktop) { btnDesktop.style.background = 'var(--webgen-gold)'; btnDesktop.style.color = '#000'; }
+      } else if (mode === 'tablet' || mode === 'mobile') {
+        var dims = DEVICE_DIMS[mode];
+        frame.classList.add('device-mode-' + mode);
+
+        // Iframe renders at the TRUE native device resolution (real responsive
+        // breakpoints fire inside the page), then the wrapper is scaled down
+        // via CSS transform to fit the available panel width - not a squished
+        // desktop layout via max-width alone.
+        iframe.setAttribute('width', dims.w);
+        iframe.setAttribute('height', dims.h);
+        iframe.style.width = dims.w + 'px';
+        iframe.style.height = dims.h + 'px';
+
+        if (viewport) {
+          var availableWidth = viewport.clientWidth || dims.w;
+          var scale = availableWidth < dims.w ? (availableWidth / dims.w) : 1;
+          viewport.style.transformOrigin = 'top center';
+          viewport.style.transform = 'scale(' + scale + ')';
+          // Compensate wrapper box height so scaled content doesn't leave a gap
+          viewport.style.height = (dims.h * scale) + 'px';
+        }
+
+        if (mode === 'tablet' && btnTablet) { btnTablet.style.background = 'var(--webgen-gold)'; btnTablet.style.color = '#000'; }
+        if (mode === 'mobile' && btnMobile) { btnMobile.style.background = 'var(--webgen-gold)'; btnMobile.style.color = '#000'; }
+      }
+    }
+
+    function updateCharCount() {
+      var p = document.getElementById('promptInput');
+      var c = document.getElementById('promptCharCounter');
+      if (p && c) {
+        var n = p.value.length;
+        c.textContent = n ? String(n) : '0';
+      }
+    }
+
+    function setPrompt(text, suggestedSlug) {
+      var p = document.getElementById('promptInput');
+      var s = document.getElementById('projNameInput');
+      if (p) {
+        p.value = text;
+        updateCharCount();
+      }
+      if (s && suggestedSlug) {
+        s.value = suggestedSlug;
+      }
+      var chips = document.querySelectorAll('#webgenIdeaChips .webgen-chip');
+      chips.forEach(function (c) {
+        var on = c.getAttribute('data-slug') === suggestedSlug;
+        c.classList.toggle('is-on', on);
+        c.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+      setWebgenStatus('', '');
+    }
+
+    function setWebgenStatus(msg, kind) {
+      var el = document.getElementById('webgenBuildStatus');
+      if (!el) return;
+      el.hidden = !msg;
+      el.textContent = msg || '';
+      el.classList.remove('is-error', 'is-ok');
+      if (kind) el.classList.add(kind === 'error' ? 'is-error' : 'is-ok');
+    }
+
+    function showWebgenEmpty(show) {
+      var empty = document.getElementById('webgenEmptyPreview');
+      var iframe = document.getElementById('webgenPreviewIframe');
+      if (empty) empty.classList.toggle('is-hidden', !show);
+      if (iframe) iframe.classList.toggle('is-waiting', !!show);
+    }
+
+    function showWebgenTweak(show) {
+      var wrap = document.getElementById('webgenTweakWrap');
+      if (wrap) wrap.hidden = !show;
+    }
+
+    function selectedPages() {
+      var boxes = document.querySelectorAll('#webgenPageOpts input[type="checkbox"]:checked');
+      var pages = [];
+      boxes.forEach(function (b) { pages.push(b.value); });
+      return pages;
+    }
+
+    var WEBGEN_SKILL_HINTS = {
+      visual: 'Visual design: one strong hero, sparse copy, no generic card grid, high contrast.',
+      seo: 'SEO: unique title and meta description, one H1, descriptive headings, semantic HTML.',
+      a11y: 'Accessibility: labels on inputs, keyboard focus, alt text, readable contrast.',
+      motion: '3D / motion: tasteful Three.js or CSS motion only where it helps the story.',
+      business: 'Small business: hours, address, phone, services, and a clear contact action.',
+      blog: 'Blog: featured post, readable type, about blurb, simple post list.',
+      gallery: 'Photo gallery: large images, simple lightbox or grid, captions.',
+      forms: 'Forms: working name/email/message fields with basic validation, no fake backend.'
+    };
+
+    function toggleWebgenSkill(btn) {
+      if (!btn) return;
+      var on = !btn.classList.contains('is-on');
+      btn.classList.toggle('is-on', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+
+    function selectedSkills() {
+      var chips = document.querySelectorAll('#webgenSkillChips .webgen-chip.is-on');
+      var out = [];
+      chips.forEach(function (c) {
+        var key = c.getAttribute('data-skill');
+        if (key && WEBGEN_SKILL_HINTS[key]) out.push(WEBGEN_SKILL_HINTS[key]);
+      });
+      return out;
+    }
+
+    var WEBGEN_STANDALONE_RULES = ' [WebGen rules: Build a standalone website in this folder. Primary file: index.html. Do not copy or link Zoth Studio hub chrome — no zoth-nav.js, zoth-nav.css, zoth-theme.js, zoth-gate.js, zoth-pet-hud, zoth-workbench, zoth-interactive-dock, header.bar, or Zoth footer. The preview must look like the user\'s own site, not the Zoth Studio website.]';
+
+    var WEBGEN_HUB_KILL = 'header.bar,#topbar,nav.drawer,#drawer,footer.site,#zothFabDock,#zothDesktopPromptPill,#zothPetHud,.zoth-interactive-dock,#zoth-page-progress,#zothToolSidebar,#zothConfigModalBackdrop,.zoth-workbench-fab,.nav-annotate-btn';
+
+    function workspacePreviewPath(urlOrSlug) {
+      if (!urlOrSlug) return '';
+      var u = String(urlOrSlug);
+      var m = u.match(/\/workspaces\/[A-Za-z0-9._-]+\/[^?#]*/);
+      if (m) return m[0];
+      if (/^[A-Za-z0-9._-]+$/.test(u)) return '/workspaces/' + u + '/index.html';
+      try {
+        var path = u.charAt(0) === '/' ? u.split('?')[0] : (new URL(u, window.location.origin)).pathname;
+        if (/^\/workspaces\//.test(path)) return path;
+      } catch (e) {}
+      return u;
+    }
+
+    function stripHubChromeHtml(html) {
+      if (!html) return html;
+      var out = String(html);
+      out = out.replace(/<link[^>]+\/assets\/zoth-[^>]*>\s*/gi, '');
+      out = out.replace(/<script[^>]+\/assets\/zoth-[^>]*>\s*<\/script>\s*/gi, '');
+      out = out.replace(/<header[^>]*\bid=["']topbar["'][^>]*>[\s\S]*?<\/header>/gi, '');
+      out = out.replace(/<header[^>]*class=["'][^"']*\bbar\b[^"']*["'][^>]*>[\s\S]*?<\/header>/gi, '');
+      out = out.replace(/<nav[^>]*\bid=["']drawer["'][^>]*>[\s\S]*?<\/nav>/gi, '');
+      out = out.replace(/<footer[^>]*class=["'][^"']*\bsite\b[^"']*["'][^>]*>[\s\S]*?<\/footer>/gi, '');
+      var guard = '<style id="webgenBarePreviewCss">' + WEBGEN_HUB_KILL + '{display:none!important}body{padding-top:0!important}</style>' +
+        '<script id="webgen-preview-guard">(function(){function wipe(){try{document.querySelectorAll("' + WEBGEN_HUB_KILL + '").forEach(function(el){el.remove()})}catch(e){}}wipe();document.addEventListener("DOMContentLoaded",wipe);try{new MutationObserver(wipe).observe(document.documentElement,{childList:true,subtree:true})}catch(e){}})();<\/script>';
+      if (/<head[^>]*>/i.test(out)) {
+        out = out.replace(/<head([^>]*)>/i, '<head$1>' + guard);
+      } else {
+        out = guard + out;
+      }
+      return out;
+    }
+
+    function stripHubChromeDom(doc) {
+      if (!doc) return;
+      try {
+        doc.querySelectorAll(WEBGEN_HUB_KILL).forEach(function (el) { el.remove(); });
+      } catch (e) {}
+      var style = doc.getElementById('webgenBarePreviewCss');
+      if (!style) {
+        style = doc.createElement('style');
+        style.id = 'webgenBarePreviewCss';
+        style.textContent = WEBGEN_HUB_KILL + '{display:none!important}body{padding-top:0!important}';
+        (doc.head || doc.documentElement).appendChild(style);
+      }
+    }
+
+    function watchPreviewChrome(iframe) {
+      if (!iframe) return;
+      iframe.onload = function () {
+        var doc = null;
+        try { doc = iframe.contentDocument; } catch (e) { return; }
+        stripHubChromeDom(doc);
+        if (!doc || !doc.documentElement) return;
+        try {
+          var obs = new MutationObserver(function () { stripHubChromeDom(doc); });
+          obs.observe(doc.documentElement, { childList: true, subtree: true });
+          setTimeout(function () { try { obs.disconnect(); } catch (e) {} }, 5000);
+        } catch (e) {}
+      };
+    }
+
+    function loadBarePreview(url) {
+      var iframe = document.getElementById('webgenPreviewIframe');
+      var path = workspacePreviewPath(url);
+      if (!iframe || !path) return;
+      var absFile = window.location.origin + path;
+      fetch(absFile, { cache: 'no-store' })
+        .then(function (res) { return res.text(); })
+        .then(function (html) {
+          var cleaned = stripHubChromeHtml(html);
+          var base = absFile.replace(/[^/]+$/, '');
+          if (!/<base\s/i.test(cleaned)) {
+            cleaned = cleaned.replace(/<head([^>]*)>/i, '<head$1><base href="' + base + '">');
+          }
+          iframe.removeAttribute('src');
+          watchPreviewChrome(iframe);
+          iframe.srcdoc = cleaned;
+          showWebgenEmpty(false);
+        })
+        .catch(function () {
+          iframe.removeAttribute('srcdoc');
+          watchPreviewChrome(iframe);
+          iframe.src = absFile;
+          showWebgenEmpty(false);
+        });
+    }
+
+    function previewExample(url, slug) {
+      currentSlug = slug || currentSlug;
+      currentPreviewUrl = url;
+      var urlLabel = document.getElementById('previewUrlLabel');
+      var newTabBtn = document.getElementById('previewNewTabBtn');
+      if (urlLabel) urlLabel.textContent = window.location.origin + url;
+      if (newTabBtn) newTabBtn.href = url;
+      var name = document.getElementById('projNameInput');
+      if (name && slug) name.value = slug;
+      loadBarePreview(url);
+      showWebgenTweak(true);
+      setWebgenStatus('Example loaded in the preview. Your build can still use a different name.', 'ok');
+    }
+
+    function copyPreviewLink() {
+      if (!currentPreviewUrl) {
+        setWebgenStatus('Build or open a site first, then copy the link.', 'error');
+        return;
+      }
+      var abs = window.location.origin + currentPreviewUrl;
+      var done = function () { setWebgenStatus('Preview link copied.', 'ok'); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(abs).then(done).catch(function () {
+          window.prompt('Copy this preview link', abs);
+        });
+      } else {
+        window.prompt('Copy this preview link', abs);
+      }
+    }
+
+    function crc32(buf) {
+      if (!window.__webgenCrcTable) {
+        var table = new Uint32Array(256);
+        for (var i = 0; i < 256; i++) {
+          var c = i;
+          for (var k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+          table[i] = c >>> 0;
+        }
+        window.__webgenCrcTable = table;
+      }
+      var crc = 0 ^ (-1);
+      for (var i = 0; i < buf.length; i++) crc = (crc >>> 8) ^ window.__webgenCrcTable[(crc ^ buf[i]) & 0xFF];
+      return (crc ^ (-1)) >>> 0;
+    }
+
+    function zipStore(files) {
+      var locals = [];
+      var central = [];
+      var offset = 0;
+      function u16(n) { return [n & 255, (n >> 8) & 255]; }
+      function u32(n) { return [n & 255, (n >> 8) & 255, (n >> 16) & 255, (n >> 24) & 255]; }
+      files.forEach(function (f) {
+        var name = unescape(encodeURIComponent(f.name));
+        var data = f.data;
+        var crc = crc32(data);
+        var local = [0x50, 0x4b, 0x03, 0x04, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+          .concat(u32(crc)).concat(u32(data.length)).concat(u32(data.length))
+          .concat(u16(name.length)).concat(u16(0));
+        for (var i = 0; i < name.length; i++) local.push(name.charCodeAt(i) & 255);
+        var rec = new Uint8Array(local.length + data.length);
+        rec.set(local, 0);
+        rec.set(data, local.length);
+        locals.push(rec);
+        var cen = [0x50, 0x4b, 0x01, 0x02, 20, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+          .concat(u32(crc)).concat(u32(data.length)).concat(u32(data.length))
+          .concat(u16(name.length)).concat(u16(0), u16(0), u16(0), u16(0))
+          .concat(u32(0)).concat(u32(offset));
+        for (var j = 0; j < name.length; j++) cen.push(name.charCodeAt(j) & 255);
+        central.push(new Uint8Array(cen));
+        offset += rec.length;
+      });
+      var cenSize = central.reduce(function (n, a) { return n + a.length; }, 0);
+      var end = [0x50, 0x4b, 0x05, 0x06, 0, 0, 0, 0]
+        .concat(u16(files.length)).concat(u16(files.length))
+        .concat(u32(cenSize)).concat(u32(offset)).concat(u16(0));
+      var total = offset + cenSize + end.length;
+      var out = new Uint8Array(total);
+      var p = 0;
+      locals.forEach(function (a) { out.set(a, p); p += a.length; });
+      central.forEach(function (a) { out.set(a, p); p += a.length; });
+      out.set(end, p);
+      return new Blob([out], { type: 'application/zip' });
+    }
+
+    function downloadPreviewSite() {
+      if (!currentPreviewUrl) {
+        setWebgenStatus('Build or open a site first, then download it.', 'error');
+        return;
+      }
+      var base = currentPreviewUrl.replace(/\/[^/]*$/, '/');
+      var names = ['index.html', 'style.css', 'styles.css', 'app.js', 'README.md'];
+      document.querySelectorAll('#workspaceFilesList .file-badge').forEach(function (el) {
+        var n = (el.textContent || '').replace(/^📄\s*/, '').trim();
+        if (n && names.indexOf(n) === -1) names.push(n);
+      });
+      Promise.all(names.map(function (name) {
+        return fetch(base + name, { cache: 'no-store' }).then(function (res) {
+          if (!res.ok) return null;
+          return res.arrayBuffer().then(function (buf) {
+            return { name: name, data: new Uint8Array(buf) };
+          });
+        }).catch(function () { return null; });
+      })).then(function (parts) {
+        var files = parts.filter(Boolean);
+        if (!files.length) {
+          setWebgenStatus('Could not download files yet. Wait until the preview has loaded.', 'error');
+          return;
+        }
+        var blob = zipStore(files);
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = (currentSlug || 'my-site') + '.zip';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setWebgenStatus('Downloaded ' + files.length + ' file' + (files.length === 1 ? '' : 's') + '.', 'ok');
+      });
+    }
+
+    function tweakCurrentSite() {
+      var extra = (document.getElementById('webgenTweakInput') || {}).value || '';
+      extra = extra.trim();
+      if (!extra) {
+        setWebgenStatus('Say what to change, then tap Update.', 'error');
+        return;
+      }
+      var p = document.getElementById('promptInput');
+      if (p) {
+        var cur = p.value.trim();
+        p.value = (cur ? cur + '\n\n' : '') + 'Update the existing site: ' + extra;
+        updateCharCount();
+      }
+      spawnPTYSession();
+    }
+
+    function styleDirectiveFor(preset) {
+      var styleDirectives = {
+        'dark-kinetic': ' [Style Directive: Deep dark matte background (#050508), cyan & gold accents, Three.js kinetic particle flow, glassmorphism cards]',
+        'cyber-matrix': ' [Style Directive: Pure black background, Matrix phosphor green (#00ff66) telemetry, scanlines HUD, JetBrains Mono font]',
+        'alchemical-gold': ' [Style Directive: Obsidian glass background, radiant hermetic gold (#fbbf24) trims, Cinzel typography, subtle ambient gold glow]',
+        'clean-modern': ' [Style Directive: Ultra-clean dark theme, high contrast white text, crisp borders, Lucide icon minimalism, smooth fluid transitions]'
+      };
+      return styleDirectives[preset] || '';
+    }
+
+    function applyStylePreset(preset) {
+      return styleDirectiveFor(preset);
+    }
+
+
+    function showLoadingOverlay(slugName) {
+      isBuilding = true;
+      buildProgress = 15;
+
+      var overlay = document.getElementById('previewLoadingOverlay');
+      if (overlay) overlay.classList.remove('hidden');
+
+      var title = document.getElementById('overlayProjectTitle');
+      if (title) title.textContent = 'Building ' + slugName + '…';
+
+      updateProgressUI(15, 'Starting the builder…');
+
+      if (!threeOrbInstance) {
+        threeOrbInstance = window.initThreeLoadingOrb ? window.initThreeLoadingOrb('threeOrbCanvasContainer') : null;
+      }
+
+      if (buildInterval) clearInterval(buildInterval);
+      buildInterval = setInterval(function () {
+        if (!isBuilding) return;
+        if (buildProgress < 90) {
+          buildProgress += Math.floor(Math.random() * 4) + 1;
+          updateProgressUI(buildProgress);
+        }
+      }, 700);
+    }
+
+    function hideLoadingOverlay() {
+      isBuilding = false;
+      if (buildInterval) clearInterval(buildInterval);
+      updateProgressUI(100, 'Preview is ready.');
+
+      if (threeOrbInstance) {
+        if (threeOrbInstance.dispose) threeOrbInstance.dispose();
+        else if (threeOrbInstance.stop) threeOrbInstance.stop();
+        threeOrbInstance = null;
+      }
+
+      setTimeout(function () {
+        var overlay = document.getElementById('previewLoadingOverlay');
+        if (overlay) overlay.classList.add('hidden');
+      }, 600);
+    }
+
+    function updateProgressUI(pct, logText) {
+      var fill = document.getElementById('overlayProgressFill');
+      var pctLabel = document.getElementById('overlayProgressPct');
+      var ticker = document.getElementById('overlayLogTicker');
+
+      if (fill) fill.style.width = pct + '%';
+      if (pctLabel) pctLabel.textContent = pct + '%';
+      if (ticker && logText) {
+        ticker.innerHTML = '<span>' + logText + '</span>';
+      }
+    }
+
+    function feedTerminalLogToOverlay(cleanText) {
+      if (!isBuilding || !cleanText) return;
+      var lines = cleanText.split('\n').map(function(l) { return l.trim(); }).filter(function(l) { return l.length > 5; });
+      if (lines.length) {
+        var lastLine = lines[lines.length - 1];
+        // Strip any residual ANSI codes
+        var stripped = lastLine.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '').trim();
+        if (stripped && stripped.length > 3) {
+          var ticker = document.getElementById('overlayLogTicker');
+          if (ticker) {
+            ticker.innerHTML = '<span>⚡ ' + stripped.slice(0, 75) + (stripped.length > 75 ? '...' : '') + '</span>';
+          }
+        }
+      }
+    }
+
+    // --- Lightweight client-side ANSI syntax highlighter for raw PTY chunks ---
+    // zoth-terminal.js writes raw PTY output directly to xterm (self.term.write(data.output))
+    // without any ANSI colorization of tool-output semantics (file paths, HTTP codes,
+    // error/success markers, JSON-ish braces). We intercept ZothTerminal's internal
+    // term.write AFTER construction (no edits to zoth-terminal.js) and recolor chunks
+    // before they reach xterm. Regex-only, wrapped in try/catch so it can never throw
+    // on binary/control-heavy chunks - falls back to writing the original text untouched.
+    function highlightPtyChunk(text) {
+      try {
+        if (typeof text !== 'string' || text.length === 0) return text;
+        // Skip re-highlighting chunks that already carry ANSI escapes (avoid double-wrapping)
+        if (/\x1b\[/.test(text)) return text;
+
+        var CYAN = '\x1b[36m', GREEN = '\x1b[32m', RED = '\x1b[31m', YELLOW = '\x1b[33m', RESET = '\x1b[0m';
+
+        var out = text
+          // File paths ending in common source extensions -> yellow
+          .replace(/([A-Za-z0-9_\-./]+\.(?:js|ts|tsx|jsx|py|rs|html|css|json))\b/g, YELLOW + '$1' + RESET)
+          // HTTP status codes (100-599 as standalone tokens) -> cyan
+          .replace(/\b([1-5]\d{2})\b(?=\s|$|[^\d])/g, CYAN + '$1' + RESET)
+          // error markers -> red
+          .replace(/\b(ERROR|error|Error|FAIL(?:ED)?|Exception)\b/g, RED + '$1' + RESET)
+          // success markers -> green
+          .replace(/(\bsuccess\b|\bSUCCESS\b|\bSuccess\b|✓|✅|\bOK\b|\bdone\b|\bDone\b)/g, GREEN + '$1' + RESET)
+          // JSON-ish "key": value tokens -> cyan key
+          .replace(/("[\w-]+")\s*:/g, CYAN + '$1' + RESET + ':');
+
+        return out;
+      } catch (e) {
+        return text;
+      }
+    }
+
+    function initZothTerminal(slug) {
+      var container = document.getElementById('zothXtermContainer');
+      if (!container) return;
+
+      var sessId = 'zoth_pty_' + slug;
+      if (zothTerm) {
+        zothTerm.switchSession(sessId, slug);
+        return;
+      }
+
+      zothTerm = new ZothTerminal('zothXtermContainer', {
+        sessionId: sessId,
+        slug: slug,
+        apiBase: getApiBase(),
+        onOutputChunk: function (rawChunk) {
+          feedTerminalLogToOverlay(rawChunk);
+        },
+        onFilesChange: function (files) {
+          var filesList = document.getElementById('workspaceFilesList');
+          var countBadge = document.getElementById('fileCountBadge');
+          if (countBadge) countBadge.textContent = files.length + ' FILES';
+
+          if (filesList && files && files.length) {
+            filesList.innerHTML = '';
+            files.forEach(function (f) {
+              var badge = document.createElement('span');
+              badge.className = 'file-badge';
+              badge.textContent = '📄 ' + f;
+              filesList.appendChild(badge);
+            });
+
+            // If files were written, bump synthesis progress
+            if (isBuilding && buildProgress < 85) {
+              buildProgress = Math.max(buildProgress, 70);
+              updateProgressUI(buildProgress, 'Writing ' + files[files.length - 1] + '…');
+            }
+          }
+        },
+        onIndexFound: function (previewUrl) {
+          var iframe = document.getElementById('webgenPreviewIframe');
+          var urlLabel = document.getElementById('previewUrlLabel');
+          var newTabBtn = document.getElementById('previewNewTabBtn');
+
+          if (urlLabel) urlLabel.textContent = window.location.origin + previewUrl;
+          if (newTabBtn) newTabBtn.href = previewUrl;
+
+          if (iframe && (isBuilding || !iframe.getAttribute('srcdoc'))) {
+            loadBarePreview(previewUrl);
+          }
+
+          if (isBuilding) {
+            hideLoadingOverlay();
+          }
+        }
+      });
+
+      // Wrap xterm's write() so raw PTY chunks get lightweight ANSI highlighting
+      // client-side (file paths, HTTP codes, error/success markers, JSON keys)
+      // before rendering. Safe no-op fallback if term isn't ready yet.
+      try {
+        if (zothTerm && zothTerm.term && typeof zothTerm.term.write === 'function' && !zothTerm._writePatched) {
+          var _origTermWrite = zothTerm.term.write.bind(zothTerm.term);
+          zothTerm.term.write = function (chunk) {
+            var safe = chunk;
+            try { safe = highlightPtyChunk(chunk); } catch (e) { safe = chunk; }
+            return _origTermWrite(safe);
+          };
+          zothTerm._writePatched = true;
+        }
+      } catch (e) { /* never block terminal init on highlighter wiring */ }
+    }
+
+    function spawnPTYSession() {
+      var projName = document.getElementById('projNameInput').value.trim() || 'my-site';
+      var prompt = document.getElementById('promptInput').value.trim();
+      var harness = (document.getElementById('agentHarnessSelect') || {}).value || 'antigravity';
+      var agentMap = { antigravity: 'agy', hermes: 'hermes', grok: 'grok', ollama: 'ollama', triad: 'agy' };
+      var agent = agentMap[harness] || 'agy';
+      var preset = (document.getElementById('stylePresetSelect') || {}).value || 'dark-kinetic';
+      var styleBit = styleDirectiveFor(preset);
+      var fullPrompt = prompt;
+      if (styleBit && prompt.indexOf('[Style Directive:') === -1) {
+        fullPrompt = prompt + styleBit;
+      }
+      var pages = selectedPages();
+      if (pages.length) {
+        fullPrompt += ' Include these pages: ' + pages.join(', ') + '.';
+      }
+      var skills = selectedSkills();
+      if (skills.length) {
+        fullPrompt += ' Use these skills: ' + skills.join(' ');
+      }
+      if (fullPrompt.indexOf('[WebGen rules:') === -1) {
+        fullPrompt += WEBGEN_STANDALONE_RULES;
+      }
+
+      if (!prompt) {
+        setWebgenStatus('Say what the site should be — or tap a starting idea first.', 'error');
+        var ta = document.getElementById('promptInput');
+        if (ta) ta.focus();
+        return;
+      }
+
+      currentSlug = projName;
+      currentPreviewUrl = '/workspaces/' + projName + '/index.html';
+
+      var urlLabel = document.getElementById('previewUrlLabel');
+      var newTabBtn = document.getElementById('previewNewTabBtn');
+      if (urlLabel) urlLabel.textContent = window.location.origin + currentPreviewUrl;
+      if (newTabBtn) newTabBtn.href = currentPreviewUrl;
+
+      var log = document.getElementById('webgenBuildLog');
+      if (log) log.open = true;
+      showLoadingOverlay(projName);
+      setWebgenStatus('Building “' + projName + '”…', 'ok');
+
+      var btn = document.getElementById('btnSpawnAgent');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Building…';
+      }
+
+      // Record code generation intent in Netrunner Memory (:8788)
+      if (window.ZothNetrunnerMemory && window.ZothNetrunnerMemory.recordCodeChange) {
+        window.ZothNetrunnerMemory.recordCodeChange({
+          filePath: 'workspaces/' + projName + '/index.html',
+          action: 'webgen_spawn_pty',
+          agentId: agent,
+          diffSummary: 'WebGen Autonomous Synthesis for project: "' + projName + '" (' + prompt.slice(0, 60) + ')',
+          linesAdded: 250,
+          language: 'html',
+          astVerified: true,
+          metadata: {
+            projectName: projName,
+            harness: harness,
+            preset: preset,
+            pages: pages
+          }
+        });
+      }
+
+      fetch(getApiBase() + '/api/zoth/pty/spawn', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          slug: projName,
+          prompt: fullPrompt,
+          agent: agent,
+          ducky: true
+        })
+      })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (data && data.sessionId) {
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = 'Build again';
+          }
+          var sessLabel = document.getElementById('termSessionLabel');
+          if (sessLabel) sessLabel.textContent = 'Building ' + (data.slug || projName);
+          var badge = document.getElementById('termStatusBadge');
+          if (badge) badge.textContent = 'live';
+          setWebgenStatus('Build started. Watch the preview.', 'ok');
+          showWebgenTweak(true);
+          initZothTerminal(data.slug);
+          fetchTrackedSessions();
+        } else {
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = 'Build this site';
+          }
+          showWebgenEmpty(true);
+          var raw = (data && data.error) ? String(data.error) : '';
+          var friendly = (!raw || /preview|install|foundry/i.test(raw))
+            ? 'Could not start a live build. Install locally to run the builder. Your prompt is ready.'
+            : raw;
+          setWebgenStatus(friendly, 'error');
+          var overlayFail = document.getElementById('previewLoadingOverlay');
+          if (overlayFail) overlayFail.classList.add('hidden');
+          isBuilding = false;
+        }
+      })
+      .catch(function (err) {
+        console.warn('PTY spawn notice:', err);
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Build this site';
+        }
+        showWebgenEmpty(true);
+        setWebgenStatus('Preview mode: the live builder needs a local install. Your prompt is ready.', 'error');
+        var overlay = document.getElementById('previewLoadingOverlay');
+        if (overlay) overlay.classList.add('hidden');
+        isBuilding = false;
+      });
+    }
+
+    function fetchTrackedSessions() {
+      fetch(getApiBase() + '/api/zoth/terminal/ducky/sessions')
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          var tray = document.getElementById('trackedSessionsTray');
+          if (!tray) return;
+
+          if (data && data.sessions && data.sessions.length) {
+            var past = document.getElementById('webgenPastBuilds');
+            if (past) past.open = true;
+            tray.innerHTML = '';
+            data.sessions.forEach(function(s) {
+              var item = document.createElement('div');
+              item.className = 'webgen-session-item' + (currentSlug === s.slug ? ' active' : '');
+              item.onclick = function() { selectSession(s); };
+
+              var isLiveBadge = s.isLive
+                ? '<span class="webgen-live-badge live">live</span>'
+                : '<span class="webgen-live-badge saved">saved</span>';
+
+              item.innerHTML =
+                '<div class="webgen-session-info">' +
+                  '<div class="webgen-session-title">' + s.slug + ' ' + isLiveBadge + '</div>' +
+                  '<div class="webgen-session-prompt">' + (s.prompt || s.slug) + '</div>' +
+                '</div>' +
+                '<div style="font-size:0.7rem;color:var(--webgen-gold);font-family:monospace;font-weight:700;">Open</div>';
+
+              tray.appendChild(item);
+            });
+          } else {
+            tray.innerHTML = '<div style="font-size:0.72rem;color:var(--webgen-mute);font-family:monospace;">No builds yet.</div>';
+          }
+        })
+        .catch(function(err) {
+          console.warn('Sessions fetch error:', err);
+        });
+    }
+
+    function selectSession(sess) {
+      currentSlug = sess.slug;
+      currentPreviewUrl = workspacePreviewPath(sess.previewUrl || sess.slug);
+
+      var slugInput = document.getElementById('projNameInput');
+      if (slugInput) slugInput.value = sess.slug;
+
+      var promptInput = document.getElementById('promptInput');
+      if (promptInput && sess.prompt && !sess.prompt.startsWith('Workspace:')) {
+        promptInput.value = sess.prompt;
+      }
+
+      var sessLabel = document.getElementById('termSessionLabel');
+      if (sessLabel) sessLabel.textContent = sess.slug;
+
+      var urlLabel = document.getElementById('previewUrlLabel');
+      var newTabBtn = document.getElementById('previewNewTabBtn');
+
+      if (urlLabel) urlLabel.textContent = window.location.origin + currentPreviewUrl;
+      if (newTabBtn) newTabBtn.href = currentPreviewUrl;
+      if (currentPreviewUrl) {
+        loadBarePreview(currentPreviewUrl);
+        showWebgenTweak(true);
+        var overlay = document.getElementById('previewLoadingOverlay');
+        if (overlay) overlay.classList.add('hidden');
+      } else {
+        showWebgenEmpty(true);
+      }
+
+      // Switch terminal
+      initZothTerminal(sess.slug);
+      fetchTrackedSessions();
+    }
+
+    function reloadPreview() {
+      if (currentPreviewUrl) {
+        loadBarePreview(currentPreviewUrl + (currentPreviewUrl.indexOf('?') === -1 ? '?' : '&') + 'v=' + Date.now());
+      }
+    }
+
+
+    function toggleHotkeysModal() {
+      var m = document.getElementById('hotkeysModal');
+      if (m) {
+        m.style.display = (m.style.display === 'none' || m.style.display === '') ? 'flex' : 'none';
+      }
+    }
+
+    // Global Interactive Hotkeys Listener
+    window.addEventListener('keydown', function (e) {
+      // Don't intercept if user is typing in textarea or input unless Ctrl modifier
+      var isInput = (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
+
+      // 1. Ctrl + Enter => Spawn PTY
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        spawnPTYSession();
+        return;
+      }
+
+      // 2. Ctrl + R => Reload Preview Viewport (prevent browser hard reload if inside app)
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'r' || e.key === 'R') && !e.shiftKey) {
+        // Only override if focus is inside preview or not standard
+      }
+
+      // 3. Alt + 1/2/3 => Device Modes
+      if (e.altKey && e.key === '1') { e.preventDefault(); setDeviceMode('desktop'); }
+      if (e.altKey && e.key === '2') { e.preventDefault(); setDeviceMode('tablet'); }
+      if (e.altKey && e.key === '3') { e.preventDefault(); setDeviceMode('mobile'); }
+
+      // 4. '?' Key => Toggle Hotkeys modal
+      if (e.key === '?' && !isInput) {
+        e.preventDefault();
+        toggleHotkeysModal();
+      }
+
+      // 5. 'Escape' => Close modal
+      if (e.key === 'Escape') {
+        var m = document.getElementById('hotkeysModal');
+        if (m && m.style.display === 'flex') {
+          m.style.display = 'none';
+        }
+        var drawer = document.getElementById('componentDrawerModal');
+        if (drawer && drawer.style.display === 'flex') {
+          drawer.style.display = 'none';
+        }
+      }
+    });
+
+    window.addEventListener('hashchange', checkUrlHashAndParams);
+
+    window.addEventListener('DOMContentLoaded', function () {
+      updateCharCount();
+      fetchTrackedSessions();
+      checkUrlHashAndParams();
+    });
+  </script>
+<script src="/assets/zoth-gate.js"></script>
+</body>
+</html>

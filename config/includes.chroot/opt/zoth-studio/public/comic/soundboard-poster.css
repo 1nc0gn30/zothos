@@ -1,0 +1,589 @@
+/* Soundboard poster — full-bleed split + quiet pad deck. Loaded last. */
+
+.skip-to-content {
+  position: absolute;
+  top: -100px;
+  left: 16px;
+  background: var(--gold, #fbbf24);
+  color: #050508;
+  padding: 10px 18px;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.82rem;
+  font-weight: 700;
+  border-radius: 8px;
+  z-index: 10000;
+  text-decoration: none;
+  transition: top 0.2s ease;
+}
+
+.skip-to-content:focus {
+  top: 16px;
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+html,
+body {
+  min-height: 100%;
+  overflow-x: hidden;
+  background: var(--bg, #050508);
+  color: var(--text-body, #f1f5f9);
+}
+
+main#main-content {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* Quiet leftover boxed hero if present */
+.sound-hero {
+  background: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  text-align: left !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: visible !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Poster — first viewport, copy left / Azoth right                           */
+/* -------------------------------------------------------------------------- */
+
+.soundboard-poster {
+  position: relative;
+  width: 100%;
+  min-height: calc(100svh - var(--zoth-header-h, 54px) - 108px);
+  display: grid;
+  grid-template-columns: minmax(18rem, 38rem) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  background: var(--bg, #050508);
+  box-sizing: border-box;
+}
+
+.soundboard-poster-copy {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 16px;
+  max-width: 40rem;
+  min-width: 0;
+  padding: clamp(28px, 5vw, 64px) clamp(20px, 4vw, 48px) clamp(96px, 12vw, 132px);
+  overflow: hidden;
+}
+
+.soundboard-poster .kicker {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold, #fbbf24);
+  font-weight: 700;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  display: block;
+}
+
+.soundboard-poster h1 {
+  font-family: "Syne", var(--font-display, system-ui, sans-serif) !important;
+  font-size: clamp(2.4rem, 5.4vw, 4.4rem) !important;
+  font-weight: 800;
+  line-height: 0.92;
+  letter-spacing: -0.05em !important;
+  max-width: 100%;
+  margin: 0;
+  background: none !important;
+  color: var(--text-primary, #fff6dc) !important;
+  -webkit-text-fill-color: var(--text-primary, #fff6dc) !important;
+  text-shadow: none !important;
+  white-space: nowrap;
+  overflow: hidden;
+  overflow-wrap: normal !important;
+  word-break: keep-all !important;
+  hyphens: none !important;
+  filter: none !important;
+}
+
+.soundboard-poster .lede {
+  margin: 0;
+  max-width: 32rem;
+  font-size: 1.08rem;
+  line-height: 1.5;
+  color: var(--text-subhead, var(--mute, #cbd5e1));
+}
+
+.soundboard-poster .cta-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 4px 0 0;
+}
+
+.soundboard-poster .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 12px 20px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  width: auto;
+}
+
+.soundboard-poster .btn-gold {
+  background: var(--gold, #fbbf24) !important;
+  color: #050508 !important;
+  border: 0 !important;
+  box-shadow: 0 8px 24px rgba(251, 191, 36, 0.28);
+}
+
+.soundboard-poster .btn-gold:hover {
+  filter: brightness(1.08);
+  color: #050508 !important;
+  transform: translateY(-1px);
+  text-decoration: none;
+}
+
+.soundboard-poster .btn-ghost {
+  background: transparent;
+  color: var(--text-primary, #fff) !important;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.16));
+}
+
+.soundboard-poster .btn-ghost:hover {
+  border-color: var(--gold, #fbbf24);
+  color: var(--gold, #fbbf24) !important;
+  text-decoration: none;
+}
+
+.soundboard-poster-figure {
+  position: relative;
+  z-index: 1;
+  min-height: calc(100svh - var(--zoth-header-h, 54px) - 108px);
+  align-self: stretch;
+  overflow: hidden;
+  background: #050508;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+/* Full portrait. Never object-fit:cover / 18% crop. */
+.soundboard-poster-figure img,
+.soundboard-poster-figure img.soundboard-azoth {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: contain !important;
+  object-position: center bottom !important;
+  background: transparent;
+}
+
+.soundboard-poster-figure::after {
+  display: none;
+}
+
+.soundboard-poster-credit {
+  position: absolute;
+  right: 24px;
+  bottom: 28px;
+  z-index: 3;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold, #fbbf24);
+  pointer-events: none;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Pad deck — the interaction lives here                                      */
+/* -------------------------------------------------------------------------- */
+
+.sound-deck {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 8px clamp(20px, 4vw, 48px) 80px;
+  box-sizing: border-box;
+}
+
+.viz-card {
+  background: color-mix(in srgb, var(--bg, #050508) 88%, #111827);
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 36px;
+  box-shadow: none;
+}
+
+#audio-canvas {
+  width: 100%;
+  height: 120px;
+  border-radius: 10px;
+  background: #020307;
+  display: block;
+}
+
+.drone-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+}
+
+.drone-bar strong {
+  color: var(--text-primary, #fff);
+  font-family: "Syne", var(--font-display, sans-serif);
+}
+
+.drone-bar .drone-hint {
+  color: var(--text-dim, #94a3b8);
+  font-size: 0.8rem;
+  margin-top: 2px;
+}
+
+.drone-btn {
+  background: linear-gradient(135deg, #00f0ff 0%, #3b82f6 100%);
+  color: #030712;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.86rem;
+  font-weight: 700;
+  padding: 10px 22px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.drone-btn:hover {
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+.drone-btn.playing {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #fff;
+}
+
+.sound-section-title {
+  font-family: "Syne", var(--font-display, sans-serif);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-primary, #fff);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 16px;
+  background: none;
+  -webkit-text-fill-color: var(--text-primary, #fff);
+}
+
+.sound-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+  margin-bottom: 40px;
+}
+
+.pad-btn {
+  background: color-mix(in srgb, var(--bg, #050508) 70%, #111827);
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+  border-radius: 14px;
+  padding: 16px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--text-body, #f1f5f9);
+  width: 100%;
+}
+
+.pad-btn:hover {
+  border-color: var(--cyan, #00f0ff);
+  background: rgba(0, 240, 255, 0.08);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 240, 255, 0.12);
+}
+
+.pad-btn:active,
+.pad-btn.active {
+  border-color: var(--gold, #fbbf24);
+  background: rgba(251, 191, 36, 0.15);
+  transform: scale(0.98);
+}
+
+.pad-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.pad-title {
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--text-primary, #ffffff);
+}
+
+.pad-badge {
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--gold, #fbbf24);
+}
+
+.pad-desc {
+  font-size: 0.78rem;
+  color: var(--text-dim, #94a3b8);
+  line-height: 1.4;
+}
+
+#pads {
+  scroll-margin-top: calc(var(--zoth-header-h, 54px) + 16px);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Footer — full bleed                                                        */
+/* -------------------------------------------------------------------------- */
+
+footer.site {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  box-sizing: border-box;
+  border-top: 1px solid var(--line, rgba(247, 244, 238, 0.1));
+  padding: 28px clamp(20px, 4vw, 48px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.76rem;
+  color: var(--mute, #a8a4c2);
+  background: var(--bg, #050508);
+}
+
+footer.site a {
+  color: inherit;
+  text-decoration: none;
+}
+
+footer.site a:hover {
+  color: var(--gold, #fbbf24);
+  text-decoration: none;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Light mode — dark ink on light paper                                       */
+/* -------------------------------------------------------------------------- */
+
+html[data-theme="light"] body,
+html.theme-light body {
+  background: #f7f9fc !important;
+  color: #1f2937 !important;
+}
+
+html[data-theme="light"] .soundboard-poster {
+  background: #f7f9fc;
+}
+
+html[data-theme="light"] .soundboard-poster h1,
+html.theme-light .soundboard-poster h1 {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  background: none !important;
+  text-shadow: none !important;
+}
+
+html[data-theme="light"] .soundboard-poster .lede {
+  color: #374151 !important;
+}
+
+html[data-theme="light"] .soundboard-poster .kicker,
+html[data-theme="light"] .soundboard-poster-credit {
+  color: #92400e !important;
+}
+
+html[data-theme="light"] .soundboard-poster-figure {
+  background: #0b1220;
+}
+
+html[data-theme="light"] .soundboard-poster .btn-ghost {
+  color: #111827 !important;
+  border-color: rgba(17, 24, 39, 0.16) !important;
+  background: #ffffff !important;
+}
+
+html[data-theme="light"] .soundboard-poster .btn-ghost:hover {
+  color: #92400e !important;
+  border-color: #b45309 !important;
+}
+
+html[data-theme="light"] .soundboard-poster .btn-gold {
+  background: #fbbf24 !important;
+  color: #050508 !important;
+}
+
+html[data-theme="light"] .viz-card {
+  background: #ffffff;
+  border-color: rgba(17, 24, 39, 0.12);
+}
+
+html[data-theme="light"] .drone-bar {
+  border-top-color: rgba(17, 24, 39, 0.1);
+}
+
+html[data-theme="light"] .drone-bar strong,
+html[data-theme="light"] .sound-section-title {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+html[data-theme="light"] .drone-bar .drone-hint {
+  color: #4b5563;
+}
+
+html[data-theme="light"] .pad-btn {
+  background: #ffffff;
+  border-color: rgba(17, 24, 39, 0.12);
+  color: #1f2937;
+}
+
+html[data-theme="light"] .pad-btn:hover {
+  background: rgba(251, 191, 36, 0.08);
+  border-color: #b45309;
+  box-shadow: none;
+}
+
+html[data-theme="light"] .pad-title {
+  color: #111827;
+}
+
+html[data-theme="light"] .pad-desc {
+  color: #4b5563;
+}
+
+html[data-theme="light"] .pad-badge {
+  background: #f3f4f6;
+  color: #92400e;
+}
+
+html[data-theme="light"] footer.site {
+  background: #f7f9fc;
+  color: #374151;
+  border-top-color: rgba(17, 24, 39, 0.1);
+}
+
+html[data-theme="gold"] .soundboard-poster,
+html[data-theme="gold"] footer.site,
+html[data-theme="gold"] body {
+  background: #0c0802;
+}
+
+html[data-theme="gold"] .soundboard-poster-figure {
+  background: #0c0802;
+}
+
+html[data-theme="matrix"] .soundboard-poster .kicker,
+html[data-theme="matrix"] .soundboard-poster-credit,
+html[data-theme="matrix"] .pad-badge {
+  color: #34d399;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Mobile / tablet portrait — Azoth first                                     */
+/* -------------------------------------------------------------------------- */
+
+@media (max-width: 1024px) {
+  .soundboard-poster {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    padding: 0;
+    gap: 0;
+    align-items: start;
+    align-content: start;
+  }
+
+  .soundboard-poster-figure {
+    order: -1;
+    min-height: 42vh;
+    height: 42vh;
+    margin: 0;
+  }
+
+  .soundboard-poster-copy {
+    padding: 18px 20px 28px;
+    padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+    gap: 10px;
+    max-width: none;
+  }
+
+  .soundboard-poster h1 {
+    max-width: 100%;
+    font-size: clamp(2.4rem, 11vw, 3.4rem) !important;
+    white-space: nowrap;
+  }
+
+  .soundboard-poster .lede {
+    font-size: 0.98rem;
+  }
+
+  .soundboard-poster-credit {
+    right: 16px;
+    bottom: 16px;
+  }
+
+  .sound-deck {
+    padding: 0 20px 48px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sound-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .soundboard-poster .btn {
+    width: auto;
+  }
+
+  .soundboard-poster-figure {
+    min-height: 36vh;
+    height: 36vh;
+  }
+}

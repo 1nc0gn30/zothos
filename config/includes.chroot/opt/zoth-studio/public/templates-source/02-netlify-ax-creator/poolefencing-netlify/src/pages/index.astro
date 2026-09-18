@@ -1,0 +1,487 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import CtaBand from "../components/CtaBand.astro";
+import ProofStrip from "../components/ProofStrip.astro";
+import Popup from "../components/Popup.astro";
+import GhlForm from "../components/GhlForm.astro";
+import { businessSchema } from "../data/schema.js";
+import { serviceAreas, site } from "../data/site.js";
+const serviceAreaMap = serviceAreas.map((area, index) => {
+  const cityName = area.h1.replace("Fence Installation in ", "").replace("Fence Installation Serving the ", "");
+  const positions = {
+    "lake-city-fl": { lat: 30.1897, lng: -82.6393, label: "Lake City" },
+    "live-oak-fl": { lat: 30.2949, lng: -82.9840, label: "Live Oak" },
+    "gainesville-fl": { lat: 29.6516, lng: -82.3248, label: "Gainesville" },
+    "jacksonville-fl": { lat: 30.3322, lng: -81.6557, label: "Jacksonville" },
+    "tallahassee-fl": { lat: 30.4383, lng: -84.2807, label: "Tallahassee" },
+    "madison-fl": { lat: 30.4694, lng: -83.4129, label: "Madison" },
+    "valdosta-ga": { lat: 30.8327, lng: -83.2785, label: "Valdosta" },
+  };
+  return {
+    ...area,
+    cityName,
+    mapLabel: positions[area.slug]?.label || cityName.replace(", FL", ""),
+    lat: positions[area.slug]?.lat || 30.2949,
+    lng: positions[area.slug]?.lng || -82.9840,
+    active: index === 0,
+  };
+});
+const liveOakBase = serviceAreaMap.find((area) => area.slug === "live-oak-fl") || {
+  lat: 30.2949,
+  lng: -82.9840,
+};
+---
+<BaseLayout
+  title="Poole Fencing | Lake City & Live Oak FL Fence Company"
+  description="Family-owned fence installation across North Florida. Vinyl, wood, chain link, ornamental and farm. 5-star rated. Free quote - call (386) 688-1293."
+  path="/"
+  schema={businessSchema()}
+>
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="hero-content">
+        <span class="hero-eyebrow">Lake City &bull; Live Oak &bull; Valdosta &bull; North Florida</span>
+        <h1>Fences that<br><span class="hero-last">last.</span></h1>
+        <p class="hero-sub">
+          Family-owned fence installation for privacy yards, pool enclosures,
+          rural acreage, commercial lots, and custom gates across the 60-mile
+          North Florida and South Georgia region.
+        </p>
+        <div class="hero-cta-row">
+          <a class="button button-primary" href="/contact-us#contact-form">Get a Free Quote &rarr;</a>
+          <a class="button button-secondary" href={site.phoneHref}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            Call {site.phoneDisplay}
+          </a>
+        </div>
+      </div>
+      <div class="hero-showcase" aria-label="Poole Fencing project examples">
+        <figure class="hero-showcase-main">
+          <div class="hero-carousel" data-carousel="hero" role="region" aria-roledescription="carousel" aria-label="Fence project photos">
+            <div class="hero-carousel-track">
+              <div class="hero-carousel-slide is-active" aria-label="Slide 1 of 4">
+                <img src="/images/fences/gate-driveway.webp" alt="White vinyl driveway gate installed by Poole Fencing" width="2048" height="1536" />
+              </div>
+              <div class="hero-carousel-slide" aria-label="Slide 2 of 4">
+                <img src="/images/fences/wood-fence-waylon.webp" alt="Wood privacy fence built by Poole Fencing crews" width="2048" height="1536" />
+              </div>
+              <div class="hero-carousel-slide" aria-label="Slide 3 of 4">
+                <img src="/images/fences/vinyl-privacy.webp" alt="Vinyl privacy fence installed in North Florida" width="2048" height="1536" />
+              </div>
+              <div class="hero-carousel-slide" aria-label="Slide 4 of 4">
+                <img src="/images/fences/farm-field.webp" alt="Farm field fence along a North Florida pasture" width="2048" height="1536" />
+              </div>
+            </div>
+            <div class="hero-carousel-dots" aria-hidden="true"></div>
+            <button class="carousel-arrow carousel-arrow-prev" aria-label="Previous slide">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <button class="carousel-arrow carousel-arrow-next" aria-label="Next slide">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+        </figure>
+        <div class="hero-service-card">
+          <span>Popular fence projects</span>
+          <strong>Privacy fencing, custom gates, and farm field fence</strong>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== FREE QUOTE FORM ===== -->
+  <section class="section" id="contact-form">
+    <div class="container split">
+      <div class="text-stack">
+        <span class="eyebrow">Free quote</span>
+        <h2>Get your free fence quote today.</h2>
+        <p class="lead">
+          Tell us about your project. We typically respond within 24 hours and
+          schedule a free on-site estimate within 48 hours.
+        </p>
+        <ul class="feature-list">
+          <li><a href={site.phoneHref}><strong>{site.phoneDisplay}</strong></a></li>
+          <li>{site.email}</li>
+          <li>{site.hours}</li>
+        </ul>
+      </div>
+      <GhlForm
+        formId="QFFPj4gAUExW0PGozOoj"
+        formName="Poole Fencing Form homepage"
+        height={694}
+      />
+    </div>
+  </section>
+  <!-- ===== WHY POOLE ===== -->
+  <section class="section why-poole-section">
+    <div class="container">
+      <div class="why-poole-header">
+        <span class="eyebrow">Why Poole</span>
+        <h2>Three crews. Local roots. No disappearing after the check clears.</h2>
+      </div>
+      <div class="why-poole-body">
+        <div class="why-poole-image">
+          <img
+            src="/images/brand/waylon-owner.webp"
+            alt="Waylon Poole, owner of Poole Fencing LLC, with service truck in Live Oak, Florida"
+            width="400"
+            height="400"
+            loading="lazy"
+          />
+        </div>
+        <div class="why-poole-content">
+          <p class="lead">
+            Poole Fencing installs hundreds of feet of fence every week across
+            Suwannee, Columbia, Madison, Alachua, Leon, Duval, Lowndes, and nearby counties.
+            <span class="bold-callout">We don't disappear after the check clears.</span>
+          </p>
+          <ul class="feature-list why-feature-list">
+            <li><strong><a class="review-link" href="https://www.google.com/search?sca_esv=c9c2efd324041014&authuser=1&sxsrf=ANbL-n7nLi1qEl5JTYU4AL2JaRlcDX7tJw:1778373192896&si=AL3DRZEsmMGCryMMFSHJ3StBhOdZ2-6yYkXd_doETEE1OR-qOcF5R3c30_b5VA26kKddqsW26FRXVWeLNrkgtc0dbhaojVFBDkuu77QDuJOGHaHYF7JYa5Yei-1be3dsYoH88HmcBV3X&q=Poole+Fencing+Reviews&sa=X&ved=2ahUKEwjk7sKzvK2UAxW8KVkFHcXXL3UQ0bkNegQIIhAF&biw=1920&bih=964&dpr=2#" target="_blank" rel="noopener noreferrer">5.0 stars on Google</a></strong> with 50+ verified reviews from real North Florida homeowners.</li>
+            <li><strong>3 install crews</strong> &mdash; faster scheduling than any one-truck operation in the region.</li>
+            <li><strong>Licensed and insured</strong> &mdash; your property and our crews are protected on every job.</li>
+            <li><strong>Free, no-pressure estimates</strong> typically scheduled within 48 hours of your call.</li>
+            <li><strong>Family-owned and local</strong> &mdash; born and raised in Suwannee County, not a franchise.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== SERVICES CTA ===== -->
+  <section class="section services-cta-section">
+    <div class="container">
+      <div class="services-cta-grid">
+        <div class="services-cta-text">
+          <span class="eyebrow">Fence services</span>
+          <h2>Every material. Every county. One crew that shows up.</h2>
+          <p class="lead">
+            Vinyl privacy, cedar board-on-board, chain link for the dogs,
+            ornamental aluminum for the pool, page wire for the pasture,
+            custom gates for the entrance &mdash; we install it all across
+            North Florida, every week.
+          </p>
+          <ul class="services-cta-pills">
+            <li>Vinyl</li>
+            <li>Wood</li>
+            <li>Chain Link</li>
+            <li>Ornamental</li>
+            <li>Farm</li>
+            <li>Gates</li>
+          </ul>
+          <div class="button-row" style="margin-top:8px">
+            <a class="button button-primary" href="/services">See All Services &rarr;</a>
+            <a class="button button-ghost" href="/contact-us">Get a Quote</a>
+          </div>
+        </div>
+        <div class="services-cta-visual">
+          <div class="image-carousel" data-carousel="services" role="region" aria-roledescription="carousel" aria-label="Fence service photos">
+            <div class="image-carousel-track">
+              <div class="image-carousel-slide is-active" aria-label="Slide 1 of 5">
+                <img src="/images/fences/aluminum-pool.webp" alt="Ornamental aluminum pool fence by Poole Fencing" width="2048" height="1536" loading="lazy" />
+              </div>
+              <div class="image-carousel-slide" aria-label="Slide 2 of 5">
+                <img src="/images/fences/wood-custom.webp" alt="Custom wood fence design built by Poole Fencing" width="2048" height="1536" loading="lazy" />
+              </div>
+              <div class="image-carousel-slide" aria-label="Slide 3 of 5">
+                <img src="/images/fences/wood-privacy.webp" alt="Wood privacy fence installation in North Florida" width="2048" height="1536" loading="lazy" />
+              </div>
+              <div class="image-carousel-slide" aria-label="Slide 4 of 5">
+                <img src="/images/fences/chain-link.webp" alt="Chain link fence for residential property" width="2048" height="1536" loading="lazy" />
+              </div>
+              <div class="image-carousel-slide" aria-label="Slide 5 of 5">
+                <img src="/images/fences/backyard-privacy.webp" alt="Backyard privacy fence by Poole Fencing" width="2048" height="1536" loading="lazy" />
+              </div>
+            </div>
+            <div class="image-carousel-dots" aria-hidden="true"></div>
+            <button class="carousel-arrow carousel-arrow-prev" aria-label="Previous slide">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <button class="carousel-arrow carousel-arrow-next" aria-label="Next slide">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section id="service-areas" class="section service-map-section">
+    <div class="container">
+      <div class="service-map-header">
+        <div>
+          <span class="eyebrow">Service area</span>
+          <h2>
+            Based in Live Oak. Built around the 60-mile North Florida and South Georgia region.
+          </h2>
+        </div>
+      </div>
+      <div class="service-map-layout" data-service-map>
+        <div class="service-map-panel" aria-label="Interactive North Florida service area map">
+          <div
+            id="service-leaflet-map"
+            class="service-leaflet-map"
+            data-areas={JSON.stringify(serviceAreaMap)}
+            data-base-lat={liveOakBase.lat}
+            data-base-lng={liveOakBase.lng}
+          >
+          </div>
+          <div class="map-fallback">
+            <strong>North Florida service map</strong>
+            <span>Map tiles load from OpenStreetMap when JavaScript is available.</span>
+          </div>
+        </div>
+        <div class="service-area-list" aria-label="Service area details">
+          {serviceAreaMap.map((area) => (
+            <article class={`service-area-card ${area.active ? "is-active" : ""}`} data-area-card={area.slug}>
+              <button type="button" data-area-target={area.slug}>
+                <span>{area.cityName}</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M7 17 17 7M9 7h8v8" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <p>{area.summary}</p>
+              <a href={`/service-areas/${area.slug}`}>See services provided in this area</a>
+            </article>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container split">
+      <div>
+        <span class="eyebrow">Recent work</span>
+        <h2>See what a Poole fence actually looks like.</h2>
+        <a class="button button-outline" href="/projects" style="margin-top:24px">Browse Project Gallery &rarr;</a>
+      </div>
+      <div class="project-gallery-preview">
+        <div class="image-carousel" data-carousel="recent" role="region" aria-roledescription="carousel" aria-label="Recent Poole Fencing project photos">
+          <div class="image-carousel-track">
+            <div class="image-carousel-slide is-active" aria-label="Slide 1 of 5">
+              <img src="/images/fences/transformation.webp" alt="Fence transformation before and after" width="2048" height="1536" loading="lazy" />
+            </div>
+            <div class="image-carousel-slide" aria-label="Slide 2 of 5">
+              <img src="/images/fences/vinyl-showcase.webp" alt="Vinyl fence showcase by Poole Fencing" width="2048" height="1536" loading="lazy" />
+            </div>
+            <div class="image-carousel-slide" aria-label="Slide 3 of 5">
+              <img src="/images/fences/aluminum-pool-fence.webp" alt="Aluminum pool fence installation" width="2048" height="1536" loading="lazy" />
+            </div>
+            <div class="image-carousel-slide" aria-label="Slide 4 of 5">
+              <img src="/images/fences/farm-barbwire.webp" alt="Farm barbwire fencing in North Florida" width="2048" height="1536" loading="lazy" />
+            </div>
+            <div class="image-carousel-slide" aria-label="Slide 5 of 5">
+              <img src="/images/fences/gate-waylon-black.webp" alt="Custom gate installation by Poole Fencing" width="2048" height="1536" loading="lazy" />
+            </div>
+          </div>
+          <div class="image-carousel-dots" aria-hidden="true"></div>
+          <button class="carousel-arrow carousel-arrow-prev" aria-label="Previous slide">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <button class="carousel-arrow carousel-arrow-next" aria-label="Next slide">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+  <script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script is:inline>
+    (function () {
+      const root = document.querySelector("[data-service-map]");
+      if (!root) return;
+      const mapEl = root.querySelector("#service-leaflet-map");
+      const cards = Array.from(root.querySelectorAll("[data-area-card]"));
+      const triggers = Array.from(root.querySelectorAll("[data-area-target]"));
+      const areas = JSON.parse(mapEl?.dataset.areas || "[]");
+      const baseLat = Number(mapEl?.dataset.baseLat || 30.2949);
+      const baseLng = Number(mapEl?.dataset.baseLng || -82.9840);
+      let map;
+      function setActive(slug) {
+        cards.forEach((card) => card.classList.toggle("is-active", card.dataset.areaCard === slug));
+      }
+      function initMap() {
+        if (!window.L || !mapEl || !areas.length) return;
+        map = L.map(mapEl, {
+          center: [baseLat, baseLng],
+          zoom: 7,
+          minZoom: 7,
+          maxZoom: 10,
+          maxBounds: [[29.05, -84.95], [30.95, -81.2]],
+          maxBoundsViscosity: 0.92,
+          scrollWheelZoom: false,
+          attributionControl: true,
+        });
+        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+          attribution: "&copy; OpenStreetMap contributors",
+        }).addTo(map);
+        const bounds = [];
+        areas.forEach((area) => bounds.push([area.lat, area.lng]));
+        const routeOrder = [
+          "tallahassee-fl",
+          "madison-fl",
+          "valdosta-ga",
+          "live-oak-fl",
+          "lake-city-fl",
+          "gainesville-fl",
+          "jacksonville-fl",
+          "lake-city-fl",
+          "live-oak-fl",
+        ];
+        const routePoints = routeOrder
+          .map((slug) => areas.find((area) => area.slug === slug))
+          .filter(Boolean)
+          .map((area) => [area.lat, area.lng]);
+        const coverageBlob = [
+          [30.90, -84.48],
+          [30.85, -83.30],
+          [30.74, -84.48],
+          [30.63, -83.82],
+          [30.55, -83.31],
+          [30.49, -82.78],
+          [30.56, -82.16],
+          [30.48, -81.50],
+          [30.14, -81.33],
+          [29.82, -81.70],
+          [29.50, -82.11],
+          [29.36, -82.61],
+          [29.57, -83.02],
+          [29.82, -83.42],
+          [29.97, -84.02],
+          [30.25, -84.49],
+        ];
+        const coverageCore = [
+          [30.80, -83.30],
+          [30.52, -83.86],
+          [30.45, -83.34],
+          [30.39, -82.91],
+          [30.41, -82.48],
+          [30.38, -81.91],
+          [30.18, -81.62],
+          [29.83, -81.91],
+          [29.68, -82.32],
+          [29.76, -82.78],
+          [30.02, -83.24],
+          [30.13, -83.76],
+        ];
+        L.polygon(coverageBlob, {
+          color: "#f4c430",
+          weight: 1,
+          opacity: 0.28,
+          fillColor: "#f4c430",
+          fillOpacity: 0.12,
+          className: "service-heat-outer",
+        }).addTo(map);
+        L.polygon(coverageCore, {
+          color: "#f4c430",
+          weight: 0,
+          opacity: 0,
+          fillColor: "#f4c430",
+          fillOpacity: 0.18,
+          className: "service-heat-core",
+        }).addTo(map);
+        L.polyline(routePoints, {
+          color: "#f4c430",
+          weight: 12,
+          opacity: 0.18,
+          lineCap: "round",
+          lineJoin: "round",
+          className: "service-snake-glow",
+        }).addTo(map);
+        L.polyline(routePoints, {
+          color: "#f4c430",
+          weight: 5,
+          opacity: 0.95,
+          lineCap: "round",
+          lineJoin: "round",
+          dashArray: "18 26",
+          className: "service-snake-route",
+        }).addTo(map);
+        map.fitBounds(bounds, { padding: [34, 34] });
+        setActive(areas[0].slug);
+      }
+      triggers.forEach((trigger) => {
+        trigger.addEventListener("click", () => setActive(trigger.dataset.areaTarget));
+      });
+      initMap();
+    })();
+  </script>
+
+<Popup />
+
+
+<script is:inline>
+  (function () {
+    function initCarousel(carousel) {
+      if (!carousel) return;
+      var slideSelector = carousel.classList.contains('hero-carousel') ? '.hero-carousel-slide' : '.image-carousel-slide';
+      var dotsSelector = carousel.classList.contains('hero-carousel') ? '.hero-carousel-dots' : '.image-carousel-dots';
+      var slides = carousel.querySelectorAll(slideSelector);
+      var dotsContainer = carousel.querySelector(dotsSelector);
+      var prevBtn = carousel.querySelector('.carousel-arrow-prev');
+      var nextBtn = carousel.querySelector('.carousel-arrow-next');
+      var current = 0;
+      var interval;
+      var DURATION = 6000;
+
+      if (dotsContainer) {
+        slides.forEach(function (_, i) {
+          var btn = document.createElement('button');
+          btn.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+          btn.addEventListener('click', function () {
+            goTo(i);
+            resetTimer();
+          });
+          dotsContainer.appendChild(btn);
+        });
+      }
+
+      var dots = dotsContainer ? dotsContainer.querySelectorAll('button') : [];
+
+      function update() {
+        slides.forEach(function (slide, i) {
+          slide.classList.toggle('is-active', i === current);
+        });
+        dots.forEach(function (dot, i) {
+          dot.classList.toggle('is-active', i === current);
+        });
+      }
+
+      function prev() {
+        current = (current - 1 + slides.length) % slides.length;
+        update();
+      }
+
+      function next() {
+        current = (current + 1) % slides.length;
+        update();
+      }
+
+      function goTo(index) {
+        current = index;
+        update();
+      }
+
+      function resetTimer() {
+        clearInterval(interval);
+        interval = setInterval(next, DURATION);
+      }
+
+      if (prevBtn) {
+        prevBtn.addEventListener('click', function () { prev(); resetTimer(); });
+      }
+      if (nextBtn) {
+        nextBtn.addEventListener('click', function () { next(); resetTimer(); });
+      }
+
+      update();
+      interval = setInterval(next, DURATION);
+
+      carousel.addEventListener('mouseenter', function () { clearInterval(interval); });
+      carousel.addEventListener('mouseleave', function () { interval = setInterval(next, DURATION); });
+      carousel.addEventListener('focusin', function () { clearInterval(interval); });
+      carousel.addEventListener('focusout', function () { interval = setInterval(next, DURATION); });
+    }
+
+    document.querySelectorAll('[data-carousel]').forEach(initCarousel);
+  })();
+</script>
+</BaseLayout>

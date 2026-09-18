@@ -1,0 +1,222 @@
+---
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import ThemeToggle from "../components/ThemeToggle.astro";
+import "../styles/global.css";
+import { site } from "../data/site";
+
+interface Props {
+  title: string;
+  description: string;
+  canonical?: string;
+  image?: string;
+  loaderLabel?: string;
+}
+
+const { title, description, canonical = Astro.url.pathname, image = site.logo, loaderLabel = "Loading Elite Connect..." } = Astro.props;
+const canonicalUrl = new URL(canonical, site.url).toString();
+const imageUrl = new URL(image, site.url).toString();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta name="theme-color" content="#f0f4f8" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0a0e14" media="(prefers-color-scheme: dark)" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={imageUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={imageUrl} />
+    <link rel="icon" href={site.logo} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
+    <script type="application/ld+json">
+      {JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": site.name,
+        "url": site.url,
+        "telephone": site.phone,
+        "email": site.email,
+        "image": imageUrl,
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Virginia Beach",
+          "addressRegion": "VA",
+          "postalCode": "23464",
+          "addressCountry": "US"
+        }
+      })}
+      </script>
+      <script is:inline>
+        (function() {
+        const saved = localStorage.getItem('eliteconnect-theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (saved === 'dark' || (!saved && prefersDark)) {
+          document.documentElement.classList.add('dark');
+        }
+        })();
+      </script>
+  </head>
+  <body>
+  <div class="page-loader" id="page-loader" aria-hidden="true" data-label={loaderLabel}>
+      <canvas class="page-loader-scene" id="page-loader-scene" aria-hidden="true"></canvas>
+      <div class="page-loader-glitch" aria-hidden="true"></div>
+      <div class="page-loader-scanlines" aria-hidden="true"></div>
+      <div class="page-loader-noise" aria-hidden="true"></div>
+
+      <div class="page-loader-inner">
+        <svg class="page-loader-svg" viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle class="pl-outer" cx="100" cy="100" r="60"/>
+          <circle class="pl-mid" cx="100" cy="100" r="40"/>
+          <circle class="pl-inner" cx="100" cy="100" r="20"/>
+          <path class="pl-cross" d="M100 20v30M100 150v30M20 100h30M150 100h30"/>
+          <path class="pl-brackets" d="M30 30L50 30 50 50M170 30L150 30 150 50M30 170L50 170 50 150M170 170L150 170 150 150"/>
+          <circle class="pl-dot" cx="100" cy="100" r="5"/>
+        </svg>
+        <p class="page-loader-label"><span class="page-loader-text">{loaderLabel}</span><span class="page-loader-cursor"></span></p>
+      </div>
+
+      <script is:inline>
+        (function() {
+          var loader = document.getElementById('page-loader');
+          if (!loader) return;
+
+          // ===== Canvas2D pixel scene =====
+          var canvas = document.getElementById('page-loader-scene');
+          var ctx = canvas && canvas.getContext('2d');
+          var W, H, animId;
+          var t = 0;
+
+          function resize() {
+            W = canvas.width = window.innerWidth;
+            H = canvas.height = window.innerHeight;
+          }
+          if (canvas) {
+            resize();
+            window.addEventListener('resize', resize);
+          }
+
+          function drawPixelScene() {
+            if (!ctx) return;
+            t += 0.012;
+            var isDark = document.documentElement.classList.contains('dark');
+            var baseR = isDark ? 10 : 240;
+            var baseG = isDark ? 14 : 244;
+            var baseB = isDark ? 20 : 248;
+
+            ctx.fillStyle = 'rgb(' + baseR + ',' + baseG + ',' + baseB + ')';
+            ctx.fillRect(0, 0, W, H);
+
+            var cx = W * 0.5;
+            var cy = H * 0.5;
+            var scale = Math.min(W, H) * 0.0035;
+
+            // Draw wireframe camera body
+            ctx.strokeStyle = isDark ? 'rgba(100,160,255,0.25)' : 'rgba(30,80,160,0.22)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(cx - 80*scale, cy - 40*scale);
+            ctx.lineTo(cx + 80*scale, cy - 40*scale);
+            ctx.lineTo(cx + 80*scale, cy + 40*scale);
+            ctx.lineTo(cx - 80*scale, cy + 40*scale);
+            ctx.closePath();
+            ctx.stroke();
+
+            // Lens rings
+            for (var i = 3; i >= 0; i--) {
+              ctx.beginPath();
+              ctx.arc(cx, cy, (20 + i*18) * scale, 0, Math.PI*2);
+              ctx.strokeStyle = isDark
+                ? 'rgba(100,160,255,' + (0.08 + i*0.06) + ')'
+                : 'rgba(30,80,160,' + (0.08 + i*0.06) + ')';
+              ctx.stroke();
+            }
+
+            // Rotating crosshair
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(t * 0.4);
+            ctx.strokeStyle = isDark ? 'rgba(100,160,255,0.18)' : 'rgba(30,80,160,0.15)';
+            ctx.lineWidth = 1;
+            for (var a = 0; a < 4; a++) {
+              ctx.save();
+              ctx.rotate(a * Math.PI / 2);
+              ctx.beginPath();
+              ctx.moveTo(0, -90*scale);
+              ctx.lineTo(0, -55*scale);
+              ctx.stroke();
+              ctx.restore();
+            }
+            ctx.restore();
+
+            // Pixel grid (datamosh displacement)
+            var px = 16;
+            for (var y = 0; y < H; y += px) {
+              for (var x = 0; x < W; x += px) {
+                var dx = Math.sin(t + y * 0.015) * Math.cos(t * 1.3 + x * 0.008) * 4;
+                var dy = Math.cos(t + x * 0.012) * Math.sin(t * 0.9 + y * 0.01) * 3;
+                var alpha = 0.03 + Math.sin(t * 2 + x * 0.02 + y * 0.02) * 0.025;
+                var r = baseR + (isDark ? 30 : -30);
+                var g = baseG + (isDark ? 50 : -40);
+                var b = baseB + (isDark ? 80 : -20);
+                ctx.fillStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+                ctx.fillRect(x + dx, y + dy, px - 1, px - 1);
+              }
+            }
+
+            // Glitch blocks
+            if (Math.random() > 0.88) {
+              var gx = Math.random() * W;
+              var gy = Math.random() * H;
+              var gw = 40 + Math.random() * 120;
+              var gh = 2 + Math.random() * 6;
+              var shift = (Math.random() - 0.5) * 30;
+              var imgData = ctx.getImageData(gx, gy, gw, gh);
+              ctx.putImageData(imgData, gx + shift, gy + Math.random() * 4);
+            }
+
+            // Chromatic aberration lines
+            if (Math.random() > 0.92) {
+              var ly = Math.random() * H;
+              ctx.fillStyle = isDark ? 'rgba(255,60,60,0.08)' : 'rgba(255,40,40,0.06)';
+              ctx.fillRect(0, ly, W, 2);
+              ctx.fillStyle = isDark ? 'rgba(60,255,120,0.06)' : 'rgba(40,200,80,0.04)';
+              ctx.fillRect(2, ly + 1, W, 1);
+            }
+
+            animId = requestAnimationFrame(drawPixelScene);
+          }
+
+          if (ctx) drawPixelScene();
+
+          // Fade out
+          setTimeout(function() {
+            loader.classList.add('page-loader--done');
+            if (animId) cancelAnimationFrame(animId);
+            setTimeout(function() {
+              if (loader && loader.parentNode) loader.parentNode.removeChild(loader);
+            }, 600);
+          }, 1800);
+        })();
+      </script>
+    </div>
+    <Header />
+    <main>
+      <slot />
+    </main>
+    <Footer />
+    <ThemeToggle />
+    <script src="/scripts/site.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,96 @@
+{
+  "$schema": "https://zoth.nullai.tech/schemas/netlify-rules-ontology.v1.json",
+  "schema_version": "2026-08-21",
+  "title": "Netlify Build & Runtime Diagnostics Ontology",
+  "description": "Deterministic rules, triggers, and self-healing patches for all known Netlify failure states.",
+  "rules": [
+    {
+      "id": "ERR_LINUX_CASE_MISMATCH",
+      "category": "filesystem",
+      "severity": "CRITICAL",
+      "title": "Linux Filesystem Case Sensitivity Mismatch",
+      "trigger": "Asset 404 on CI / Netlify Linux build while resolving locally on macOS or Windows.",
+      "root_cause": "Linux filesystems (ext4/xfs) are case-sensitive. References like `/assets/Image.png` fail when the disk has `/assets/image.png`.",
+      "detection_regex": "Cannot find file|404 Not Found.*assets|no such file or directory",
+      "self_heal_action": "AST scanner inspects directory contents case-insensitively and updates HTML/JS/CSS string references to exact disk casing.",
+      "cli_fix": "python3 tools-and-automation/zoth_netlify_ax.py --self-heal"
+    },
+    {
+      "id": "ERR_CIRCULAR_REDIRECT_LOOP",
+      "category": "routing",
+      "severity": "CRITICAL",
+      "title": "Circular or Infinite Redirect Loop",
+      "trigger": "Browser error: ERR_TOO_MANY_REDIRECTS or Netlify Deploy validation failure.",
+      "root_cause": "A redirect entry in `_redirects` or `netlify.toml` redirects a path back to itself (e.g. `/hub -> /hub` or recursive `:splat`).",
+      "detection_regex": "Circular redirect detected|infinite redirect loop|ERR_TOO_MANY_REDIRECTS",
+      "self_heal_action": "Graph cycle detector removes self-referential rules and normalizes splat targets.",
+      "cli_fix": "python3 tools-and-automation/zoth_netlify_ax.py --self-heal"
+    },
+    {
+      "id": "ERR_LAMBDA_PAYLOAD_TOO_LARGE",
+      "category": "serverless",
+      "severity": "HIGH",
+      "title": "Serverless Function Package Exceeds 50 MB",
+      "trigger": "Netlify build packaging error: Function exceeds uncompressed size limit.",
+      "root_cause": "Heavy node modules, ML models, or static assets bundled inside `netlify/functions` exceed AWS Lambda / Netlify limits.",
+      "detection_regex": "exceeds Netlify Lambda size limit of 50 MB|Function package too large",
+      "self_heal_action": "Configures `esbuild` bundler with `external_node_modules` exclusion list in `netlify.toml`.",
+      "cli_fix": "Add `[functions] node_bundler = 'esbuild'` to netlify.toml"
+    },
+    {
+      "id": "ERR_NODE_ENGINE_DRIFT",
+      "category": "runtime",
+      "severity": "HIGH",
+      "title": "Node.js Version Engine Mismatch",
+      "trigger": "npm ERR! notsup Unsupported engine for package, or build failure on modern ES syntax.",
+      "root_cause": "Netlify build default image defaults to older LTS Node while package.json requires Node >=20.",
+      "detection_regex": "requires Node.js engine|notsup Unsupported engine|NODE_VERSION mismatch",
+      "self_heal_action": "Pins `[build.environment] NODE_VERSION = '20.17.0'` in `netlify.toml`.",
+      "cli_fix": "python3 tools-and-automation/zoth_netlify_ax.py --self-heal"
+    },
+    {
+      "id": "ERR_SPA_DEEP_LINK_404",
+      "category": "routing",
+      "severity": "MEDIUM",
+      "title": "Single Page Application Sub-Route 404",
+      "trigger": "Direct URL reload or bookmark on clean URLs returns Netlify 404 Page Not Found.",
+      "root_cause": "Missing client-side rewrite fallback rule (`/* /index.html 200`) in `_redirects` or `netlify.toml`.",
+      "detection_regex": "Page Not Found on direct route reload|404 on deep link",
+      "self_heal_action": "Injects `/* /index.html 200` rewrite fallback rule.",
+      "cli_fix": "python3 tools-and-automation/zoth_netlify_ax.py --self-heal"
+    },
+    {
+      "id": "ERR_SECRET_LEAK_IN_CLIENT",
+      "category": "security",
+      "severity": "CRITICAL",
+      "title": "Hardcoded Secret / API Key in Public Assets",
+      "trigger": "Red-team regex detector matches `sk-*`, `ghp_*`, `AIza*` in public bundle files.",
+      "root_cause": "Developer inadvertently hardcoded a private API token in client-side HTML or JS.",
+      "detection_regex": "sk-[a-zA-Z0-9]{32,}|ghp_[a-zA-Z0-9]{36}|AIza[0-9A-Za-z-_]{35}",
+      "self_heal_action": "Redacts plaintext secret, logs warning, and generates `netlify env:set` migration command.",
+      "cli_fix": "netlify env:set SECRET_KEY 'value'"
+    },
+    {
+      "id": "ERR_MISSING_PUBLISH_DIR",
+      "category": "build",
+      "severity": "CRITICAL",
+      "title": "Missing or Misconfigured Publish Directory",
+      "trigger": "Netlify deploy error: 'Deploy directory does not exist'.",
+      "root_cause": "`publish` setting in `netlify.toml` points to wrong path (e.g. `dist` vs `public` vs `build`).",
+      "detection_regex": "Deploy directory does not exist|publish directory not found",
+      "self_heal_action": "Detects actual build artifact folder and aligns `[build] publish` property.",
+      "cli_fix": "python3 tools-and-automation/zoth_netlify_ax.py --self-heal"
+    },
+    {
+      "id": "ERR_CACHE_CORRUPTION",
+      "category": "cdn",
+      "severity": "LOW",
+      "title": "CDN Edge Cache Drift or Stale Asset Revalidation",
+      "trigger": "Visitors see stale content after deploy due to aggressive edge caching.",
+      "root_cause": "Missing `must-revalidate` on HTML routes alongside long max-age headers.",
+      "detection_regex": "stale asset served|cache-control conflict",
+      "self_heal_action": "Harmonizes `Cache-Control: public, max-age=3600, must-revalidate` on HTML and `max-age=604800` on `/assets/*`.",
+      "cli_fix": "python3 tools-and-automation/zoth_netlify_ax.py --self-heal"
+    }
+  ]
+}

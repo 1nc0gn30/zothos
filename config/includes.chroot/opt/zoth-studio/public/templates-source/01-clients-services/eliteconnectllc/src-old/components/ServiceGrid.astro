@@ -1,0 +1,124 @@
+---
+import { services } from "../data/site";
+
+const categories = [...new Set(services.map((s) => s.title.split(" / ")[0]))];
+---
+
+<div class="service-carousel" id="service-carousel">
+  <div class="service-tabs" id="service-tabs" role="tablist" aria-label="Service categories">
+    {categories.map((cat, i) => (
+      <button
+        class={`service-tab ${i === 0 ? "active" : ""}`}
+        role="tab"
+        aria-selected={i === 0 ? "true" : "false"}
+        aria-controls={`service-panel-${cat}`}
+        id={`service-tab-${cat}`}
+        data-index={i}
+      >
+        {cat}
+      </button>
+    ))}
+  </div>
+
+  <div class="service-panels" id="service-panels">
+    {categories.map((cat, i) => {
+      const catServices = services.filter((s) => s.title.split(" / ")[0] === cat);
+      return (
+        <div
+          class={`service-panel ${i === 0 ? "active" : ""}`}
+          role="tabpanel"
+          id={`service-panel-${cat}`}
+          aria-labelledby={`service-tab-${cat}`}
+          hidden={i !== 0}
+        >
+          {catServices.map((service) => (
+            <article class="service-card" id={service.slug}>
+              <div class="service-img-wrap">
+                <img src={service.image} alt={service.alt} loading="lazy" />
+              </div>
+              <div class="service-body">
+                <h3>{service.title}</h3>
+                <p>{service.summary}</p>
+                <ul class="service-chips">
+                  {service.points.map((point) => <li>{point}</li>)}
+                </ul>
+                <a class="service-cta" href="/contact/">
+                  Get a quote
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
+                </a>
+              </div>
+            </article>
+          ))}
+        </div>
+      );
+    })}
+  </div>
+
+  <div class="service-nav">
+    <button class="service-prev" id="service-prev" aria-label="Previous service category">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 19l-7-7 7-7" />
+      </svg>
+    </button>
+    <span class="service-counter" id="service-counter">1 / {categories.length}</span>
+    <button class="service-next" id="service-next" aria-label="Next service category">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 12h14M12 5l7 7-7 7" />
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script type="module">
+  (function() {
+    const tabs = document.querySelectorAll('.service-tab');
+    const panels = document.querySelectorAll('.service-panel');
+    const prevBtn = document.getElementById('service-prev');
+    const nextBtn = document.getElementById('service-next');
+    const counter = document.getElementById('service-counter');
+    let current = 0;
+    const total = tabs.length;
+
+    function show(index) {
+      if (index < 0) index = total - 1;
+      if (index >= total) index = 0;
+      current = index;
+
+      tabs.forEach((tab, i) => {
+        tab.classList.toggle('active', i === current);
+        tab.setAttribute('aria-selected', i === current ? 'true' : 'false');
+      });
+
+      panels.forEach((panel, i) => {
+        const isActive = i === current;
+        panel.classList.toggle('active', isActive);
+        panel.hidden = !isActive;
+        if (isActive) {
+          panel.style.animation = 'none';
+          panel.offsetHeight;
+          panel.style.animation = 'fadeIn 0.4s ease forwards';
+        }
+      });
+
+      counter.textContent = `${current + 1} / ${total}`;
+    }
+
+    tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => show(i));
+      tab.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') show(current + 1);
+        if (e.key === 'ArrowLeft') show(current - 1);
+      });
+    });
+
+    prevBtn?.addEventListener('click', () => show(current - 1));
+    nextBtn?.addEventListener('click', () => show(current + 1));
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') show(current - 1);
+      if (e.key === 'ArrowRight') show(current + 1);
+    });
+  })();
+</script>

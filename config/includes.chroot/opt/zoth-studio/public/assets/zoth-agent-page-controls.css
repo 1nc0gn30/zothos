@@ -1,0 +1,194 @@
+/* ==============================================================================
+   ⚡ ZOTH STUDIO — PER-AGENT PROFILE PAGE INTERACTIVE CONTROL SIZING
+   ==============================================================================
+   Scope: the 21 individual agent dossier pages under /agents/*.html ONLY.
+
+   WHY THIS FILE EXISTS: the shared agents.css sizes the resonance slider at 6px
+   tall and the telemetry buttons at ~22-29px tall, and the breadcrumb links at
+   20px tall. All of those are far under the 44x44 CSS-pixel minimum touch
+   target on a 390x844 handset. The shared stylesheets are site-wide and are not
+   the place for a page-class-specific touch fix, so every rule here is additive
+   and scoped to the agent dossier markup only.
+
+   RULES OF THE ROAD
+     * Theme tokens only (--agent-*, --radius-fib-*, --font-*). No literal hex,
+       no dark-only colours: this file must render correctly for every value of
+       <html data-theme="...">.
+     * Hit areas are scaled, never type. Desktop typography and rhythm are
+       untouched: everything that grows the visual box is inside the mobile
+       media query, except the range slider, whose *box* grows while its
+       visible track stays exactly 6px (drawn as a centred background gradient)
+       so the desktop render is pixel-identical apart from 38px of airflow.
+     * Zero JS required. Pure CSS, works with scripting disabled.
+     * All motion is guarded by prefers-reduced-motion.
+   ============================================================================== */
+
+/* ------------------------------------------------------------------------------
+   1. RESONANCE FREQUENCY SLIDER
+   6px of drawn track sitting inside a 44px-tall hit box. The track is painted as
+   a background gradient confined to 6px in the vertical centre so the desktop
+   composition is unchanged; the element itself is a genuine 44px touch target.
+   ------------------------------------------------------------------------------ */
+.resonance-range-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 44px;              /* real touch height, was 6px */
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: var(--radius-fib-pill);
+  outline: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  background-color: transparent;
+  background-image: linear-gradient(var(--agent-border), var(--agent-border));
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: 100% 6px; /* the visible track */
+}
+
+/* zoth-theme-light.css carries a site-wide
+   `html[data-theme="light"] input { background: #ffffff !important;
+    background-image: initial !important; ... }`
+   which erases the 6px track, leaving a 44px invisible white box in the Solar
+   Light theme. That file is shared and off-limits, so we beat it on specificity
+   + importance instead of editing it. The track colour is mixed from the themed
+   --agent-text-dim token so it stays legible on light AND dark surfaces; the
+   plain --agent-border gradient above is the fallback. */
+html[data-theme="light"] .resonance-range-slider,
+body[data-theme="light"] .resonance-range-slider {
+  background-color: transparent !important;
+  background-image: linear-gradient(var(--agent-border), var(--agent-border)) !important;
+  background-image: linear-gradient(
+    color-mix(in srgb, var(--agent-text-dim) 45%, transparent),
+    color-mix(in srgb, var(--agent-text-dim) 45%, transparent)) !important;
+  background-repeat: no-repeat !important;
+  background-position: center center !important;
+  background-size: 100% 6px !important;
+}
+
+
+/* Kill the UA track box so only our 6px gradient paints. */
+.resonance-range-slider::-webkit-slider-runnable-track {
+  height: 6px;
+  background: transparent;
+  border: 0;
+}
+.resonance-range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  margin-top: -6px;          /* centre the 18px thumb on the 6px track */
+  border-radius: 50%;
+  background: var(--agent-gold);
+  border: 2px solid var(--agent-bg);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--agent-gold) 80%, transparent);
+  cursor: pointer;
+}
+.resonance-range-slider::-moz-range-track {
+  height: 6px;
+  background: var(--agent-border);
+  border-radius: var(--radius-fib-pill);
+}
+.resonance-range-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--agent-gold);
+  border: 2px solid var(--agent-bg);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--agent-gold) 80%, transparent);
+  cursor: pointer;
+}
+
+/* Keyboard affordance — the slide box is the focus ring's frame. */
+.resonance-range-slider:focus-visible {
+  outline: 2px solid var(--agent-gold);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------------------
+   2. MOBILE TOUCH TARGETS
+   Applied only where a thumb (not a mouse) is doing the pointing. The desktop
+   layout keeps its compact editorial density — only the hit box grows here.
+   ------------------------------------------------------------------------------ */
+@media (max-width: 820px) {
+
+  /* --- Telemetry suite buttons: Test Tone / Pulse / Verify / Harmonize --- */
+  .telemetry-btn {
+    min-height: 44px;
+    min-width: 44px;
+    padding-block: 10px;      /* beats the inline padding on the "Test Tone" button */
+    box-sizing: border-box;
+  }
+  .telemetry-controls-row {
+    gap: var(--fib-8);
+    row-gap: 10px;
+  }
+
+  /* --- In-page breadcrumb nav links ("Home", "Pantheon Codex") --- */
+  .breadcrumb-bar {
+    row-gap: 0;
+    column-gap: var(--fib-8);
+  }
+  .breadcrumb-bar a {
+    min-height: 44px;
+    min-width: 44px;
+    box-sizing: border-box;
+    align-items: center;
+  }
+
+  /* --- Floating annotator toolbar (zoth-annotator.css, loaded site-wide but
+         only made touch-sized here, on the dossier pages). --- */
+  .za-tool-btn {
+    min-height: 44px;
+    box-sizing: border-box;
+  }
+
+  /* --- Mega-footer link rows: the narrow ones (Docs / FAQ) were 22-30px wide
+         against a >=44x44 bar. --- */
+  .mega-footer-link {
+    min-height: 44px;
+    min-width: 44px;
+    box-sizing: border-box;
+  }
+
+  /* --- Footer meta row (GitHub / NullAI / Docs / FAQ). The shared footer
+         already gives these 44px of height; the narrow ones ("FAQ" is 22px
+         wide) still need width. Padding grown symmetrically and cancelled by
+         an equal negative margin, so the row's layout box is unchanged and
+         nothing reflows or wraps — only the hit box grows. --- */
+  .foot-meta a {
+    padding-inline: 12px;
+    margin-inline: -12px;
+  }
+}
+
+/* Coarse-pointer tablets/desktops that still present a touch surface. */
+@media (hover: none) and (pointer: coarse) {
+  .telemetry-btn,
+  .breadcrumb-bar a {
+    min-height: 44px;
+    min-width: 44px;
+    box-sizing: border-box;
+  }
+}
+
+/* ------------------------------------------------------------------------------
+   3. MOTION GUARD
+   The shared .telemetry-btn carries `transition: all .2s ease`; we re-assert the
+   same hover contract here so the reduced-motion opt-out is explicit and local.
+   ------------------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .telemetry-btn,
+  .breadcrumb-bar a,
+  .resonance-range-slider,
+  .resonance-range-slider::-webkit-slider-thumb,
+  .mega-footer-link,
+  .za-tool-btn {
+    transition: none !important;
+    animation: none !important;
+  }
+}

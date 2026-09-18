@@ -1,0 +1,833 @@
+/* Signal operator poster — gold/void editorial HUD.
+   Loaded after /assets/zoth-theme.css (and after signal.css). */
+
+.ambient-mesh,
+.rune-matrix-canvas,
+body.signal-deck::before,
+body.signal-deck::after {
+  display: none !important;
+}
+
+html,
+body.signal-deck {
+  background: var(--bg);
+  color: var(--text-body);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Hero — full-bleed split, one still                                         */
+/* -------------------------------------------------------------------------- */
+
+.sig-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  width: 100%;
+  min-height: calc(100svh - var(--zoth-header-h, 54px));
+  background: var(--bg);
+}
+
+.sig-hero-stage {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  min-height: calc(100svh - var(--zoth-header-h, 54px));
+  display: grid;
+  grid-template-columns: minmax(18rem, 38rem) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+}
+
+.sig-hero-copy {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 16px;
+  max-width: 38rem;
+  padding: clamp(28px, 5vw, 64px) clamp(20px, 4vw, 48px) clamp(40px, 7vw, 80px);
+}
+
+.sig-kicker {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.sig-hero h1.signal-title,
+h1.signal-title {
+  margin: 0;
+  max-width: 12ch;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2.35rem, 5.4vw, 4.4rem);
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+  color: var(--text-primary);
+  -webkit-text-fill-color: var(--text-primary);
+  background: none;
+  text-shadow: none;
+  overflow-wrap: normal;
+  word-break: keep-all;
+}
+
+.sig-lede {
+  margin: 0;
+  max-width: 34rem;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  color: var(--text-subhead);
+}
+
+.sig-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.sig-hero-actions .btn-on,
+.sig-hero-actions .btn-off {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  border-radius: 999px;
+  padding: 12px 22px;
+  min-height: 44px;
+  min-width: 44px;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.sig-hero-actions .btn-on {
+  background: var(--gold);
+  color: #050508;
+  border: 1px solid var(--gold);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--gold) 32%, transparent);
+}
+
+.sig-hero-actions .btn-on:hover {
+  transform: translateY(-2px);
+  text-decoration: none;
+  filter: brightness(1.08);
+}
+
+.sig-hero-actions .btn-off {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--line);
+}
+
+.sig-hero-actions .btn-off:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+
+.sig-live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fib-8);
+  background: color-mix(in srgb, var(--green) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--green) 36%, transparent);
+  color: var(--green);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 8px 16px;
+  border-radius: 999px;
+  min-height: 44px;
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--green);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--green);
+  animation: sigPulse 1.8s infinite;
+}
+
+@keyframes sigPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.sig-hero-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.sig-metric {
+  background: color-mix(in srgb, var(--panel) 82%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  padding: 12px 14px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.sig-metric b {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  color: var(--text-primary);
+  letter-spacing: -0.03em;
+}
+
+.sig-metric span {
+  display: block;
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.sig-hero-media {
+  position: relative;
+  z-index: 1;
+  min-height: calc(100svh - var(--zoth-header-h, 54px));
+  align-self: stretch;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.sig-hero-still {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 28% 55%;
+  display: block;
+}
+
+.sig-hero-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 55%, transparent) 22%, transparent 48%),
+    linear-gradient(180deg, transparent 52%, var(--bg) 100%),
+    url("/assets/media/signal-poster-grid.svg");
+  background-size: auto, auto, 96px 96px;
+  mix-blend-mode: normal;
+}
+
+.sig-hero-hud {
+  position: absolute;
+  left: clamp(16px, 3vw, 32px);
+  bottom: clamp(20px, 4vw, 40px);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  min-width: 11rem;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  color: var(--text-primary);
+  pointer-events: none;
+}
+
+.sig-hero-hud-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+
+.sig-hero-hud strong {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+}
+
+.sig-hero-hud span:last-child {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--muted);
+}
+
+.sig-hero-seal {
+  position: absolute;
+  right: clamp(16px, 3vw, 28px);
+  top: clamp(16px, 3vw, 28px);
+  z-index: 3;
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45));
+  pointer-events: none;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Deck HUD                                                                   */
+/* -------------------------------------------------------------------------- */
+
+.sig-deck {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--bg) 92%, transparent), var(--bg)),
+    url("/assets/media/signal-poster-grid.svg");
+  background-size: auto, 96px 96px;
+  border-top: 1px solid var(--line);
+  scroll-margin-top: calc(var(--zoth-header-h, 54px) + var(--zoth-ribbon, 0px) + 12px);
+}
+
+.sig-deck-inner {
+  position: relative;
+}
+
+.mobile-desktop-insight {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0 0 var(--fib-21);
+  padding: 14px 16px;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--panel) 90%, transparent);
+  color: var(--text-body);
+}
+
+.mobile-desktop-insight .insight-icon {
+  flex-shrink: 0;
+}
+
+.mobile-desktop-insight .insight-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.mobile-desktop-insight .insight-text strong {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.mobile-desktop-insight .insight-close {
+  margin-left: auto;
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.sig-card {
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  border: 1px solid var(--line);
+  box-shadow: 0 18px 40px var(--shadow-color, rgba(0, 0, 0, 0.35));
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.sig-card-meta {
+  color: var(--cyan);
+}
+
+.sig-deck-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--fib-13);
+  flex-wrap: wrap;
+  margin-bottom: var(--fib-21);
+  padding-bottom: var(--fib-13);
+  border-bottom: 1px solid var(--line);
+}
+
+.sig-deck-head .sig-deck-kicker {
+  margin-bottom: 0;
+}
+
+.msg-bubble {
+  animation: sigFadeIn 0.25s ease-out both;
+}
+
+@keyframes sigFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.sig-card-stream {
+  position: relative;
+  padding: 18px 16px 24px;
+  border-radius: 28px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--panel-solid) 92%, transparent), var(--panel)),
+    var(--phone-bg, var(--panel));
+  border: 10px solid color-mix(in srgb, var(--bg-2) 80%, #121018);
+  box-shadow:
+    0 28px 60px var(--shadow-color, rgba(0, 0, 0, 0.45)),
+    0 0 0 1px var(--phone-bezel, var(--line)),
+    inset 0 0 0 1px color-mix(in srgb, var(--text-primary) 6%, transparent);
+}
+
+.sig-card-stream::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 92px;
+  height: 10px;
+  border-radius: 0 0 10px 10px;
+  background: color-mix(in srgb, var(--bg-2) 80%, #121018);
+  pointer-events: none;
+}
+
+.sig-card-stream::after {
+  content: "";
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 108px;
+  height: 4px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-primary) 22%, transparent);
+  pointer-events: none;
+}
+
+.sig-card-stream .card-title {
+  padding-top: 6px;
+}
+
+.stream-console {
+  position: relative;
+  background:
+    url("/assets/media/signal-poster-scan.svg"),
+    var(--code-bg);
+  background-size: 4px 8px, auto;
+  box-shadow: inset 0 0 40px color-mix(in srgb, var(--bg) 55%, transparent);
+}
+
+.mascot-item {
+  border-left: 3px solid transparent;
+}
+
+.mascot-item.selected {
+  border-left-color: var(--gold);
+}
+
+.mascot-item::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  margin-left: auto;
+  border-radius: 50%;
+  background: var(--muted);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--muted) 18%, transparent);
+  flex-shrink: 0;
+}
+
+.mascot-item.selected::after {
+  background: var(--green);
+  box-shadow: 0 0 10px var(--green);
+}
+
+.tel-item {
+  position: relative;
+  padding-left: 28px;
+}
+
+.tel-item::before {
+  content: "";
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+}
+
+.tel-item:nth-last-child(-n+2)::before {
+  background: var(--gold);
+  box-shadow: 0 0 8px var(--gold);
+}
+
+.sig-floating-voice-fab.recording,
+.btn-voice-memo.recording {
+  animation: sigMemoPulse 1.2s infinite;
+}
+
+@keyframes sigMemoPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+
+.sig-audio-toggle {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 96;
+  width: 48px;
+  height: 48px;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--gold);
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 20px var(--shadow-color, rgba(0, 0, 0, 0.35));
+}
+
+footer.site {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Mobile                                                                     */
+/* -------------------------------------------------------------------------- */
+
+@media (max-width: 880px) {
+  .sig-hero {
+    min-height: auto;
+  }
+
+  .sig-hero-stage {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .sig-hero-media {
+    order: -1;
+    min-height: 52svh;
+    height: 52svh;
+  }
+
+  .sig-hero-copy {
+    padding: 18px 20px 36px;
+    gap: 12px;
+    max-width: none;
+    justify-content: flex-start;
+  }
+
+  .sig-hero h1.signal-title {
+    max-width: none;
+    font-size: clamp(2.1rem, 10vw, 3rem);
+    background: none;
+    -webkit-text-fill-color: var(--text-primary);
+  }
+
+  .sig-hero-scrim {
+    background:
+      linear-gradient(180deg, transparent 40%, var(--bg) 100%),
+      url("/assets/media/signal-poster-grid.svg");
+    background-size: auto, 96px 96px;
+  }
+
+  .sig-hero-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .sig-hero-hud {
+    left: 12px;
+    bottom: 16px;
+  }
+
+  .sig-card-stream {
+    border-width: 8px;
+    border-radius: 22px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse-dot,
+  .sig-floating-voice-fab,
+  .btn-voice-memo,
+  .msg-bubble,
+  .sig-hero-still {
+    animation: none !important;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Light                                                                      */
+/* -------------------------------------------------------------------------- */
+
+html[data-theme="light"] body.signal-deck,
+html.theme-light body.signal-deck {
+  background: var(--bg) !important;
+  color: var(--text-body) !important;
+}
+
+html[data-theme="light"] .sig-hero,
+html[data-theme="light"] .sig-deck {
+  background-color: var(--bg, #f7f9fc);
+}
+
+html[data-theme="light"] .sig-hero-copy {
+  background: linear-gradient(
+    90deg,
+    var(--bg, #f7f9fc) 0%,
+    var(--bg, #f7f9fc) 78%,
+    color-mix(in srgb, var(--bg, #f7f9fc) 40%, transparent) 100%
+  );
+}
+
+html[data-theme="light"] .sig-kicker,
+html[data-theme="light"] .sig-hero-hud-kicker,
+html[data-theme="light"] .sig-deck-kicker p,
+html[data-theme="light"] .mobile-desktop-insight .insight-text strong {
+  color: #b45309;
+}
+
+html[data-theme="light"] .sig-hero h1.signal-title,
+html[data-theme="light"] h1.signal-title {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  background: none !important;
+  text-shadow: none;
+}
+
+html[data-theme="light"] .sig-lede,
+html[data-theme="light"] .sig-hero-hud span:last-child,
+html[data-theme="light"] .sig-metric span,
+html[data-theme="light"] .mascot-info span,
+html[data-theme="light"] .msg-meta,
+html[data-theme="light"] .tel-item .label {
+  color: #4b5563;
+}
+
+html[data-theme="light"] .sig-hero-scrim {
+  background:
+    linear-gradient(90deg, var(--bg) 0%, rgba(247, 249, 252, 0.72) 26%, transparent 52%),
+    linear-gradient(180deg, transparent 58%, var(--bg) 100%);
+  mix-blend-mode: normal;
+}
+
+html[data-theme="light"] .sig-hero-actions .btn-off,
+html[data-theme="light"] .cockpit-tab-btn,
+html[data-theme="light"] .chip-btn,
+html[data-theme="light"] .mascot-item,
+html[data-theme="light"] .tel-item,
+html[data-theme="light"] .sig-metric,
+html[data-theme="light"] .sig-hero-hud,
+html[data-theme="light"] .mobile-desktop-insight,
+html[data-theme="light"] .sig-card,
+html[data-theme="light"] .sig-audio-toggle {
+  background: #ffffff;
+  color: #1f2937;
+  border-color: rgba(17, 24, 39, 0.14);
+  box-shadow: 0 10px 28px rgba(17, 24, 39, 0.06);
+}
+
+html[data-theme="light"] .sig-hero-actions .btn-on,
+html[data-theme="light"] .btn-send {
+  color: #111827;
+}
+
+html[data-theme="light"] .sig-metric b,
+html[data-theme="light"] .sig-hero-hud strong,
+html[data-theme="light"] .sig-deck-kicker h2,
+html[data-theme="light"] .card-title,
+html[data-theme="light"] .mascot-info strong,
+html[data-theme="light"] .tel-item .status {
+  color: #111827;
+  -webkit-text-fill-color: #111827;
+}
+
+html[data-theme="light"] .sig-card-meta {
+  color: #635bff;
+}
+
+html[data-theme="light"] .sig-deck-head {
+  border-bottom-color: rgba(17, 24, 39, 0.1);
+}
+
+html[data-theme="light"] .sig-live-pill {
+  background: #ecfdf5;
+  border-color: rgba(4, 120, 87, 0.3);
+  color: #047857;
+}
+
+html[data-theme="light"] .sig-card-stream {
+  background: #ffffff;
+  border-color: #e5e7eb;
+  box-shadow: 0 18px 40px rgba(17, 24, 39, 0.1);
+}
+
+html[data-theme="light"] .sig-card-stream::before {
+  background: #e5e7eb;
+}
+
+html[data-theme="light"] .stream-console {
+  background: #f3f4f6;
+  border-color: rgba(17, 24, 39, 0.1);
+}
+
+html[data-theme="light"] .msg-inbound {
+  background: #eef2ff;
+  border-color: rgba(99, 91, 255, 0.28);
+  color: #1f2937;
+}
+
+html[data-theme="light"] .msg-ack {
+  background: #fff7ed;
+  border-color: rgba(180, 83, 9, 0.28);
+  color: #92400e;
+}
+
+html[data-theme="light"] .msg-reply {
+  background: #ffffff;
+  border-color: rgba(109, 40, 217, 0.22);
+  color: #1f2937;
+}
+
+html[data-theme="light"] .msg-heartbeat {
+  background: #ecfdf5;
+  border-color: rgba(4, 120, 87, 0.25);
+  color: #065f46;
+}
+
+html[data-theme="light"] .mascot-item:hover,
+html[data-theme="light"] .mascot-item.selected,
+html[data-theme="light"] .chip-btn:hover,
+html[data-theme="light"] .cockpit-tab-btn.active {
+  background: #fff7ed;
+  border-color: #b45309;
+  color: #92400e;
+}
+
+html[data-theme="light"] .sig-textarea {
+  background: #ffffff;
+  color: #111827;
+  border-color: rgba(17, 24, 39, 0.16);
+}
+
+html[data-theme="light"] footer.site {
+  background: #f7f9fc;
+  color: #374151;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Matrix                                                                     */
+/* -------------------------------------------------------------------------- */
+
+html[data-theme="matrix"] .sig-kicker,
+html[data-theme="matrix"] .sig-hero-hud-kicker,
+html[data-theme="matrix"] .cockpit-tab-btn.active,
+html[data-theme="matrix"] .chip-btn:hover,
+html[data-theme="matrix"] .mascot-item.selected {
+  color: var(--cyan);
+  border-color: var(--cyan);
+}
+
+html[data-theme="matrix"] .sig-hero-actions .btn-on,
+html[data-theme="matrix"] .btn-send {
+  background: var(--cyan);
+  border-color: var(--cyan);
+  color: #001400;
+  box-shadow: 0 0 22px color-mix(in srgb, var(--cyan) 35%, transparent);
+}
+
+html[data-theme="matrix"] .sig-card,
+html[data-theme="matrix"] .sig-hero-hud,
+html[data-theme="matrix"] .sig-metric {
+  border-color: color-mix(in srgb, var(--cyan) 28%, transparent);
+}
+
+html[data-theme="matrix"] .sig-card-stream {
+  border-color: #031803;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--cyan) 40%, transparent);
+}
+
+html[data-theme="matrix"] .stream-console {
+  box-shadow: inset 0 0 40px rgba(0, 255, 65, 0.08);
+}
+
+html[data-theme="matrix"] .mascot-item.selected {
+  background: color-mix(in srgb, var(--cyan) 12%, transparent);
+  border-left-color: var(--cyan);
+}
+
+html[data-theme="matrix"] .sig-live-pill {
+  color: var(--cyan);
+  border-color: color-mix(in srgb, var(--cyan) 40%, transparent);
+  background: color-mix(in srgb, var(--cyan) 10%, transparent);
+}
+
+html[data-theme="matrix"] .pulse-dot,
+html[data-theme="matrix"] .mascot-item.selected::after,
+html[data-theme="matrix"] .tel-item::before {
+  background: var(--cyan);
+  box-shadow: 0 0 10px var(--cyan);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Gold                                                                       */
+/* -------------------------------------------------------------------------- */
+
+html[data-theme="gold"] .sig-kicker,
+html[data-theme="gold"] .sig-hero-hud-kicker,
+html[data-theme="gold"] .cockpit-tab-btn.active {
+  color: var(--gold);
+}
+
+html[data-theme="gold"] .sig-hero-scrim {
+  background:
+    linear-gradient(90deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 60%, transparent) 24%, transparent 50%),
+    linear-gradient(180deg, transparent 55%, var(--bg) 100%);
+}
+
+html[data-theme="gold"] .sig-card,
+html[data-theme="gold"] .sig-hero-hud,
+html[data-theme="gold"] .sig-metric {
+  border-color: color-mix(in srgb, var(--gold) 28%, transparent);
+}
+
+html[data-theme="gold"] .sig-card-stream {
+  box-shadow:
+    0 28px 60px rgba(0, 0, 0, 0.5),
+    0 0 0 1px color-mix(in srgb, var(--gold) 40%, transparent);
+}
+
+html[data-theme="gold"] .mascot-item.selected {
+  background: color-mix(in srgb, var(--gold) 14%, transparent);
+}

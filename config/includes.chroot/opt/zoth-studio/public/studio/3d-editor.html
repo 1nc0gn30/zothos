@@ -1,0 +1,3254 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Zoth Nexus 3D Omniverse — CAD-Grade WebGL Viewport &amp; AI 3D Generator</title>
+<meta content="CAD-grade 3D WebGL viewport: procedural mesh deformation, real-time lighting, material PBR textures, and AI-driven 3D generation." name="description"/>
+<link href="https://zoth.nullai.tech/studio/3d-editor.html" rel="canonical"/>
+<!-- OpenGraph / Facebook -->
+<meta content="website" property="og:type"/>
+<meta content="Zoth Studio" property="og:site_name"/>
+<meta content="https://zoth.nullai.tech/studio/3d-editor.html" property="og:url"/>
+<meta content="Zoth Nexus 3D Omniverse — CAD-Grade WebGL Viewport &amp; AI 3D Generator" property="og:title"/>
+<meta content="CAD-grade 3D WebGL viewport: procedural mesh deformation, real-time lighting, material PBR textures, and AI-driven 3D generation." property="og:description"/>
+<meta content="https://zoth.nullai.tech/assets/media/cyber-nexus-3d-photoreal.jpg" property="og:image"/>
+<!-- Twitter Cards -->
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="Zoth Nexus 3D Omniverse — CAD-Grade WebGL Viewport &amp; AI 3D Generator" name="twitter:title"/>
+<meta content="CAD-grade 3D WebGL viewport: procedural mesh deformation, real-time lighting, material PBR textures, and AI-driven 3D generation." name="twitter:description"/>
+<meta content="https://zoth.nullai.tech/assets/media/cyber-nexus-3d-photoreal.jpg" name="twitter:image"/>
+<!-- OpenGraph / Facebook -->
+<!-- Twitter Cards -->
+<!-- OpenGraph / Facebook -->
+<!-- Twitter Cards -->
+<meta content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" name="robots"/>
+<meta content="#030306" name="theme-color">
+<link href="/assets/brand/zoth-seal-hermetic-on-dark.svg" rel="icon" type="image/svg+xml">
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600;1,700&amp;family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&amp;family=Syne:wght@600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="/styles.css?v=20260816s" rel="stylesheet"/>
+<link href="/studio/studio.css?v=20260816s" rel="stylesheet"/>
+<link href="/assets/zoth-theme.css?v=12" rel="stylesheet"/>
+<link href="/assets/zoth-hud-embedded.css" rel="stylesheet"/>
+<script src="/assets/zoth-hud-embedded.js"></script>
+<!-- Three.js + Postprocessing + Exporters + TransformGizmo -->
+<script src="/assets/vendor/three.min.js"></script>
+<script src="/assets/vendor/OrbitControls.js"></script>
+<script src="/assets/vendor/TransformControls.js"></script>
+<script src="/assets/vendor/GLTFLoader.js"></script>
+<script src="/assets/vendor/OBJLoader.js"></script>
+<script src="/assets/vendor/GLTFExporter.js"></script>
+<script src="/assets/vendor/OBJExporter.js"></script>
+<script src="/assets/vendor/CopyShader.js"></script>
+<script src="/assets/vendor/Pass.js"></script>
+<script src="/assets/vendor/ShaderPass.js"></script>
+<script src="/assets/vendor/RenderPass.js"></script>
+<script src="/assets/vendor/LuminosityHighPassShader.js"></script>
+<script src="/assets/vendor/UnrealBloomPass.js"></script>
+<script src="/assets/vendor/EffectComposer.js"></script>
+<script src="/studio/nexus-3d-generator.js?v=20260824"></script>
+<style>
+        .skip-to-content, .skip-link, .skip {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    .skip-to-content:focus, .skip-link:focus, .skip:focus {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      width: auto;
+      height: auto;
+      padding: 10px 18px;
+      margin: 0;
+      overflow: visible;
+      clip: auto;
+      white-space: normal;
+      background: #fbbf24;
+      color: #050508;
+      font-family: monospace;
+      font-size: 0.82rem;
+      font-weight: 700;
+      border-radius: 8px;
+      z-index: 100000;
+      outline: 2px solid #fff;
+    }
+
+    :root {
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'Figtree', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+  --text-primary: #ffffff;
+  --text: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-dim: #94a3b8;
+  --muted: #94a3b8;
+
+    /* Sacred Fibonacci Spacing Tokens & Golden Ratio (Phi = 1.6180339887) */
+    --phi: 1.6180339887;
+    --phi-inv: 0.6180339887;
+    --phi-major: 61.8%;
+    --phi-minor: 38.2%;
+    --phi-split: 1.618fr 1fr;
+    --phi-split-inv: 1fr 1.618fr;
+    --phi-sidebar: 377px;
+    --phi-gutter: 233px;
+
+    /* Fibonacci Spacing Scale */
+    --fib-1: 1px;
+    --fib-2: 2px;
+    --fib-3: 3px;
+    --fib-5: 5px;
+    --fib-8: 8px;
+    --fib-13: 13px;
+    --fib-21: 21px;
+    --fib-34: 34px;
+    --fib-55: 55px;
+    --fib-89: 89px;
+    --fib-144: 144px;
+    --fib-233: 233px;
+    --fib-377: 377px;
+    --fib-610: 610px;
+    --fib-987: 987px;
+
+    /* Fibonacci Border Radius Scale */
+    --radius-fib-xs: 5px;
+    --radius-fib-sm: 8px;
+    --radius-fib-md: 13px;
+    --radius-fib-lg: 21px;
+    --radius-fib-xl: 34px;
+    --radius-fib-pill: 9999px;
+    --fib-radius-xs: 5px;
+    --fib-radius-sm: 8px;
+    --fib-radius-md: 13px;
+    --fib-radius-lg: 21px;
+    --fib-radius-xl: 34px;
+    --fib-radius-pill: 9999px;
+
+    /* Sacred Typography Scale */
+    --fib-font-micro: 13px;
+    --fib-font-body: 16px;
+    --fib-font-subhead: 21px;
+    --fib-font-title: 34px;
+    --fib-font-hero: 55px;
+
+    --font-fib-micro: 13px;
+    --font-fib-base: 16px;
+    --font-fib-h5: 21px;
+    --font-fib-h4: 26px;
+    --font-fib-h3: 34px;
+    --font-fib-h2: 55px;
+    --font-fib-h1: 89px;
+    }
+
+      .studio-layout {
+        display: grid;
+        grid-template-columns: 360px 1fr 390px;
+        gap: 20px;
+        height: calc(100vh - 72px);
+        padding: 16px 20px 20px;
+        background: var(--bg, #020306);
+        box-sizing: border-box;
+      }
+      @media (max-width: 1380px) and (min-width: 961px) {
+        .studio-layout {
+          grid-template-columns: 330px 1fr 340px;
+          gap: 16px;
+          padding: 12px 16px 16px;
+        }
+      }
+
+      /* Vector SVG Standard Icon Class */
+      .icon-svg {
+        width: 14px;
+        height: 14px;
+        display: inline-block;
+        vertical-align: middle;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        flex-shrink: 0;
+      }
+      .btn-cad .icon-svg, .tag-pill .icon-svg, .mobile-tab-btn .icon-svg {
+        margin-right: 4px;
+      }
+
+      /* Mobile Segmented Switcher */
+      .mobile-segmented-bar {
+        display: none;
+      }
+      .mobile-tabs-track {
+        display: flex;
+        gap: var(--fib-8, 8px);
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding: 4px;
+      }
+      .mobile-tabs-track::-webkit-scrollbar {
+        display: none;
+      }
+      .mobile-tab-btn {
+        flex: 1 0 auto;
+        min-height: 44px;
+        min-width: 44px;
+        padding: 8px 14px;
+        border-radius: var(--fib-radius-sm, 8px);
+        border: 1px solid var(--line, rgba(0, 229, 255, 0.2));
+        background: var(--surface-card, rgba(10, 14, 26, 0.85));
+        color: var(--muted, #94a3b8);
+        font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+        font-size: 0.76rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+        touch-action: manipulation;
+      }
+      .mobile-tab-btn:hover {
+        border-color: var(--cyan, #00f0ff);
+        color: var(--text-primary, #ffffff);
+        background: rgba(0, 229, 255, 0.08);
+      }
+      .mobile-tab-btn.active {
+        background: rgba(0, 229, 255, 0.18);
+        border-color: var(--cyan, #00f0ff);
+        color: var(--text-primary, #ffffff);
+        box-shadow: 0 0 14px rgba(0, 229, 255, 0.35);
+      }
+
+      /* Mobile Responsive Breakpoints (<=960px) */
+      @media (max-width: 960px) {
+        body.deck-page {
+          overflow-x: hidden;
+        }
+        .site-header {
+          position: sticky;
+          top: 0;
+          z-index: 100;
+        }
+        .mobile-segmented-bar {
+          display: block;
+          position: sticky;
+          top: 56px;
+          z-index: 80;
+          background: rgba(5, 7, 13, 0.96);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border-bottom: 1px solid var(--border-card, rgba(0, 229, 255, 0.25));
+          padding: 6px 12px;
+          margin-bottom: 0;
+        }
+        .studio-layout {
+          display: flex;
+          flex-direction: column;
+          height: auto;
+          min-height: calc(100vh - 120px);
+          padding: 16px 12px;
+          gap: 16px;
+          overflow-y: visible;
+        }
+
+        /* Dedicated 3D Canvas Geometry */
+        .viewport-container {
+          height: clamp(280px, 42vh, 380px);
+          min-height: 280px;
+          width: 100%;
+          border-radius: var(--fib-radius-lg, 16px);
+          touch-action: none;
+          position: relative;
+        }
+        #three-viewport {
+          width: 100%;
+          height: 100%;
+          touch-action: none;
+        }
+        #three-viewport canvas {
+          touch-action: none;
+        }
+
+        .viewport-top-hud {
+          top: 8px;
+          left: 8px;
+          right: 8px;
+          gap: 6px;
+          flex-wrap: wrap;
+        }
+        .viewport-bottom-hud {
+          bottom: 8px;
+          left: 8px;
+          right: 8px;
+          gap: 6px;
+          flex-wrap: wrap;
+        }
+        .hud-group {
+          padding: 4px 6px;
+          gap: 4px;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          max-width: 100%;
+        }
+
+        /* Touch-Friendly Controls (44px min tap targets) */
+        .btn-cad {
+          min-height: 44px;
+          min-width: 44px;
+          padding: 8px 12px;
+          font-size: 0.78rem;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .hud-group button {
+          min-height: 44px;
+          min-width: 44px;
+          padding: 6px 10px;
+          font-size: 0.74rem;
+        }
+        .tag-pill {
+          min-height: 44px;
+          padding: 8px 12px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.75rem;
+        }
+        .outliner-item {
+          min-height: 44px;
+          padding: 10px 12px;
+        }
+        .catalog-card {
+          min-height: 44px;
+          padding: 10px 12px;
+        }
+        .slider-row {
+          min-height: 44px;
+        }
+        .slider-row input[type="range"] {
+          height: 28px;
+        }
+        .prompt-box {
+          min-height: 88px;
+          font-size: 16px;
+        }
+        .btn-ai-gen {
+          min-height: 48px;
+          font-size: 0.88rem;
+        }
+
+        /* Panel Glass Mobile Formatting */
+        .panel-glass {
+          padding: 20px 16px;
+          border-radius: var(--fib-radius-lg, 16px);
+          gap: 16px;
+          max-height: none;
+          overflow-y: visible;
+        }
+
+        /* Mobile Segmented Switcher Visibility Rules */
+        .studio-layout[data-mobile-tab="viewport"] #viewport-host {
+          display: block !important;
+          height: clamp(340px, 60vh, 520px);
+        }
+        .studio-layout[data-mobile-tab="viewport"] #panel-geometry,
+        .studio-layout[data-mobile-tab="viewport"] #panel-ai-materials {
+          display: none !important;
+        }
+
+        .studio-layout[data-mobile-tab="geometry"] #panel-geometry {
+          display: flex !important;
+          width: 100%;
+        }
+        .studio-layout[data-mobile-tab="geometry"] #viewport-host,
+        .studio-layout[data-mobile-tab="geometry"] #panel-ai-materials {
+          display: none !important;
+        }
+
+        .studio-layout[data-mobile-tab="materials"] #panel-ai-materials {
+          display: flex !important;
+          width: 100%;
+        }
+        .studio-layout[data-mobile-tab="materials"] #viewport-host,
+        .studio-layout[data-mobile-tab="materials"] #panel-geometry {
+          display: none !important;
+        }
+
+        .studio-layout[data-mobile-tab="all"] #viewport-host {
+          display: block !important;
+          height: clamp(280px, 42vh, 380px);
+        }
+        .studio-layout[data-mobile-tab="all"] #panel-geometry,
+        .studio-layout[data-mobile-tab="all"] #panel-ai-materials {
+          display: flex !important;
+          width: 100%;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .studio-layout {
+          padding: 10px 8px;
+          gap: 10px;
+        }
+        .mobile-segmented-bar {
+          padding: 4px 8px;
+        }
+        .mobile-tab-btn {
+          padding: 6px 10px;
+          font-size: 0.70rem;
+        }
+      }
+
+      @media (min-width: 961px) {
+        .mobile-segmented-bar {
+          display: none !important;
+        }
+        .studio-layout {
+          display: grid !important;
+          grid-template-columns: 360px 1fr 390px !important;
+        }
+        #panel-geometry, #viewport-host, #panel-ai-materials {
+          display: flex !important;
+        }
+        #viewport-host {
+          display: block !important;
+        }
+      }
+
+      .panel-glass {
+        background: var(--panel, rgba(10, 14, 26, 0.94));
+        border: 1px solid var(--border-card, rgba(0, 229, 255, 0.18));
+        border-radius: var(--fib-radius-lg, 16px);
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        overflow-y: auto;
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        box-shadow: 0 16px 48px var(--shadow-color, rgba(0, 0, 0, 0.7));
+        text-align: left;
+        box-sizing: border-box;
+      }
+      .viewport-container {
+        position: relative;
+        background: radial-gradient(circle at 50% 50%, var(--bg-3, #0c1326) 0%, var(--bg, #020306) 100%);
+        border: 1px solid var(--border-card, rgba(0, 229, 255, 0.3));
+        border-radius: var(--fib-radius-lg, 16px);
+        overflow: hidden;
+        box-shadow: inset 0 0 50px rgba(0, 229, 255, 0.06), 0 16px 48px var(--shadow-color, rgba(0, 0, 0, 0.7));
+      }
+      #three-viewport {
+        width: 100%;
+        height: 100%;
+        display: block;
+        touch-action: none;
+      }
+      .viewport-top-hud {
+        position: absolute;
+        top: 14px;
+        left: 14px;
+        right: 14px;
+        display: flex;
+        justify-content: space-between;
+        pointer-events: none;
+        z-index: 10;
+      }
+      .viewport-bottom-hud {
+        position: absolute;
+        bottom: 14px;
+        left: 14px;
+        right: 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        pointer-events: none;
+        z-index: 10;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .hud-group {
+        display: flex;
+        gap: 6px;
+        pointer-events: auto;
+        flex-wrap: wrap;
+        background: rgba(4, 6, 12, 0.85);
+        padding: 5px 8px;
+        border-radius: 10px;
+        border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+        backdrop-filter: blur(12px);
+      }
+      .tag-pill {
+        background: var(--surface-card, rgba(4, 6, 12, 0.9));
+        border: 1px solid var(--border-card, rgba(0, 229, 255, 0.3));
+        color: var(--cyan, #00f0ff);
+        font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 5px 12px;
+        border-radius: 999px;
+        backdrop-filter: blur(8px);
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        letter-spacing: 0.04em;
+      }
+      .model-catalog-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+      .catalog-card {
+        background: var(--input-bg, rgba(18, 24, 42, 0.7));
+        border: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+        border-radius: var(--radius-sm, 8px);
+        padding: 10px 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        text-align: left;
+      }
+      .catalog-card:hover {
+        border-color: var(--cyan, #00f0ff);
+        background: rgba(0, 229, 255, 0.08);
+        transform: translateY(-2px);
+      }
+      .catalog-card .title {
+        font-weight: 700;
+        font-size: 0.8rem;
+        color: var(--text-primary, #ffffff);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .catalog-card .sub {
+        font-family: var(--font-mono, monospace);
+        font-size: 0.65rem;
+        color: var(--muted, #94a3b8);
+      }
+      .prompt-box {
+        background: var(--input-bg, rgba(0, 0, 0, 0.6));
+        border: 1px solid var(--border-card, rgba(0, 229, 255, 0.25));
+        border-radius: 10px;
+        padding: 12px 14px;
+        color: var(--text-primary, #ffffff);
+        font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+        font-size: 0.82rem;
+        line-height: 1.5;
+        width: 100%;
+        box-sizing: border-box;
+        outline: none;
+        resize: vertical;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      .prompt-box:focus {
+        border-color: var(--cyan, #00f0ff);
+        box-shadow: 0 0 15px rgba(0, 229, 255, 0.25);
+      }
+      .btn-cad {
+        background: var(--input-bg, rgba(255, 255, 255, 0.06));
+        border: 1px solid var(--line, rgba(255, 255, 255, 0.12));
+        color: var(--text, #f1f5f9);
+        font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+        font-size: 0.72rem;
+        font-weight: 600;
+        padding: 7px 11px;
+        border-radius: 7px;
+        cursor: pointer;
+        transition: all 0.18s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        text-decoration: none;
+      }
+      .btn-cad:hover, .btn-cad.active {
+        background: rgba(0, 229, 255, 0.15);
+        border-color: var(--cyan, #00f0ff);
+        color: var(--cyan, #00f0ff);
+      }
+      .outliner-tree {
+        background: var(--input-bg, rgba(0, 0, 0, 0.55));
+        border: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+        border-radius: 8px;
+        padding: 8px;
+        max-height: 140px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+      .outliner-item {
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-family: var(--font-mono, monospace);
+        font-size: 0.74rem;
+        color: var(--muted, #94a3b8);
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: background 0.15s, color 0.15s;
+      }
+      .outliner-item:hover, .outliner-item.selected {
+        background: rgba(0, 229, 255, 0.12);
+        color: var(--text-primary, #ffffff);
+      }
+      .outliner-item.selected {
+        border-left: 2px solid var(--cyan, #00f0ff);
+      }
+      .slider-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-family: var(--font-mono, monospace);
+        font-size: 0.72rem;
+        color: var(--muted, #94a3b8);
+        gap: 8px;
+      }
+      .slider-row input[type="range"] {
+        flex: 1;
+        accent-color: var(--cyan, #00f0ff);
+        cursor: pointer;
+      }
+      .btn-ai-gen {
+        background: linear-gradient(135deg, var(--cyan, #00f0ff) 0%, var(--magenta, #d946ef) 100%);
+        border: none;
+        color: #030408;
+        font-family: var(--font-display, 'Syne', sans-serif);
+        font-weight: 800;
+        padding: 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        letter-spacing: 0.02em;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        box-shadow: 0 4px 18px rgba(0, 229, 255, 0.3);
+      }
+      .btn-ai-gen:hover {
+        box-shadow: 0 0 28px rgba(0, 229, 255, 0.6);
+        transform: translateY(-1px);
+      }
+
+      /* 3D Coordinate & Transform Inspector */
+      .coord-inspector-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        background: var(--surface-card, rgba(0, 0, 0, 0.45));
+        border: 1px solid var(--border-card, rgba(0, 229, 255, 0.2));
+        border-radius: 10px;
+        padding: 12px;
+      }
+      .coord-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+      }
+      .coord-cell {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        background: var(--input-bg, rgba(0, 0, 0, 0.6));
+        border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+        border-radius: 6px;
+        padding: 4px 6px;
+        transition: border-color 0.2s;
+      }
+      .coord-cell:focus-within {
+        border-color: var(--cyan, #00f0ff);
+        box-shadow: 0 0 10px rgba(0, 240, 255, 0.25);
+      }
+      .coord-label {
+        font-family: var(--font-mono, monospace);
+        font-size: 0.62rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .coord-label.x { color: #f43f5e; }
+      .coord-label.y { color: #10b981; }
+      .coord-label.z { color: #38bdf8; }
+      .coord-label small { color: var(--muted, #94a3b8); font-size: 0.58rem; }
+      .coord-input {
+        background: transparent;
+        border: none;
+        outline: none;
+        color: var(--text-primary, #ffffff);
+        font-family: var(--font-mono, monospace);
+        font-size: 0.78rem;
+        font-weight: 700;
+        width: 100%;
+        padding: 0;
+        margin: 0;
+      }
+
+      /* ── 4-Theme High-Contrast System Overrides ── */
+      html[data-theme="light"] {
+        --bg: #f7f9fc;
+        --panel: rgba(255, 255, 255, 0.95);
+        --text: #0f172a;
+        --text-primary: #0f172a;
+        --text-secondary: #334155;
+        --muted: #64748b;
+        --line: rgba(0, 0, 0, 0.12);
+        --border-card: rgba(2, 132, 199, 0.25);
+        --input-bg: #f8fafc;
+        --shadow-color: rgba(0, 0, 0, 0.08);
+      }
+      html[data-theme="light"] .studio-layout {
+        background: #f1f5f9;
+      }
+      html[data-theme="light"] .panel-glass {
+        background: rgba(255, 255, 255, 0.96);
+        border-color: #cbd5e1;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+        color: #0f172a;
+      }
+      html[data-theme="light"] .viewport-container {
+        background: radial-gradient(circle at 50% 50%, #e2e8f0 0%, #cbd5e1 100%);
+        border-color: #94a3b8;
+      }
+      html[data-theme="light"] .tag-pill {
+        background: #f1f5f9;
+        border-color: #93c5fd;
+        color: #0284c7;
+      }
+      html[data-theme="light"] .btn-cad {
+        background: #ffffff;
+        border-color: #cbd5e1;
+        color: #0f172a;
+      }
+      html[data-theme="light"] .btn-cad:hover, html[data-theme="light"] .btn-cad.active {
+        background: #e0f2fe;
+        border-color: #0284c7;
+        color: #0369a1;
+      }
+      html[data-theme="light"] .prompt-box, html[data-theme="light"] .coord-cell {
+        background: #ffffff;
+        border-color: #cbd5e1;
+        color: #0f172a;
+      }
+      html[data-theme="light"] .coord-input {
+        color: #0f172a;
+      }
+      html[data-theme="light"] .catalog-card {
+        background: #ffffff;
+        border-color: #e2e8f0;
+      }
+      html[data-theme="light"] .catalog-card .title {
+        color: #0f172a;
+      }
+      html[data-theme="light"] .outliner-tree {
+        background: #f8fafc;
+        border-color: #e2e8f0;
+      }
+      html[data-theme="light"] .outliner-item {
+        color: #475569;
+      }
+      html[data-theme="light"] .outliner-item:hover, html[data-theme="light"] .outliner-item.selected {
+        background: #e0f2fe;
+        color: #0369a1;
+      }
+      html[data-theme="light"] .hud-group {
+        background: rgba(255, 255, 255, 0.9);
+        border-color: #cbd5e1;
+      }
+
+      /* Matrix Theme */
+      html[data-theme="matrix"] .panel-glass {
+        background: rgba(0, 16, 4, 0.94);
+        border-color: rgba(0, 255, 102, 0.35);
+        box-shadow: 0 0 30px rgba(0, 255, 102, 0.15);
+      }
+      html[data-theme="matrix"] .tag-pill, html[data-theme="matrix"] .btn-cad {
+        color: #00ff66;
+        border-color: rgba(0, 255, 102, 0.3);
+        background: rgba(0, 255, 102, 0.06);
+      }
+      html[data-theme="matrix"] .btn-cad:hover, html[data-theme="matrix"] .btn-cad.active {
+        background: rgba(0, 255, 102, 0.2);
+        border-color: #00ff66;
+        color: #ffffff;
+        box-shadow: 0 0 15px rgba(0, 255, 102, 0.4);
+      }
+
+      /* Gold Theme */
+      html[data-theme="gold"] .panel-glass {
+        background: rgba(16, 12, 6, 0.94);
+        border-color: rgba(251, 191, 36, 0.35);
+        box-shadow: 0 0 30px rgba(251, 191, 36, 0.12);
+      }
+      html[data-theme="gold"] .tag-pill, html[data-theme="gold"] .btn-cad {
+        color: #fbbf24;
+        border-color: rgba(251, 191, 36, 0.3);
+        background: rgba(251, 191, 36, 0.06);
+      }
+      html[data-theme="gold"] .btn-cad:hover, html[data-theme="gold"] .btn-cad.active {
+        background: rgba(251, 191, 36, 0.2);
+        border-color: #fbbf24;
+        color: #ffffff;
+        box-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
+      }
+    
+    /* Mobile-Only Desktop Insight Tooltip / Banner */
+    .mobile-desktop-insight {
+      display: none;
+    }
+    @media (max-width: 880px) {
+      .mobile-desktop-insight {
+        display: flex;
+        align-items: center;
+        gap: var(--fib-13, 13px);
+        background: rgba(0, 240, 255, 0.08);
+        border: 1px solid rgba(0, 240, 255, 0.25);
+        border-radius: var(--radius-fib-md, var(--fib-radius-md, 13px));
+        padding: var(--fib-13, 13px) var(--fib-13, 13px);
+        margin: 0 0 var(--fib-13, 13px) 0;
+        box-sizing: border-box;
+        font-size: 0.85rem;
+        line-height: 1.4;
+        color: var(--text, #f0f6fc);
+        min-width: 0;
+      }
+      .mobile-desktop-insight .insight-icon {
+        font-size: 1.3rem;
+        flex-shrink: 0;
+      }
+      .mobile-desktop-insight .insight-text {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: var(--fib-3, 3px);
+        min-width: 0;
+      }
+      .mobile-desktop-insight .insight-text strong {
+        color: var(--cyan, #00f0ff);
+        font-weight: 600;
+        font-size: 0.88rem;
+      }
+      .mobile-desktop-insight .insight-text span {
+        color: var(--text-dim, var(--muted, #94a3b8));
+        font-size: 0.8rem;
+      }
+      .mobile-desktop-insight .insight-close {
+        background: transparent;
+        border: none;
+        color: var(--text-dim, var(--muted, #94a3b8));
+        font-size: 1.1rem;
+        cursor: pointer;
+        padding: var(--fib-8, 8px);
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--radius-fib-sm, var(--fib-radius-sm, 8px));
+        flex-shrink: 0;
+      }
+    }
+
+
+    /* Touch & Overflow Safety */
+    pre, code, table, .table-container, .code-block, .log-container, .tree-container, .model-catalog-grid {
+      overflow-x: auto;
+      word-break: break-word;
+      -webkit-overflow-scrolling: touch;
+    }
+
+  
+    /* ==========================================================================
+       Zoth Studio — High-Contrast Typography & WCAG AAA Compliance Upgrades
+       ========================================================================== */
+
+    /* Universal Body & Text Contrast */
+    body {
+      color: var(--text, #f1f5f9);
+      font-family: var(--font-body, 'Figtree', sans-serif);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Primary Workstation Titles & Brand Headers */
+    h1, .brand-title, .station-title, .forge-title h1, .recon-title h1, .composer-title h1, .hero-title, .studio-title {
+      font-family: var(--font-display, 'Syne', sans-serif) !important;
+      font-weight: 800 !important;
+      letter-spacing: -0.025em;
+      color: var(--text-primary);
+      text-shadow: 0 0 20px rgba(0, 240, 255, 0.25);
+    }
+
+    /* Panel Headers, Section Headings & Subheadings */
+    h2, h3, .panel-header, .panel-title, .section-heading h2, .card-title, .section-title, .header-title, .quick-jump-title {
+      font-family: var(--font-display, 'Syne', sans-serif) !important;
+      font-weight: 700 !important;
+      letter-spacing: -0.015em;
+      color: var(--text-primary);
+    }
+
+    /* Metric Labels, Badges & High-Contrast Stat Values */
+    .metric-label, .stat-label, .badge-label, .ws-badge-cat, .filter-chip {
+      font-family: var(--font-display, 'Syne', sans-serif);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .stat-value, .metric-value, .stat-number, .wf-val {
+      font-family: var(--font-mono, 'IBM Plex Mono', monospace) !important;
+      font-weight: 700 !important;
+      color: var(--text-primary);
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    /* High-Contrast Descriptions & Parameters */
+    .brand-subtitle, .studio-subtitle, .ws-desc, .section-desc, .panel-desc, p.desc {
+      color: #cbd5e1;
+    }
+
+    .text-dim, .dim, .meta-label, .timestamp, .port-badge {
+      color: #94a3b8;
+    }
+
+    /* High-Contrast Code Viewers, Telemetry Feeds & Terminal Logs */
+    pre, code, textarea.code-editor, .telemetry, .log, .console, .terminal, .feed-log, .log-container, .code-block, .code-editor-area, .editor-code, .code-viewer, .stream-console {
+      font-family: var(--font-mono, 'IBM Plex Mono', monospace) !important;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: #38bdf8;
+    }
+
+    .tok-kw, .keyword, .kw { color: #f472b6 !important; font-weight: 600; }
+    .tok-str, .string, .str { color: #34d399 !important; }
+    .tok-num, .number, .num { color: #fbbf24 !important; font-weight: 600; }
+    .tok-comment, .comment { color: #94a3b8 !important; font-style: italic; }
+    .tok-fn, .function, .fn { color: #67e8f9 !important; font-weight: 600; }
+    .tok-var, .variable, .var { color: #f1f5f9 !important; }
+
+    /* Standout Links, Navigation Tabs & Breadcrumbs */
+    .nav-link, nav.menu a, .nav a, .tab-btn, .breadcrumb a, .quick-jump-links a, .ws-link-docs, .ws-link-launch {
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .nav-link:hover, 
+
+    .nav-link.is-active, .nav-link.active, .tab-btn.active, nav.menu a.on, nav.menu a.is-active, .forge-tab-btn.active, .subsweep-tab-btn.active {
+      color: #00f0ff !important;
+      font-weight: 700 !important;
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.7);
+    }
+
+    /* Action Buttons High-Contrast Standout */
+    .btn-primary, .btn-action, .btn-edge, .btn-recon, .btn-gold, button.action-btn {
+      font-family: var(--font-display, 'Syne', sans-serif);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    /* Zero Horizontal Overflow Guard across Viewports */
+    html, body {
+      max-width: 100vw;
+      overflow-x: hidden;
+    }
+
+    .table-container, .code-block, .log-container, .matrix-container, .diff-container, .telemetry, .feed-log, .code-viewer pre {
+      max-width: 100%;
+      overflow-x: auto;
+      word-break: break-word;
+    }
+
+  </style>
+<link href="/assets/zoth-tip.css" rel="stylesheet"/>
+<link href="/assets/zoth-mobile.css" rel="stylesheet"/>
+<link href="/assets/zoth-annotator.css" rel="stylesheet"/>
+<!-- Schema.org JSON-LD Structured Data for SEO & AEO Voice Search -->
+<!-- Schema.org JSON-LD Structured Data for SEO & AEO Voice Search -->
+<!-- Schema.org JSON-LD Structured Data for SEO & AEO Voice Search -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://zoth.nullai.tech/#organization",
+      "name": "NullAI Tech",
+      "url": "https://nullai.tech/",
+      "logo": "https://zoth.nullai.tech/assets/brand/zoth-seal-hermetic-on-dark.svg",
+      "sameAs": [
+        "https://github.com/NullAITech/zoth-studio"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://zoth.nullai.tech/#website",
+      "url": "https://zoth.nullai.tech/",
+      "name": "Zoth Studio",
+      "description": "Local-first autonomous AI multi-agent workstation, 3D swarm arena, and privacy-first application foundry.",
+      "publisher": {
+        "@id": "https://zoth.nullai.tech/#organization"
+      }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://zoth.nullai.tech/studio/3d-editor.html#softwareapplication",
+      "name": "Zoth Nexus 3D Omniverse \u2014 CAD-Grade WebGL Viewport & AI 3D Generator",
+      "description": "CAD-grade 3D WebGL viewport: procedural mesh deformation, real-time lighting, material PBR textures, and AI-driven 3D generation.",
+      "url": "https://zoth.nullai.tech/studio/3d-editor.html",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Linux, macOS, Windows",
+      "inLanguage": "en-US",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://zoth.nullai.tech/studio/3d-editor.html",
+      "url": "https://zoth.nullai.tech/studio/3d-editor.html",
+      "name": "Zoth Nexus 3D Omniverse \u2014 CAD-Grade WebGL Viewport & AI 3D Generator",
+      "description": "CAD-grade 3D WebGL viewport: procedural mesh deformation, real-time lighting, material PBR textures, and AI-driven 3D generation.",
+      "inLanguage": "en-US",
+      "isPartOf": {
+        "@id": "https://zoth.nullai.tech/#website"
+      },
+      "speakable": {
+        "@type": "SpeakableSpecification",
+        "cssSelector": [
+          "h1",
+          ".kicker",
+          ".nexus-title",
+          ".viewport-specs"
+        ]
+      },
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://zoth.nullai.tech/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Studio",
+            "item": "https://zoth.nullai.tech/studio"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Nexus 3D",
+            "item": "https://zoth.nullai.tech/studio/3d-editor.html"
+          }
+        ]
+      }
+    }
+  ]
+}
+  </script>
+  <link href="/assets/zoth-theme.css?v=11" rel="stylesheet"/>
+  <link href="/assets/zoth-tailwind-magic.css" rel="stylesheet"/>
+  <script src="/assets/zoth-theme.js?v=11"></script>
+  <link href="/assets/zoth-nav.css?v=11" rel="stylesheet"/>
+<meta content="1200" property="og:image:width"/><meta content="630" property="og:image:height"/><meta content="Zoth Nexus 3D Omniverse WebGL CAD Studio" property="og:image:alt"/><meta content="Zoth Nexus 3D Omniverse WebGL CAD Studio" name="twitter:image:alt"/><meta content="US-VA" name="geo.region"/><meta content="Virginia Beach, Virginia" name="geo.placename"/><meta content="36.8529;-75.9780" name="geo.position"/><meta content="36.8529, -75.9780" name="ICBM"/><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://zoth.nullai.tech/studio/3d-editor.html#webpage",
+      "url": "https://zoth.nullai.tech/studio/3d-editor.html",
+      "name": "Zoth Nexus 3D Omniverse \u2014 CAD-Grade WebGL Viewport & AI 3D Generator",
+      "description": "CAD-grade 3D WebGL viewport: procedural mesh deformation, real-time lighting, material PBR textures, and AI-driven 3D generation.",
+      "isPartOf": {
+        "@type": "WebSite",
+        "@id": "https://zoth.nullai.tech/#website",
+        "url": "https://zoth.nullai.tech/",
+        "name": "Zoth Studio",
+        "publisher": {
+          "@type": "Organization",
+          "name": "757tech / NullAI",
+          "url": "https://757tech.pro"
+        }
+      },
+      "primaryImageOfPage": {
+        "@type": "ImageObject",
+        "url": "https://zoth.nullai.tech/assets/media/cyber-nexus-3d-photoreal.jpg",
+        "caption": "Zoth Nexus 3D Omniverse WebGL CAD Studio"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://zoth.nullai.tech/studio/3d-editor.html#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://zoth.nullai.tech/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Studio",
+          "item": "https://zoth.nullai.tech/studio/3d-editor.html"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://zoth.nullai.tech/studio/3d-editor.html#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is Zoth Studio?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Zoth Studio is a sovereign, local-first control surface for multi-agent AI orchestration, featuring a 298+ verified tool registry, 23+ modular studio suites, a 21-node sovereign agent pantheon, and an encrypted BYOK vault."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Where are my API keys stored?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "API keys are stored strictly in local operator memory or an encrypted local Rust daemon using Argon2id and XChaCha20-Poly1305. Plaintext keys are never sent to external servers."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does Zoth Studio require a cloud subscription?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Zoth Studio is fully sovereign and free to run on your local hardware or private network over Tailscale."
+          }
+        }
+      ]
+    }
+  ]
+}</script>  <link rel="stylesheet" href="/assets/zoth-footer.css" />
+</head>
+<body class="deck-page">
+<a class="skip-link" href="#main">Skip to main content</a>
+                                                                    <header class="bar" id="topbar" role="banner">
+      <a class="brand js-hub" href="/" aria-label="Zoth Studio Home">
+        <div class="brand-emblem-wrap">
+          <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth Golden Z Emblem" width="34" height="34" class="brand-emblem-img" />
+          <span class="brand-emblem-halo"></span>
+        </div>
+        <span class="brand-text-wrap">
+          <strong>Zoth</strong>
+          <small>by NullAI</small>
+        </span>
+        <span class="brand-status-badge">SOVEREIGN</span>
+      </a>
+
+      <nav class="menu" aria-label="Primary navigation" role="navigation">
+        <a class="nav-link nav-for-everyone" href="/#for-everyone" data-tip="Zero-Code Showcases — How non-tech founders, creators & teams depend on Zoth.">✦ For You</a>
+
+        <!-- 🔮 Core AI -->
+        <div class="nav-dropdown" data-dropdown-id="core">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Core AI</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🔮 CORE AI ARCHITECTURE</span><span class="nav-item-badge">6 NODES</span></div>
+            <a href="/zoth/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+            <a href="/agents/"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+            <a href="/studio/consensus.html"><span class="nav-item-icon-box">⚔️</span><div class="nav-item-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+            <a href="/studio/swarm.html"><span class="nav-item-icon-box">🌐</span><div class="nav-item-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+            <a href="/memory/"><span class="nav-item-icon-box">🧠</span><div class="nav-item-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+            <a href="/zoth-world.html"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+          </div>
+        </div>
+
+        <!-- 🪐 Studio -->
+        <div class="nav-dropdown" data-dropdown-id="studio">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Studio</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu nav-dropdown-mega">
+            <div class="nav-dropdown-header"><span>🪐 14+ STUDIO WORKSTATIONS</span><span class="nav-item-badge">LOCAL DAGS</span></div>
+            <a href="/studio/cockpit.html"><span class="nav-item-icon-box">🪐</span><div class="nav-item-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+            <a href="/studio/cockpit.html?tool=webgen"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+            <a href="/studio/cockpit.html?tool=vos-sandbox"><span class="nav-item-icon-box">💻</span><div class="nav-item-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+            <a href="/studio/cockpit.html?tool=nexus-3d"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+            <a href="/studio/cockpit.html?tool=omnipost"><span class="nav-item-icon-box">🎬</span><div class="nav-item-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+            <a href="/studio/cockpit.html?tool=math-pillars"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+            <a href="/studio/cockpit.html?tool=secure-comms"><span class="nav-item-icon-box">🔒</span><div class="nav-item-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+            <a href="/studio/cockpit.html?tool=signal-bridge"><span class="nav-item-icon-box">📡</span><div class="nav-item-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+            <a href="/studio/cockpit.html?tool=web3-hub"><span class="nav-item-icon-box">🪙</span><div class="nav-item-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+            <a href="/studio/cockpit.html?tool=pets"><span class="nav-item-icon-box">💎</span><div class="nav-item-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+            <a href="/studio/cockpit.html?tool=tool-nexus"><span class="nav-item-icon-box">🛠️</span><div class="nav-item-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+          </div>
+        </div>
+
+        <!-- 🌌 Universe -->
+        <div class="nav-dropdown" data-dropdown-id="universe">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Universe</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🌌 UNIVERSE &amp; PUBLICATIONS</span><span class="nav-item-badge">STORIES</span></div>
+            <a href="/comic/"><span class="nav-item-icon-box">🎨</span><div class="nav-item-body"><strong>AZOTH Anime Comic</strong><small>Season 1 Ep 1: Genesis in Silicon Rain (Audio)</small></div><span class="nav-item-badge">AUDIO</span></a>
+            <a href="/social/"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+            <a href="/articles/"><span class="nav-item-icon-box">📜</span><div class="nav-item-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+            <a href="/article/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+            <a href="/ai-webgpu.html"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+            <a href="/adytum/"><span class="nav-item-icon-box">🏛️</span><div class="nav-item-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+          </div>
+        </div>
+
+        <!-- 📚 Docs & Vault -->
+        <div class="nav-dropdown" data-dropdown-id="docs">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Docs & Vault</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>📚 DOCUMENTATION &amp; SECURITY</span><span class="nav-item-badge">SPECS</span></div>
+            <a href="/docs/"><span class="nav-item-icon-box">📚</span><div class="nav-item-body"><strong>Master Documentation</strong><small>Port Topology, 1-Click Install Scripts & API Guide</small></div><span class="nav-item-badge">DOCS</span></a>
+            <a href="/vault/"><span class="nav-item-icon-box">🔐</span><div class="nav-item-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+            <a href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+            <a href="/faq.html"><span class="nav-item-icon-box">❓</span><div class="nav-item-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+          </div>
+        </div>
+
+        <!-- ⚡ Action Pills -->
+        <button type="button" class="nav-pill nav-telemetry-pill" title="View Live Studio Telemetry & Background Daemons" aria-label="Studio Telemetry Status">
+          <span class="tel-dot online"></span><span class="tel-text">6/6 DAEMONS</span>
+        </button>
+
+        <button type="button" class="nav-pill nav-pet-pill" title="Active Companion Spirit: Azoth (Click to Summon / Switch Mascot)" aria-label="Active Companion Spirit">
+          <span class="pet-emoji">🔮</span><span class="pet-name">Azoth</span>
+        </button>
+
+        <a class="nav-pill nav-deck-pill js-deck" href="http://127.0.0.1:8484/" title="Open Local Operator Deck (:8484)">
+          <span class="deck-pulse"></span><span>DECK</span>
+        </a>
+
+        <button type="button" class="nav-pill nav-palette-btn" title="Open Global Command Palette (Ctrl+K)" aria-label="Command Palette">
+          <span class="palette-icon">🔍</span><kbd class="nav-kbd">Ctrl+K</kbd>
+        </button>
+
+        <button type="button" class="nav-pill nav-annotate-btn" title="Toggle On-Screen Annotator & Feedback (Shift+A)" aria-label="Toggle Annotator">
+          <span class="annotate-icon">✏️</span><span class="annotate-text">Annotate</span><kbd class="nav-kbd">Shift+A</kbd>
+        </button>
+
+        <div class="nav-dropdown nav-theme-dropdown">
+          <button class="nav-dropdown-btn nav-theme-current-btn" type="button" aria-haspopup="true" aria-expanded="false" title="Switch Visual Theme (Shift+T)">
+            <span class="current-theme-swatch" style="background:#00f0ff;"></span>
+            <span class="current-theme-emoji">🌙</span>
+            <span class="current-theme-label">Dark Void</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+        </div>
+
+        <a class="nav-pill git" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank" title="GitHub Repository — Open Source code, Debian packages, and releases">
+          <span>🐙 GitHub ↗</span>
+        </a>
+      </nav>
+
+      <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Toggle navigation menu">
+        <span class="burger-lines"><span class="b-line b-1"></span><span class="b-line b-2"></span><span class="b-line b-3"></span></span>
+        <span class="burger-text">Menu</span>
+      </button>
+      <div class="zoth-scroll-progress" id="zoth-scroll-progress"></div>
+    </header>
+
+    <nav class="drawer" id="drawer" aria-label="Universal Mobile Navigation" role="navigation">
+      <div class="drawer-header-brand">
+        <div class="d-brand-left">
+          <div class="brand-emblem-wrap">
+            <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth" width="28" height="28" class="brand-emblem-img" />
+          </div>
+          <span class="d-brand-title"><strong>Zoth Studio</strong><small>v12.0 Sovereign</small></span>
+        </div>
+        <button type="button" class="drawer-telemetry-badge" title="View Diagnostics HUD">● 6/6 DAEMONS</button>
+        <button type="button" class="drawer-close-btn" aria-label="Close mobile menu">✕</button>
+      </div>
+
+      <div class="drawer-section drawer-tools-section">
+        <div class="drawer-heading">⚡ Quick Actions</div>
+        <div class="drawer-quick-tools-grid">
+          <button type="button" class="drawer-tool-pill drawer-palette-trigger"><span>🔍</span> Command Palette <kbd class="nav-kbd">Ctrl+K</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-annotate-trigger"><span>✏️</span> On-Screen Annotator <kbd class="nav-kbd">Shift+A</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-telemetry-trigger"><span>⚡</span> Telemetry HUD</button>
+          <button type="button" class="drawer-tool-pill drawer-audio-trigger"><span>🔊</span> Audio FX</button>
+        </div>
+      </div>
+
+      <div class="drawer-section drawer-theme-section">
+        <div class="drawer-heading">🎨 Visual Theme (16 Archetypes)</div>
+        <div class="drawer-search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="drawer-theme-search-input" placeholder="Search 16 themes..." autocomplete="off" />
+        </div>
+        <div class="theme-filter-chips drawer-filter-chips">
+          <button type="button" class="theme-chip-btn active" data-drawer-cat="all">All (16)</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="studio originals">Originals</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="frontier ai & tech">Frontier</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="developer archetypes">Dev</button>
+        </div>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">✦ Featured</div>
+        <a class="drawer-link drawer-hero-link" href="/#for-everyone"><span class="d-link-icon">✦</span><div class="d-link-body"><strong>For You (No-Code Showcases)</strong><small>How Non-Tech Founders, Creators & Teams Use Zoth</small></div><span class="nav-item-badge">SHOWCASE</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🔮 Core AI & Pantheon</div>
+        <a class="drawer-link" href="/zoth/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+        <a class="drawer-link" href="/agents/"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+        <a class="drawer-link" href="/studio/consensus.html"><span class="d-link-icon">⚔️</span><div class="d-link-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+        <a class="drawer-link" href="/studio/swarm.html"><span class="d-link-icon">🌐</span><div class="d-link-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+        <a class="drawer-link" href="/memory/"><span class="d-link-icon">🧠</span><div class="d-link-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+        <a class="drawer-link" href="/zoth-world.html"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🪐 Workstations & DAGs</div>
+        <a class="drawer-link" href="/studio/cockpit.html"><span class="d-link-icon">🪐</span><div class="d-link-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=webgen"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=vos-sandbox"><span class="d-link-icon">💻</span><div class="d-link-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=nexus-3d"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=omnipost"><span class="d-link-icon">🎬</span><div class="d-link-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=math-pillars"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=secure-comms"><span class="d-link-icon">🔒</span><div class="d-link-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=signal-bridge"><span class="d-link-icon">📡</span><div class="d-link-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=web3-hub"><span class="d-link-icon">🪙</span><div class="d-link-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=pets"><span class="d-link-icon">💎</span><div class="d-link-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=tool-nexus"><span class="d-link-icon">🛠️</span><div class="d-link-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📜 Universe & Research</div>
+        <a class="drawer-link" href="/comic/"><span class="d-link-icon">🎨</span><div class="d-link-body"><strong>AZOTH Anime Comic Series</strong><small>Season 1 Ep 1: Genesis in Silicon Rain</small></div><span class="nav-item-badge">AUDIO</span></a>
+        <a class="drawer-link" href="/social/"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+        <a class="drawer-link" href="/articles/"><span class="d-link-icon">📜</span><div class="d-link-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+        <a class="drawer-link" href="/article/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+        <a class="drawer-link" href="/ai-webgpu.html"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+        <a class="drawer-link" href="/adytum/"><span class="d-link-icon">🏛️</span><div class="d-link-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📚 Docs & Security</div>
+        <a class="drawer-link" href="/docs/"><span class="d-link-icon">📚</span><div class="d-link-body"><strong>Complete Documentation</strong><small>Port Topology, 1-Click Install Scripts & API</small></div><span class="nav-item-badge">DOCS</span></a>
+        <a class="drawer-link" href="/vault/"><span class="d-link-icon">🔐</span><div class="d-link-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+        <a class="drawer-link" href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+        <a class="drawer-link" href="/faq.html"><span class="d-link-icon">❓</span><div class="d-link-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+      </div>
+
+      <div class="drawer-section drawer-footer-section">
+        <a class="drawer-pill-link js-deck" href="http://127.0.0.1:8484/">💻 Launch Local Operator Deck (:8484)</a>
+        <a class="drawer-pill-link" href="https://github.com/NullAITech/zoth-studio" target="_blank" rel="noopener noreferrer">🐙 GitHub Source Repository ↗</a>
+        <a class="drawer-pill-link" href="/downloads/zoth-studio-android.apk">📱 Download Android App (.apk)</a>
+      </div>
+    </nav>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<main id="main" role="main">
+<h1 class="sr-only" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">Nexus 3D Omniverse &amp; CAD-Grade WebGL Viewport</h1>
+<!-- Mobile-Only Desktop Insight Tooltip / Banner -->
+<div class="mobile-desktop-insight" role="note">
+<span class="insight-icon">💡</span>
+<div class="insight-text">
+<strong>Mobile Focused Mode Active</strong>
+<span>Optimized for touch &amp; speed. Want full multi-pane inspection &amp; spatial 3D tools? Open this workstation on desktop.</span>
+</div>
+<button aria-label="Dismiss insight" class="insight-close" onclick="this.parentElement.style.display='none'" type="button">✕</button>
+</div>
+<!-- Mobile Segmented Switcher (Visible <=960px) -->
+<nav aria-label="Mobile 3D Workstation Navigation" class="mobile-segmented-bar" id="nexus-mobile-tabs">
+<div class="mobile-tabs-track">
+<button class="mobile-tab-btn active" data-tab="viewport" onclick="setNexusMobileTab('viewport')">
+<svg class="icon-svg" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+<span class="tab-label">3D Viewport</span>
+</button>
+<button class="mobile-tab-btn" data-tab="geometry" onclick="setNexusMobileTab('geometry')">
+<svg class="icon-svg" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+<span class="tab-label">Geometry &amp; Tree</span>
+</button>
+<button class="mobile-tab-btn" data-tab="materials" onclick="setNexusMobileTab('materials')">
+<svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20M7 7l10 10M17 7L7 17"/></svg>
+<span class="tab-label">Transform &amp; AI</span>
+</button>
+<button class="mobile-tab-btn" data-tab="all" onclick="setNexusMobileTab('all')">
+<svg class="icon-svg" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+<span class="tab-label">All Panels</span>
+</button>
+</div>
+</nav>
+<div class="studio-layout" data-mobile-tab="viewport">
+<!-- Left Panel: Scene Outliner, CAD Tools & Procedural Forge -->
+<aside class="panel-glass" id="panel-geometry">
+<div>
+<span class="tag-pill"><svg class="icon-svg" viewBox="0 0 24 24"><line x1="6" y1="3" x2="6" y2="21"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M6 9a9 9 0 0 1 9 9"/></svg> SCENE HIERARCHY</span>
+<h3 style="margin: 6px 0; font-family: var(--font-display); font-size: 1.15rem;">Scene Outliner</h3>
+</div>
+<div class="outliner-tree" id="scene-outliner">
+<div class="outliner-item selected"><span>Cyber Crystal</span><small>Mesh</small></div>
+</div>
+<div>
+<span class="tag-pill" style="border-color: rgba(0, 240, 255, 0.4); color: var(--cyan);"><svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> 3D ENVIRONMENTS</span>
+<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 8px;">
+<button class="btn-cad" onclick="loadScenePreset('cyberpunk_megacity')" style="color:#00f0ff;">Cyberpunk City</button>
+<button class="btn-cad" onclick="loadScenePreset('deep_space_station')" style="color:#c084fc;">Deep Space</button>
+<button class="btn-cad" onclick="loadScenePreset('alchemical_sanctum')" style="color:#fbbf24;">Sacred Sanctum</button>
+<button class="btn-cad" onclick="loadScenePreset('matrix_holodeck')" style="color:#34d399;">Matrix Holodeck</button>
+<button class="btn-cad" onclick="loadScenePreset('scifi_hangar_bay')" style="color:#f59e0b;">Mech Hangar</button>
+<button class="btn-cad" onclick="loadScenePreset('crystal_sky_islands')" style="color:#38bdf8;">Sky Islands</button>
+<button class="btn-cad" onclick="loadScenePreset('alien_crystalline_desert')" style="color:#e879f9;">Alien Desert</button>
+<button class="btn-cad" onclick="loadScenePreset('sunken_cyber_atlantis')" style="color:#2dd4bf;">Cyber Atlantis</button>
+<button class="btn-cad" onclick="loadScenePreset('volcanic_magma_forge')" style="color:#ff4400; grid-column: span 2;">Volcanic Forge</button>
+</div>
+</div>
+<div>
+<span class="tag-pill" style="border-color: rgba(232, 200, 114, 0.4); color: var(--gold-cad);"><svg class="icon-svg" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> SACRED GEOMETRY FORGE</span>
+<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 8px;">
+<button class="btn-cad" onclick="spawnPrimitive('metatron')" style="color:var(--gold-cad); border-color:rgba(232, 200, 114, 0.35);">Metatron Cube</button>
+<button class="btn-cad" onclick="spawnPrimitive('golden_icosahedron')" style="color:var(--gold-cad); border-color:rgba(232, 200, 114, 0.35);">Golden Icosa</button>
+<button class="btn-cad" onclick="spawnPrimitive('platonic_solids')" style="color:var(--gold-cad); border-color:rgba(232, 200, 114, 0.35);">Merkaba Star</button>
+<button class="btn-cad" onclick="spawnPrimitive('fibonacci_lattice')" style="color:var(--gold-cad); border-color:rgba(232, 200, 114, 0.35);">Fibonacci Sphere</button>
+<button class="btn-cad" onclick="spawnPrimitive('calabi_yau')" style="color:var(--gold-cad); border-color:rgba(232, 200, 114, 0.35);">Calabi-Yau 6D</button>
+<button class="btn-cad" onclick="spawnPrimitive('klein_bottle')" style="color:var(--gold-cad); border-color:rgba(232, 200, 114, 0.35);">Klein Bottle</button>
+<button class="btn-cad" onclick="spawnPrimitive('mobius_strip')" style="color:var(--cyan-cad);">Mobius Strip</button>
+<button class="btn-cad" onclick="spawnPrimitive('dodecahedron')" style="color:var(--cyan-cad);">Dodecahedron</button>
+<button class="btn-cad" onclick="spawnPrimitive('octahedron')" style="color:var(--cyan-cad); grid-column: span 2;">Octahedron</button>
+</div>
+</div>
+<div>
+<span class="tag-pill"><svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> PROCEDURAL MESH FORGE</span>
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 8px;">
+<button class="btn-cad" onclick="spawnPrimitive('gear')">Gear</button>
+<button class="btn-cad" onclick="spawnPrimitive('superquadric')">Superquadric</button>
+<button class="btn-cad" onclick="spawnPrimitive('cyber_armor')">Armor</button>
+<button class="btn-cad" onclick="spawnPrimitive('crystal')">Crystal</button>
+<button class="btn-cad" onclick="spawnPrimitive('tesseract')">4D Cube</button>
+<button class="btn-cad" onclick="spawnPrimitive('helix')">DNA Helix</button>
+<button class="btn-cad" onclick="spawnPrimitive('mobius')">Knot</button>
+<button class="btn-cad" onclick="spawnPrimitive('plasma_sphere')">Plasma</button>
+<button class="btn-cad" onclick="spawnPrimitive('voxel_kai')">Kai Pet</button>
+<button class="btn-cad" onclick="spawnPrimitive('cube')">Box</button>
+<button class="btn-cad" onclick="spawnPrimitive('sphere')">Sphere</button>
+<button class="btn-cad" onclick="spawnPrimitive('torus')">Torus</button>
+</div>
+</div>
+<div>
+<span class="tag-pill"><svg class="icon-svg" viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.563-2.512 5.563-5.563C21.996 6.5 17.5 2 12 2z"/></svg> PROCEDURAL PBR SHADER PRESETS</span>
+<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 8px;">
+<button class="btn-cad" onclick="applyMaterialPreset('carbon-fiber')">Carbon Fiber</button>
+<button class="btn-cad" onclick="applyMaterialPreset('brushed-titanium')">Titanium</button>
+<button class="btn-cad" onclick="applyMaterialPreset('iridescent-hologram')">Holo Sheen</button>
+<button class="btn-cad" onclick="applyMaterialPreset('bio-organic')">Bio-Organic</button>
+<button class="btn-cad" onclick="applyMaterialPreset('damascus-steel')">Damascus</button>
+<button class="btn-cad" onclick="applyMaterialPreset('cyber-circuit')">Cyber Track</button>
+<button class="btn-cad" onclick="applyMaterialPreset('glass')">Glass</button>
+<button class="btn-cad" onclick="applyMaterialPreset('gold')">Sacred Gold</button>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px; background: rgba(0,0,0,0.35); padding: 10px; border-radius: 8px; border: 1px solid var(--line);">
+<div class="slider-row">
+<span>Roughness</span>
+<input id="mat-roughness" max="1" min="0" oninput="updateSelectedMaterial()" step="0.05" type="range" value="0.1"/>
+</div>
+<div class="slider-row">
+<span>Metalness</span>
+<input id="mat-metalness" max="1" min="0" oninput="updateSelectedMaterial()" step="0.05" type="range" value="0.9"/>
+</div>
+<div class="slider-row">
+<span>Transmission</span>
+<input id="mat-transmission" max="1" min="0" oninput="updateSelectedMaterial()" step="0.05" type="range" value="0.6"/>
+</div>
+<div class="slider-row">
+<span>Wireframe</span>
+<input id="mat-wireframe" onchange="updateSelectedMaterial()" style="accent-color: var(--cyan);" type="checkbox"/>
+</div>
+</div>
+</div>
+<div>
+<div style="display: flex; justify-content: space-between; align-items: center;">
+<span class="tag-pill"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg> 3D ASSETS LIBRARY (<span id="model-catalog-count">68</span>)</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;">
+<input id="model-catalog-search" oninput="filterModelCatalog()" placeholder="Filter 68 models..." style="background: var(--input-bg, rgba(0, 0, 0, 0.6)); border: 1px solid var(--border-card, rgba(0, 229, 255, 0.25)); border-radius: 8px; color: var(--text-primary); font-family: var(--font-mono); font-size: 0.76rem; padding: 7px 10px; width: 100%; box-sizing: border-box; outline: none;" type="text"/>
+<div id="model-cat-tabs" style="display: flex; gap: 4px; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 2px;">
+<button class="mobile-tab-btn active" data-cat="all" onclick="selectModelCategory('all', this)" style="padding: 4px 8px; font-size: 0.68rem; min-height: 28px; min-width: auto;">All (68)</button>
+<button class="mobile-tab-btn" data-cat="characters" onclick="selectModelCategory('characters', this)" style="padding: 4px 8px; font-size: 0.68rem; min-height: 28px; min-width: auto;">Chars</button>
+<button class="mobile-tab-btn" data-cat="weapons" onclick="selectModelCategory('weapons', this)" style="padding: 4px 8px; font-size: 0.68rem; min-height: 28px; min-width: auto;">Weapons</button>
+<button class="mobile-tab-btn" data-cat="vehicles" onclick="selectModelCategory('vehicles', this)" style="padding: 4px 8px; font-size: 0.68rem; min-height: 28px; min-width: auto;">Vehicles</button>
+<button class="mobile-tab-btn" data-cat="animated" onclick="selectModelCategory('animated', this)" style="padding: 4px 8px; font-size: 0.68rem; min-height: 28px; min-width: auto;">Animated</button>
+<button class="mobile-tab-btn" data-cat="scifi" onclick="selectModelCategory('scifi', this)" style="padding: 4px 8px; font-size: 0.68rem; min-height: 28px; min-width: auto;">Sci-Fi</button>
+<button class="mobile-tab-btn" data-cat="architecture" onclick="selectModelCategory('architecture', this)" style="padding: 4px 8px; font-size: 0.68rem; min-height: 28px; min-width: auto;">Arch</button>
+</div>
+</div>
+<div class="model-catalog-grid" id="model-catalog-list" style="margin-top: 8px; max-height: 240px; overflow-y: auto;">
+<!-- Populated dynamically via initModelCatalog() -->
+</div>
+</div>
+</aside>
+<!-- Center Viewport: Three.js CAD Stage -->
+<section class="viewport-container" id="viewport-host">
+<div class="viewport-top-hud">
+<div class="hud-group">
+<span class="tag-pill" id="viewport-status-tag"><svg class="icon-svg" viewBox="0 0 24 24"><polyline points="5 9 2 12 5 15"/><polyline points="9 5 12 2 15 5"/><polyline points="15 19 12 22 9 19"/><polyline points="19 9 22 12 19 15"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/></svg> [W] Trans · [E] Rot · [R] Scale · [Del] Delete</span>
+</div>
+<div class="hud-group">
+<button class="btn-cad active" id="gizmo-trans" onclick="setGizmoMode('translate')"><svg class="icon-svg" viewBox="0 0 24 24"><polyline points="5 9 2 12 5 15"/><polyline points="9 5 12 2 15 5"/><polyline points="15 19 12 22 9 19"/><polyline points="19 9 22 12 19 15"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/></svg> Translate [W]</button>
+<button class="btn-cad" id="gizmo-rot" onclick="setGizmoMode('rotate')"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg> Rotate [E]</button>
+<button class="btn-cad" id="gizmo-scale" onclick="setGizmoMode('scale')"><svg class="icon-svg" viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg> Scale [R]</button>
+<button class="btn-cad" onclick="clearEntireScene()" style="color:#f43f5e; border-color:rgba(244,63,94,0.4);"><svg class="icon-svg" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Clear Stage</button>
+</div>
+</div>
+<div class="viewport-bottom-hud">
+<div class="hud-group">
+<button class="btn-cad" onclick="cloneSelectedMesh()"><svg class="icon-svg" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Clone</button>
+<button class="btn-cad" onclick="deleteSelectedMesh()"><svg class="icon-svg" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg> Delete</button>
+<button class="btn-cad" id="btn-wireframe-toggle" onclick="toggleWireframeSolid()"><svg class="icon-svg" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg> Wire / Solid</button>
+<button class="btn-cad" onclick="toggleAutoRotate()"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg> Orbit</button>
+<button class="btn-cad" onclick="burstParticles()"><svg class="icon-svg" viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg> Burst</button>
+<button class="btn-cad" onclick="resetCamera()"><svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M22 12h-4M6 12H2M12 6V2M12 22v-4"/></svg> Recenter</button>
+</div>
+<div class="hud-group">
+<button class="btn-cad" onclick="exportSnapshotPNG()"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Snapshot</button>
+<button class="btn-cad" id="btn-record-3d" onclick="recordTurntableWebM()"><svg class="icon-svg" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg> 360° Video</button>
+<button class="btn-cad" onclick="exportSceneGLTF()"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> GLTF</button>
+<button class="btn-cad" onclick="exportSceneOBJ()"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> OBJ</button>
+<button class="btn-cad" onclick="exportSceneSTL()"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> STL</button>
+</div>
+</div>
+<div id="three-viewport"></div>
+</section>
+<!-- Right Panel: AI Mesh Synthesizer, 3D Coordinates & Telemetry -->
+<aside class="panel-glass" id="panel-ai-materials">
+<!-- 3D Transform & Coordinates Inspector -->
+<div class="coord-inspector-panel">
+  <div style="display: flex; justify-content: space-between; align-items: center;">
+    <span class="tag-pill" style="font-size: 0.68rem;"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20M7 7l10 10M17 7L7 17"/></svg> TRANSFORM &amp; COORDINATES</span>
+    <span id="coord-mesh-name" style="font-family: var(--font-mono); font-size: 0.68rem; color: var(--cyan); max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Selected Mesh</span>
+  </div>
+
+  <!-- Position (X, Y, Z) -->
+  <div>
+    <div style="font-family: var(--font-mono); font-size: 0.68rem; color: var(--muted); margin-bottom: 4px; display: flex; justify-content: space-between;">
+      <span>POSITION (m)</span>
+      <span style="font-size: 0.62rem; color: var(--cyan);">XYZ Translation</span>
+    </div>
+    <div class="coord-grid">
+      <div class="coord-cell">
+        <div class="coord-label x"><span>X</span><small>px</small></div>
+        <input type="number" id="coord-pos-x" step="0.1" value="0.0" oninput="onCoordInputChange('pos', 'x', this.value)" class="coord-input" />
+      </div>
+      <div class="coord-cell">
+        <div class="coord-label y"><span>Y</span><small>py</small></div>
+        <input type="number" id="coord-pos-y" step="0.1" value="1.5" oninput="onCoordInputChange('pos', 'y', this.value)" class="coord-input" />
+      </div>
+      <div class="coord-cell">
+        <div class="coord-label z"><span>Z</span><small>pz</small></div>
+        <input type="number" id="coord-pos-z" step="0.1" value="0.0" oninput="onCoordInputChange('pos', 'z', this.value)" class="coord-input" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Rotation (X, Y, Z in deg) -->
+  <div>
+    <div style="font-family: var(--font-mono); font-size: 0.68rem; color: var(--muted); margin-bottom: 4px; display: flex; justify-content: space-between;">
+      <span>ROTATION (deg)</span>
+      <span style="font-size: 0.62rem; color: #c084fc;">Euler Angles</span>
+    </div>
+    <div class="coord-grid">
+      <div class="coord-cell">
+        <div class="coord-label x"><span>Rx</span><small>°</small></div>
+        <input type="number" id="coord-rot-x" step="5" value="0" oninput="onCoordInputChange('rot', 'x', this.value)" class="coord-input" />
+      </div>
+      <div class="coord-cell">
+        <div class="coord-label y"><span>Ry</span><small>°</small></div>
+        <input type="number" id="coord-rot-y" step="5" value="0" oninput="onCoordInputChange('rot', 'y', this.value)" class="coord-input" />
+      </div>
+      <div class="coord-cell">
+        <div class="coord-label z"><span>Rz</span><small>°</small></div>
+        <input type="number" id="coord-rot-z" step="5" value="0" oninput="onCoordInputChange('rot', 'z', this.value)" class="coord-input" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Scale (X, Y, Z) -->
+  <div>
+    <div style="font-family: var(--font-mono); font-size: 0.68rem; color: var(--muted); margin-bottom: 4px; display: flex; justify-content: space-between;">
+      <span>SCALE (factor)</span>
+      <span style="font-size: 0.62rem; color: #fbbf24;">Uniform/Aspect</span>
+    </div>
+    <div class="coord-grid">
+      <div class="coord-cell">
+        <div class="coord-label x"><span>Sx</span><small>x</small></div>
+        <input type="number" id="coord-scale-x" step="0.05" min="0.01" value="1.0" oninput="onCoordInputChange('scale', 'x', this.value)" class="coord-input" />
+      </div>
+      <div class="coord-cell">
+        <div class="coord-label y"><span>Sy</span><small>x</small></div>
+        <input type="number" id="coord-scale-y" step="0.05" min="0.01" value="1.0" oninput="onCoordInputChange('scale', 'y', this.value)" class="coord-input" />
+      </div>
+      <div class="coord-cell">
+        <div class="coord-label z"><span>Sz</span><small>x</small></div>
+        <input type="number" id="coord-scale-z" step="0.05" min="0.01" value="1.0" oninput="onCoordInputChange('scale', 'z', this.value)" class="coord-input" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Lighting & Camera Viewport Controls -->
+<div>
+  <span class="tag-pill"><svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg> LIGHTING &amp; CAMERA PRESETS</span>
+  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 8px;">
+    <button class="btn-cad active" id="btn-cam-persp" onclick="setCameraPreset('perspective')">Persp [P]</button>
+    <button class="btn-cad" id="btn-cam-top" onclick="setCameraPreset('top')">Top [T]</button>
+    <button class="btn-cad" id="btn-cam-front" onclick="setCameraPreset('front')">Front [F]</button>
+    <button class="btn-cad" id="btn-cam-side" onclick="setCameraPreset('side')">Side [S]</button>
+    <button class="btn-cad" id="btn-cam-iso" onclick="setCameraPreset('iso')">Isometric [I]</button>
+    <button class="btn-cad" onclick="resetCamera()">Recenter [O]</button>
+  </div>
+  <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px; background: rgba(0,0,0,0.35); padding: 10px; border-radius: 8px; border: 1px solid var(--line);">
+    <div class="slider-row">
+      <span>Sun Directional</span>
+      <input id="light-dir-intensity" max="5" min="0" oninput="updateLightingParams()" step="0.1" type="range" value="2.0"/>
+      <span id="label-dir-light" style="min-width: 28px; text-align: right; color: var(--cyan);">2.0</span>
+    </div>
+    <div class="slider-row">
+      <span>Ambient Fill</span>
+      <input id="light-amb-intensity" max="3" min="0" oninput="updateLightingParams()" step="0.05" type="range" value="0.65"/>
+      <span id="label-amb-light" style="min-width: 28px; text-align: right; color: var(--cyan);">0.65</span>
+    </div>
+    <div class="slider-row">
+      <span>Unreal Bloom</span>
+      <input id="bloom-strength-slider" max="4" min="0" oninput="updateBloomParams(this.value)" step="0.1" type="range" value="1.25"/>
+      <span id="label-bloom-strength" style="min-width: 28px; text-align: right; color: var(--cyan);">1.25</span>
+    </div>
+  </div>
+</div>
+
+<!-- AI Generator -->
+<div>
+<span class="tag-pill"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> ALGORITHMIC 3D STUDIO</span>
+<h3 style="margin: 6px 0; font-family: var(--font-display); font-size: 1.15rem;">Math &amp; Neural 3D Generator</h3>
+<small style="color: var(--muted);">Zero-VRAM procedural synthesis via Three.js &amp; Simplex noise</small>
+</div>
+<textarea class="prompt-box" id="ai-3d-prompt" placeholder="Describe 3D geometry (e.g. 'Synthesize a high-tech glowing plasma shield generator with neon coils')..." rows="3">Synthesize a glowing quantum reactor core with magnetic accelerator rings and iridescent refraction</textarea>
+<div style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px;">
+<button class="tag-pill" onclick="setPresetPrompt('Synthesize a glowing quantum reactor core with magnetic accelerator rings and iridescent refraction')" style="cursor: pointer; background: rgba(0,240,255,0.12); border: 1px solid rgba(0,240,255,0.3); font-size: 0.68rem;">Quantum Reactor</button>
+<button class="tag-pill" onclick="setPresetPrompt('Ancient alchemical warp portal gate with outer gold glyphs and event horizon disc')" style="cursor: pointer; background: rgba(232,200,114,0.12); border: 1px solid rgba(232,200,114,0.3); font-size: 0.68rem;">Warp Gate</button>
+<button class="tag-pill" onclick="setPresetPrompt('4D Tesseract hypercube matrix with rotating stereographic 4D projection and glass refraction')" style="cursor: pointer; background: rgba(192,132,252,0.12); border: 1px solid rgba(192,132,252,0.3); font-size: 0.68rem;">4D Tesseract</button>
+<button class="tag-pill" onclick="setPresetPrompt('Faceted crystal spire monolith with orbiting Fibonacci shards and noise displacement')" style="cursor: pointer; background: rgba(52,211,153,0.12); border: 1px solid rgba(52,211,153,0.3); font-size: 0.68rem;">Crystal Spire</button>
+<button class="tag-pill" onclick="setPresetPrompt('Topological torus knot DNA double helix with cellular voronoi mesh and inner wireframe')" style="cursor: pointer; background: rgba(255,51,102,0.12); border: 1px solid rgba(255,51,102,0.3); font-size: 0.68rem;">Torus DNA</button>
+<button class="tag-pill" onclick="setPresetPrompt('Sacred Metatron cube with golden ratio phyllotaxis spiral constellation')" style="cursor: pointer; background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.3); font-size: 0.68rem;">Metatron Cube</button>
+</div>
+<button class="btn-ai-gen" id="btn-ai-synthesize" onclick="generateAI3DGeometry()"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> Synthesize 3D Geometry</button>
+<div>
+<span class="tag-pill"><svg class="icon-svg" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg> TELEMETRY &amp; STATS</span>
+<div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px; font-family: var(--font-mono); font-size: 0.72rem;">
+<div style="display: flex; justify-content: space-between;">
+<span style="color: var(--muted);">Active Meshes:</span>
+<span id="stat-mesh-count" style="color: var(--cyan);">1</span>
+</div>
+<div style="display: flex; justify-content: space-between;">
+<span style="color: var(--muted);">Vertex Count:</span>
+<span id="stat-vert-count" style="color: var(--cyan);">1,248</span>
+</div>
+<div style="display: flex; justify-content: space-between;">
+<span style="color: var(--muted);">Procedural PBR:</span>
+<span style="color: #34d399;">Active (Canvas 2D)</span>
+</div>
+<div style="display: flex; justify-content: space-between;">
+<span style="color: var(--muted);">Ambient Particles:</span>
+<span style="color: #a855f7;">300 Active</span>
+</div>
+<div style="display: flex; justify-content: space-between;">
+<span style="color: var(--muted);">GPU Pipeline:</span>
+<span style="color: var(--green, #34d399);">UnrealBloomPass Active</span>
+</div>
+<div style="display: flex; justify-content: space-between;">
+<span style="color: var(--muted);">Engine:</span>
+<span style="color: var(--text-primary);">Nexus 3D v3.2 CAD</span>
+</div>
+</div>
+</div>
+<div style="margin-top: auto; padding-top: 12px; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px;">
+<a class="btn-cad" href="/studio/omnipost.html" style="text-decoration: none; text-align: center; justify-content: center; color: var(--cyan);"><svg class="icon-svg" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg> OmniPost 60 FPS Studio ➔</a>
+<a class="btn-cad" href="/studio/math-pillars.html" style="text-decoration: none; text-align: center; justify-content: center; color: var(--purple);"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20M7 7l10 10M17 7L7 17"/></svg> Math Pillars Telemetry ➔</a>
+</div>
+</aside>
+</div>
+</main>
+                                                            <footer class="site" role="contentinfo">
+      <div class="foot-wrap">
+        <div aria-hidden="true" class="foot-watermark">ZOTH</div>
+        <div class="foot-grid">
+          <div class="foot-brand-col">
+            <p class="foot-kicker">Local · loopback · no telemetry</p>
+            <a class="foot-brand-lockup" href="/">
+              <img alt="Master Azoth" class="foot-azoth" decoding="async" height="72" loading="lazy" src="/assets/mascot/azoth-bust.jpg" width="72" />
+              <span class="foot-brand-text">
+                <img alt="" class="foot-brand-logo" decoding="async" height="28" loading="lazy" src="/assets/brand/zoth-golden-z-192.png" width="28" />
+                <strong class="foot-brand-title">Zoth Studio</strong>
+              </span>
+            </a>
+            <small class="foot-brand-desc">Local-first workspace for a team of AI agents. Files stay on this machine.</small>
+            <div class="foot-actions">
+              <a class="foot-btn foot-btn-on" href="/#install">Install locally</a>
+              <a class="foot-btn foot-btn-ghost" href="/pricing/">Support the forge</a>
+            </div>
+          </div>
+          <div class="foot-col">
+            <h3>Studio</h3>
+            <a class="mega-footer-link js-deck" href="http://127.0.0.1:8484/">Operator Deck</a>
+            <a class="mega-footer-link" href="/studio/">Workstations</a>
+            <a class="mega-footer-link" href="/studio/webgen.html">WebGen</a>
+            <a class="mega-footer-link" href="/studio/swarm.html">3D Swarm</a>
+            <a class="mega-footer-link" href="/studio/consensus.html">Consensus</a>
+          </div>
+          <div class="foot-col">
+            <h3>Agents</h3>
+            <a class="mega-footer-link" href="/zoth/">Master Azoth</a>
+            <a class="mega-footer-link" href="/agents/">21-Agent pantheon</a>
+            <a class="mega-footer-link" href="/pets/">Companions</a>
+            <a class="mega-footer-link" href="/vault/">Sovereign vault</a>
+            <a class="mega-footer-link" href="/adytum/">Adytum</a>
+          </div>
+          <div class="foot-col">
+            <h3>Universe</h3>
+            <a class="mega-footer-link" href="/comic/">Azoth comic</a>
+            <a class="mega-footer-link" href="/social/">Social wall</a>
+            <a class="mega-footer-link" href="/showcase.html">Showcase</a>
+            <a class="mega-footer-link" href="/signal/">Signal</a>
+            <a class="mega-footer-link" href="/article/">Manifesto</a>
+          </div>
+          <div class="foot-col">
+            <h3>Resources</h3>
+            <a class="mega-footer-link" href="/docs/">Docs</a>
+            <a class="mega-footer-link" href="/faq.html">FAQ</a>
+            <a class="mega-footer-link" href="/pricing/">Support / Patron</a>
+            <a class="mega-footer-link" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub ↗</a>
+            <a class="mega-footer-link" href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI ↗</a>
+          </div>
+        </div>
+        <div class="foot-bottom">
+          <p>© 2026 NullAI Tech. MIT. Local sovereign execution — zero telemetry.</p>
+          <nav aria-label="Footer meta" class="foot-meta">
+            <a href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub</a>
+            <a href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI</a>
+            <a href="/docs/">Docs</a>
+            <a href="/faq.html">FAQ</a>
+          </nav>
+        </div>
+      </div>
+    </footer>
+<!-- Nexus 3D Studio Engine Script -->
+<script>
+      let scene, camera, renderer, controls, transformControls, composer, bloomPass;
+      let ambLight, dirLight, fillLight, gridHelper;
+      let selectedObject = null;
+      let meshList = [];
+      let mixer, clock = new THREE.Clock();
+      let particleSystem, particleGeo;
+      let isRecording = false;
+      let mediaRecorder = null;
+      let recordedChunks = [];
+      let petModelsEngine = null;
+      let petFigures = [];
+      let allModelsList = [];
+      let activeModelCategory = 'all';
+      let activeLoadedModelPath = '';
+
+      const CATEGORY_ICONS = {
+        characters: '<svg class="icon-svg" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+        weapons: '<svg class="icon-svg" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+        vehicles: '<svg class="icon-svg" viewBox="0 0 24 24"><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/><path d="M5 17H3v-4l2-5h12l3 5v4h-2"/></svg>',
+        animated: '<svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+        scifi: '<svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
+        architecture: '<svg class="icon-svg" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="9" y1="22" x2="9" y2="2"/><line x1="15" y1="22" x2="15" y2="2"/></svg>'
+      };
+
+      async function loadPetEngine() {
+        if (!petModelsEngine) {
+          petModelsEngine = await import('/pets/pet-models.js?v=20260819ultra');
+        }
+        return petModelsEngine;
+      }
+
+      async function spawnPetFigure(petId, vibe = 'idle') {
+        try {
+          const engine = await loadPetEngine();
+          const { createPetFigure, loadPetTexture, fallbackPetTexture, petPortrait, PET_SPECIES } = engine;
+          
+          const id = petId || 'kai';
+          const spec = PET_SPECIES[id] || { name: id, vibeColor: '#00e5ff', species: 'Cyber Familiar' };
+          const color = spec.vibeColor || '#00e5ff';
+          
+          const tex = (await loadPetTexture(THREE, petPortrait(id))) || fallbackPetTexture(THREE);
+          const figure = createPetFigure(THREE, {
+            id: id,
+            color: color,
+            texture: tex,
+            style: 'realistic',
+            initialVibe: vibe,
+            withAura: true
+          });
+
+          const group = figure.group;
+          group.position.set(0, 0.98, 0);
+          group.name = `Companion: ${spec.name || id}`;
+          group.userData = { isPet: true, petId: id, figure: figure };
+
+          scene.add(group);
+          meshList.push(group);
+          petFigures.push(figure);
+
+          selectObject(group);
+          updateOutliner();
+          updateStats();
+          
+          const tag = document.getElementById('viewport-status-tag');
+          if (tag) tag.textContent = `🐾 3D Volumetric Companion: ${spec.name || id} (${spec.species || 'Familiar'})`;
+        } catch (e) {
+          console.error("Failed to spawn pet in Nexus 3D:", e);
+          spawnPrimitive('crystal');
+        }
+      }
+
+      const DEFAULT_MODELS = [
+        { name: "Brainstem", category: "characters", format: "GLB", path: "/assets/models/characters/BrainStem.glb" },
+        { name: "Cesiumman", category: "characters", format: "GLB", path: "/assets/models/characters/CesiumMan.glb" },
+        { name: "Fox", category: "characters", format: "GLB", path: "/assets/models/characters/Fox.glb" },
+        { name: "Cyber Android", category: "characters", format: "OBJ", path: "/assets/models/characters/cyber_android.obj" },
+        { name: "Mech Warrior", category: "characters", format: "OBJ", path: "/assets/models/characters/mech_warrior.obj" },
+        { name: "Nano Scout", category: "characters", format: "OBJ", path: "/assets/models/characters/nano_scout.obj" },
+        { name: "Scifi Drone Bot", category: "characters", format: "OBJ", path: "/assets/models/characters/scifi_drone_bot.obj" },
+        { name: "Synth Sentinel", category: "characters", format: "OBJ", path: "/assets/models/characters/synth_sentinel.obj" },
+        { name: "Cyber Dagger", category: "weapons", format: "OBJ", path: "/assets/models/weapons/cyber_dagger.obj" },
+        { name: "Cyberpunk Katana", category: "weapons", format: "OBJ", path: "/assets/models/weapons/cyberpunk_katana.obj" },
+        { name: "Emp Grenade", category: "weapons", format: "OBJ", path: "/assets/models/weapons/emp_grenade.obj" },
+        { name: "Energy Shield", category: "weapons", format: "OBJ", path: "/assets/models/weapons/energy_shield.obj" },
+        { name: "Plasma Rifle", category: "weapons", format: "OBJ", path: "/assets/models/weapons/plasma_rifle.obj" },
+        { name: "Railgun", category: "weapons", format: "OBJ", path: "/assets/models/weapons/railgun.obj" },
+        { name: "Smart Pistol", category: "weapons", format: "OBJ", path: "/assets/models/weapons/smart_pistol.obj" },
+        { name: "Thermal Blade", category: "weapons", format: "OBJ", path: "/assets/models/weapons/thermal_blade.obj" },
+        { name: "Cesiummilktruck", category: "vehicles", format: "GLB", path: "/assets/models/vehicles/CesiumMilkTruck.glb" },
+        { name: "Duck", category: "vehicles", format: "GLB", path: "/assets/models/vehicles/Duck.glb" },
+        { name: "Toycar", category: "vehicles", format: "GLB", path: "/assets/models/vehicles/ToyCar.glb" },
+        { name: "Cyber Recon Drone", category: "vehicles", format: "OBJ", path: "/assets/models/vehicles/cyber_recon_drone.obj" },
+        { name: "Heavy Mech Carrier", category: "vehicles", format: "OBJ", path: "/assets/models/vehicles/heavy_mech_carrier.obj" },
+        { name: "Hover Speeder", category: "vehicles", format: "OBJ", path: "/assets/models/vehicles/hover_speeder.obj" },
+        { name: "Interceptor Fighter", category: "vehicles", format: "OBJ", path: "/assets/models/vehicles/interceptor_fighter.obj" },
+        { name: "Lunar Rover", category: "vehicles", format: "OBJ", path: "/assets/models/vehicles/lunar_rover.obj" },
+        { name: "Animatedmorphcube", category: "animated", format: "GLB", path: "/assets/models/animated/AnimatedMorphCube.glb" },
+        { name: "Animatedmorphsphere", category: "animated", format: "GLB", path: "/assets/models/animated/AnimatedMorphSphere.glb" },
+        { name: "Boxanimated", category: "animated", format: "GLB", path: "/assets/models/animated/BoxAnimated.glb" },
+        { name: "Flamingo", category: "animated", format: "GLB", path: "/assets/models/animated/Flamingo.glb" },
+        { name: "Horse", category: "animated", format: "GLB", path: "/assets/models/animated/Horse.glb" },
+        { name: "Interpolationtest", category: "animated", format: "GLB", path: "/assets/models/animated/InterpolationTest.glb" },
+        { name: "Littlesttokyo", category: "animated", format: "GLB", path: "/assets/models/animated/LittlestTokyo.glb" },
+        { name: "Michelle", category: "animated", format: "GLB", path: "/assets/models/animated/Michelle.glb" },
+        { name: "Parrot", category: "animated", format: "GLB", path: "/assets/models/animated/Parrot.glb" },
+        { name: "Riggedfigure", category: "animated", format: "GLB", path: "/assets/models/animated/RiggedFigure.glb" },
+        { name: "Riggedsimple", category: "animated", format: "GLB", path: "/assets/models/animated/RiggedSimple.glb" },
+        { name: "Robotexpressive", category: "animated", format: "GLB", path: "/assets/models/animated/RobotExpressive.glb" },
+        { name: "Soldier", category: "animated", format: "GLB", path: "/assets/models/animated/Soldier.glb" },
+        { name: "Astronaut", category: "scifi", format: "GLB", path: "/assets/models/scifi/Astronaut.glb" },
+        { name: "Avocado", category: "scifi", format: "GLB", path: "/assets/models/scifi/Avocado.glb" },
+        { name: "Barramundifish", category: "scifi", format: "GLB", path: "/assets/models/scifi/BarramundiFish.glb" },
+        { name: "Boombox", category: "scifi", format: "GLB", path: "/assets/models/scifi/BoomBox.glb" },
+        { name: "Buggy", category: "scifi", format: "GLB", path: "/assets/models/scifi/Buggy.glb" },
+        { name: "Cesiumman", category: "scifi", format: "GLB", path: "/assets/models/scifi/CesiumMan.glb" },
+        { name: "Corset", category: "scifi", format: "GLB", path: "/assets/models/scifi/Corset.glb" },
+        { name: "Damagedhelmet", category: "scifi", format: "GLB", path: "/assets/models/scifi/DamagedHelmet.glb" },
+        { name: "Flighthelmet", category: "scifi", format: "GLB", path: "/assets/models/scifi/FlightHelmet.glb" },
+        { name: "Lantern", category: "scifi", format: "GLB", path: "/assets/models/scifi/Lantern.glb" },
+        { name: "Metalroughspheres", category: "scifi", format: "GLB", path: "/assets/models/scifi/MetalRoughSpheres.glb" },
+        { name: "Scifihelmet", category: "scifi", format: "GLB", path: "/assets/models/scifi/SciFiHelmet.glb" },
+        { name: "Specglossvsmetalrough", category: "scifi", format: "GLB", path: "/assets/models/scifi/SpecGlossVsMetalRough.glb" },
+        { name: "Waterbottle", category: "scifi", format: "GLB", path: "/assets/models/scifi/WaterBottle.glb" },
+        { name: "Energy Pylon", category: "scifi", format: "OBJ", path: "/assets/models/scifi/energy_pylon.obj" },
+        { name: "Gravity Generator", category: "scifi", format: "OBJ", path: "/assets/models/scifi/gravity_generator.obj" },
+        { name: "Hologram Projector", category: "scifi", format: "OBJ", path: "/assets/models/scifi/hologram_projector.obj" },
+        { name: "Quantum Reactor", category: "scifi", format: "OBJ", path: "/assets/models/scifi/quantum_reactor.obj" },
+        { name: "Scifi Comm Tower", category: "scifi", format: "OBJ", path: "/assets/models/scifi/scifi_comm_tower.obj" },
+        { name: "Scifi Crate", category: "scifi", format: "OBJ", path: "/assets/models/scifi/scifi_crate.obj" },
+        { name: "Scifi Cryo Chamber", category: "scifi", format: "OBJ", path: "/assets/models/scifi/scifi_cryo_chamber.obj" },
+        { name: "Antiquecamera", category: "architecture", format: "GLB", path: "/assets/models/architecture/AntiqueCamera.glb" },
+        { name: "Lantern", category: "architecture", format: "GLB", path: "/assets/models/architecture/Lantern.glb" },
+        { name: "Sheenchair", category: "architecture", format: "GLB", path: "/assets/models/architecture/SheenChair.glb" },
+        { name: "Cyberpunk Skyscraper", category: "architecture", format: "OBJ", path: "/assets/models/architecture/cyberpunk_skyscraper.obj" },
+        { name: "Data Vault", category: "architecture", format: "OBJ", path: "/assets/models/architecture/data_vault.obj" },
+        { name: "Hab Dome", category: "architecture", format: "OBJ", path: "/assets/models/architecture/hab_dome.obj" },
+        { name: "Landing Pad", category: "architecture", format: "OBJ", path: "/assets/models/architecture/landing_pad.obj" },
+        { name: "Modular Scifi Corridor", category: "architecture", format: "OBJ", path: "/assets/models/architecture/modular_scifi_corridor.obj" },
+        { name: "Neon Gateway", category: "architecture", format: "OBJ", path: "/assets/models/architecture/neon_gateway.obj" },
+        { name: "Observation Deck", category: "architecture", format: "OBJ", path: "/assets/models/architecture/observation_deck.obj" }
+      ];
+      allModelsList = [...DEFAULT_MODELS];
+
+      async function initModelCatalog() {
+        const countEl = document.getElementById('model-catalog-count');
+        if (countEl) countEl.textContent = allModelsList.length;
+        renderModelCatalog();
+
+        try {
+          const res = await fetch('/assets/models/models_index.json');
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.categories) {
+              allModelsList = [];
+              Object.keys(data.categories).forEach(cat => {
+                data.categories[cat].forEach(item => {
+                  allModelsList.push({
+                    name: item.name,
+                    category: cat,
+                    filename: item.filename,
+                    format: (item.format || 'glb').toUpperCase(),
+                    path: item.path.startsWith('/') ? item.path : '/' + item.path
+                  });
+                });
+              });
+              if (countEl) countEl.textContent = allModelsList.length;
+              renderModelCatalog();
+            }
+          }
+        } catch (e) {
+          console.warn('Using default models list:', e);
+        }
+      }
+
+      function selectModelCategory(cat, btn) {
+        activeModelCategory = cat;
+        document.querySelectorAll('#model-cat-tabs button').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        renderModelCatalog();
+      }
+
+      function filterModelCatalog() {
+        renderModelCatalog();
+      }
+
+      function renderModelCatalog() {
+        const container = document.getElementById('model-catalog-list');
+        if (!container) return;
+        const search = (document.getElementById('model-catalog-search')?.value || '').toLowerCase().trim();
+
+        const filtered = allModelsList.filter(m => {
+          const matchesCat = activeModelCategory === 'all' || m.category === activeModelCategory;
+          const matchesSearch = !search || m.name.toLowerCase().includes(search) || m.category.toLowerCase().includes(search) || m.format.toLowerCase().includes(search);
+          return matchesCat && matchesSearch;
+        });
+
+        container.innerHTML = '';
+        if (filtered.length === 0) {
+          container.innerHTML = '<div style="grid-column: 1 / -1; padding: 12px; text-align: center; color: var(--muted); font-family: var(--font-mono); font-size: 0.75rem;">No matching 3D models found.</div>';
+          return;
+        }
+
+        filtered.forEach(m => {
+          const card = document.createElement('div');
+          card.className = `catalog-card ${activeLoadedModelPath === m.path ? 'active' : ''}`;
+          const icon = CATEGORY_ICONS[m.category] || '<svg class="icon-svg" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>';
+          card.innerHTML = `
+            <span class="title">${icon} ${m.name}</span>
+            <span class="sub" style="display:flex; justify-content:space-between; align-items:center;">
+              <span>${m.category}</span>
+              <span style="background:rgba(0,229,255,0.15); color:var(--cyan); padding:1px 5px; border-radius:3px; font-size:0.6rem;">${m.format}</span>
+            </span>
+          `;
+          card.onclick = () => {
+            activeLoadedModelPath = m.path;
+            document.querySelectorAll('#model-catalog-list .catalog-card').forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+            loadModelPreset(m.path, m.name);
+          };
+          container.appendChild(card);
+        });
+      }
+
+      function initNexus3D() {
+        const host = document.getElementById('three-viewport');
+        if (!host) return;
+
+        // Initialize 3D Model Catalog Browser immediately
+        initModelCatalog();
+
+        scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x020306, 0.015);
+
+        const initW = Math.max(host.clientWidth || window.innerWidth || 800, 64);
+        const initH = Math.max(host.clientHeight || window.innerHeight || 600, 64);
+
+        camera = new THREE.PerspectiveCamera(45, initW / initH, 0.1, 1000);
+        camera.position.set(6, 6, 12);
+
+        try {
+          renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+        } catch (e) {
+          console.warn("Falling back WebGL renderer options:", e);
+          renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, preserveDrawingBuffer: true });
+        }
+        renderer.setSize(initW, initH);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.25;
+        renderer.shadowMap.enabled = true;
+        host.appendChild(renderer.domElement);
+
+        // OrbitControls
+        if (typeof THREE.OrbitControls === 'function') {
+          controls = new THREE.OrbitControls(camera, renderer.domElement);
+          controls.enableDamping = true;
+          controls.dampingFactor = 0.05;
+          controls.target.set(0, 1.5, 0);
+          controls.touches = {
+            ONE: THREE.TOUCH.ROTATE,
+            TWO: THREE.TOUCH.DOLLY_PAN
+          };
+        }
+
+        // TransformControls
+        if (typeof THREE.TransformControls === 'function') {
+          transformControls = new THREE.TransformControls(camera, renderer.domElement);
+          transformControls.addEventListener('dragging-changed', (event) => {
+            if (controls) controls.enabled = !event.value;
+          });
+          transformControls.addEventListener('change', () => {
+            updateCoordInputsFromSelected();
+          });
+          scene.add(transformControls);
+        }
+
+        // Postprocessing (Bloom)
+        if (typeof THREE.EffectComposer === 'function' && typeof THREE.RenderPass === 'function') {
+          const renderPass = new THREE.RenderPass(scene, camera);
+          if (typeof THREE.UnrealBloomPass === 'function') {
+            bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(initW, initH), 1.25, 0.4, 0.85);
+          }
+          composer = new THREE.EffectComposer(renderer);
+          composer.addPass(renderPass);
+          if (bloomPass) composer.addPass(bloomPass);
+        }
+
+        // Grid & Platform
+        gridHelper = new THREE.GridHelper(24, 24, 0x00e5ff, 0x1f293d);
+        gridHelper.position.y = -0.01;
+        scene.add(gridHelper);
+
+        // Ambient Lights
+        ambLight = new THREE.AmbientLight(0xffffff, 0.65);
+        scene.add(ambLight);
+
+        dirLight = new THREE.DirectionalLight(0x00e5ff, 2.0);
+        dirLight.position.set(10, 15, 10);
+        scene.add(dirLight);
+
+        fillLight = new THREE.DirectionalLight(0xd946ef, 1.5);
+        fillLight.position.set(-10, 10, -10);
+        scene.add(fillLight);
+
+        // Dynamic 16-Brand Theme Synchronization
+        window.addEventListener('zoth-theme-change', (e) => {
+          const themeId = (e && e.detail && e.detail.theme) ? e.detail.theme : (window.getZothTheme ? window.getZothTheme() : 'dark');
+          applyEditorTheme3D(themeId);
+        });
+        applyEditorTheme3D(window.getZothTheme ? window.getZothTheme() : 'dark');
+
+        // Ambient Particle System
+        initParticleSystem();
+
+        // 3D Viewport Raycaster Picking
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        let isPointerDown = false;
+        let pointerDownPos = { x: 0, y: 0 };
+
+        renderer.domElement.addEventListener('pointerdown', (e) => {
+          isPointerDown = true;
+          pointerDownPos = { x: e.clientX, y: e.clientY };
+        });
+
+        renderer.domElement.addEventListener('pointerup', (e) => {
+          if (!isPointerDown) return;
+          isPointerDown = false;
+          const dist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
+          if (dist > 6) return;
+
+          const rect = renderer.domElement.getBoundingClientRect();
+          mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+          mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+          raycaster.setFromCamera(mouse, camera);
+          const intersects = raycaster.intersectObjects(meshList, true);
+          if (intersects.length > 0) {
+            let hit = intersects[0].object;
+            while (hit.parent && hit.parent !== scene && !meshList.includes(hit)) {
+              hit = hit.parent;
+            }
+            if (meshList.includes(hit)) {
+              selectObject(hit);
+            } else {
+              const root = meshList.find(m => {
+                let found = false;
+                m.traverse(c => { if (c === intersects[0].object) found = true; });
+                return found;
+              });
+              if (root) selectObject(root);
+            }
+          }
+        });
+
+        // Initialize 3D Model Catalog Browser from models_index.json
+        initModelCatalog();
+
+        // Ingest Pet Parameter or start with pristine Hero Crystal
+        const urlParams = new URLSearchParams(window.location.search);
+        const petParam = urlParams.get('pet');
+        if (petParam) {
+          spawnPetFigure(petParam);
+        } else {
+          spawnPrimitive('crystal');
+        }
+
+        // Drag & Drop Custom GLB/OBJ Files into Viewport
+        host.addEventListener('dragover', (e) => e.preventDefault());
+        host.addEventListener('drop', handleFileDrop);
+
+        // Keyboard Shortcuts
+        window.addEventListener('keydown', (e) => {
+          if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
+          if (e.key === 'w' || e.key === 'W') setGizmoMode('translate');
+          if (e.key === 'e' || e.key === 'E') setGizmoMode('rotate');
+          if (e.key === 'r' || e.key === 'R') setGizmoMode('scale');
+          if (e.key === 'Delete' || e.key === 'Backspace') deleteSelectedMesh();
+        });
+
+        // Enter key in prompt box triggers synthesis
+        const promptBox = document.getElementById('ai-3d-prompt');
+        if (promptBox) {
+          promptBox.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              generateAI3DGeometry();
+            }
+          });
+        }
+
+        window.addEventListener('resize', onResize, { passive: true });
+        if (window.ResizeObserver) {
+          new ResizeObserver(onResize).observe(host);
+        }
+        animate();
+      }
+
+      function initParticleSystem() {
+        const count = 300;
+        particleGeo = new THREE.BufferGeometry();
+        const positions = new Float32Array(count * 3);
+        const colors = new Float32Array(count * 3);
+
+        for (let i = 0; i < count; i++) {
+          positions[i * 3] = (Math.random() - 0.5) * 20;
+          positions[i * 3 + 1] = Math.random() * 10;
+          positions[i * 3 + 2] = (Math.random() - 0.5) * 20;
+
+          const isCyan = Math.random() > 0.5;
+          colors[i * 3] = isCyan ? 0.0 : 0.85;
+          colors[i * 3 + 1] = isCyan ? 0.9 : 0.2;
+          colors[i * 3 + 2] = 1.0;
+        }
+
+        particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        particleGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+        const mat = new THREE.PointsMaterial({
+          size: 0.15,
+          vertexColors: true,
+          transparent: true,
+          opacity: 0.8
+        });
+
+        particleSystem = new THREE.Points(particleGeo, mat);
+        scene.add(particleSystem);
+      }
+
+      function burstParticles() {
+        if (!particleGeo) return;
+        const pos = particleGeo.attributes.position.array;
+        for (let i = 0; i < pos.length / 3; i++) {
+          pos[i * 3] += (Math.random() - 0.5) * 6;
+          pos[i * 3 + 1] += Math.random() * 4;
+          pos[i * 3 + 2] += (Math.random() - 0.5) * 6;
+        }
+        particleGeo.attributes.position.needsUpdate = true;
+        if (bloomPass) {
+          bloomPass.strength = 2.8;
+          setTimeout(() => { bloomPass.strength = 1.25; }, 400);
+        }
+      }
+
+      function spawnPrimitive(type) {
+        let geo, mat;
+        let name = 'Mesh';
+        const color = Math.random() > 0.5 ? 0x00e5ff : 0xd946ef;
+
+        mat = new THREE.MeshPhysicalMaterial({
+          color: color,
+          emissive: color,
+          emissiveIntensity: 0.35,
+          roughness: 0.1,
+          metalness: 0.85,
+          transmission: 0.5,
+          side: THREE.DoubleSide
+        });
+
+        // 1. METATRON'S CUBE (13 Spheres + 78 Interconnecting Vector Lines + Inner Merkaba)
+        if (type === 'metatron') {
+          const group = new THREE.Group();
+          const scale = 1.4;
+          const nodes = [new THREE.Vector3(0, 0, 0)]; // Node 0: Center
+
+          // 6 Inner Hexagon Nodes (XY Plane)
+          for (let i = 0; i < 6; i++) {
+            const angle = (i / 6) * Math.PI * 2;
+            nodes.push(new THREE.Vector3(Math.cos(angle) * scale * 1.15, Math.sin(angle) * scale * 1.15, 0));
+          }
+          // 6 Outer 3D Vertices (Cuboctahedron / Fruit of Life 3D Formation)
+          for (let j = 0; j < 6; j++) {
+            const angle = (j / 6) * Math.PI * 2 + Math.PI / 6;
+            const zOffset = (j % 2 === 0 ? 1 : -1) * (scale * 0.75);
+            nodes.push(new THREE.Vector3(Math.cos(angle) * scale * 2.0, Math.sin(angle) * scale * 2.0, zOffset));
+          }
+
+          // 13 Glowing Node Spheres
+          const goldNodeMat = new THREE.MeshPhysicalMaterial({
+            color: 0xe8c872,
+            emissive: 0xe8c872,
+            emissiveIntensity: 0.8,
+            roughness: 0.1,
+            metalness: 0.9
+          });
+          const cyanNodeMat = new THREE.MeshPhysicalMaterial({
+            color: 0x00e5ff,
+            emissive: 0x00e5ff,
+            emissiveIntensity: 1.0,
+            roughness: 0.1,
+            metalness: 0.9
+          });
+
+          nodes.forEach((pos, idx) => {
+            const sph = new THREE.Mesh(new THREE.SphereGeometry(idx === 0 ? 0.22 : 0.14, 24, 24), idx === 0 ? cyanNodeMat : goldNodeMat);
+            sph.position.copy(pos);
+            group.add(sph);
+          });
+
+          // 78 Sacred Connecting Vector Lines
+          const linePositions = [];
+          for (let i = 0; i < nodes.length; i++) {
+            for (let j = i + 1; j < nodes.length; j++) {
+              linePositions.push(nodes[i].x, nodes[i].y, nodes[i].z);
+              linePositions.push(nodes[j].x, nodes[j].y, nodes[j].z);
+            }
+          }
+          const lineGeo = new THREE.BufferGeometry();
+          lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
+          const lineMat = new THREE.LineBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.65 });
+          group.add(new THREE.LineSegments(lineGeo, lineMat));
+
+          // Inner Dual Star Tetrahedron (Merkaba)
+          const tetMat1 = new THREE.MeshPhysicalMaterial({ color: 0xd946ef, emissive: 0x7c3aed, emissiveIntensity: 0.4, roughness: 0.1, metalness: 0.7, transmission: 0.6, transparent: true, opacity: 0.75, side: THREE.DoubleSide });
+          const tetMat2 = new THREE.MeshPhysicalMaterial({ color: 0xe8c872, emissive: 0xf59e0b, emissiveIntensity: 0.4, roughness: 0.1, metalness: 0.7, transmission: 0.6, transparent: true, opacity: 0.75, side: THREE.DoubleSide });
+          const tA = new THREE.Mesh(new THREE.TetrahedronGeometry(scale * 0.95), tetMat1);
+          const tB = new THREE.Mesh(new THREE.TetrahedronGeometry(scale * 0.95), tetMat2);
+          tB.rotation.x = Math.PI;
+          group.add(tA);
+          group.add(tB);
+
+          // Outer Gold Harmonic Torus Ring
+          const ring = new THREE.Mesh(new THREE.TorusGeometry(scale * 2.1, 0.03, 16, 64), new THREE.MeshBasicMaterial({ color: 0xe8c872, transparent: true, opacity: 0.7 }));
+          group.add(ring);
+
+          group.position.set(0, 1.5, 0);
+          group.name = `Metatron's Cube #${meshList.length + 1}`;
+          scene.add(group);
+          meshList.push(group);
+          selectObject(group);
+          updateOutliner();
+          updateStats();
+          return;
+        }
+
+        // 2. GOLDEN RATIO ICOSAHEDRON (Exact Phi Vertices + PBR Crystal + Golden Wireframe)
+        else if (type === 'golden_icosahedron') {
+          const group = new THREE.Group();
+          const PHI = (1 + Math.sqrt(5)) / 2;
+          const s = 1.35;
+
+          const rawVerts = [
+            [-1,  PHI,  0], [ 1,  PHI,  0], [-1, -PHI,  0], [ 1, -PHI,  0],
+            [ 0, -1,  PHI], [ 0,  1,  PHI], [ 0, -1, -PHI], [ 0,  1, -PHI],
+            [ PHI,  0, -1], [ PHI,  0,  1], [-PHI,  0, -1], [-PHI,  0,  1]
+          ];
+          const vertices = rawVerts.map(v => new THREE.Vector3(v[0] * s * 0.75, v[1] * s * 0.75, v[2] * s * 0.75));
+
+          const icosaGeo = new THREE.IcosahedronGeometry(s * 1.25, 0);
+          const icosaMat = new THREE.MeshPhysicalMaterial({
+            color: 0xe8c872,
+            emissive: 0xd97706,
+            emissiveIntensity: 0.35,
+            roughness: 0.08,
+            metalness: 0.92,
+            transmission: 0.55,
+            transparent: true,
+            opacity: 0.85,
+            flatShading: true,
+            side: THREE.DoubleSide
+          });
+          const icosaMesh = new THREE.Mesh(icosaGeo, icosaMat);
+          group.add(icosaMesh);
+
+          // Golden Wireframe
+          const wireGeo = new THREE.WireframeGeometry(icosaGeo);
+          const wireMat = new THREE.LineBasicMaterial({ color: 0x00e5ff, linewidth: 2, transparent: true, opacity: 0.9 });
+          group.add(new THREE.LineSegments(wireGeo, wireMat));
+
+          // 12 Glowing Golden Vertices
+          const vertMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+          vertices.forEach(v => {
+            const vSph = new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 16), vertMat);
+            vSph.position.copy(v);
+            group.add(vSph);
+          });
+
+          // Inner Concentric Octahedron Core
+          const innerCore = new THREE.Mesh(new THREE.OctahedronGeometry(s * 0.55, 0), new THREE.MeshPhysicalMaterial({ color: 0xd946ef, emissive: 0xd946ef, emissiveIntensity: 0.6, roughness: 0.1, metalness: 0.8 }));
+          group.add(innerCore);
+
+          group.position.set(0, 1.5, 0);
+          group.name = `Golden Icosahedron #${meshList.length + 1}`;
+          scene.add(group);
+          meshList.push(group);
+          selectObject(group);
+          updateOutliner();
+          updateStats();
+          return;
+        }
+
+        // 3. MERKABA STAR / PLATONIC SOLIDS SUITE
+        else if (type === 'platonic_solids' || type === 'merkaba') {
+          const group = new THREE.Group();
+          const size = 1.6;
+
+          const tetGeo1 = new THREE.TetrahedronGeometry(size);
+          const tetGeo2 = new THREE.TetrahedronGeometry(size);
+
+          const mat1 = new THREE.MeshPhysicalMaterial({ color: 0x00e5ff, emissive: 0x00e5ff, emissiveIntensity: 0.35, roughness: 0.1, metalness: 0.85, transmission: 0.65, transparent: true, opacity: 0.8, side: THREE.DoubleSide });
+          const mat2 = new THREE.MeshPhysicalMaterial({ color: 0xe8c872, emissive: 0xe8c872, emissiveIntensity: 0.35, roughness: 0.1, metalness: 0.85, transmission: 0.65, transparent: true, opacity: 0.8, side: THREE.DoubleSide });
+
+          const m1 = new THREE.Mesh(tetGeo1, mat1);
+          const m2 = new THREE.Mesh(tetGeo2, mat2);
+          m2.rotation.x = Math.PI;
+          m2.rotation.y = Math.PI / 4;
+
+          m1.add(new THREE.LineSegments(new THREE.WireframeGeometry(tetGeo1), new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2 })));
+          m2.add(new THREE.LineSegments(new THREE.WireframeGeometry(tetGeo2), new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2 })));
+
+          const core = new THREE.Mesh(new THREE.IcosahedronGeometry(0.42, 2), new THREE.MeshBasicMaterial({ color: 0xd946ef }));
+          group.add(m1);
+          group.add(m2);
+          group.add(core);
+
+          group.position.set(0, 1.5, 0);
+          group.name = `Merkaba Star #${meshList.length + 1}`;
+          scene.add(group);
+          meshList.push(group);
+          selectObject(group);
+          updateOutliner();
+          updateStats();
+          return;
+        }
+
+        // 4. FIBONACCI SPHERICAL LATTICE (Golden Angle Phyllotaxis Distribution)
+        else if (type === 'fibonacci_lattice') {
+          const group = new THREE.Group();
+          const N = 144;
+          const radius = 1.85;
+          const goldenAngle = Math.PI * (3 - Math.sqrt(5)); // ~137.507764 deg
+
+          const points = [];
+          const colorA = new THREE.Color(0xe8c872);
+          const colorB = new THREE.Color(0x00e5ff);
+          const colorC = new THREE.Color(0xd946ef);
+
+          for (let i = 0; i < N; i++) {
+            const y = 1 - (i / (N - 1)) * 2;
+            const radAtY = Math.sqrt(Math.max(0, 1 - y * y));
+            const theta = goldenAngle * i;
+
+            const v = new THREE.Vector3(Math.cos(theta) * radAtY * radius, y * radius, Math.sin(theta) * radAtY * radius);
+            points.push(v);
+
+            const lerpVal = i / N;
+            const c = lerpVal < 0.5 ? colorA.clone().lerp(colorB, lerpVal * 2) : colorB.clone().lerp(colorC, (lerpVal - 0.5) * 2);
+
+            const nodeMesh = new THREE.Mesh(new THREE.SphereGeometry(0.045 + (i % 8 === 0 ? 0.03 : 0), 12, 12), new THREE.MeshBasicMaterial({ color: c }));
+            nodeMesh.position.copy(v);
+            group.add(nodeMesh);
+          }
+
+          // Golden Spiral Geodesic Lines
+          const spiralLines = [];
+          const hops = [1, 8, 13, 21];
+          hops.forEach(hop => {
+            for (let i = 0; i < N - hop; i++) {
+              spiralLines.push(points[i].x, points[i].y, points[i].z);
+              spiralLines.push(points[i + hop].x, points[i + hop].y, points[i + hop].z);
+            }
+          });
+
+          const spiralGeo = new THREE.BufferGeometry();
+          spiralGeo.setAttribute('position', new THREE.Float32BufferAttribute(spiralLines, 3));
+          group.add(new THREE.LineSegments(spiralGeo, new THREE.LineBasicMaterial({ color: 0xe8c872, transparent: true, opacity: 0.35 })));
+
+          // Inner Dodecahedron Core
+          group.add(new THREE.Mesh(new THREE.DodecahedronGeometry(0.55), new THREE.MeshPhysicalMaterial({ color: 0x00e5ff, emissive: 0x00e5ff, emissiveIntensity: 0.6, metalness: 0.9, roughness: 0.1, transmission: 0.7 })));
+
+          group.position.set(0, 1.5, 0);
+          group.name = `Fibonacci Lattice (N=144) #${meshList.length + 1}`;
+          scene.add(group);
+          meshList.push(group);
+          selectObject(group);
+          updateOutliner();
+          updateStats();
+          return;
+        }
+
+        // 5. STANDARD SHAPES
+        else if (type === 'dodecahedron') {
+          geo = new THREE.DodecahedronGeometry(1.5, 0);
+          name = 'Sacred Dodecahedron';
+        } else if (type === 'octahedron') {
+          geo = new THREE.OctahedronGeometry(1.6, 0);
+          name = 'Sacred Octahedron';
+        } else if (type === 'cube') {
+          geo = new THREE.BoxGeometry(2, 2, 2);
+          name = 'Cube';
+        } else if (type === 'sphere') {
+          geo = new THREE.SphereGeometry(1.4, 32, 32);
+          name = 'Sphere';
+        } else if (type === 'torus') {
+          geo = new THREE.TorusKnotGeometry(1.2, 0.35, 100, 16);
+          name = 'Torus Knot';
+        } else if (type === 'crystal') {
+          geo = new THREE.OctahedronGeometry(1.8, 1);
+          name = 'Cyber Crystal';
+        } else if (type === 'tesseract') {
+          // 4D Hypercube nested frame
+          const group = new THREE.Group();
+          const outerGeo = new THREE.BoxGeometry(2.4, 2.4, 2.4);
+          const innerGeo = new THREE.BoxGeometry(1.2, 1.2, 1.2);
+          const outerMesh = new THREE.Mesh(outerGeo, new THREE.MeshBasicMaterial({ color: 0x00e5ff, wireframe: true }));
+          const innerMesh = new THREE.Mesh(innerGeo, new THREE.MeshPhysicalMaterial({ color: 0xd946ef, metalness: 0.9, roughness: 0.1, transmission: 0.7 }));
+          group.add(outerMesh);
+          group.add(innerMesh);
+          group.position.set(0, 1.5, 0);
+          group.name = `Tesseract #${meshList.length + 1}`;
+          scene.add(group);
+          meshList.push(group);
+          selectObject(group);
+          updateOutliner();
+          updateStats();
+          return;
+        } else if (type === 'helix') {
+          const group = new THREE.Group();
+          for (let i = 0; i < 40; i++) {
+            const a = i * 0.4;
+            const x = Math.cos(a) * 1.2;
+            const z = Math.sin(a) * 1.2;
+            const y = (i * 0.15) - 2;
+            const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), new THREE.MeshBasicMaterial({ color: 0x00e5ff }));
+            sphere.position.set(x, y, z);
+            group.add(sphere);
+
+            const sphere2 = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), new THREE.MeshBasicMaterial({ color: 0xd946ef }));
+            sphere2.position.set(-x, y, -z);
+            group.add(sphere2);
+
+            // Connective rung
+            if (i % 2 === 0) {
+              const rungGeo = new THREE.CylinderGeometry(0.04, 0.04, 2.4, 8);
+              const rungMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.6 });
+              const rung = new THREE.Mesh(rungGeo, rungMat);
+              rung.position.set(0, y, 0);
+              rung.rotation.z = Math.PI / 2;
+              rung.rotation.y = a;
+              group.add(rung);
+            }
+          }
+          group.position.set(0, 2, 0);
+          group.name = `DNA Helix #${meshList.length + 1}`;
+          scene.add(group);
+          meshList.push(group);
+          selectObject(group);
+          updateOutliner();
+          updateStats();
+          return;
+        } else if (type === 'mobius') {
+          geo = new THREE.TorusKnotGeometry(1.4, 0.25, 128, 32, 2, 5);
+          name = 'Mobius Knot';
+        } else if (type === 'plasma_sphere') {
+          geo = new THREE.IcosahedronGeometry(1.5, 3);
+          name = 'Plasma Sphere';
+        } else if (type === 'voxel_kai') {
+          // Kai Mascot Voxel Avatar
+          const group = new THREE.Group();
+          const body = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.2, 2.2), new THREE.MeshPhysicalMaterial({ color: 0x0c1326, metalness: 0.8, roughness: 0.2 }));
+          const head = new THREE.Mesh(new THREE.BoxGeometry(1.0, 1.0, 1.0), new THREE.MeshPhysicalMaterial({ color: 0x00e5ff, emissive: 0x00e5ff, emissiveIntensity: 0.4 }));
+          head.position.set(0, 0.8, 1.2);
+          const ear1 = new THREE.Mesh(new THREE.ConeGeometry(0.25, 0.6, 4), new THREE.MeshBasicMaterial({ color: 0xd946ef }));
+          ear1.position.set(-0.35, 1.5, 1.1);
+          const ear2 = new THREE.Mesh(new THREE.ConeGeometry(0.25, 0.6, 4), new THREE.MeshBasicMaterial({ color: 0xd946ef }));
+          ear2.position.set(0.35, 1.5, 1.1);
+          group.add(body);
+          group.add(head);
+          group.add(ear1);
+          group.add(ear2);
+          group.position.set(0, 1.2, 0);
+          group.name = `Kai Spirit Avatar #${meshList.length + 1}`;
+          scene.add(group);
+          meshList.push(group);
+          selectObject(group);
+          updateOutliner();
+          updateStats();
+          return;
+        }
+
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.set(0, 1.5, 0);
+        mesh.name = `${name} #${meshList.length + 1}`;
+        scene.add(mesh);
+        meshList.push(mesh);
+
+        selectObject(mesh);
+        updateOutliner();
+        updateStats();
+      }
+
+      function toggleWireframeSolid() {
+        if (selectedObject) {
+          let hasWire = false;
+          selectedObject.traverse(child => {
+            if (child.material && child.material.wireframe) hasWire = true;
+          });
+          const nextWire = !hasWire;
+          selectedObject.traverse(child => {
+            if (child.material) {
+              child.material.wireframe = nextWire;
+              child.material.needsUpdate = true;
+            }
+          });
+          const wireCheck = document.getElementById('mat-wireframe');
+          if (wireCheck) wireCheck.checked = nextWire;
+        } else if (meshList.length > 0) {
+          const firstMat = meshList[0].material || (meshList[0].children && meshList[0].children[0] && meshList[0].children[0].material);
+          const nextWire = firstMat ? !firstMat.wireframe : true;
+          meshList.forEach(m => {
+            m.traverse(child => {
+              if (child.material) {
+                child.material.wireframe = nextWire;
+                child.material.needsUpdate = true;
+              }
+            });
+          });
+          const wireCheck = document.getElementById('mat-wireframe');
+          if (wireCheck) wireCheck.checked = nextWire;
+        }
+      }
+
+      function applyMaterialPreset(preset) {
+        if (!selectedObject) return;
+
+        let themeColor = '#00f0ff';
+        if (preset === 'bio-organic') themeColor = '#34d399';
+        else if (preset === 'iridescent-hologram') themeColor = '#c084fc';
+        else if (preset === 'damascus-steel' || preset === 'gold') themeColor = '#e8c872';
+        else if (preset === 'brushed-titanium') themeColor = '#38bdf8';
+        else if (preset === 'cyber-circuit') themeColor = '#00f0ff';
+
+        const targetMat = (obj) => {
+          if (obj.material) {
+            if (preset === 'glass') {
+              obj.material.color.setHex(0xffffff);
+              obj.material.emissive.setHex(0x000000);
+              obj.material.roughness = 0.02;
+              obj.material.metalness = 0.1;
+              obj.material.transmission = 0.95;
+              obj.material.wireframe = false;
+            } else {
+              obj.material.color.set(themeColor);
+              obj.material.roughness = 0.2;
+              obj.material.metalness = 0.8;
+              obj.material.wireframe = false;
+            }
+            obj.material.needsUpdate = true;
+          }
+        };
+
+        selectedObject.traverse(targetMat);
+      }
+
+      function selectObject(obj) {
+        selectedObject = obj;
+        if (transformControls) {
+          if (obj) {
+            transformControls.attach(obj);
+          } else {
+            transformControls.detach();
+          }
+        }
+        updateOutliner();
+        updateCoordInputsFromSelected();
+      }
+
+      function updateCoordInputsFromSelected() {
+        if (!selectedObject) {
+          const nameEl = document.getElementById('coord-mesh-name');
+          if (nameEl) nameEl.textContent = 'None Selected';
+          return;
+        }
+        const nameEl = document.getElementById('coord-mesh-name');
+        if (nameEl) nameEl.textContent = selectedObject.name || 'Selected Mesh';
+
+        const posX = document.getElementById('coord-pos-x');
+        const posY = document.getElementById('coord-pos-y');
+        const posZ = document.getElementById('coord-pos-z');
+        if (posX) posX.value = selectedObject.position.x.toFixed(2);
+        if (posY) posY.value = selectedObject.position.y.toFixed(2);
+        if (posZ) posZ.value = selectedObject.position.z.toFixed(2);
+
+        const rotX = document.getElementById('coord-rot-x');
+        const rotY = document.getElementById('coord-rot-y');
+        const rotZ = document.getElementById('coord-rot-z');
+        if (rotX) rotX.value = (selectedObject.rotation.x * 180 / Math.PI).toFixed(0);
+        if (rotY) rotY.value = (selectedObject.rotation.y * 180 / Math.PI).toFixed(0);
+        if (rotZ) rotZ.value = (selectedObject.rotation.z * 180 / Math.PI).toFixed(0);
+
+        const scaleX = document.getElementById('coord-scale-x');
+        const scaleY = document.getElementById('coord-scale-y');
+        const scaleZ = document.getElementById('coord-scale-z');
+        if (scaleX) scaleX.value = selectedObject.scale.x.toFixed(2);
+        if (scaleY) scaleY.value = selectedObject.scale.y.toFixed(2);
+        if (scaleZ) scaleZ.value = selectedObject.scale.z.toFixed(2);
+      }
+
+      function onCoordInputChange(type, axis, val) {
+        if (!selectedObject) return;
+        const num = parseFloat(val);
+        if (isNaN(num)) return;
+
+        if (type === 'pos') {
+          selectedObject.position[axis] = num;
+        } else if (type === 'rot') {
+          selectedObject.rotation[axis] = num * Math.PI / 180;
+        } else if (type === 'scale') {
+          selectedObject.scale[axis] = Math.max(0.001, num);
+        }
+      }
+
+      function setCameraPreset(preset) {
+        if (!camera || !controls) return;
+        
+        ['btn-cam-persp', 'btn-cam-top', 'btn-cam-front', 'btn-cam-side', 'btn-cam-iso'].forEach(id => {
+          const btn = document.getElementById(id);
+          if (btn) btn.classList.remove('active');
+        });
+
+        if (preset === 'top') {
+          camera.position.set(0, 18, 0.001);
+          controls.target.set(0, 0, 0);
+          document.getElementById('btn-cam-top')?.classList.add('active');
+        } else if (preset === 'front') {
+          camera.position.set(0, 1.5, 16);
+          controls.target.set(0, 1.5, 0);
+          document.getElementById('btn-cam-front')?.classList.add('active');
+        } else if (preset === 'side') {
+          camera.position.set(16, 1.5, 0);
+          controls.target.set(0, 1.5, 0);
+          document.getElementById('btn-cam-side')?.classList.add('active');
+        } else if (preset === 'iso') {
+          camera.position.set(10, 10, 10);
+          controls.target.set(0, 1.5, 0);
+          document.getElementById('btn-cam-iso')?.classList.add('active');
+        } else { // perspective
+          camera.position.set(6, 6, 12);
+          controls.target.set(0, 1.5, 0);
+          document.getElementById('btn-cam-persp')?.classList.add('active');
+        }
+        controls.update();
+      }
+
+      function updateLightingParams() {
+        const dirVal = parseFloat(document.getElementById('light-dir-intensity')?.value || '2.0');
+        const ambVal = parseFloat(document.getElementById('light-amb-intensity')?.value || '0.65');
+        
+        if (dirLight) dirLight.intensity = dirVal;
+        if (ambLight) ambLight.intensity = ambVal;
+
+        const dirLabel = document.getElementById('label-dir-light');
+        const ambLabel = document.getElementById('label-amb-light');
+        if (dirLabel) dirLabel.textContent = dirVal.toFixed(1);
+        if (ambLabel) ambLabel.textContent = ambVal.toFixed(2);
+      }
+
+      function updateBloomParams(val) {
+        const num = parseFloat(val);
+        if (bloomPass && !isNaN(num)) {
+          bloomPass.strength = num;
+        }
+        const label = document.getElementById('label-bloom-strength');
+        if (label && !isNaN(num)) label.textContent = num.toFixed(2);
+      }
+
+      function updateOutliner() {
+        const tree = document.getElementById('scene-outliner');
+        if (!tree) return;
+        tree.innerHTML = '';
+        meshList.forEach((m) => {
+          const item = document.createElement('div');
+          item.className = `outliner-item ${selectedObject === m ? 'selected' : ''}`;
+          item.innerHTML = `<span>${m.name}</span><small>PBR</small>`;
+          item.onclick = () => selectObject(m);
+          tree.appendChild(item);
+        });
+      }
+
+      function setGizmoMode(mode) {
+        if (transformControls) transformControls.setMode(mode);
+        const transBtn = document.getElementById('gizmo-trans');
+        const rotBtn = document.getElementById('gizmo-rot');
+        const scaleBtn = document.getElementById('gizmo-scale');
+        if (transBtn) transBtn.classList.toggle('active', mode === 'translate');
+        if (rotBtn) rotBtn.classList.toggle('active', mode === 'rotate');
+        if (scaleBtn) scaleBtn.classList.toggle('active', mode === 'scale');
+      }
+
+      function cloneSelectedMesh() {
+        if (!selectedObject) return;
+        const clone = selectedObject.clone();
+        clone.position.x += 1.8;
+        clone.name = `${selectedObject.name} (Clone)`;
+        scene.add(clone);
+        meshList.push(clone);
+        selectObject(clone);
+        updateOutliner();
+        updateStats();
+        burstParticles();
+      }
+
+      function deleteSelectedMesh() {
+        if (!selectedObject) return;
+        if (transformControls) transformControls.detach();
+        scene.remove(selectedObject);
+        meshList = meshList.filter(m => m !== selectedObject);
+        selectedObject = null;
+        updateOutliner();
+        updateStats();
+      }
+
+      function updateSelectedMaterial() {
+        if (!selectedObject) return;
+        const r = parseFloat(document.getElementById('mat-roughness').value);
+        const m = parseFloat(document.getElementById('mat-metalness').value);
+        const t = parseFloat(document.getElementById('mat-transmission').value);
+        const w = document.getElementById('mat-wireframe').checked;
+
+        selectedObject.traverse(child => {
+          if (child.material) {
+            child.material.roughness = r;
+            child.material.metalness = m;
+            child.material.transmission = t;
+            child.material.wireframe = w;
+            child.material.needsUpdate = true;
+          }
+        });
+      }
+
+      function loadModelPreset(url, name) {
+        const isObj = url.toLowerCase().endsWith('.obj');
+        const tag = document.getElementById('viewport-status-tag');
+        if (tag) tag.textContent = `⏳ Loading 3D Model: ${name}...`;
+
+        function setupLoadedModel(object) {
+          const bbox = new THREE.Box3().setFromObject(object);
+          const size = new THREE.Vector3();
+          bbox.getSize(size);
+          const maxDim = Math.max(size.x, size.y, size.z);
+          if (maxDim > 0.001) {
+            const targetScale = 3.0 / maxDim;
+            object.scale.multiplyScalar(targetScale);
+          }
+          const centerBbox = new THREE.Box3().setFromObject(object);
+          const center = new THREE.Vector3();
+          centerBbox.getCenter(center);
+          object.position.x -= center.x;
+          object.position.y += (1.5 - center.y);
+          object.position.z -= center.z;
+
+          object.name = name;
+          scene.add(object);
+          meshList.push(object);
+          selectObject(object);
+          updateOutliner();
+          updateStats();
+          burstParticles();
+          if (tag) tag.textContent = `📦 Loaded 3D Asset: ${name}`;
+        }
+
+        if (isObj) {
+          if (typeof THREE.OBJLoader === 'function') {
+            const loader = new THREE.OBJLoader();
+            loader.load(url, (obj) => {
+              setupLoadedModel(obj);
+            }, undefined, (err) => {
+              console.warn('OBJ load fallback to procedural generator:', err);
+              spawnPrimitive('crystal');
+            });
+          }
+          return;
+        }
+
+        // GLTF / GLB Loader
+        if (typeof THREE.GLTFLoader === 'function') {
+          const loader = new THREE.GLTFLoader();
+          loader.load(url, (gltf) => {
+            const model = gltf.scene;
+            setupLoadedModel(model);
+
+            if (gltf.animations && gltf.animations.length > 0) {
+              mixer = new THREE.AnimationMixer(model);
+              const action = mixer.clipAction(gltf.animations[0]);
+              action.play();
+            }
+          }, undefined, (err) => {
+            console.warn('GLTF load error:', err);
+            spawnPrimitive('crystal');
+          });
+        }
+      }
+
+      function handleFileDrop(e) {
+        e.preventDefault();
+        const file = e.dataTransfer.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        if (file.name.endsWith('.glb') || file.name.endsWith('.gltf')) {
+          reader.readAsArrayBuffer(file);
+          reader.onload = (evt) => {
+            if (typeof THREE.GLTFLoader === 'function') {
+              const loader = new THREE.GLTFLoader();
+              loader.parse(evt.target.result, '', (gltf) => {
+                const model = gltf.scene;
+                model.name = file.name;
+                scene.add(model);
+                meshList.push(model);
+                selectObject(model);
+                updateOutliner();
+                updateStats();
+              });
+            }
+          };
+        } else if (file.name.endsWith('.obj')) {
+          reader.readAsText(file);
+          reader.onload = (evt) => {
+            if (typeof THREE.OBJLoader === 'function') {
+              const loader = new THREE.OBJLoader();
+              const obj = loader.parse(evt.target.result);
+              obj.name = file.name;
+              scene.add(obj);
+              meshList.push(obj);
+              selectObject(obj);
+              updateOutliner();
+              updateStats();
+            }
+          };
+        }
+      }
+
+      function exportSceneGLTF() {
+        if (typeof THREE.GLTFExporter === 'function') {
+          const exporter = new THREE.GLTFExporter();
+          exporter.parse(scene, (gltf) => {
+            const blob = new Blob([JSON.stringify(gltf, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `nexus_3d_scene_${Date.now()}.gltf`;
+            link.click();
+          }, { binary: false });
+        }
+      }
+
+      function exportSceneOBJ() {
+        if (window.Nexus3DGenerator && window.Nexus3DGenerator.exportToOBJ) {
+          const result = window.Nexus3DGenerator.exportToOBJ(scene);
+          const blob = new Blob([result], { type: 'text/plain' });
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = `nexus_3d_scene_${Date.now()}.obj`;
+          link.click();
+          return;
+        }
+        if (typeof THREE.OBJExporter === 'function') {
+          const exporter = new THREE.OBJExporter();
+          const result = exporter.parse(scene);
+          const blob = new Blob([result], { type: 'text/plain' });
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = `nexus_3d_scene_${Date.now()}.obj`;
+          link.click();
+        }
+      }
+
+      function exportSceneSTL() {
+        if (window.Nexus3DGenerator && window.Nexus3DGenerator.exportToSTL) {
+          const result = window.Nexus3DGenerator.exportToSTL(scene);
+          const blob = new Blob([result], { type: 'text/plain' });
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = `nexus_3d_print_${Date.now()}.stl`;
+          link.click();
+        }
+      }
+
+      function exportSnapshotPNG() {
+        if (composer) composer.render();
+        else if (renderer && scene && camera) renderer.render(scene, camera);
+        const canvas = renderer.domElement;
+        const link = document.createElement('a');
+        link.download = `nexus3d_render_${Date.now()}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      }
+
+      function recordTurntableWebM() {
+        const btn = document.getElementById('btn-record-3d');
+        if (isRecording) {
+          if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+          isRecording = false;
+          if (btn) btn.textContent = '📹 360° Video';
+          if (controls) controls.autoRotate = false;
+          return;
+        }
+
+        if (typeof renderer.domElement.captureStream !== 'function' || typeof MediaRecorder === 'undefined') {
+          alert('360° turntable video capture is supported in standard WebGL browsers.');
+          return;
+        }
+
+        try {
+          const stream = renderer.domElement.captureStream(60);
+          recordedChunks = [];
+          const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm';
+          mediaRecorder = new MediaRecorder(stream, { mimeType: mimeType });
+
+          mediaRecorder.ondataavailable = (e) => {
+            if (e.data && e.data.size > 0) recordedChunks.push(e.data);
+          };
+
+          mediaRecorder.onstop = () => {
+            const blob = new Blob(recordedChunks, { type: 'video/webm' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `nexus3d_turntable_${Date.now()}.webm`;
+            a.click();
+            URL.revokeObjectURL(url);
+          };
+
+          if (controls) {
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 4.0;
+          }
+          mediaRecorder.start();
+          isRecording = true;
+          if (btn) btn.textContent = '⏹ Stop (Recording...)';
+
+          setTimeout(() => {
+            if (isRecording) recordTurntableWebM();
+          }, 8000);
+        } catch (err) {
+          console.warn('Record video fallback:', err);
+        }
+      }
+
+      function clearEntireScene() {
+        if (transformControls) transformControls.detach();
+        meshList.forEach(m => {
+          if (m && m.parent) m.parent.remove(m);
+        });
+        meshList = [];
+        petFigures = [];
+        selectedObject = null;
+        updateOutliner();
+        updateStats();
+      }
+
+      function loadScenePreset(sceneId) {
+        clearEntireScene();
+        const promptInput = document.getElementById('ai-3d-prompt');
+        let promptText = '';
+        if (sceneId === 'cyberpunk_megacity') promptText = 'Cyberpunk Megacity Plaza scene with neon skyscrapers, reflective asphalt, and holographic monument';
+        else if (sceneId === 'deep_space_station') promptText = 'Deep space nebula space station scene with asteroid belt and orbital torus';
+        else if (sceneId === 'alchemical_sanctum') promptText = 'Sacred Alchemical Sanctum temple scene with golden marble floor, floating obelisks, and MerKaBa altar';
+        else if (sceneId === 'matrix_holodeck') promptText = 'Quantum Matrix Holodeck cyber grid scene with green data towers and floating holographic cubes';
+        else if (sceneId === 'scifi_hangar_bay') promptText = 'Sci-Fi Mech Hangar Bay launch deck scene with overhead gantry crane and landing beacons';
+        else if (sceneId === 'crystal_sky_islands') promptText = 'Floating celestial crystal islands landscape scene with crystal spires and satellite rocks';
+        
+        if (promptInput) promptInput.value = promptText;
+        generateAI3DGeometry();
+      }
+
+      function setPresetPrompt(promptText) {
+        const promptInput = document.getElementById('ai-3d-prompt');
+        if (promptInput) {
+          promptInput.value = promptText;
+          generateAI3DGeometry();
+        }
+      }
+
+      function generateAI3DGeometry() {
+        const promptInput = document.getElementById('ai-3d-prompt');
+        const prompt = promptInput ? promptInput.value.trim().toLowerCase() : '';
+        const btn = document.getElementById('btn-ai-synthesize');
+        if (btn) btn.textContent = '⚡ Synthesizing Geometry...';
+
+        clearEntireScene();
+
+        setTimeout(() => {
+          const knownPets = ['kai', 'draco', 'athena', 'lycan', 'ignis', 'kitsune', 'azoth', 'zoth', 'workbot', 'aquila', 'leviathan', 'onyx', 'chronos', 'aether', 'kraken', 'scorpius', 'ghostbyte', 'glitchcat', 'binary', 'pet', 'cat', 'dog', 'wolf', 'dragon'];
+          const matchedPet = knownPets.find(p => prompt.includes(p));
+          
+          if (matchedPet) {
+            let pid = matchedPet;
+            if (pid === 'azoth') pid = 'zoth';
+            if (pid === 'cat' || pid === 'pet') pid = 'kai';
+            if (pid === 'dog' || pid === 'wolf') pid = 'lycan';
+            if (pid === 'dragon') pid = 'draco';
+            spawnPetFigure(pid);
+          } else if (window.Nexus3DGenerator) {
+            const composite = window.Nexus3DGenerator.synthesizeFromPrompt(prompt);
+            composite.position.set(0, 1.2, 0);
+            scene.add(composite);
+            meshList.push(composite);
+            selectObject(composite);
+            updateOutliner();
+            updateStats();
+          } else {
+            spawnPrimitive('plasma_sphere');
+          }
+
+          if (bloomPass) {
+            bloomPass.strength = 3.0;
+            setTimeout(() => { bloomPass.strength = 1.25; }, 600);
+          }
+          if (btn) btn.textContent = '✨ Synthesize 3D Geometry';
+        }, 100);
+      }
+
+      function toggleAutoRotate() {
+        if (controls) controls.autoRotate = !controls.autoRotate;
+      }
+
+      function resetCamera() {
+        if (camera) camera.position.set(6, 6, 12);
+        if (controls) {
+          controls.target.set(0, 1.5, 0);
+          controls.update();
+        }
+      }
+
+      function updateStats() {
+        const meshCountEl = document.getElementById('stat-mesh-count');
+        const vertCountEl = document.getElementById('stat-vert-count');
+        if (meshCountEl) meshCountEl.textContent = meshList.length;
+        let totalVerts = 0;
+        meshList.forEach(m => {
+          m.traverse(child => {
+            if (child.isMesh && child.geometry) {
+              totalVerts += child.geometry.attributes && child.geometry.attributes.position ? child.geometry.attributes.position.count : 0;
+            }
+          });
+        });
+        if (vertCountEl) vertCountEl.textContent = totalVerts.toLocaleString() || '1,248';
+      }
+
+      /* Mobile Segmented Switcher Navigation */
+      function setNexusMobileTab(tab) {
+        const layout = document.querySelector('.studio-layout');
+        if (layout) {
+          layout.setAttribute('data-mobile-tab', tab);
+        }
+        document.querySelectorAll('#nexus-mobile-tabs .mobile-tab-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.getAttribute('data-tab') === tab);
+        });
+        if (tab === 'viewport' || tab === 'all') {
+          setTimeout(() => {
+            if (typeof onResize === 'function') onResize();
+            window.dispatchEvent(new Event('resize'));
+          }, 60);
+        }
+      }
+
+      function onResize() {
+        const host = document.getElementById('three-viewport');
+        if (!host || !camera || !renderer) return;
+        const w = Math.max(host.clientWidth || window.innerWidth || 800, 64);
+        const h = Math.max(host.clientHeight || window.innerHeight || 600, 64);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+        if (composer) composer.setSize(w, h);
+        if (bloomPass && typeof bloomPass.setSize === 'function') bloomPass.setSize(w, h);
+      }
+
+      function applyEditorTheme3D(themeName) {
+        if (!scene || !renderer) return;
+        const theme = String(themeName).toLowerCase();
+
+        let fogColor = 0x020306;
+        let dirColor = 0x00e5ff;
+        let fillColor = 0xd946ef;
+
+        if (theme.includes('gold') || theme.includes('hermetic') || theme.includes('alchemy')) {
+          fogColor = 0x060502; dirColor = 0xfbbf24; fillColor = 0xf59e0b;
+        } else if (theme.includes('matrix') || theme.includes('terminal') || theme.includes('emerald')) {
+          fogColor = 0x010803; dirColor = 0x00ff66; fillColor = 0x10b981;
+        } else if (theme.includes('synthwave') || theme.includes('cyberpunk') || theme.includes('neon')) {
+          fogColor = 0x08020b; dirColor = 0xff007a; fillColor = 0x00f0ff;
+        } else if (theme.includes('light')) {
+          fogColor = 0xe2e8f0; dirColor = 0x0284c7; fillColor = 0x7c3aed;
+        }
+
+        if (scene.fog) scene.fog.color.setHex(fogColor);
+        if (dirLight) dirLight.color.setHex(dirColor);
+        if (fillLight) fillLight.color.setHex(fillColor);
+      }
+
+      function animate() {
+        requestAnimationFrame(animate);
+        const dt = clock.getDelta();
+        const t = clock.getElapsedTime();
+        if (mixer) mixer.update(dt);
+
+        // Web Audio pulse for audio-reactive mesh and particle breathing
+        const audioLevel = (window.ZothAudioFX && typeof window.ZothAudioFX.getAudioLevel === 'function') 
+          ? window.ZothAudioFX.getAudioLevel() 
+          : 0;
+
+        // Tick companion procedural aura rings, gaze and floating levitation
+        petFigures.forEach(fig => {
+          if (fig && fig.tick) fig.tick(t, dt);
+        });
+
+        // Thematic particle animation (floating bubbles/embers/sparks rising vs rotating starfields/dust)
+        if (particleSystem && particleGeo && particleGeo.userData) {
+          const pos = particleGeo.attributes.position ? particleGeo.attributes.position.array : null;
+          const vel = particleGeo.userData.velocities;
+          const type = particleGeo.userData.type || '';
+          const speed = (particleGeo.userData.speed || 0.4) + (audioLevel * 0.8);
+
+          if (pos && vel && (type.includes('bubble') || type.includes('ember') || type.includes('spark') || type.includes('spore'))) {
+            const count = pos.length / 3;
+            for (let i = 0; i < count; i++) {
+              pos[i * 3 + 1] += (vel[i * 3 + 1] || 0.03) * speed * 2.0;
+              pos[i * 3] += Math.sin(t * 1.5 + i) * 0.015 * speed;
+              pos[i * 3 + 2] += Math.cos(t * 1.5 + i) * 0.015 * speed;
+              if (pos[i * 3 + 1] > 22) {
+                pos[i * 3 + 1] = 0;
+                pos[i * 3] = (Math.random() - 0.5) * 40;
+                pos[i * 3 + 2] = (Math.random() - 0.5) * 40;
+              }
+            }
+            particleGeo.attributes.position.needsUpdate = true;
+          } else if (particleSystem) {
+            particleSystem.rotation.y += (0.001 * speed) + (audioLevel * 0.005);
+          }
+        }
+
+        if (controls) controls.update();
+        const rw = renderer && renderer.domElement ? renderer.domElement.width : 0;
+        const rh = renderer && renderer.domElement ? renderer.domElement.height : 0;
+        if (rw > 0 && rh > 0) {
+          if (composer) {
+            composer.render();
+          } else if (renderer && scene && camera) {
+            renderer.render(scene, camera);
+          }
+        }
+      }
+
+      window.onload = initNexus3D;
+    </script>
+<script src="/assets/celestial-trail.js"></script>
+<script src="/assets/zoth-gate.js"></script>
+<script defer="" src="/assets/zoth-tip.js"></script>
+<script defer="" src="/assets/zoth-annotator.js"></script>
+<script defer="" src="/assets/zoth-nav.js?v=11"></script>
+</body>
+</html>

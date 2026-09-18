@@ -1,0 +1,1035 @@
+import React, { useState, useEffect } from 'react';
+import { Helmet, HelmetProvider } from 'react-helmet-async';
+import { 
+  TreePine, 
+  Tractor, 
+  Hammer, 
+  Map, 
+  Camera, 
+  Phone, 
+  Mail, 
+  MapPin, 
+  CheckCircle2, 
+  Menu, 
+  X,
+  ChevronRight,
+  ArrowRight,
+  Shield,
+  Wrench,
+  Clock,
+  AlertTriangle,
+  ArrowUpRight
+} from 'lucide-react';
+
+// --- CENTRALIZED DATA WITH HIGH-QUALITY STABLE ASSETS ---
+
+const SERVICES_DATA = {
+  'forestry-mulching': {
+    id: 'forestry-mulching',
+    title: "Forestry Mulching",
+    shortDesc: <>Eco-friendly, highly efficient land clearing that turns brush and trees into a <strong className="text-emerald-700 font-bold bg-emerald-100 px-1 rounded">nutrient-rich mulch layer</strong>.</>,
+    heroDesc: (
+      <>
+        Eco-friendly, highly efficient land clearing that turns brush and trees into a
+        <span className="block mt-3">
+          <strong className="text-white font-bold bg-emerald-500/30 border border-emerald-400/30 px-3 py-1 rounded shadow-sm inline-block">
+            nutrient-rich mulch layer
+          </strong>
+        </span>
+      </>
+    ),
+    longDesc: (
+      <>
+        <p>Forestry mulching is the modern, eco-friendly alternative to traditional bulldozing and burning. Instead of ripping up the earth and hauling away debris, our specialized heavy-duty mulchers grind trees, brush, and stumps <strong className="text-neutral-900 font-bold border-b-2 border-emerald-500">directly where they stand</strong>.</p>
+        <p>This process leaves behind a nutrient-rich layer of mulch that acts as a natural barrier. It suppresses weed growth, drastically reduces soil erosion, and rapidly <span className="italic text-emerald-700 font-bold">returns vital nutrients back into the earth</span>. It is the fastest, cleanest way to reclaim overgrown property without damaging the underlying soil structure.</p>
+      </>
+    ),
+    icon: <TreePine />,
+    img: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?q=80&w=1200&auto=format&fit=crop",
+    bullets: ["Zero haul-off or burn permits required", "Prevents soil erosion and protects topsoil", "Improves soil health for future growth", "Selective clearing (we leave the trees you want)"]
+  },
+  'land-clearing': {
+    id: 'land-clearing',
+    title: "General Land Clearing",
+    shortDesc: <>Complete removal of trees, stumps, and vegetation to provide a <strong className="text-neutral-900 font-bold border-b border-neutral-300">clean, blank slate</strong> for your property.</>,
+    heroDesc: (
+      <>
+        Complete removal of trees, stumps, and vegetation to provide a
+        <span className="block mt-3">
+          <strong className="text-white font-bold bg-emerald-500/30 border border-emerald-400/30 px-3 py-1 rounded shadow-sm inline-block">
+            clean, blank slate
+          </strong>
+        </span>
+      </>
+    ),
+    longDesc: (
+      <>
+        <p>When you need a property completely stripped back to bare earth, general land clearing is the answer. Whether you have a five-acre residential lot or a fifty-acre agricultural expansion, we provide the <strong className="text-neutral-900 font-bold bg-neutral-200 px-1 rounded">heavy machinery required</strong> to rip out dense vegetation, large trees, and deep-rooted stumps.</p>
+        <p>We don't just knock things down; we create a completely clean, blank slate. This service is critical for new construction, pasture creation, or simply <span className="italic text-emerald-700 font-bold">maximizing the usable square footage</span> of your real estate investment.</p>
+      </>
+    ),
+    icon: <Tractor />,
+    img: "https://images.unsplash.com/photo-1541888062957-695ccf2b6ba9?q=80&w=1200&auto=format&fit=crop",
+    bullets: ["Total vegetation and tree removal", "Deep stump extraction and root raking", "Debris haul-off and disposal available", "Maximized usable property space"]
+  },
+  'site-preparation': {
+    id: 'site-preparation',
+    title: "Site Preparation",
+    shortDesc: <>Grading, leveling, and dirt work to ensure your construction site is perfectly prepped and <strong className="text-neutral-900 font-bold underline decoration-emerald-500 decoration-2">structurally sound</strong>.</>,
+    heroDesc: (
+      <>
+        Grading, leveling, and dirt work to ensure your construction site is perfectly prepped and
+        <span className="block mt-3">
+          <strong className="text-white font-bold bg-emerald-500/30 border border-emerald-400/30 px-3 py-1 rounded shadow-sm inline-block">
+            structurally sound
+          </strong>
+        </span>
+      </>
+    ),
+    longDesc: (
+      <>
+        <p>The foundation of any successful build—whether it's a home, a commercial building, or a barn—<strong className="text-emerald-800 font-bold">starts with the dirt</strong>. If your site isn't prepped correctly, you will face severe structural and drainage issues down the line.</p>
+        <p>Our comprehensive site preparation services include precision grading, leveling, and dirt work. We engineer the land to ensure proper water runoff, create rock-solid building pads, and cut in driveways and access roads so your construction crews can <span className="text-neutral-900 font-black uppercase tracking-wide">get to work the moment we leave</span>.</p>
+      </>
+    ),
+    icon: <Map />,
+    img: "https://images.unsplash.com/photo-1504307651254-35680f356f67?q=80&w=1200&auto=format&fit=crop",
+    bullets: ["Precision pad building & grading", "Engineered drainage contouring", "Driveway & road rough-ins", "Compaction and soil stabilization"]
+  },
+  'demolition': {
+    id: 'demolition',
+    title: "Demolition Services",
+    shortDesc: <>Safe and efficient teardown of old structures, handling the <strong className="text-neutral-900 font-bold bg-red-100/50 text-red-800 px-1 rounded">dirty, dangerous work</strong> for you.</>,
+    heroDesc: (
+      <>
+        Safe and efficient teardown of old structures, handling the
+        <span className="block mt-3">
+          <strong className="text-white font-bold bg-emerald-500/30 border border-emerald-400/30 px-3 py-1 rounded shadow-sm inline-block">
+            dirty, dangerous work
+          </strong>
+        </span>
+      </>
+    ),
+    longDesc: (
+      <>
+        <p>Sometimes you have to tear down the old to make way for the new. Our demolition services handle the dirty, dangerous work of bringing down unwanted structures. From old barns and dilapidated sheds to cracked concrete pads and retaining walls, we have the excavators and grapples to <strong className="text-neutral-900 font-bold border-b-2 border-emerald-500">dismantle it safely</strong>.</p>
+        <p>We prioritize safety and efficiency, ensuring surrounding structures and landscapes remain completely unharmed. Once the structure is down, we haul away the debris and grade out the footprint, leaving the site <span className="italic text-emerald-700 font-semibold">clean and ready for its next purpose</span>.</p>
+      </>
+    ),
+    icon: <Hammer />,
+    img: "https://images.unsplash.com/photo-1503708928676-1cb796a0891e?q=80&w=1200&auto=format&fit=crop",
+    bullets: ["Safe structural teardown (barns, sheds, homes)", "Concrete pad and foundation removal", "Complete debris haul-away and disposal", "Post-demo site clean-up & grading"]
+  }
+};
+
+// --- SHARED COMPONENTS ---
+
+const BrandLogo = ({ className = "", variant = 'dark' }) => {
+  const isDark = variant === 'dark';
+  const badgeBg = isDark ? 'bg-neutral-900' : 'bg-white';
+  const primaryText = isDark ? 'text-white' : 'text-neutral-900';
+  const secondaryText = isDark ? 'text-emerald-400' : 'text-emerald-700';
+  const borderColor = isDark ? 'border-emerald-500/30' : 'border-emerald-700/20';
+  
+  return (
+    <div className={`flex items-center ${className}`}>
+      <div className={`flex flex-col items-center justify-center border-2 ${borderColor} ${badgeBg} px-4 py-2 sm:px-5 sm:py-2.5 rounded-sm shadow-md transition-transform duration-300 hover:shadow-lg`}>
+        <div className="flex items-baseline gap-1">
+          <span className={`font-industrial font-black text-3xl sm:text-4xl uppercase tracking-tighter leading-none ${primaryText}`}>
+            C<span className="text-emerald-500 mx-0.5">{"&"}</span>C
+          </span>
+        </div>
+        <div className="w-full h-[2px] bg-emerald-500/50 mt-1 mb-1.5 rounded-full"></div>
+        <span className={`font-industrial font-bold text-[0.70rem] sm:text-[0.80rem] tracking-[0.25em] sm:tracking-[0.3em] uppercase leading-none ${secondaryText}`}>
+          Land Services
+        </span>
+      </div>
+    </div>
+  );
+};
+
+const ImageFallback = ({ src, alt, className }) => {
+  const fallbackSrc = "https://images.unsplash.com/photo-1605367332306-1bc7d2a84277?q=80&w=1200&auto=format&fit=crop";
+  return (
+    <img 
+      src={src} 
+      alt={alt}
+      className={className}
+      onError={(e) => { e.target.onerror = null; e.target.src = fallbackSrc; }}
+    />
+  );
+};
+
+const PageHeader = ({ title, subtitle, image }) => (
+  <div className="relative pt-32 pb-24 lg:pt-48 lg:pb-32 overflow-hidden bg-neutral-950">
+    <div className="absolute inset-0 z-0 opacity-40">
+      <ImageFallback src={image} alt={title} className="w-full h-full object-cover object-center" />
+      <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/80 to-transparent"></div>
+    </div>
+    <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 className="font-industrial text-5xl md:text-7xl font-black text-white uppercase tracking-tight mb-4 drop-shadow-xl">{title}</h1>
+      <p className="font-body text-xl md:text-2xl text-emerald-400 font-medium max-w-3xl mx-auto">{subtitle}</p>
+    </div>
+  </div>
+);
+
+const CallToActionBanner = ({ navigateTo }) => (
+  <section className="py-20 bg-emerald-900 relative overflow-hidden">
+    <div className="absolute inset-0 opacity-10">
+      <svg className="h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <pattern id="grid-cta" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" strokeWidth="0.5" /></pattern>
+        <rect width="100" height="100" fill="url(#grid-cta)" />
+      </svg>
+    </div>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+      <h2 className="font-industrial text-4xl md:text-6xl font-black text-white uppercase tracking-tight mb-6">Ready to Clear The Way?</h2>
+      <p className="font-body text-xl text-emerald-100 font-medium mb-10 max-w-2xl mx-auto leading-relaxed">
+        Get a <strong className="text-white font-bold">free, no-obligation estimate</strong> for your next project. We handle the <span className="italic text-emerald-300">heavy lifting</span> so you don't have to.
+      </p>
+      <button onClick={() => navigateTo('contact')} className="font-industrial font-black uppercase tracking-widest bg-white hover:bg-neutral-50 text-emerald-900 px-10 py-5 rounded-xl text-2xl md:text-3xl transition-all duration-300 inline-flex items-center group shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:shadow-[0_0_40px_rgba(255,255,255,0.6)] hover:-translate-y-1 hover:scale-105">
+        Get Your Free Quote
+        <ArrowRight className="ml-3 h-7 w-7 group-hover:translate-x-2 transition-transform" />
+      </button>
+    </div>
+  </section>
+);
+
+// --- FORM COMPONENT ---
+const LeadForm = ({ isSubmitted, handleSubmit, formState, handleInputChange, compact = false, prefilledService = '' }) => {
+  if (isSubmitted) {
+    return (
+      <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-10 text-center h-full flex flex-col items-center justify-center shadow-inner">
+        <div className="bg-emerald-100 p-5 rounded-full mb-6">
+          <CheckCircle2 className="h-16 w-16 text-emerald-600" />
+        </div>
+        <h4 className="font-industrial text-4xl sm:text-5xl uppercase text-emerald-900 mb-4">Message Sent!</h4>
+        <p className="font-body text-emerald-700 text-lg sm:text-xl font-medium">Thank you for reaching out. We will review your project details and contact you shortly.</p>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className={compact ? "space-y-4" : "space-y-6"}>
+      <div className={`grid grid-cols-1 ${compact ? 'sm:grid-cols-2' : 'md:grid-cols-2'} gap-4 md:gap-6`}>
+        <div>
+          <label className="block font-industrial text-lg tracking-wide uppercase text-neutral-700 mb-1 md:mb-2">Full Name *</label>
+          <input type="text" name="name" required value={formState.name} onChange={handleInputChange} className={`font-body w-full px-4 ${compact ? 'py-3' : 'py-4'} rounded-xl border border-neutral-300 focus:ring-2 focus:ring-emerald-600 focus:border-emerald-600 outline-none transition-all font-medium bg-neutral-50`} placeholder="John Doe" />
+        </div>
+        <div>
+          <label className="block font-industrial text-lg tracking-wide uppercase text-neutral-700 mb-1 md:mb-2">Phone Number *</label>
+          <input type="tel" name="phone" required value={formState.phone} onChange={handleInputChange} className={`font-body w-full px-4 ${compact ? 'py-3' : 'py-4'} rounded-xl border border-neutral-300 focus:ring-2 focus:ring-emerald-600 focus:border-emerald-600 outline-none transition-all font-medium bg-neutral-50`} placeholder="(555) 123-4567" />
+        </div>
+      </div>
+      
+      {!compact && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+          <div>
+            <label className="block font-industrial text-lg tracking-wide uppercase text-neutral-700 mb-1 md:mb-2">Email Address</label>
+            <input type="email" name="email" value={formState.email} onChange={handleInputChange} className="font-body w-full px-4 py-4 rounded-xl border border-neutral-300 focus:ring-2 focus:ring-emerald-600 focus:border-emerald-600 outline-none transition-all font-medium bg-neutral-50" placeholder="john@example.com" />
+          </div>
+          <div>
+            <label className="block font-industrial text-lg tracking-wide uppercase text-neutral-700 mb-1 md:mb-2">Project Location</label>
+            <input type="text" name="address" value={formState.address} onChange={handleInputChange} className="font-body w-full px-4 py-4 rounded-xl border border-neutral-300 focus:ring-2 focus:ring-emerald-600 focus:border-emerald-600 outline-none transition-all font-medium bg-neutral-50" placeholder="City, State or Address" />
+          </div>
+        </div>
+      )}
+
+      <div>
+        <label className="block font-industrial text-lg tracking-wide uppercase text-neutral-700 mb-1 md:mb-2">Project Details *</label>
+        <textarea name="details" required rows={compact ? "2" : "4"} value={formState.details || prefilledService} onChange={handleInputChange} className={`font-body w-full px-4 ${compact ? 'py-3' : 'py-4'} rounded-xl border border-neutral-300 focus:ring-2 focus:ring-emerald-600 focus:border-emerald-600 outline-none transition-all resize-none font-medium bg-neutral-50`} placeholder="Tell us about your project (acreage, services needed, timeline)..."></textarea>
+      </div>
+      
+      <div className={`${compact ? 'p-3' : 'p-5'} bg-neutral-100 rounded-xl border border-neutral-200`}>
+        <label className="flex items-start cursor-pointer">
+          <div className="flex-shrink-0 mt-0.5 md:mt-1">
+            <input type="checkbox" name="smsOptIn" required checked={formState.smsOptIn} onChange={handleInputChange} className="h-4 w-4 md:h-5 md:w-5 rounded border-neutral-400 text-emerald-600 focus:ring-emerald-600" />
+          </div>
+          <div className={`ml-3 md:ml-4 text-xs md:text-sm text-neutral-600 font-body font-medium leading-relaxed`}>
+            <span className={`font-bold text-neutral-900 block mb-1 ${compact ? 'text-sm' : 'text-base'}`}>Communication Consent *</span>
+            By checking this box, I consent to receive phone calls and SMS messages from C&C Land Services regarding my project inquiry. I understand I can opt-out of SMS at any time by replying "STOP". We <strong className="text-neutral-900 font-bold underline decoration-emerald-500 decoration-2 underline-offset-2">do not sell or share</strong> your data.
+          </div>
+        </label>
+      </div>
+      <button type="submit" className={`font-industrial font-black uppercase tracking-widest w-full bg-gradient-to-r from-emerald-600 to-emerald-400 hover:from-emerald-500 hover:to-emerald-300 text-white ${compact ? 'py-4 text-xl' : 'py-5 text-2xl'} rounded-xl transition-all duration-300 shadow-[0_8px_25px_rgba(16,185,129,0.4)] hover:shadow-[0_8px_35px_rgba(16,185,129,0.6)] hover:-translate-y-1 hover:scale-[1.02] flex justify-center items-center group`}>
+        Submit Request <ChevronRight className="ml-2 h-5 w-5 md:h-6 md:w-6 group-hover:translate-x-1 transition-transform" />
+      </button>
+    </form>
+  );
+};
+
+// --- VIEWS ---
+
+const HomeView = ({ navigateTo }) => {
+  const heroPhrases = [
+    { top: "Transforming Your Land,", bottom: "From the Ground Up." },
+    { top: "Heavy-Duty Equipment,", bottom: "Zero Hassle Results." },
+    { top: "Fast & Done Right,", bottom: "Without Cutting Corners." },
+    { top: "Precision Site Prep,", bottom: "Built for Your Project." }
+  ];
+  const [phraseIndex, setPhraseIndex] = useState(0);
+  const [isPhraseVisible, setIsPhraseVisible] = useState(true);
+
+  useEffect(() => {
+    const rotationInterval = setInterval(() => {
+      setIsPhraseVisible(false);
+      setTimeout(() => {
+        setPhraseIndex((prev) => (prev + 1) % heroPhrases.length);
+        setIsPhraseVisible(true);
+      }, 700);
+    }, 4500);
+    return () => clearInterval(rotationInterval);
+  }, []);
+
+  const homeSchema = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "LocalBusiness",
+        "@id": "https://candclandservices.net/#business",
+        "name": "C&C Land Services",
+        "image": "https://images.unsplash.com/photo-1605367332306-1bc7d2a84277?q=80&w=1200&auto=format&fit=crop",
+        "telePhone": "386-209-7058",
+        "email": "candclandservices@gmail.com",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "822 SW Cherokee Road",
+          "addressLocality": "Mayo",
+          "addressRegion": "FL",
+          "postalCode": "32066",
+          "addressCountry": "US"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": "30.0514",
+          "longitude": "-83.1743"
+        },
+        "url": "https://candclandservices.net",
+        "priceRange": "$$",
+        "areaServed": ["Mayo", "Lafayette County", "Suwannee County", "North Florida"]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://candclandservices.net/#website",
+        "url": "https://candclandservices.net",
+        "name": "C&C Land Services",
+        "description": "Family-owned & operated land clearing, forestry mulching, and site prep experts based in Mayo, FL."
+      }
+    ]
+  };
+
+  return (
+    <>
+      <Helmet>
+        <title>C&C Land Services | Land Clearing & Forestry Mulching Mayo, FL</title>
+        <meta name="description" content="Professional, family-owned land clearing, forestry mulching, site preparation, and demolition services in Mayo, Florida. Request a free estimate today!" />
+        <link rel="canonical" href="https://candclandservices.net" />
+        <script type="application/ld+json">
+          {JSON.stringify(homeSchema)}
+        </script>
+      </Helmet>
+
+      <section className="relative pt-32 pb-32 lg:pt-48 lg:pb-48 overflow-hidden min-h-[90vh] flex items-center">
+        <div className="absolute inset-0 z-0">
+          <ImageFallback src="https://images.unsplash.com/photo-1605367332306-1bc7d2a84277?q=80&w=2000&auto=format&fit=crop" alt="Heavy equipment" className="w-full h-full object-cover object-center" />
+          <div className="absolute inset-0 bg-neutral-950/80 bg-gradient-to-r from-neutral-950 via-neutral-900/95 to-neutral-900/40 z-10"></div>
+        </div>
+        
+        {/* Animated Pixel / Grid Design Layer */}
+        <div className="absolute inset-0 z-[1] opacity-30 pointer-events-none mix-blend-screen">
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'radial-gradient(rgba(16, 185, 129, 0.4) 2px, transparent 2px)',
+            backgroundSize: '32px 32px',
+            animation: 'pixelPan 20s linear infinite'
+          }}></div>
+          <div className="absolute left-0 right-0 h-32 bg-gradient-to-b from-transparent via-emerald-500/20 to-transparent w-full" style={{
+             animation: 'scanVertical 6s ease-in-out infinite'
+          }}></div>
+        </div>
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full z-20 text-center lg:text-left flex flex-col lg:flex-row items-center">
+          <div className="lg:w-3/5 lg:pr-12">
+            <div className="inline-flex items-center px-5 py-2.5 rounded-full bg-emerald-900/60 border border-emerald-500/30 text-emerald-300 text-sm font-semibold mb-8 backdrop-blur-md shadow-lg font-body uppercase tracking-wider">
+              <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400 mr-3 animate-pulse"></span>
+              Family-Owned & Operated in Mayo, FL
+            </div>
+            
+            <div className="relative h-[180px] sm:h-[220px] lg:h-[260px] w-full mb-8 lg:mb-10 flex flex-col justify-center">
+              {heroPhrases.map((phrase, i) => (
+                <h1 key={i} className={`absolute inset-0 w-full flex flex-col justify-center items-center lg:items-start text-center lg:text-left font-industrial text-5xl sm:text-6xl lg:text-[5.5rem] font-black uppercase tracking-tight leading-[0.95] drop-shadow-2xl pointer-events-none pb-4`}>
+                  <span className={`text-white transition-all duration-700 ease-in-out transform ${phraseIndex === i ? (isPhraseVisible ? 'opacity-100 translate-y-0 blur-none scale-100' : 'opacity-0 -translate-y-8 blur-sm scale-95') : 'opacity-0 translate-y-8 blur-sm scale-105'}`}>
+                    {phrase.top}
+                  </span>
+                  <span className={`text-emerald-500 mt-2 lg:mt-3 transition-all duration-700 ease-in-out transform ${phraseIndex === i ? (isPhraseVisible ? 'opacity-100 translate-y-0 blur-none scale-100' : 'opacity-0 -translate-y-8 blur-sm scale-95') : 'opacity-0 translate-y-8 blur-sm scale-105'}`} style={{ transitionDelay: phraseIndex === i && isPhraseVisible ? '300ms' : '0ms' }}>
+                    {phrase.bottom}
+                  </span>
+                </h1>
+              ))}
+            </div>
+
+            <p className="font-body text-lg sm:text-xl lg:text-2xl text-neutral-300 mb-10 max-w-2xl mx-auto lg:mx-0 font-medium leading-relaxed drop-shadow-md relative z-10">
+              Expert land clearing, forestry mulching, and site preparation. We deliver <strong className="text-white font-bold">cost-efficient, heavy-duty results</strong> with a commitment to <span className="text-emerald-400 italic font-semibold">excellent customer service</span>.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-5 justify-center lg:justify-start relative z-10">
+              <button onClick={() => navigateTo('contact')} className="font-industrial font-black uppercase tracking-widest bg-gradient-to-r from-emerald-600 to-emerald-400 hover:from-emerald-500 hover:to-emerald-300 text-white px-8 py-4 rounded-xl text-2xl transition-all duration-300 flex items-center justify-center group shadow-[0_0_30px_rgba(16,185,129,0.4)] hover:shadow-[0_0_40px_rgba(16,185,129,0.6)] hover:-translate-y-1 hover:scale-105">
+                Start Your Project
+                <ChevronRight className="ml-2 h-7 w-7 group-hover:translate-x-1 transition-transform" />
+              </button>
+              <a href="tel:3862097058" className="font-industrial tracking-wider bg-white/10 hover:bg-white/20 text-white border border-white/20 px-8 py-4 rounded-xl text-2xl transition-all duration-300 flex items-center justify-center backdrop-blur-md hover:-translate-y-1 hover:scale-105 shadow-xl">
+                <Phone className="mr-3 h-6 w-6" />
+                (386) 209-7058
+              </a>
+            </div>
+          </div>
+          
+          <div className="lg:w-2/5 mt-16 lg:mt-0 relative hidden lg:block z-10">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white/10 backdrop-blur-xl p-8 rounded-3xl shadow-2xl border border-white/10 flex flex-col items-center text-center w-full max-w-sm transform hover:scale-105 transition-transform duration-500">
+              <div className="bg-emerald-500/20 p-4 rounded-2xl text-emerald-400 mb-4 border border-emerald-500/30">
+                <Camera className="h-10 w-10" />
+              </div>
+              <h3 className="font-industrial text-3xl uppercase text-white mb-2">Free Drone Footage</h3>
+              <p className="font-body text-neutral-300 mb-6 font-medium leading-relaxed">Included with <strong className="text-white font-bold border-b border-emerald-500/50 pb-0.5">every project delivery</strong> to track our progress from above.</p>
+              <div className="w-full h-px bg-white/10 mb-6"></div>
+              <div className="flex items-center justify-center gap-2 text-emerald-400 font-bold uppercase tracking-wider text-sm">
+                <CheckCircle2 className="h-5 w-5" />
+                <span>Before & After Shots</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Services Preview Grid */}
+      <section className="py-24 bg-white relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="font-industrial text-emerald-700 text-xl tracking-widest uppercase mb-2">What We Do</h2>
+            <h3 className="font-industrial text-4xl md:text-6xl font-black text-neutral-900 mb-4 uppercase tracking-tight">Heavy-Duty Capabilities</h3>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            {Object.values(SERVICES_DATA).map((srv, i) => (
+              <div key={i} className="bg-white rounded-2xl overflow-hidden border border-neutral-100 hover:border-emerald-500 hover:shadow-2xl transition-all duration-300 group flex flex-col cursor-pointer transform hover:-translate-y-2" onClick={() => navigateTo(`service-${srv.id}`)}>
+                <div className="h-48 relative overflow-hidden">
+                  <ImageFallback src={srv.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={srv.title} />
+                  <div className="absolute inset-0 bg-gradient-to-t from-neutral-900 via-neutral-900/40 to-transparent"></div>
+                  <div className="absolute bottom-4 left-4 bg-emerald-500 p-2.5 rounded-lg text-white shadow-lg">
+                    {React.cloneElement(srv.icon, { className: "h-6 w-6" })}
+                  </div>
+                </div>
+                <div className="p-6 flex-1 bg-white flex flex-col">
+                  <h4 className="font-industrial text-2xl uppercase tracking-wide text-neutral-900 mb-2 group-hover:text-emerald-700 transition-colors">{srv.title}</h4>
+                  <div className="font-body text-neutral-500 text-sm font-medium line-clamp-3 mb-4 flex-1">{srv.shortDesc}</div>
+                  <div className="font-industrial uppercase tracking-widest text-emerald-600 font-bold text-sm flex items-center mt-auto">
+                    Learn More <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-2 transition-transform" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="text-center">
+            <button onClick={() => navigateTo('services')} className="font-industrial font-black uppercase tracking-widest text-emerald-950 hover:text-emerald-900 text-xl inline-flex items-center group bg-gradient-to-r from-emerald-400 to-emerald-300 hover:from-emerald-300 hover:to-emerald-200 px-10 py-5 rounded-xl border border-emerald-300 transition-all duration-300 shadow-[0_0_20px_rgba(52,211,153,0.4)] hover:shadow-[0_0_30px_rgba(52,211,153,0.6)] hover:-translate-y-1 hover:scale-105">
+              View All Services Hub <ArrowRight className="ml-2 h-6 w-6 group-hover:translate-x-2 transition-transform" />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <CallToActionBanner navigateTo={navigateTo} />
+    </>
+  );
+};
+
+// --- NEW: MAIN SERVICES HUB ---
+const ServicesHubView = ({ navigateTo }) => {
+  const hubSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Professional Land Management Services | C&C Land Services",
+    "description": "Explore our comprehensive local land management and heavy equipment capabilities including forestry mulching, land clearing, and demolition in Mayo, FL.",
+    "publisher": {
+      "@type": "LocalBusiness",
+      "name": "C&C Land Services",
+      "telePhone": "386-209-7058"
+    }
+  };
+
+  return (
+    <div className="bg-neutral-50 min-h-screen">
+      <Helmet>
+        <title>Professional Land Management Services | C&C Land Services</title>
+        <meta name="description" content="Explore our specialized services including eco-friendly forestry mulching, general land clearing, site preparation, and professional demolition in Mayo, FL." />
+        <link rel="canonical" href="https://candclandservices.net/services" />
+        <script type="application/ld+json">
+          {JSON.stringify(hubSchema)}
+        </script>
+      </Helmet>
+
+      <PageHeader 
+        title="Our Services" 
+        subtitle="Select a capability below to learn how we can transform your property."
+        image="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=2000&auto=format&fit=crop"
+      />
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+        <div className="grid md:grid-cols-2 gap-10">
+          {Object.values(SERVICES_DATA).map((srv, i) => (
+            <div 
+              key={i} 
+              onClick={() => navigateTo(`service-${srv.id}`)}
+              className="group cursor-pointer bg-white rounded-3xl overflow-hidden border border-neutral-200 hover:border-emerald-400 shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col md:flex-row h-full"
+            >
+              <div className="md:w-2/5 h-64 md:h-auto relative overflow-hidden">
+                <ImageFallback src={srv.img} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={srv.title} />
+                <div className="absolute inset-0 bg-neutral-900/20 group-hover:bg-transparent transition-colors duration-500"></div>
+              </div>
+              <div className="md:w-3/5 p-8 flex flex-col justify-center">
+                <div className="bg-emerald-50 text-emerald-700 w-12 h-12 rounded-xl flex items-center justify-center mb-6 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                  {React.cloneElement(srv.icon, { className: "h-6 w-6" })}
+                </div>
+                <h3 className="font-industrial text-4xl uppercase tracking-tight text-neutral-900 mb-3">{srv.title}</h3>
+                <div className="font-body text-neutral-600 font-medium mb-6 leading-relaxed flex-1">{srv.shortDesc}</div>
+                <div className="font-industrial uppercase tracking-widest text-emerald-600 font-bold flex items-center">
+                  View Full Details <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-2 transition-transform" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      
+      <CallToActionBanner navigateTo={navigateTo} />
+    </div>
+  );
+};
+
+// --- NEW: INDIVIDUAL SERVICE DETAIL PAGE ---
+const ServiceDetailView = ({ service, navigateTo, isSubmitted, handleSubmit, formState, handleInputChange }) => {
+  const detailSchema = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "name": service.title,
+    "description": service.shortDesc?.props?.children || "Professional property clearing and land management solutions.",
+    "provider": {
+      "@type": "LocalBusiness",
+      "name": "C&C Land Services",
+      "telePhone": "386-209-7058",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "822 SW Cherokee Road",
+        "addressLocality": "Mayo",
+        "addressRegion": "FL",
+        "postalCode": "32066",
+        "addressCountry": "US"
+      }
+    },
+    "areaServed": "Mayo, FL and surrounding counties",
+    "offers": {
+      "@type": "Offer",
+      "priceCurrency": "USD",
+      "price": "Request a Free Quote"
+    }
+  };
+
+  return (
+    <div className="bg-neutral-50">
+      <Helmet>
+        <title>{service.title} in Mayo, FL | C&C Land Services</title>
+        <meta name="description" content={`Get high-quality, professional ${service.title} solutions in Mayo, FL and nearby regions. Free estimate & free drone tracking photography included.`} />
+        <link rel="canonical" href={`https://candclandservices.net/services/${service.id}`} />
+        <script type="application/ld+json">
+          {JSON.stringify(detailSchema)}
+        </script>
+      </Helmet>
+
+      {/* Custom Hero for Specific Service */}
+      <div className="relative pt-32 pb-24 lg:pt-48 lg:pb-32 overflow-hidden bg-neutral-950">
+        <div className="absolute inset-0 z-0 opacity-40">
+          <ImageFallback src={service.img} alt={service.title} className="w-full h-full object-cover object-center" />
+          <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/90 to-transparent"></div>
+        </div>
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
+          <div className="bg-emerald-500/20 p-4 rounded-2xl text-emerald-400 mb-6 border border-emerald-500/30 shadow-xl backdrop-blur-sm">
+            {React.cloneElement(service.icon, { className: "h-12 w-12" })}
+          </div>
+          <h1 className="font-industrial text-5xl md:text-7xl font-black text-white uppercase tracking-tight mb-4 drop-shadow-xl">{service.title}</h1>
+          <div className="font-body text-xl md:text-2xl text-emerald-100 font-medium max-w-3xl mx-auto leading-relaxed">{service.heroDesc || service.shortDesc}</div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex flex-col lg:flex-row gap-16">
+        {/* Deep Dive Content (Left Side) */}
+        <div className="lg:w-2/3">
+          <h2 className="font-industrial text-4xl uppercase tracking-tight text-neutral-900 mb-6 border-b-4 border-emerald-500 pb-4 inline-block">The Process & Benefits</h2>
+          <div className="font-body text-xl text-neutral-700 font-medium leading-relaxed space-y-6 mb-12">
+            {service.longDesc}
+          </div>
+          
+          <div className="bg-white p-8 rounded-3xl shadow-lg border border-neutral-200">
+             <h3 className="font-industrial text-3xl uppercase tracking-tight text-neutral-900 mb-6">Service Highlights</h3>
+             <div className="grid sm:grid-cols-2 gap-4">
+                {service.bullets.map((bullet, i) => (
+                  <div key={i} className="flex items-start">
+                    <CheckCircle2 className="h-6 w-6 text-emerald-600 mr-3 flex-shrink-0 mt-0.5" />
+                    <span className="font-body font-bold text-lg text-neutral-800">{bullet}</span>
+                  </div>
+                ))}
+             </div>
+          </div>
+        </div>
+
+        {/* Action Sidebar (Right Side) */}
+        <div className="lg:w-1/3">
+          <div className="sticky top-32 bg-neutral-950 p-8 rounded-3xl shadow-2xl border border-neutral-800 text-white">
+            <h3 className="font-industrial text-4xl uppercase text-white mb-2">Book This Service</h3>
+            <p className="font-body text-neutral-400 font-medium mb-8">Secure your spot on our schedule for {service.title} today.</p>
+            
+            <LeadForm 
+              isSubmitted={isSubmitted} 
+              handleSubmit={handleSubmit} 
+              formState={formState} 
+              handleInputChange={handleInputChange} 
+              compact={true}
+              prefilledService={`I am interested in getting a quote for ${service.title}.`}
+            />
+            
+            <div className="mt-8 pt-8 border-t border-neutral-800 text-center">
+               <p className="font-industrial uppercase tracking-widest text-neutral-500 mb-3">Or Call Directly</p>
+               <a href="tel:3862097058" className="font-industrial text-3xl text-emerald-400 hover:text-white transition-colors block">(386) 209-7058</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+const AboutView = ({ navigateTo }) => {
+  const aboutSchema = {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "name": "About C&C Land Services | Mayo, FL Land Clearing Experts",
+    "description": "Learn about C&C Land Services. We treat every single Florida property as if it were our own, bringing dedication, honesty, and precision.",
+    "publisher": {
+      "@type": "LocalBusiness",
+      "name": "C&C Land Services"
+    }
+  };
+
+  return (
+    <div className="bg-neutral-50">
+      <Helmet>
+        <title>About C&C Land Services | Mayo, FL Land Clearing Experts</title>
+        <meta name="description" content="Discover the history of C&C Land Services in Mayo, Florida. Guided by Cole Lawson, we prioritize customer transparency, premium equipment, and precise results." />
+        <link rel="canonical" href="https://candclandservices.net/about" />
+        <script type="application/ld+json">
+          {JSON.stringify(aboutSchema)}
+        </script>
+      </Helmet>
+
+      <PageHeader 
+        title="About Us" 
+        subtitle="Built on family values, hard work, and a commitment to doing the job right."
+        image="https://images.unsplash.com/photo-1542601901963-4a4ef20b7215?q=80&w=2000&auto=format&fit=crop"
+      />
+      
+      {/* Story Section */}
+      <section className="py-24 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row gap-16 items-center">
+            <div className="lg:w-1/2">
+              <h2 className="font-industrial text-emerald-700 text-xl tracking-widest uppercase mb-2">Our Story</h2>
+              <h3 className="font-industrial text-4xl md:text-6xl font-black text-neutral-900 mb-8 uppercase tracking-tight leading-[0.95]">Rooted in <br/> Mayo, Florida</h3>
+              <p className="font-body text-xl text-neutral-600 mb-6 font-medium leading-relaxed">
+                C&C Land Services is a proud <strong className="text-emerald-800 font-bold bg-emerald-100/80 px-2 py-0.5 rounded shadow-sm">family-owned and operated</strong> business. We treat every single property we step foot on as if it were our own backyard, bringing <span className="italic text-neutral-800 font-bold">relentless dedication, honesty, and precision</span> to every job site.
+              </p>
+              <p className="font-body text-xl text-neutral-600 mb-8 font-medium leading-relaxed">
+                Led by Cole Lawson, our mission is straightforward: provide top-tier, cost-efficient land management solutions <span className="italic text-neutral-800 font-semibold border-b border-neutral-300">without ever compromising</span> on customer service. We believe in answering the phone, communicating clearly, quoting fair prices, and getting the heavy-duty job <strong className="text-neutral-900 font-black uppercase tracking-wider relative z-10 after:absolute after:bottom-0 after:left-0 after:w-full after:h-2 after:bg-emerald-400/40 after:-z-10 hover:after:h-full after:transition-all after:duration-300">done right the very first time</strong>.
+              </p>
+            </div>
+            <div className="lg:w-1/2 grid grid-cols-2 gap-6 relative">
+               <div className="absolute inset-0 bg-emerald-600 rounded-3xl transform rotate-3 scale-105 opacity-10"></div>
+               <ImageFallback src="https://images.unsplash.com/photo-1579684389782-64d84b5e901a?q=80&w=800&auto=format&fit=crop" className="w-full h-64 object-cover rounded-3xl shadow-lg relative z-10" />
+               <ImageFallback src="https://images.unsplash.com/photo-1508614589041-895b88991e3e?q=80&w=800&auto=format&fit=crop" className="w-full h-80 object-cover rounded-3xl shadow-lg mt-12 relative z-10" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Core Values */}
+      <section className="py-24 bg-neutral-950 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="font-industrial text-emerald-500 text-xl tracking-widest uppercase mb-2">The C&C Standard</h2>
+            <h3 className="font-industrial text-4xl md:text-6xl font-black text-white uppercase tracking-tight">Our Core Values</h3>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-neutral-900 p-10 rounded-3xl border border-neutral-800 text-center hover:border-emerald-500/50 transition-colors">
+              <Shield className="h-16 w-16 text-emerald-400 mx-auto mb-6" />
+              <h4 className="font-industrial text-3xl uppercase tracking-wide mb-4">Integrity</h4>
+              <p className="font-body text-neutral-400 text-lg font-medium leading-relaxed">We do what we say we're going to do. No hidden fees, no cutting corners, just <strong className="text-white font-bold">honest, hard work.</strong></p>
+            </div>
+            <div className="bg-neutral-900 p-10 rounded-3xl border border-neutral-800 text-center hover:border-emerald-500/50 transition-colors">
+              <Clock className="h-16 w-16 text-emerald-400 mx-auto mb-6" />
+              <h4 className="font-industrial text-3xl uppercase tracking-wide mb-4">Reliability</h4>
+              <p className="font-body text-neutral-400 text-lg font-medium leading-relaxed">When you book us, we show up on time and stay until the job is completed to your <strong className="text-emerald-400 font-bold italic">absolute satisfaction.</strong></p>
+            </div>
+            <div className="bg-neutral-900 p-10 rounded-3xl border border-neutral-800 text-center hover:border-emerald-500/50 transition-colors">
+              <Wrench className="h-16 w-16 text-emerald-400 mx-auto mb-6" />
+              <h4 className="font-industrial text-3xl uppercase tracking-wide mb-4">Precision</h4>
+              <p className="font-body text-neutral-400 text-lg font-medium leading-relaxed">We operate heavy machinery with an expert touch, ensuring surrounding land and structures <strong className="text-white font-bold underline decoration-emerald-500 decoration-2 underline-offset-4">remain safe.</strong></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <CallToActionBanner navigateTo={navigateTo} />
+    </div>
+  );
+};
+
+const ContactView = ({ isSubmitted, handleSubmit, formState, handleInputChange }) => {
+  const contactSchema = {
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    "name": "Contact C&C Land Services | Mayo, FL",
+    "description": "Ready to clear land, construct pad sites, or initiate a demolition project? Get in touch with Cole Lawson at C&C Land Services for premium local solutions.",
+    "mainEntity": {
+      "@type": "LocalBusiness",
+      "name": "C&C Land Services",
+      "telePhone": "386-209-7058",
+      "email": "candclandservices@gmail.com"
+    }
+  };
+
+  return (
+    <div className="bg-neutral-50">
+      <Helmet>
+        <title>Contact C&C Land Services | Free Estimate Mayo, FL</title>
+        <meta name="description" content="Get a fast and free quotation on your forestry mulching, excavation, grading, or demolition job. Contact C&C Land Services today." />
+        <link rel="canonical" href="https://candclandservices.net/contact" />
+        <script type="application/ld+json">
+          {JSON.stringify(contactSchema)}
+        </script>
+      </Helmet>
+
+      <PageHeader 
+        title="Contact Us" 
+        subtitle="Get in touch to schedule a site visit or request a free estimate."
+        image="https://images.unsplash.com/photo-1581454174005-728b9d3e8e19?q=80&w=2000&auto=format&fit=crop"
+      />
+      
+      <section className="py-24 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col lg:flex-row border border-neutral-100">
+            
+            {/* Contact Info Panel */}
+            <div className="lg:w-2/5 p-10 lg:p-16 bg-neutral-950 text-white relative overflow-hidden flex flex-col justify-between">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-900/20 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+              
+              <div className="relative z-10 mb-12 lg:mb-0">
+                <h3 className="font-industrial text-5xl uppercase text-white mb-4">Direct Lines</h3>
+                <p className="font-body text-neutral-400 text-xl font-medium mb-12 leading-relaxed">
+                  Skip the runaround. When you call us, you're talking <strong className="text-white font-bold bg-emerald-600/20 px-2 py-1 rounded-md border border-emerald-500/30">directly to the team</strong> that will be working on your property.
+                </p>
+                
+                <div className="space-y-10">
+                  <div className="flex items-start">
+                    <div className="bg-emerald-900/50 p-4 rounded-2xl mr-5">
+                      <Phone className="h-8 w-8 text-emerald-400" />
+                    </div>
+                    <div>
+                      <p className="font-industrial text-lg text-neutral-400 tracking-wider uppercase mb-1">Call or Text</p>
+                      <a href="tel:3862097058" className="font-industrial text-3xl md:text-4xl text-white hover:text-emerald-400 transition-colors tracking-wide block">(386) 209-7058</a>
+                      <p className="font-body text-neutral-500 mt-2 font-medium">Ask for Cole Lawson</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start">
+                    <div className="bg-emerald-900/50 p-4 rounded-2xl mr-5">
+                      <Mail className="h-8 w-8 text-emerald-400" />
+                    </div>
+                    <div>
+                      <p className="font-industrial text-lg text-neutral-400 tracking-wider uppercase mb-1">Email</p>
+                      <a href="mailto:candclandservices@gmail.com" className="font-industrial text-2xl md:text-3xl text-white hover:text-emerald-400 transition-colors break-all block">candclandservices<br/>@gmail.com</a>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start">
+                    <div className="bg-emerald-900/50 p-4 rounded-2xl mr-5">
+                      <MapPin className="h-8 w-8 text-emerald-400" />
+                    </div>
+                    <div>
+                      <p className="font-industrial text-lg text-neutral-400 tracking-wider uppercase mb-1">Base of Operations</p>
+                      <p className="font-industrial text-2xl md:text-3xl text-white tracking-wide">822 SW Cherokee Rd</p>
+                      <p className="font-body text-neutral-400 font-medium text-lg mt-1">Mayo, FL 32066</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="relative z-10 pt-12 border-t border-neutral-800">
+                <p className="font-industrial uppercase tracking-widest text-emerald-500 mb-2">Service Area</p>
+                <p className="font-body text-neutral-400 font-medium">Proudly serving Mayo, FL and the surrounding North Florida counties with heavy-duty land solutions.</p>
+              </div>
+            </div>
+
+            {/* Form Panel */}
+            <div className="lg:w-3/5 p-10 lg:p-16 bg-white">
+              <h3 className="font-industrial text-4xl md:text-5xl uppercase text-neutral-900 mb-2">Request an Estimate</h3>
+              <p className="font-body text-lg text-neutral-500 font-medium mb-10">Fill out the details below and we'll get back to you to discuss your project.</p>
+              
+              <LeadForm 
+                isSubmitted={isSubmitted} 
+                handleSubmit={handleSubmit} 
+                formState={formState} 
+                handleInputChange={handleInputChange} 
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+
+// --- MAIN APP SHELL ---
+
+export default function App() {
+  const [currentPage, setCurrentPage] = useState('home');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [isNavVisible, setIsNavVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  
+  // Shared Form State
+  const [formState, setFormState] = useState({
+    name: '', phone: '', email: '', address: '', details: '', smsOptIn: false
+  });
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  useEffect(() => {
+    // Only show popup on home page load
+    if (currentPage === 'home') {
+      const timer = setTimeout(() => setShowPopup(true), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [currentPage]);
+
+  useEffect(() => {
+    // Hide navbar on scroll down, show on scroll up
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Only hide if we scroll past 100px and the mobile menu is NOT open
+      if (currentScrollY > lastScrollY && currentScrollY > 100 && !isMenuOpen) {
+        setIsNavVisible(false);
+      } else {
+        setIsNavVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY, isMenuOpen]);
+
+  const navigateTo = (page) => {
+    setCurrentPage(page);
+    window.scrollTo(0, 0);
+    setIsMenuOpen(false);
+    setShowPopup(false);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormState(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log('Form submitted:', formState);
+    setIsSubmitted(true);
+    setTimeout(() => setIsSubmitted(false), 5000);
+    setFormState({ name: '', phone: '', email: '', address: '', details: '', smsOptIn: false });
+    // Close popup if it was open during submit
+    if (showPopup) {
+      setTimeout(() => setShowPopup(false), 3000);
+    }
+  };
+
+  return (
+    <HelmetProvider>
+      <div className="min-h-screen bg-neutral-50 text-neutral-900 font-body font-normal">
+        <style dangerouslySetInnerHTML={{__html: `
+          @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Barlow:wght@400;500;600;700;800&display=swap');
+          
+          .font-industrial { font-family: 'Barlow Condensed', sans-serif; }
+          .font-body { font-family: 'Barlow', sans-serif; }
+          
+          @keyframes pixelPan {
+            from { background-position: 0 0; }
+            to { background-position: 32px 32px; }
+          }
+          
+          @keyframes scanVertical {
+            0% { transform: translateY(-100%); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(100vh); opacity: 0; }
+          }
+        `}} />
+        
+        {/* Navigation */}
+        <nav className={`fixed w-full bg-white/95 backdrop-blur shadow-sm z-50 border-b border-neutral-100 transition-transform duration-300 ${isNavVisible ? 'translate-y-0' : '-translate-y-full'}`}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between h-24 items-center">
+              <div className="cursor-pointer transition-transform hover:scale-105" onClick={() => navigateTo('home')}>
+                <BrandLogo variant="dark" />
+              </div>
+              
+              {/* Desktop Nav */}
+              <div className="hidden md:flex space-x-10 items-center">
+                <button onClick={() => navigateTo('home')} className={`font-industrial uppercase tracking-widest text-xl transition-colors ${currentPage === 'home' ? 'text-emerald-700' : 'text-neutral-600 hover:text-emerald-700'}`}>Home</button>
+                <button onClick={() => navigateTo('services')} className={`font-industrial uppercase tracking-widest text-xl transition-colors ${currentPage.includes('service') ? 'text-emerald-700' : 'text-neutral-600 hover:text-emerald-700'}`}>Services</button>
+                <button onClick={() => navigateTo('about')} className={`font-industrial uppercase tracking-widest text-xl transition-colors ${currentPage === 'about' ? 'text-emerald-700' : 'text-neutral-600 hover:text-emerald-700'}`}>About</button>
+                <button onClick={() => navigateTo('contact')} className="font-industrial font-black uppercase tracking-widest text-xl bg-gradient-to-r from-emerald-600 to-emerald-400 hover:from-emerald-500 hover:to-emerald-300 text-white px-8 py-3.5 rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] hover:-translate-y-1 hover:scale-105">
+                  Get a Quote
+                </button>
+              </div>
+
+              {/* Mobile Menu Button */}
+              <div className="md:hidden flex items-center">
+                <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-neutral-900 hover:text-emerald-700 p-2">
+                  {isMenuOpen ? <X className="h-8 w-8" /> : <Menu className="h-8 w-8" />}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile Nav */}
+          {isMenuOpen && (
+            <div className="md:hidden bg-white border-t border-neutral-100 px-4 pt-4 pb-8 space-y-3 shadow-2xl absolute w-full left-0">
+              <button onClick={() => navigateTo('home')} className="block w-full text-left px-6 py-4 font-industrial uppercase tracking-widest text-2xl text-neutral-900 bg-neutral-50 rounded-xl">Home</button>
+              <button onClick={() => navigateTo('services')} className="block w-full text-left px-6 py-4 font-industrial uppercase tracking-widest text-2xl text-neutral-900 bg-neutral-50 rounded-xl">Services</button>
+              <button onClick={() => navigateTo('about')} className="block w-full text-left px-6 py-4 font-industrial uppercase tracking-widest text-2xl text-neutral-900 bg-neutral-50 rounded-xl">About</button>
+              <button onClick={() => navigateTo('contact')} className="block w-full text-center mt-6 font-industrial font-black uppercase tracking-widest text-2xl bg-gradient-to-r from-emerald-600 to-emerald-400 text-white px-6 py-5 rounded-xl shadow-[0_5px_20px_rgba(16,185,129,0.4)]">Get a Free Quote</button>
+            </div>
+          )}
+        </nav>
+
+        {/* Main Content Router */}
+        <main>
+          {currentPage === 'home' && <HomeView navigateTo={navigateTo} />}
+          {currentPage === 'services' && <ServicesHubView navigateTo={navigateTo} />}
+          {currentPage === 'about' && <AboutView navigateTo={navigateTo} />}
+          {currentPage === 'contact' && (
+             <ContactView 
+               isSubmitted={isSubmitted} 
+               handleSubmit={handleSubmit} 
+               formState={formState} 
+               handleInputChange={handleInputChange} 
+             />
+          )}
+          {/* Dynamic Service Routes */}
+          {currentPage.startsWith('service-') && SERVICES_DATA[currentPage.replace('service-', '')] && (
+             <ServiceDetailView 
+               service={SERVICES_DATA[currentPage.replace('service-', '')]} 
+               navigateTo={navigateTo}
+               isSubmitted={isSubmitted} 
+               handleSubmit={handleSubmit} 
+               formState={formState} 
+               handleInputChange={handleInputChange} 
+             />
+          )}
+        </main>
+
+        {/* Footer */}
+        <footer className="bg-neutral-950 text-neutral-400 py-16 border-t border-neutral-800">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+              <div className="md:col-span-2">
+                <div className="mb-6 inline-block">
+                  <BrandLogo variant="light" />
+                </div>
+                <p className="font-body text-base mb-6 font-medium leading-relaxed max-w-sm">Professional, heavy-duty land clearing, forestry mulching, and site preparation based in Mayo, Florida.</p>
+                <div className="flex space-x-4">
+                   <a href="tel:3862097058" className="bg-neutral-900 p-3 rounded-lg hover:bg-emerald-900 hover:text-emerald-400 transition-colors"><Phone className="h-5 w-5" /></a>
+                   <a href="mailto:candclandservices@gmail.com" className="bg-neutral-900 p-3 rounded-lg hover:bg-emerald-900 hover:text-emerald-400 transition-colors"><Mail className="h-5 w-5" /></a>
+                </div>
+              </div>
+              <div>
+                <h4 className="font-industrial text-2xl uppercase tracking-widest text-white mb-6">Navigation</h4>
+                <ul className="font-body space-y-3 text-base font-medium">
+                  <li><button onClick={() => navigateTo('home')} className="hover:text-emerald-400 transition-colors">Home</button></li>
+                  <li><button onClick={() => navigateTo('services')} className="hover:text-emerald-400 transition-colors">Services</button></li>
+                  <li><button onClick={() => navigateTo('about')} className="hover:text-emerald-400 transition-colors">About</button></li>
+                  <li><button onClick={() => navigateTo('contact')} className="hover:text-emerald-400 transition-colors">Contact</button></li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-industrial text-2xl uppercase tracking-widest text-white mb-6">Privacy & Legal</h4>
+                <p className="font-body text-sm leading-relaxed font-medium">
+                  Personal information collected through contact forms is used solely to provide estimates. We do not sell, rent, or share personal data or SMS opt-in consent with third parties for marketing purposes.
+                </p>
+              </div>
+            </div>
+            <div className="font-body pt-8 border-t border-neutral-900 text-center text-sm flex flex-col md:flex-row justify-between items-center font-medium">
+              <p>&copy; {new Date().getFullYear()} C&C Land Services LLC. All rights reserved.</p>
+              <p className="font-industrial tracking-widest uppercase mt-4 md:mt-0 text-emerald-500 text-base">Licensed & Insured</p>
+            </div>
+          </div>
+        </footer>
+
+        {/* NEW EMOTIONAL/HIGH-CONVERSION CTA POPUP */}
+        {showPopup && currentPage === 'home' && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4">
+            <div className="absolute inset-0 bg-neutral-950/90 backdrop-blur-md" onClick={() => setShowPopup(false)}></div>
+            
+            <div className="bg-white rounded-2xl md:rounded-3xl w-full max-w-4xl max-h-[95vh] overflow-y-auto relative shadow-2xl z-10 transform transition-all animate-in fade-in zoom-in duration-300 flex flex-col md:flex-row border border-emerald-500/20">
+              <button onClick={() => setShowPopup(false)} className="absolute top-3 right-3 md:top-4 md:right-4 text-neutral-600 md:text-neutral-400 hover:text-neutral-900 md:hover:text-white bg-neutral-100 hover:bg-neutral-200 md:bg-transparent md:hover:bg-neutral-900 rounded-full p-2 transition-colors z-20 shadow-sm md:shadow-none border border-neutral-200 md:border-none">
+                <X className="h-5 w-5 md:h-6 md:w-6" />
+              </button>
+              
+              {/* Left Side - Emotional Hook */}
+              <div className="md:w-1/2 bg-neutral-950 p-6 sm:p-8 md:p-10 lg:p-12 text-white relative flex flex-col justify-center">
+                <div className="absolute inset-0 opacity-20">
+                   <ImageFallback src="https://images.unsplash.com/photo-1600572522502-d9ec936e7192?q=80&w=800&auto=format&fit=crop" className="w-full h-full object-cover" />
+                   <div className="absolute inset-0 bg-emerald-950/80 mix-blend-multiply"></div>
+                </div>
+                <div className="relative z-10">
+                  <BrandLogo variant="light" className="mb-6 md:mb-10 scale-75 md:scale-90 origin-left -ml-2 md:ml-0" />
+                  <div className="flex items-center gap-2 md:gap-3 text-red-400 font-industrial uppercase tracking-widest text-xs md:text-sm mb-3 md:mb-4">
+                    <AlertTriangle className="h-4 w-4 md:h-5 md:w-5" /> Stalled Project?
+                  </div>
+                  <h3 className="font-industrial text-4xl sm:text-5xl md:text-6xl font-black uppercase tracking-tight leading-[0.95] mb-3 md:mb-6">
+                    Is Overgrown Land <span className="text-emerald-500">Holding You Back?</span>
+                  </h3>
+                  <p className="font-body text-neutral-300 text-base sm:text-lg md:text-xl font-medium leading-relaxed hidden sm:block">
+                    Stop dealing with unreliable contractors. We bring the heavy machinery required to clear your path forward—<strong className="text-white">fast, clean, and done right the first time.</strong>
+                  </p>
+                </div>
+              </div>
+
+              {/* Right Side - Immediate Action Form */}
+              <div className="md:w-1/2 p-6 sm:p-8 md:p-10 lg:p-12 bg-white flex flex-col justify-center">
+                <h4 className="font-industrial text-3xl sm:text-4xl uppercase text-neutral-900 mb-2">Claim Your Fast-Track Quote</h4>
+                <p className="font-body text-neutral-500 text-sm sm:text-base font-medium mb-6">Skip the line. Enter your details below for priority scheduling.</p>
+                
+                <LeadForm 
+                  isSubmitted={isSubmitted} 
+                  handleSubmit={handleSubmit} 
+                  formState={formState} 
+                  handleInputChange={handleInputChange} 
+                  compact={true} // Uses the streamlined version of the form!
+                />
+              </div>
+              
+            </div>
+          </div>
+        )}
+      </div>
+    </HelmetProvider>
+  );
+}

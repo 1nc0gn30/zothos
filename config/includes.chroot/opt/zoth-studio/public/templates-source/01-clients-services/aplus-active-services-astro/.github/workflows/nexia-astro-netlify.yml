@@ -1,0 +1,29 @@
+name: Nexia Astro Netlify
+
+on:
+  push:
+    paths:
+      - "nexia-astro-netlify/**"
+      - ".github/workflows/nexia-astro-netlify.yml"
+  pull_request:
+    paths:
+      - "nexia-astro-netlify/**"
+      - ".github/workflows/nexia-astro-netlify.yml"
+
+jobs:
+  build-and-verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: nexia-astro-netlify
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: nexia-astro-netlify/package-lock.json
+      - run: npm ci
+      - run: npm run build:aplus
+      - run: npm run verify:aplus:source
+      - run: npm run verify:aplus

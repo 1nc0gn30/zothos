@@ -1,0 +1,76 @@
+---
+import { ExternalLink } from '@lucide/astro'
+
+import HeaderLink from './HeaderLink.astro'
+---
+
+<dropdown-menu>
+  <div
+    data-dropdown="false"
+    id="dropdown-menu"
+    role="menu"
+    class="absolute top-full right-0 z-50 mt-2 w-64 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg data-[dropdown=false]:hidden data-[dropdown=true]:block"
+  >
+    <HeaderLink class="block px-4 py-2 focus:ring-inset" href="/components/application">
+      Application
+    </HeaderLink>
+
+    <HeaderLink class="block px-4 py-2 focus:ring-inset" href="/components/marketing">
+      Marketing
+    </HeaderLink>
+
+    <HeaderLink class="block px-4 py-2 focus:ring-inset" href="/components/neobrutalism">
+      Neobrutalism
+    </HeaderLink>
+
+    <HeaderLink class="block px-4 py-2 focus:ring-inset" href="/components/templates">
+      Templates
+    </HeaderLink>
+
+    <HeaderLink class="block px-4 py-2 focus:ring-inset" href="/tools"> Tools </HeaderLink>
+
+    <HeaderLink class="block px-4 py-2 focus:ring-inset" href="/blog"> Blog </HeaderLink>
+
+    <HeaderLink
+      href="https://js.hyperui.dev"
+      class="flex items-center gap-1 border-t border-gray-200 bg-gray-50 px-4 py-2 focus:ring-inset"
+      target="_blank"
+      rel="noreferrer"
+    >
+      HyperUX
+      <ExternalLink class="size-4 shrink-0" />
+    </HeaderLink>
+  </div>
+</dropdown-menu>
+
+<script>
+  class DropdownMenu extends HTMLElement {
+    private toggleHandler: ((event: CustomEvent<{ open: boolean }>) => void) | null = null
+
+    connectedCallback() {
+      const dropdownEl = this.querySelector('[data-dropdown]')
+
+      if (!dropdownEl) {
+        return
+      }
+
+      this.toggleHandler = (toggleEvent) => {
+        dropdownEl.setAttribute('data-dropdown', toggleEvent.detail.open ? 'true' : 'false')
+      }
+
+      // @ts-expect-error -- CustomEvent handler is not assignable to EventListener
+      document.addEventListener('dropdown:toggle', this.toggleHandler)
+    }
+
+    disconnectedCallback() {
+      if (this.toggleHandler) {
+        // @ts-expect-error -- CustomEvent handler is not assignable to EventListener
+        document.removeEventListener('dropdown:toggle', this.toggleHandler)
+
+        this.toggleHandler = null
+      }
+    }
+  }
+
+  customElements.define('dropdown-menu', DropdownMenu)
+</script>

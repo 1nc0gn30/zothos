@@ -1,0 +1,254 @@
+/* =============================================================================
+   ✨ ZOTH STUDIO — MAGIC UI & MATERIAL DESIGN 3 COMPONENT SUITE (v1.0)
+   =============================================================================
+   Integrates Magic UI animation primitives & Google Material 3 tokens:
+   - Magic UI: Border Beam, Shimmer Button, Shiny Text, Retro Grid, Marquee, Floating Dock
+   - Material Design 3: Tonal Surfaces, Segmented Controls, Elevation, Chips, Floating Actions
+   - Seamless compatibility with Zoth's 4 sovereign themes (Dark, Light, Matrix, Gold)
+   ============================================================================= */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   1. Magic UI Animation Keyframes
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@keyframes magic-border-beam {
+  100% {
+    offset-distance: 100%;
+  }
+}
+
+@keyframes magic-shimmer-sweep {
+  0% {
+    transform: translateX(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(200%) rotate(45deg);
+  }
+}
+
+@keyframes magic-shiny-text {
+  0%, 90%, 100% {
+    background-position: calc(-100% - var(--shiny-width, 100px)) 0;
+  }
+  30%, 60% {
+    background-position: calc(100% + var(--shiny-width, 100px)) 0;
+  }
+}
+
+@keyframes magic-marquee-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-100% - var(--gap, 1rem))); }
+}
+
+@keyframes magic-retro-grid-pulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes magic-float-hover {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   2. Magic UI: Shimmer Button (Google/Apple Tier Glowing Action)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.magic-shimmer-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  font-family: var(--font-theme-mono, monospace);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #05070e !important;
+  background: var(--accent, #00f0ff);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 9999px;
+  text-decoration: none !important;
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow: 0 0 24px var(--accent-glow, rgba(0, 240, 255, 0.45));
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  isolation: isolate;
+}
+
+.magic-shimmer-btn::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.75) 50%,
+    transparent 100%
+  );
+  transform: translateX(-100%) rotate(25deg);
+  animation: magic-shimmer-sweep 3.5s infinite ease-in-out;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.magic-shimmer-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 0 35px var(--accent-glow, rgba(0, 240, 255, 0.65));
+}
+
+.magic-shimmer-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+[data-theme="light"] .magic-shimmer-btn {
+  background: #0f172a !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.25) !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   3. Magic UI: Border Beam Card (Running Neon Light Border)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.magic-border-beam-card {
+  position: relative;
+  background: var(--surface-card);
+  border: 1px solid var(--border-card);
+  border-radius: 20px;
+  overflow: hidden;
+  isolation: isolate;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.magic-border-beam-card::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 2px;
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    transparent 0%,
+    var(--cyan, #00f0ff) 25%,
+    var(--gold, #fbbf24) 50%,
+    var(--violet, #a855f7) 75%,
+    transparent 100%
+  );
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.85;
+  transition: opacity 0.3s ease;
+}
+
+.magic-border-beam-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 45px var(--shadow-color);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   4. Magic UI: Shiny Gradient Text
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.magic-shiny-text {
+  --shiny-width: 120px;
+  background: linear-gradient(
+    120deg,
+    var(--muted, #94a3b8) 40%,
+    var(--text-primary, #ffffff) 50%,
+    var(--muted, #94a3b8) 60%
+  ) 0 0 / 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  animation: magic-shiny-text 4s infinite linear;
+  display: inline-block;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   5. Magic UI: Marquee Ticker (Infinite Agent & Tool Loop)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.magic-marquee-track {
+  display: flex;
+  overflow: hidden;
+  user-select: none;
+  gap: var(--gap, 1.5rem);
+  mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 1) 12%, rgba(0, 0, 0, 1) 88%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 1) 12%, rgba(0, 0, 0, 1) 88%, transparent 100%);
+  padding: 12px 0;
+}
+
+.magic-marquee-group {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: var(--gap, 1.5rem);
+  min-width: 100%;
+  animation: magic-marquee-scroll 28s linear infinite;
+}
+
+.magic-marquee-track:hover .magic-marquee-group {
+  animation-play-state: paused;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   6. Material Design 3 (MUI) Clean Primitives
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* MD3 Filled Tonal Button */
+.md3-btn-tonal {
+  background: var(--surface-highlight);
+  color: var(--text-primary);
+  border: 1px solid var(--border-card);
+  padding: 10px 20px;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  text-decoration: none !important;
+}
+
+.md3-btn-tonal:hover {
+  background: var(--surface-elevated);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* MD3 Chip */
+.md3-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  background: var(--surface-card);
+  border: 1px solid var(--border-card);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-subhead);
+  transition: all 0.18s ease;
+}
+
+.md3-chip:hover {
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
+.md3-chip.active {
+  background: rgba(0, 240, 255, 0.12);
+  border-color: var(--accent);
+  color: var(--accent);
+}

@@ -1,0 +1,113 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import CtaBand from "../components/CtaBand.astro";
+import ProofStrip from "../components/ProofStrip.astro";
+import { businessSchema } from "../data/schema.js";
+
+const featuredReview = {
+  title: "These guys built a fence that's still dead straight after two hurricane seasons.",
+  text: "Waylon walked the property, gave us a fair number the next day, and his crew had the whole fence up before the weekend. No shortcuts on the post depth. You can feel the difference when you push on it.",
+  author: "Live Oak homeowner",
+  rating: 5,
+};
+
+const reviews = [
+  { title: "Best fence decision we made.", text: "Had three quotes from Orlando-based companies. Poole's number was better and they actually knew Lake City code requirements. The fence was done in two days.", author: "Lake City homeowner", rating: 5 },
+  { title: "Went above and beyond.", text: "Discovered an old buried concrete slab on the fence line. Crew cut through it, finished on schedule, and did not charge extra. That kind of integrity is rare.", author: "Gainesville homeowner", rating: 5 },
+  { title: "Honest advice from the start.", text: "Called about a vinyl fence. Waylon told us wood would work better given the tree shade on our property. Saved us money and it looks great.", author: "Tallahassee homeowner", rating: 5 },
+  { title: "Owner on site means everything.", text: "Waylon was there every day and every question during the walkthrough got a straight answer.", author: "Lake City homeowner", rating: 5 },
+  { title: "Fair price and solid work.", text: "They helped us choose the right material instead of pushing the most expensive option. Ended up with a nicer fence than the two other quotes and saved money.", author: "Live Oak homeowner", rating: 5 },
+  { title: "Fast scheduling for a large fence job.", text: "Three crews made a real difference. The project moved faster than expected and the gate alignment has stayed perfect through storms.", author: "Madison County property owner", rating: 5 },
+  { title: "Knows North Florida soil.", text: "Previous fence posts shifted after a year. Poole set these posts deeper with concrete and proper drainage. Night and day difference in stability.", author: "Lake City homeowner", rating: 5 },
+  { title: "Great farm fence work.", text: "Needed 800 feet of field fence for cattle. They knocked it out in two days and the bracing on the corners is rock solid. Will use them again for the next section.", author: "Suwannee County rancher", rating: 5 },
+];
+
+function renderStars(count = 5) {
+  const svgs = [];
+  for (let i = 0; i < count; i++) {
+    svgs.push(`<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`);
+  }
+  return svgs.join("");
+}
+---
+
+<BaseLayout
+  title="Customer Reviews | Poole Fencing LLC Live Oak FL"
+  description="5-star Google reviews from Poole Fencing customers across North Florida. Read what real homeowners and businesses say. Call (386) 688-1293."
+  path="/reviews"
+  schema={businessSchema()}
+>
+  <!-- ===== HERO ===== -->
+  <section class="page-hero reviews-hero">
+    <div class="container page-hero-grid">
+      <div>
+        <span class="eyebrow">Verified Reviews</span>
+        <h1>What customers are saying.</h1>
+        <p class="lead">
+          Poole Fencing holds a <a class="review-link" href="https://www.google.com/search?sca_esv=c9c2efd324041014&authuser=1&sxsrf=ANbL-n7nLi1qEl5JTYU4AL2JaRlcDX7tJw:1778373192896&si=AL3DRZEsmMGCryMMFSHJ3StBhOdZ2-6yYkXd_doETEE1OR-qOcF5R3c30_b5VA26kKddqsW26FRXVWeLNrkgtc0dbhaojVFBDkuu77QDuJOGHaHYF7JYa5Yei-1be3dsYoH88HmcBV3X&q=Poole+Fencing+Reviews&sa=X&ved=2ahUKEwjk7sKzvK2UAxW8KVkFHcXXL3UQ0bkNegQIIhAF&biw=1920&bih=964&dpr=2#" target="_blank" rel="noopener noreferrer">5.0-star Google rating</a> with 50+ verified reviews
+          from customers across North Florida. These are real experiences from
+          people who hired our crews.
+        </p>
+      </div>
+      <figure class="page-hero-media">
+        <img
+          src="/images/fences/vinyl-privacy.webp"
+          alt="Finished vinyl privacy fence installed by Poole Fencing in Live Oak, Florida"
+          width="2048"
+          height="1536"
+        />
+        <figcaption>Finished work customers can feel on the post line</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ===== FEATURED REVIEW ===== -->
+  <section class="section featured-review-section">
+    <div class="container">
+      <a class="featured-review-card" href="https://www.google.com/search?sca_esv=c9c2efd324041014&authuser=1&sxsrf=ANbL-n7nLi1qEl5JTYU4AL2JaRlcDX7tJw:1778373192896&si=AL3DRZEsmMGCryMMFSHJ3StBhOdZ2-6yYkXd_doETEE1OR-qOcF5R3c30_b5VA26kKddqsW26FRXVWeLNrkgtc0dbhaojVFBDkuu77QDuJOGHaHYF7JYa5Yei-1be3dsYoH88HmcBV3X&q=Poole+Fencing+Reviews&sa=X&ved=2ahUKEwjk7sKzvK2UAxW8KVkFHcXXL3UQ0bkNegQIIhAF&biw=1920&bih=964&dpr=2#" target="_blank" rel="noopener noreferrer" aria-label="Read this review on Google">
+        <div class="featured-review-quote-mark">&ldquo;</div>
+        <div class="featured-review-content">
+          <span class="review-stars" aria-label="5 out of 5 stars" set:html={renderStars(featuredReview.rating)} />
+          <h2 class="featured-review-title">{featuredReview.title}</h2>
+          <p class="featured-review-text">&ldquo;{featuredReview.text}&rdquo;</p>
+          <div class="featured-review-author">
+            <div class="featured-review-avatar">{featuredReview.author.charAt(0)}</div>
+            <div>
+              <strong>{featuredReview.author}</strong>
+              <span class="featured-review-verified">&#10003; Verified Customer</span>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ===== REVIEW GRID ===== -->
+  <section class="section-tight reviews-grid-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="eyebrow">More Reviews</span>
+        <h2>Real stories from North Florida property owners.</h2>
+      </div>
+
+      <div class="review-grid">
+        {reviews.map(({ title, text, author, rating }) => (
+          <a class="review-card" href="https://www.google.com/search?sca_esv=c9c2efd324041014&authuser=1&sxsrf=ANbL-n7nLi1qEl5JTYU4AL2JaRlcDX7tJw:1778373192896&si=AL3DRZEsmMGCryMMFSHJ3StBhOdZ2-6yYkXd_doETEE1OR-qOcF5R3c30_b5VA26kKddqsW26FRXVWeLNrkgtc0dbhaojVFBDkuu77QDuJOGHaHYF7JYa5Yei-1be3dsYoH88HmcBV3X&q=Poole+Fencing+Reviews&sa=X&ved=2ahUKEwjk7sKzvK2UAxW8KVkFHcXXL3UQ0bkNegQIIhAF&biw=1920&bih=964&dpr=2#" target="_blank" rel="noopener noreferrer" aria-label="Read this review on Google">
+            <div class="review-card-quote">&ldquo;</div>
+            <span class="review-stars" aria-label={`${rating} out of 5 stars`} set:html={renderStars(rating)} />
+            <h3>{title}</h3>
+            <p>{text}</p>
+            <div class="review-card-footer">
+              <span class="review-card-avatar">{author.charAt(0)}</span>
+              <span class="review-card-name">{author}</span>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <ProofStrip />
+
+  <CtaBand heading="The best research is hearing from people who already hired the crew." />
+</BaseLayout>

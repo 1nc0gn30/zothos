@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#  ZOTHOS Desktop Environment Initialization & Trust Engine
+# ==============================================================================
+
+# 1. Trust and mark all desktop launchers executable (Fixes "white sheet" icons)
+if [[ -d "$HOME/Desktop" ]]; then
+    chmod +x "$HOME"/Desktop/*.desktop 2>/dev/null || true
+    for f in "$HOME"/Desktop/*.desktop; do
+        if [[ -f "$f" ]]; then
+            gio set "$f" metadata::trusted true 2>/dev/null || true
+            gio set "$f" metadata::xfce-exe-checksum "$(sha256sum "$f" 2>/dev/null | awk '{print $1}')" 2>/dev/null || true
+        fi
+    done
+fi
+
+# 2. Update icon caches
+gtk-update-icon-cache -f -q /usr/share/icons/hicolor 2>/dev/null || true
+gtk-update-icon-cache -f -q /usr/share/icons/Zoth-Hermetic 2>/dev/null || true
+
+# 3. Ensure XFWM4 window theme and draggable settings are applied
+xfconf-query -c xfwm4 -p /general/theme -s "Zoth-Hermetic-Matrix" 2>/dev/null || true
+xfconf-query -c xfwm4 -p /general/easy_click -s "Alt" 2>/dev/null || true
+xfconf-query -c xfwm4 -p /general/button_layout -s "O|HMC" 2>/dev/null || true
+xfconf-query -c xsettings -p /Net/ThemeName -s "Zoth-Hermetic-Matrix" 2>/dev/null || true
+xfconf-query -c xsettings -p /Net/IconThemeName -s "Zoth-Hermetic" 2>/dev/null || true
+
+# 4. Set desktop wallpaper to Hermetic Matrix if default
+xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/last-image -s "/usr/share/backgrounds/zothos/hermetic-matrix.png" 2>/dev/null || true
+xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/image-style -s 5 2>/dev/null || true
+xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitorVirtual-1/workspace0/last-image -s "/usr/share/backgrounds/zothos/hermetic-matrix.png" 2>/dev/null || true
+xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitorVirtual-1/workspace0/image-style -s 5 2>/dev/null || true
+
+exit 0

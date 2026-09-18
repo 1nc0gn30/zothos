@@ -1,0 +1,57 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import CtaBand from "../components/CtaBand.astro";
+import { businessSchema } from "../data/schema.js";
+import { blogPosts } from "../data/site.js";
+
+const allPosts = [
+  ...blogPosts,
+  { title: "How to choose between vinyl and wood in humid climates", href: "/services/wood-fencing", summary: "Florida humidity punishes the wrong material choice. Here is what actually holds up." },
+  { title: "What fence height works for keeping deer out", href: "/services/farm-field-fencing", summary: "Deer fencing height recommendations for North Florida rural properties and gardens." },
+  { title: "Pool fence code requirements in Florida", href: "/services/ornamental-aluminum", summary: "What Florida building code says about pool barrier height, gate latches, and spacing." },
+  { title: "Why most failed fences fail at the posts", href: "/services/vinyl-fencing", summary: "Post depth, concrete, and drainage are where corners get cut. Here is what our crews do differently." },
+  { title: "Chain link vs ornamental for commercial properties", href: "/services/commercial-chainlink", summary: "Cost, lifespan, and security considerations for business fence decisions." },
+  { title: "How to prepare your property for a fence estimate", href: "/contact-us", summary: "Three things to have ready so your free estimate is fast and accurate." },
+];
+---
+
+<BaseLayout
+  title="Fencing Tips & Guides | Poole Fencing LLC Blog"
+  description="Practical fencing guides for North Florida homeowners and property owners. Vinyl vs wood, pool codes, farm fence, gate advice, and more."
+  path="/blog"
+  schema={businessSchema()}
+>
+  <section class="page-hero">
+    <div class="container page-hero-grid">
+      <div>
+        <span class="eyebrow">Resources</span>
+        <h1>Fencing tips for North Florida property owners.</h1>
+        <p>Straightforward guides, no sales pitch. Written for the climate, soil, and code requirements you actually deal with.</p>
+      </div>
+      <figure class="page-hero-media">
+        <img
+          src="/images/fences/wood-repair.webp"
+          alt="Wood fence repair after storm damage in North Florida"
+          width="2048"
+          height="1536"
+        />
+        <figcaption>Practical fence advice for Florida weather and soil</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="project-grid">
+        {allPosts.map((post) => (
+          <a class="tile" href={post.href}>
+            <h3>{post.title}</h3>
+            <p>{post.summary}</p>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <CtaBand heading="Got a question that is not covered here? Call or send us the details." />
+</BaseLayout>

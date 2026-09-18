@@ -1,0 +1,75 @@
+@use '../config' as *;
+
+$markdown-font-size: var(--font-size-h3) !default;
+$markdown-line-height: var(--line-height-lg) !default;
+
+/**
+Prose (formerly markdown)
+ */
+.prose,
+.markdown {
+  --markdown-heading-margin-top: #{$markdown-heading-margin-top};
+  --markdown-blockquote-margin-y: #{$markdown-blockquote-margin-y};
+  --markdown-blockquote-padding-y: #{$markdown-blockquote-padding-y};
+  --markdown-blockquote-padding-x: #{$markdown-blockquote-padding-x};
+  --markdown-pre-max-height: #{$markdown-pre-max-height};
+  font-size: $markdown-font-size;
+  line-height: $markdown-line-height;
+
+  > :first-child {
+    margin-top: 0;
+  }
+
+  > :last-child,
+  > :last-child .highlight {
+    margin-bottom: 0;
+  }
+
+  > hr {
+    @include media-breakpoint-up(md) {
+      margin-top: 3em;
+      margin-bottom: 3em;
+    }
+  }
+
+  > {
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      font-weight: $headings-font-weight;
+    }
+
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      margin-top: var(--markdown-heading-margin-top);
+    }
+  }
+
+  > table {
+    // The `@extend .table, .table-bordered, .table-sm` part lives in
+    // `_extends.scss` — its targets span modules loaded after this one.
+    font-size: var(--body-font-size);
+  }
+
+  > blockquote {
+    padding: var(--markdown-blockquote-padding-y) var(--markdown-blockquote-padding-x);
+    margin: var(--markdown-blockquote-margin-y) 0;
+    font-size: $h3-font-size;
+  }
+
+  > img,
+  > p > img {
+    @include border-radius(var(--border-radius));
+    border: 1px solid var(--border-color);
+  }
+
+  pre {
+    max-height: var(--markdown-pre-max-height);
+  }
+}

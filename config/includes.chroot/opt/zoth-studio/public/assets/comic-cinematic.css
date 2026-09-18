@@ -1,0 +1,924 @@
+/* ==========================================================================
+   AZOTH: The Zero-Leakage Saga — Comic & S01 Trailers Cinematic UI Engine
+   Cinematic 2.39:1 Letterbox, Alchemical Chapter Markers & Custom Video HUD
+   ========================================================================== */
+
+:root {
+  --cinema-gold: #fbbf24;
+  --cinema-gold-glow: rgba(251, 191, 36, 0.45);
+  --cinema-cyan: #00f0ff;
+  --cinema-cyan-glow: rgba(0, 240, 255, 0.35);
+  --cinema-purple: #a855f7;
+  --cinema-rose: #ff007a;
+  --cinema-emerald: #10b981;
+  --cinema-bg-dark: #030408;
+  --cinema-card-bg: rgba(10, 14, 26, 0.88);
+  --cinema-border: rgba(0, 240, 255, 0.25);
+  --cinema-border-gold: rgba(251, 191, 36, 0.3);
+  --cinema-hud-bg: rgba(6, 9, 18, 0.88);
+  --cinema-letterbox-aspect: 2.39 / 1;
+}
+
+/* ==========================================================================
+   1. Cinematic 2.39:1 Trailer Viewport & Frame
+   ========================================================================== */
+
+.cinematic-trailer-container {
+  position: relative;
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto 36px;
+  border-radius: 20px;
+  padding: 2px;
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.3) 0%, rgba(168, 85, 247, 0.2) 50%, rgba(251, 191, 36, 0.35) 100%);
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.85), 0 0 45px rgba(0, 240, 255, 0.15);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 10;
+}
+
+.cinematic-trailer-container:hover {
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.95), 0 0 60px rgba(0, 240, 255, 0.25), 0 0 30px rgba(251, 191, 36, 0.2);
+}
+
+/* Dynamic Ambient Glow Behind Letterbox */
+.cinematic-ambient-glow {
+  position: absolute;
+  inset: -15px;
+  border-radius: 30px;
+  background: radial-gradient(circle at 50% 50%, var(--cinema-cyan-glow) 0%, var(--cinema-gold-glow) 40%, transparent 70%);
+  filter: blur(35px);
+  opacity: 0.6;
+  pointer-events: none;
+  z-index: -1;
+  transition: opacity 0.5s ease, filter 0.5s ease;
+  will-change: opacity, transform;
+}
+
+.cinematic-ambient-glow.glow-boost {
+  opacity: 0.9;
+  filter: blur(45px);
+}
+
+.cinematic-ambient-glow.glow-off {
+  opacity: 0;
+}
+
+/* 2.39:1 Anamorphic Letterbox Viewport */
+.cinematic-viewport {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2.39 / 1;
+  background: #000000;
+  border-radius: 18px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.9);
+}
+
+/* Fallback for older browsers lacking aspect-ratio */
+@supports not (aspect-ratio: 2.39 / 1) {
+  .cinematic-viewport {
+    height: 0;
+    padding-bottom: 41.84%; /* 1 / 2.39 = 41.84% */
+  }
+}
+
+.cinematic-viewport.aspect-16-9 {
+  aspect-ratio: 16 / 9;
+}
+@supports not (aspect-ratio: 16 / 9) {
+  .cinematic-viewport.aspect-16-9 {
+    padding-bottom: 56.25%;
+  }
+}
+
+.cinematic-video-element {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background: #000;
+  cursor: pointer;
+}
+
+/* Anamorphic Flare Top & Bottom Letterbox Micro-Lines */
+.cinematic-letterbox-matte-top,
+.cinematic-letterbox-matte-bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0px; /* Expands if letterbox aspect adjustment enabled */
+  background: #000;
+  z-index: 5;
+  pointer-events: none;
+  transition: height 0.3s ease;
+}
+
+.cinematic-letterbox-matte-top {
+  top: 0;
+  border-bottom: 1px solid rgba(251, 191, 36, 0.25);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+}
+
+.cinematic-letterbox-matte-bottom {
+  bottom: 0;
+  border-top: 1px solid rgba(0, 240, 255, 0.25);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.8);
+}
+
+.cinematic-flare-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(0, 240, 255, 0.6) 25%, rgba(251, 191, 36, 0.9) 50%, rgba(168, 85, 247, 0.6) 75%, transparent 100%);
+  pointer-events: none;
+  z-index: 6;
+  opacity: 0.8;
+}
+
+/* Big Central Play Trigger */
+.cinematic-big-play-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.9) 0%, rgba(245, 158, 11, 0.95) 100%);
+  border: 2px solid #ffffff;
+  color: #05060b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  cursor: pointer;
+  z-index: 12;
+  box-shadow: 0 0 35px rgba(251, 191, 36, 0.7), 0 0 0 8px rgba(251, 191, 36, 0.25);
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  pointer-events: auto;
+}
+
+.cinematic-big-play-btn:hover {
+  transform: translate(-50%, -50%) scale(1.12);
+  box-shadow: 0 0 50px rgba(251, 191, 36, 0.95), 0 0 0 14px rgba(251, 191, 36, 0.35);
+  background: #ffffff;
+  color: #f59e0b;
+}
+
+.cinematic-big-play-btn.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, -50%) scale(0.7);
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   2. Glassmorphic Custom Video HUD Controls
+   ========================================================================== */
+
+.cinematic-hud {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0) 25%, rgba(0, 0, 0, 0) 65%, rgba(0, 0, 0, 0.92) 100%);
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.cinematic-viewport.is-playing.is-idle .cinematic-hud {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.cinematic-hud * {
+  pointer-events: auto;
+}
+
+/* HUD Top Status Bar */
+.cinematic-hud-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cinematic-title-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(5, 7, 16, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--cinema-border-gold);
+  border-radius: 999px;
+  padding: 5px 14px;
+  font-family: var(--font-display, 'Syne', sans-serif);
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.cinematic-title-badge .alchemical-sigil {
+  color: var(--cinema-gold);
+  font-size: 1rem;
+  text-shadow: 0 0 10px rgba(251, 191, 36, 0.6);
+}
+
+.cinematic-meta-tags {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.cinematic-tag {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(0, 240, 255, 0.15);
+  border: 1px solid rgba(0, 240, 255, 0.35);
+  color: var(--cinema-cyan);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.cinematic-tag.gold {
+  background: rgba(251, 191, 36, 0.15);
+  border-color: rgba(251, 191, 36, 0.4);
+  color: var(--cinema-gold);
+}
+
+.cinematic-tag.rose {
+  background: rgba(255, 0, 122, 0.18);
+  border-color: rgba(255, 0, 122, 0.4);
+  color: var(--cinema-rose);
+}
+
+/* HUD Bottom Deck */
+.cinematic-hud-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Interactive Scrubber Bar with Alchemical Chapters */
+.cinematic-scrubber-box {
+  position: relative;
+  width: 100%;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.cinematic-scrubber-track {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  overflow: visible;
+  transition: height 0.18s ease;
+}
+
+.cinematic-scrubber-box:hover .cinematic-scrubber-track {
+  height: 9px;
+}
+
+.cinematic-scrubber-buffered {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.cinematic-scrubber-played {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--cinema-cyan) 0%, var(--cinema-purple) 50%, var(--cinema-gold) 100%);
+  border-radius: 999px;
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.6);
+  pointer-events: none;
+}
+
+.cinematic-scrubber-thumb {
+  position: absolute;
+  top: 50%;
+  left: 0%;
+  transform: translate(-50%, -50%) scale(0);
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid var(--cinema-gold);
+  box-shadow: 0 0 15px rgba(251, 191, 36, 0.9);
+  transition: transform 0.18s ease;
+  pointer-events: none;
+  z-index: 8;
+}
+
+.cinematic-scrubber-box:hover .cinematic-scrubber-thumb {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* Alchemical Chapter Pin Marker */
+.alchemical-marker-pin {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--cinema-gold);
+  border: 1.5px solid #05060b;
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.85);
+  cursor: pointer;
+  z-index: 6;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.alchemical-marker-pin:hover,
+.alchemical-marker-pin.active {
+  transform: translate(-50%, -50%) scale(1.6);
+  background: #ffffff;
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.95);
+}
+
+/* Scrubber Tooltip Hover */
+.cinematic-scrubber-tooltip {
+  position: absolute;
+  bottom: 30px;
+  transform: translateX(-50%);
+  background: rgba(5, 8, 16, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--cinema-border-gold);
+  border-radius: 8px;
+  padding: 4px 10px;
+  color: #ffffff;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.8), 0 0 12px rgba(251, 191, 36, 0.3);
+  z-index: 15;
+}
+
+.cinematic-scrubber-tooltip.is-visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.cinematic-scrubber-tooltip .tooltip-sigil {
+  color: var(--cinema-gold);
+  margin-right: 4px;
+}
+
+/* Control Deck Buttons */
+.cinematic-control-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--cinema-hud-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 6px 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+}
+
+.cinematic-ctrl-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cinematic-btn {
+  background: transparent;
+  border: none;
+  color: #cbd5e1;
+  font-size: 1.05rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.cinematic-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.cinematic-btn.gold-highlight {
+  color: var(--cinema-gold);
+}
+.cinematic-btn.gold-highlight:hover {
+  background: rgba(251, 191, 36, 0.2);
+  box-shadow: 0 0 14px rgba(251, 191, 36, 0.4);
+}
+
+.cinematic-btn.active {
+  background: rgba(0, 240, 255, 0.2);
+  color: var(--cinema-cyan);
+  border: 1px solid rgba(0, 240, 255, 0.4);
+}
+
+/* Volume Slider in HUD */
+.cinematic-volume-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cinematic-volume-slider {
+  width: 60px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  accent-color: var(--cinema-gold);
+  cursor: pointer;
+  outline: none;
+  transition: width 0.2s ease;
+}
+
+.cinematic-volume-wrap:hover .cinematic-volume-slider {
+  width: 80px;
+}
+
+.cinematic-time-display {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #94a3b8;
+  letter-spacing: 0.04em;
+  min-width: 90px;
+}
+
+.cinematic-time-display .current {
+  color: #ffffff;
+}
+
+/* Speed Dropdown Menu */
+.cinematic-dropdown-wrap {
+  position: relative;
+}
+
+.cinematic-menu-popover {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  background: rgba(8, 12, 24, 0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--cinema-border-gold);
+  border-radius: 12px;
+  padding: 6px;
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 130px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(251, 191, 36, 0.2);
+  z-index: 20;
+}
+
+.cinematic-menu-popover.is-open {
+  display: flex;
+}
+
+.cinematic-menu-item {
+  background: transparent;
+  border: none;
+  color: #cbd5e1;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.cinematic-menu-item:hover,
+.cinematic-menu-item.active {
+  background: rgba(251, 191, 36, 0.18);
+  color: var(--cinema-gold);
+}
+
+/* ==========================================================================
+   3. Alchemical Chapter Navigation Rail
+   ========================================================================== */
+
+.alchemical-chapters-section {
+  width: 100%;
+  margin-top: 18px;
+  margin-bottom: 36px;
+}
+
+.alchemical-rail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.alchemical-rail-title {
+  font-family: var(--font-display, 'Syne', sans-serif);
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.alchemical-rail-title span {
+  color: var(--cinema-gold);
+}
+
+.alchemical-chapters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.alchemical-chapter-card {
+  background: rgba(12, 16, 32, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+  text-align: left;
+}
+
+.alchemical-chapter-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: transparent;
+  transition: background-color 0.2s ease;
+}
+
+.alchemical-chapter-card:hover {
+  background: rgba(18, 24, 48, 0.95);
+  border-color: rgba(0, 240, 255, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 240, 255, 0.15);
+}
+
+.alchemical-chapter-card.active {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(13, 18, 38, 0.95) 100%);
+  border-color: var(--cinema-gold);
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.35);
+}
+
+.alchemical-chapter-card.active::before {
+  background: var(--cinema-gold);
+}
+
+.chapter-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chapter-sigil {
+  font-size: 1.15rem;
+  color: var(--cinema-gold);
+  text-shadow: 0 0 8px rgba(251, 191, 36, 0.6);
+}
+
+.chapter-time {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--cinema-cyan);
+  background: rgba(0, 240, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 240, 255, 0.25);
+}
+
+.chapter-title {
+  font-family: var(--font-display, 'Syne', sans-serif);
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  line-height: 1.3;
+}
+
+.chapter-desc {
+  font-size: 0.74rem;
+  color: #94a3b8;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   4. Theater / Cinema Viewport Mode
+   ========================================================================== */
+
+body.cinema-mode-active {
+  overflow: hidden;
+}
+
+body.cinema-mode-active::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 3, 6, 0.94);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  z-index: 9990;
+  animation: fadeInBackdrop 0.3s ease forwards;
+}
+
+@keyframes fadeInBackdrop {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+body.cinema-mode-active .cinematic-trailer-container {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 95vw !important;
+  max-width: 1560px !important;
+  max-height: 90vh !important;
+  z-index: 9995 !important;
+  margin: 0 !important;
+  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.98), 0 0 80px rgba(0, 240, 255, 0.35);
+}
+
+.cinema-mode-close-btn {
+  display: none;
+  position: absolute;
+  top: -48px;
+  right: 0;
+  background: rgba(16, 22, 42, 0.9);
+  border: 1px solid var(--cinema-border-gold);
+  color: #ffffff;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  align-items: center;
+  gap: 6px;
+  z-index: 9999;
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+}
+
+body.cinema-mode-active .cinema-mode-close-btn {
+  display: inline-flex;
+}
+
+/* ==========================================================================
+   5. Keyboard Cheatsheet Modal
+   ========================================================================== */
+
+.cinematic-shortcuts-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.95);
+  background: rgba(8, 12, 24, 0.96);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--cinema-border-gold);
+  border-radius: 20px;
+  padding: 24px 30px;
+  max-width: 520px;
+  width: 90vw;
+  color: #ffffff;
+  z-index: 10005;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.95), 0 0 40px rgba(251, 191, 36, 0.3);
+  display: none;
+  opacity: 0;
+  transition: all 0.25s ease;
+}
+
+.cinematic-shortcuts-modal.is-open {
+  display: block;
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.cinematic-shortcuts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 12px;
+}
+
+.cinematic-shortcuts-header h3 {
+  margin: 0;
+  font-family: var(--font-display, 'Syne', sans-serif);
+  font-size: 1.2rem;
+  color: var(--cinema-gold);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cinematic-shortcuts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  font-size: 0.82rem;
+}
+
+.shortcut-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.shortcut-key {
+  font-family: var(--font-mono, monospace);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  color: var(--cinema-cyan);
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   6. Responsive Episode Navigation Ribbon
+   ========================================================================== */
+
+.comic-episode-ribbon {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 28px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--cinema-gold) rgba(255, 255, 255, 0.05);
+}
+
+.comic-episode-card-tab {
+  flex: 1 1 240px;
+  min-width: 210px;
+  background: rgba(13, 18, 36, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: all 0.25s ease;
+  position: relative;
+}
+
+.comic-episode-card-tab:hover {
+  border-color: var(--cinema-cyan);
+  background: rgba(18, 25, 52, 0.95);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 240, 255, 0.2);
+}
+
+.comic-episode-card-tab.active {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.18) 0%, rgba(13, 18, 36, 0.95) 100%);
+  border-color: var(--cinema-cyan);
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.35);
+}
+
+.comic-episode-card-tab.gold-active {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.2) 0%, rgba(13, 18, 36, 0.95) 100%);
+  border-color: var(--cinema-gold);
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.35);
+}
+
+.ep-tab-tag {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--cinema-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.ep-tab-title {
+  font-family: var(--font-display, 'Syne', sans-serif);
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.ep-tab-sub {
+  font-size: 0.74rem;
+  color: #94a3b8;
+}
+
+/* ==========================================================================
+   7. Mobile & Media Query Refinements
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .cinematic-hud {
+    padding: 10px 12px;
+  }
+  .cinematic-control-bar {
+    padding: 4px 8px;
+    gap: 6px;
+  }
+  .cinematic-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 0.95rem;
+  }
+  .cinematic-volume-wrap {
+    display: none; /* Hide volume slider on mobile to fit touch buttons */
+  }
+  .cinematic-time-display {
+    font-size: 0.7rem;
+    min-width: 70px;
+  }
+  .alchemical-chapters-grid {
+    grid-template-columns: 1fr;
+  }
+  .cinematic-shortcuts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Mobile HUD control bar must wrap ─────────────────────────────────────────
+   .cinematic-control-bar is a nowrap flex row containing two .cinematic-ctrl-group
+   clusters (190px + 272px measured) inside a 324px bar at 390px viewport. The
+   second cluster was pushed to x=238..510, i.e. entirely off-screen with no
+   scroller, making PiP / fullscreen / shortcuts unreachable on phones. Let the
+   bar wrap and the clusters shrink instead. Declared last so it wins over the
+   earlier <=768px block. */
+@media (max-width: 768px) {
+  .cinematic-control-bar {
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 6px;
+  }
+  .cinematic-ctrl-group {
+    flex-wrap: wrap;
+    justify-content: center;
+    min-width: 0;
+    flex-shrink: 1;
+  }
+}

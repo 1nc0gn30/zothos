@@ -1,0 +1,92 @@
+---
+import { Eye, Code } from '@lucide/astro'
+
+interface Props {
+  src: string
+}
+
+const { src } = Astro.props
+---
+
+<preview-view data-src={src}>
+  <button
+    type="button"
+    aria-label="Toggle preview mode"
+    aria-pressed="true"
+    class="inline-flex items-center justify-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 disabled:pointer-events-none disabled:opacity-50"
+  >
+    <Eye class="size-4" data-preview />
+
+    <Code class="hidden size-4" data-code />
+
+    <span data-text>Preview</span>
+  </button>
+</preview-view>
+
+<script>
+  class PreviewView extends HTMLElement {
+    private contentSrc: string | null = null
+
+    private clickHandler: (() => void) | null = null
+
+    connectedCallback() {
+      this.contentSrc = this.dataset.src || null
+
+      if (!this.contentSrc) {
+        return
+      }
+
+      const buttonEl = this.querySelector('button')
+
+      if (!buttonEl) {
+        return
+      }
+
+      const previewIcon = buttonEl.querySelector('svg[data-preview]')
+      const codeIcon = buttonEl.querySelector('svg[data-code]')
+      const buttonText = buttonEl.querySelector('span[data-text]')
+
+      if (!previewIcon || !codeIcon || !buttonText) {
+        return
+      }
+
+      this.clickHandler = () => {
+        const isPreviewing = buttonEl.getAttribute('aria-pressed') === 'true'
+        const newState = !isPreviewing
+
+        buttonEl.setAttribute('aria-pressed', String(newState))
+
+        if (newState) {
+          previewIcon.classList.remove('hidden')
+          codeIcon.classList.add('hidden')
+          buttonText.textContent = 'Preview'
+        } else {
+          previewIcon.classList.add('hidden')
+          codeIcon.classList.remove('hidden')
+          buttonText.textContent = 'HTML'
+        }
+
+        document.dispatchEvent(
+          new CustomEvent(`preview:view:${this.contentSrc}`, {
+            bubbles: true,
+            detail: { previewing: newState },
+          }),
+        )
+      }
+
+      buttonEl.addEventListener('click', this.clickHandler)
+    }
+
+    disconnectedCallback() {
+      const buttonEl = this.querySelector('button')
+
+      if (buttonEl && this.clickHandler) {
+        buttonEl.removeEventListener('click', this.clickHandler)
+
+        this.clickHandler = null
+      }
+    }
+  }
+
+  customElements.define('preview-view', PreviewView)
+</script>

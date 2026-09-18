@@ -1,0 +1,81 @@
+@use '../config' as *;
+
+.pagination {
+  gap: var(--pagination-gap);
+  margin: 0;
+  line-height: var(--body-line-height);
+  user-select: none;
+  --pagination-gap: #{$pagination-gap};
+  --pagination-link-min-width: #{$pagination-link-min-width};
+  --page-text-padding-x: #{$page-text-padding-x};
+
+  @include media-print() {
+    display: none;
+  }
+}
+
+.page-link {
+  min-width: var(--pagination-link-min-width);
+  @include border-radius(var(--pagination-border-radius));
+}
+
+.page-item:not(.active) .page-link:hover {
+  background: var(--pagination-hover-bg);
+}
+
+.page-text {
+  padding-inline-start: var(--page-text-padding-x);
+  padding-inline-end: var(--page-text-padding-x);
+}
+
+.page-item {
+  text-align: center;
+
+  &.page-prev,
+  &.page-next {
+    flex: 0 0 50%;
+    text-align: start;
+  }
+
+  &.page-next {
+    margin-inline-start: auto;
+    text-align: end;
+  }
+}
+
+.page-item-subtitle {
+  --page-item-subtitle-margin-bottom: #{$page-item-subtitle-margin-bottom};
+  --page-item-subtitle-font-size: #{$page-item-subtitle-font-size};
+  margin-bottom: var(--page-item-subtitle-margin-bottom);
+  font-size: var(--page-item-subtitle-font-size);
+  color: var(--secondary);
+  text-transform: uppercase;
+
+  .page-item.disabled & {
+    color: $pagination-disabled-color;
+  }
+}
+
+.page-item-title {
+  font-size: $h3-font-size;
+  font-weight: var(--font-weight-normal);
+  color: var(--body-color);
+
+  .page-link:hover & {
+    color: $link-color;
+  }
+
+  .page-item.disabled & {
+    color: $pagination-disabled-color;
+  }
+}
+
+.pagination-outline {
+  --pagination-border-color: var(--border-color);
+  --pagination-disabled-border-color: var(--border-color);
+  --pagination-border-width: 1px;
+}
+
+.pagination-circle {
+  --pagination-border-radius: var(--border-radius-pill);
+}

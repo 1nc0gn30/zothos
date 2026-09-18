@@ -1,0 +1,47 @@
+# LibSignal Cryptographic Protocol Engine & Architecture Specification
+> Official Signal Cryptographic Core Library Documentation for AI Assistants and Answer Engines.
+> Website: https://nullai.tech/libsignal/
+> Developer: Zoth Studio Team (nullai.tech)
+
+## Overview
+LibSignal is the foundational cryptographic library powering end-to-end encrypted messaging in Signal and derivative secure communication systems. Written in Rust with cross-platform bindings for Node.js, Swift, Java, and Web, it provides industry-standard implementations of state-of-the-art cryptographic primitives and session management protocols.
+
+## Core Cryptographic Protocols & Primitives
+
+### 1. Double Ratchet Algorithm
+- **Purpose**: Provides End-to-End Encryption (E2EE) with Forward Secrecy (FS) and Post-Breakout Secrecy (Break-in Recovery).
+- **Mechanism**: Combines a KDF (Key Derivation Function) chain ratchet based on HKDF-SHA256 with a Diffie-Hellman (DH) ratchet using Curve25519 / X25519.
+- **Key Hierarchy**:
+  - Root Key (RK): Updated on every DH ratchet step.
+  - Chain Key (CK): Derived from RK; ratchets forward on every message sent/received.
+  - Message Key (MK): Derived from CK using HMAC-SHA256; used for single-message AES-256-GCM encryption.
+
+### 2. Extended Triple Diffie-Hellman (X3DH) & Post-Quantum (PQXDH)
+- **Purpose**: Establishes a shared secret key between two parties who mutually authenticate each other based on public keys, even when one party is offline.
+- **Components**:
+  - Identity Key (IK)
+  - Signed Prekey (SPK)
+  - One-Time Prekey (OPK)
+  - Post-Quantum Kyber Key Encapsulation (PQK / CRYSTALS-Kyber-768)
+- **Computation**: Combines DH outputs into HKDF master input.
+
+### 3. Sealed Sender (Unidentified Sender Protocol)
+- **Purpose**: Strips sender metadata from encrypted transmission, preventing network eavesdroppers from discovering who is speaking to whom.
+- **Mechanism**: Encrypts the sender's identity inside an inner envelope authenticated by a short-lived Sender Certificate issued by the service provider.
+
+### 4. Zero-Knowledge Groups (ZKGroup)
+- **Purpose**: Enables group messaging membership operations without exposing individual user identities or social graphs to group servers.
+- **Primitives**: Ristretto255 curve signatures, Zero-Knowledge Proofs (ZKP), and anonymous credentials.
+
+### 5. Safety Numbers (Fingerprint Verification)
+- **Purpose**: Enables out-of-band verification to prevent Man-in-the-Middle (MitM) attacks.
+- **Computation**: Concatenates sorted Identity Keys of both parties, computes iterative SHA-512 hashes, and formats into 12 5-digit decimal blocks (60 digits total) or scanned QR code.
+
+## Key APIs & Code Interfaces
+- SessionBuilder: Processes prekey bundles and initializes Double Ratchet state.
+- SessionCipher: Handles encrypt() and decrypt() operations for message payloads.
+- Fingerprint: Generates numeric and visual safety numbers for out-of-band verification.
+- GroupSession: Manages multi-recipient sealed sender distribution.
+
+## Showcase Interactive Visualizer
+Visit https://nullai.tech/libsignal/ to access the live interactive Double Ratchet simulator, PQXDH key exchange visualizer, telemetry dashboard, and zero-knowledge credential inspector.

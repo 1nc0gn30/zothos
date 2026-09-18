@@ -1,0 +1,92 @@
+---
+import { proof } from "../data/site.js";
+---
+
+<section class="proof-section" aria-label="Poole Fencing proof points">
+  <div class="proof-bg"></div>
+  <div class="proof-overlay"></div>
+  <div class="proof-glow"></div>
+  <div class="container proof-content">
+    <div class="proof-heading-wrap">
+      <span class="proof-heading-line" aria-hidden="true"></span>
+      <p class="proof-heading">Why North Florida Trusts Poole Fencing</p>
+      <span class="proof-heading-line" aria-hidden="true"></span>
+    </div>
+    <div class="proof-strip">
+      {proof.map((item, index) => (
+        index === 0 ? (
+          <a
+            class="proof-item proof-item--link"
+            href="https://www.google.com/search?sca_esv=c9c2efd324041014&authuser=1&sxsrf=ANbL-n7nLi1qEl5JTYU4AL2JaRlcDX7tJw:1778373192896&si=AL3DRZEsmMGCryMMFSHJ3StBhOdZ2-6yYkXd_doETEE1OR-qOcF5R3c30_b5VA26kKddqsW26FRXVWeLNrkgtc0dbhaojVFBDkuu77QDuJOGHaHYF7JYa5Yei-1be3dsYoH88HmcBV3X&q=Poole+Fencing+Reviews&sa=X&ved=2ahUKEwjk7sKzvK2UAxW8KVkFHcXXL3UQ0bkNegQIIhAF&biw=1920&bih=964&dpr=2#"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="View Poole Fencing 5.0 star Google reviews"
+          >
+            <div class="proof-number-wrap">
+              <strong data-countup data-target={item.value}>{item.value}</strong>
+              <svg class="proof-star" aria-hidden="true" viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+            </div>
+            <span>{item.label}</span>
+          </a>
+        ) : (
+          <div class="proof-item">
+            <div class="proof-number-wrap">
+              <strong data-countup data-target={item.value}>{item.value}</strong>
+            </div>
+            <span>{item.label}</span>
+          </div>
+        )
+      ))}
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  (function () {
+    const els = document.querySelectorAll('[data-countup]');
+    if (!els.length) return;
+
+    function parseTarget(raw) {
+      const match = raw.match(/^([\d.]+)(.*)$/);
+      if (!match) return { num: parseFloat(raw) || 0, suffix: '' };
+      return { num: parseFloat(match[1]), suffix: match[2] || '' };
+    }
+
+    function easeOutExpo(t) {
+      return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const el = entry.target;
+          observer.unobserve(el);
+
+          const { num, suffix } = parseTarget(el.dataset.target || '0');
+          const isDecimal = (el.dataset.target || '').includes('.');
+          const duration = Math.min(1800, Math.max(800, num * 150));
+          const start = performance.now();
+
+          function tick(now) {
+            const elapsed = now - start;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = easeOutExpo(progress);
+            const current = num * eased;
+            el.textContent = isDecimal
+              ? current.toFixed(1) + suffix
+              : Math.floor(current) + suffix;
+            if (progress < 1) requestAnimationFrame(tick);
+          }
+
+          requestAnimationFrame(tick);
+        });
+      },
+      { threshold: 0.4 }
+    );
+
+    els.forEach((el) => observer.observe(el));
+  })();
+</script>

@@ -1,0 +1,1237 @@
+/* S01E01 reader poster — first viewport split + later-stage reader. Loaded last. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
+  background: var(--bg, #050508);
+  color: var(--text-body, #f1f5f9);
+  font-family: var(--font-sans, "Figtree", system-ui, sans-serif);
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  max-width: 100%;
+}
+
+.skip,
+.skip-to-content {
+  position: absolute;
+  top: -100px;
+  left: 16px;
+  background: var(--gold, #fbbf24);
+  color: #050508;
+  padding: 10px 18px;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.82rem;
+  font-weight: 700;
+  border-radius: 8px;
+  z-index: 10000;
+  text-decoration: none;
+  transition: top 0.2s ease;
+}
+
+.skip:focus,
+.skip:focus-visible,
+.skip-to-content:focus,
+.skip-to-content:focus-visible {
+  top: 16px;
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+main#main-content {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* Layout aliases only — never pin --text / --bg here. */
+:root {
+  --phi: 1.6180339887;
+  --fib-8: 8px;
+  --fib-13: 13px;
+  --fib-21: 21px;
+  --fib-34: 34px;
+  --fib-55: 55px;
+  --fib-89: 89px;
+  --comic-gold: var(--gold, #fbbf24);
+  --comic-cyan: var(--cyan, #00f0ff);
+  --comic-purple: var(--violet, #a855f7);
+  --comic-emerald: var(--green, #10b981);
+  --comic-line: var(--line, rgba(255, 255, 255, 0.12));
+  --comic-border: var(--border-card, rgba(0, 240, 255, 0.22));
+}
+
+/* -------------------------------------------------------------------------- */
+/* First viewport — saga-hero / azoth-poster split. Portrait: contain/bottom. */
+/* Never object-fit:cover. Never object-position Y ≈ 18%.                     */
+/* CTAs sit above the comic audio HUD (~108px).                               */
+/* -------------------------------------------------------------------------- */
+
+.saga-hero,
+.azoth-poster {
+  position: relative;
+  width: 100%;
+  min-height: calc(100svh - var(--zoth-header-h, 54px) - 108px);
+  display: grid;
+  grid-template-columns: minmax(18rem, 38rem) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  background: var(--bg, #050508);
+  box-sizing: border-box;
+}
+
+.saga-hero-copy,
+.azoth-poster-copy {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 16px;
+  max-width: 40rem;
+  min-width: 0;
+  padding: clamp(28px, 5vw, 64px) clamp(20px, 4vw, 48px) clamp(96px, 12vw, 132px);
+}
+
+.saga-hero .kicker,
+.saga-kicker,
+.azoth-poster .kicker {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold, #fbbf24);
+  font-weight: 700;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  display: block;
+}
+
+.saga-hero h1,
+.azoth-poster h1 {
+  font-family: var(--font-display, "Syne", sans-serif);
+  font-size: clamp(3.2rem, 8vw, 6.4rem);
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 0.92;
+  margin: 0;
+  max-width: none;
+  white-space: nowrap;
+  color: var(--text-primary, #fff6dc);
+  background: none !important;
+  -webkit-text-fill-color: var(--text-primary, #fff6dc) !important;
+  text-shadow: none !important;
+  overflow-wrap: normal;
+  word-break: keep-all;
+  hyphens: none;
+}
+
+.saga-hero .lede,
+.azoth-poster .lede,
+.saga-hero-lede,
+.comic-synopsis {
+  margin: 0;
+  max-width: 34rem;
+  font-size: 1.08rem;
+  line-height: 1.5;
+  color: var(--text-subhead, var(--mute, #cbd5e1));
+}
+
+.saga-hero .lede strong,
+.azoth-poster .lede strong,
+.comic-synopsis strong {
+  color: var(--text-primary, #fff);
+  font-weight: 700;
+}
+
+.comic-ep-title {
+  margin: 0;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold, #fbbf24);
+  background: none;
+  border: 0;
+  padding: 0;
+  -webkit-text-fill-color: var(--gold, #fbbf24);
+}
+
+.saga-actions,
+.azoth-poster .cta-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.saga-btn,
+.azoth-poster .btn,
+.saga-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 12px 20px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  border: 0;
+  transition: transform 0.2s ease, filter 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.saga-btn:hover,
+.azoth-poster .btn:hover {
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+.saga-btn-gold,
+.azoth-poster .btn-gold {
+  background: var(--gold, #fbbf24) !important;
+  color: #050508 !important;
+  box-shadow: 0 8px 24px rgba(251, 191, 36, 0.28);
+}
+
+.saga-btn-gold:hover,
+.azoth-poster .btn-gold:hover {
+  filter: brightness(1.08);
+  color: #050508 !important;
+}
+
+.saga-btn-ghost,
+.azoth-poster .btn-ghost {
+  background: transparent !important;
+  color: var(--text-primary, #fff) !important;
+  border: 1.5px solid var(--line, rgba(255, 255, 255, 0.28)) !important;
+  box-shadow: none !important;
+}
+
+.saga-btn-ghost:hover,
+.azoth-poster .btn-ghost:hover {
+  border-color: var(--gold, #fbbf24);
+  color: var(--gold, #fbbf24) !important;
+}
+
+.saga-hero-azoth,
+.azoth-poster-figure {
+  position: relative;
+  z-index: 1;
+  min-height: calc(100svh - var(--zoth-header-h, 54px) - 108px);
+  min-width: 0;
+  align-self: stretch;
+  overflow: hidden;
+  background: #050508;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.saga-hero-azoth img,
+.azoth-poster-figure img {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  object-fit: contain !important;
+  object-position: center bottom !important;
+  display: block;
+  background: transparent;
+}
+
+.saga-hero-azoth::after,
+.azoth-poster-figure::after {
+  display: none;
+}
+
+.saga-hero-credit,
+.azoth-poster-credit {
+  position: absolute;
+  right: 24px;
+  bottom: 28px;
+  z-index: 2;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold, #fbbf24);
+  pointer-events: none;
+}
+
+.saga-hero-atmosphere {
+  display: none;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Later stages — episode tabs, dock, trailer, panels                         */
+/* -------------------------------------------------------------------------- */
+
+.comic-wrap {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 32px 20px 140px;
+  width: 100%;
+}
+
+.ep-crumb {
+  display: flex;
+  gap: 8px;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.75rem;
+  color: var(--gold, #fbbf24);
+  margin-bottom: 16px;
+}
+
+.ep-crumb a {
+  color: var(--cyan, #00f0ff);
+  text-decoration: none;
+}
+
+.ep-crumb [aria-current="page"] {
+  color: var(--text-primary, #fff);
+}
+
+#reader,
+#trailer {
+  scroll-margin-top: calc(var(--zoth-header-h, 54px) + 16px);
+}
+
+.comic-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  border: 0;
+  color: var(--gold, #fbbf24);
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  box-shadow: none;
+}
+
+.comic-hero-badge.cyan-badge {
+  background: none;
+  border: 0;
+  color: var(--cyan, #00f0ff);
+}
+
+.ep-nav-tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.ep-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  min-height: 44px;
+  background: var(--panel, var(--surface-card, rgba(15, 22, 41, 0.72)));
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+  border-radius: 12px;
+  color: var(--muted, #94a3b8);
+  text-decoration: none;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.ep-tab-btn:hover {
+  border-color: var(--cyan, #00f0ff);
+  color: var(--text-primary, #fff);
+  transform: translateY(-2px);
+}
+
+.ep-tab-btn.active {
+  background: color-mix(in srgb, var(--cyan, #00f0ff) 12%, transparent);
+  border-color: var(--cyan, #00f0ff);
+  color: var(--text-primary, #fff);
+  box-shadow: none;
+}
+
+.badge-premiere {
+  background: var(--gold, #fbbf24);
+  color: #050508;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  margin-left: 4px;
+}
+
+.comic-control-dock {
+  background: var(--panel, rgba(10, 14, 28, 0.9));
+  border: 1px solid var(--border-card, var(--comic-border));
+  border-radius: 16px;
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 36px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: none;
+}
+
+.dock-label {
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--gold, #fbbf24);
+}
+
+.dock-mode-toggle {
+  display: flex;
+  gap: 6px;
+  background: color-mix(in srgb, var(--bg, #000) 50%, transparent);
+  padding: 4px;
+  border-radius: 999px;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+}
+
+.mode-btn {
+  background: none;
+  border: none;
+  color: var(--muted, #94a3b8);
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 8px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mode-btn.active {
+  background: var(--gold, #fbbf24);
+  color: #050508;
+  box-shadow: 0 0 16px rgba(251, 191, 36, 0.4);
+}
+
+.dock-audio-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.panel-card {
+  background: var(--panel, var(--bg-2, #0a0e1c));
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 48px;
+  box-shadow: none;
+  transition: border-color 0.3s ease;
+}
+
+.panel-card:hover {
+  border-color: var(--border-card, var(--comic-border));
+}
+
+.panel-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: 0;
+}
+
+.panel-media-wrap {
+  position: relative;
+  background: var(--bg, #020306);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.panel-img {
+  width: 100%;
+  height: auto;
+  max-height: 860px;
+  object-fit: cover;
+  display: block;
+}
+
+.panel-video {
+  width: 100%;
+  height: auto;
+  max-height: 860px;
+  object-fit: cover;
+  display: none;
+  background: #000;
+}
+
+body.view-video .panel-img {
+  display: none;
+}
+
+body.view-video .panel-video {
+  display: block;
+}
+
+.panel-info {
+  padding: 32px 36px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: var(--panel, var(--bg-2, #0a0e1c));
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.panel-tag {
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--gold, #fbbf24);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  border: 0;
+}
+
+.panel-meta {
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.7rem;
+  color: var(--cyan, #00f0ff);
+}
+
+.panel-title {
+  font-family: var(--font-display, "Syne", sans-serif);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-primary, #fff);
+  margin: 0 0 12px;
+  line-height: 1.25;
+  background: none;
+  -webkit-text-fill-color: var(--text-primary, #fff);
+}
+
+.panel-script {
+  font-size: 1.02rem;
+  line-height: 1.65;
+  color: var(--text-subhead, #cbd5e1);
+  margin: 0 0 24px;
+  border-left: 3px solid var(--cyan, #00f0ff);
+  padding-left: 14px;
+}
+
+.panel-audio-ctrl {
+  background: color-mix(in srgb, var(--bg, #000) 40%, transparent);
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: auto;
+  flex-wrap: wrap;
+}
+
+.panel-audio-note {
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.72rem;
+  color: var(--muted, #94a3b8);
+}
+
+.play-panel-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--gold, #fbbf24);
+  color: #050508;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, filter 0.2s ease;
+  white-space: nowrap;
+  min-height: 40px;
+}
+
+.play-panel-btn:hover {
+  background: #fff;
+  filter: none;
+  transform: translateY(-2px);
+}
+
+.trailer-box {
+  background: var(--panel, var(--bg-2, #0a0e1c));
+  border: 1px solid var(--border-card, var(--comic-border));
+  border-radius: 24px;
+  padding: 32px;
+  margin: 48px 0;
+  box-shadow: none;
+}
+
+.trailer-header-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.trailer-heading {
+  font-family: var(--font-display, "Syne", sans-serif);
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--text-primary, #fff);
+  margin: 4px 0 0;
+  background: none;
+  -webkit-text-fill-color: var(--text-primary, #fff);
+}
+
+.trailer-spec-badge {
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.75rem;
+  color: var(--green, #34d399);
+  font-weight: 700;
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+.trailer-video {
+  width: 100%;
+  border-radius: 16px;
+  box-shadow: none;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+  max-height: 640px;
+  object-fit: cover;
+  background: #000;
+}
+
+.comic-soundboard-card {
+  background: var(--panel, var(--bg-2, #0a0e1c));
+  border: 1px solid var(--border-card, var(--comic-border));
+  border-radius: 20px;
+  padding: 28px 32px;
+  margin-top: 56px;
+  margin-bottom: 48px;
+  box-shadow: none;
+}
+
+.soundboard-kicker {
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.72rem;
+  color: var(--gold, #fbbf24);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 4px;
+}
+
+.comic-soundboard-card h2 {
+  font-family: var(--font-display, "Syne", sans-serif);
+  font-size: 1.35rem;
+  color: var(--text-primary, #fff);
+  margin: 0 0 8px;
+  background: none;
+  -webkit-text-fill-color: var(--text-primary, #fff);
+}
+
+.comic-soundboard-card p {
+  color: var(--muted, #94a3b8);
+  font-size: 0.88rem;
+  margin: 0 0 16px;
+}
+
+.soundboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.btn-sfx-drop {
+  background: var(--bg-2, rgba(5, 7, 15, 0.85));
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+  border-radius: 12px;
+  padding: 14px 18px;
+  color: var(--text-body, #f1f5f9);
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.84rem;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 48px;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.btn-sfx-drop:hover {
+  border-color: var(--gold, #fbbf24);
+  background: color-mix(in srgb, var(--gold, #fbbf24) 12%, transparent);
+  transform: translateY(-2px);
+}
+
+.btn-sfx-drop small {
+  color: var(--cyan, #00f0ff);
+  font-size: 0.72rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  min-height: 44px;
+}
+
+.btn-off {
+  background: color-mix(in srgb, var(--text-primary, #fff) 6%, transparent);
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+  color: var(--text-subhead, #cbd5e1);
+}
+
+.btn-off:hover {
+  border-color: var(--cyan, #00f0ff);
+  color: var(--text-primary, #fff);
+  transform: translateY(-2px);
+}
+
+.btn-on {
+  background: var(--gold, #fbbf24);
+  border: 1px solid var(--gold, #fbbf24);
+  color: #050508;
+}
+
+.btn-on:hover {
+  background: #fff;
+  color: #050508;
+  transform: translateY(-2px);
+}
+
+.ep-foot-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 60px;
+  padding-top: 30px;
+  border-top: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+}
+
+.ep-foot-nav .btn-off,
+.ep-foot-nav .btn-on {
+  font-size: 0.85rem;
+  padding: 12px 24px;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Footer full-bleed                                                          */
+/* -------------------------------------------------------------------------- */
+
+footer.site {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  box-sizing: border-box;
+  border-top: 1px solid var(--line, rgba(247, 244, 238, 0.1));
+  padding: 48px clamp(20px, 4vw, 48px) 36px;
+  background: var(--bg, #050508);
+  color: var(--mute, var(--muted, #a8a4c2));
+}
+
+body.has-comic-audio-player footer.site {
+  padding-bottom: 140px;
+}
+
+footer.site .foot-grid {
+  display: grid;
+  grid-template-columns: 1.618fr 1fr 1fr 1fr;
+  gap: 34px;
+  width: 100%;
+  max-width: none;
+}
+
+footer.site .foot-brand {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+footer.site .foot-brand img {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+footer.site .foot-brand strong {
+  display: block;
+  font-family: var(--font-display, "Syne", sans-serif);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-primary, #fff);
+}
+
+footer.site .foot-brand .kicker {
+  display: block;
+  margin: 4px 0 0;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold, #fbbf24);
+  font-weight: 700;
+}
+
+footer.site .foot-brand p {
+  color: var(--mute, var(--muted, #94a3b8));
+  margin: 8px 0 0;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  max-width: 22rem;
+}
+
+footer.site .foot-col h3 {
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold, #fbbf24);
+  margin: 0 0 14px;
+  font-weight: 700;
+}
+
+footer.site .foot-col a {
+  display: block;
+  text-decoration: none;
+  color: var(--text-subhead, #cbd5e1);
+  font-size: 0.94rem;
+  padding: 5px 0;
+}
+
+footer.site .foot-col a:hover {
+  color: var(--gold, #fbbf24);
+}
+
+footer.site .foot-end {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line, rgba(247, 244, 238, 0.1));
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.76rem;
+  color: var(--mute, var(--muted, #94a3b8));
+}
+
+/* -------------------------------------------------------------------------- */
+/* Light — dark ink on pale ground. Poster h1 stays #111827.                  */
+/* -------------------------------------------------------------------------- */
+
+html[data-theme="light"] body {
+  background: #f7f9fc !important;
+  color: #1f2937 !important;
+}
+
+html[data-theme="light"] h1 {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  background: none !important;
+}
+
+html[data-theme="light"] .saga-hero,
+html[data-theme="light"] .azoth-poster {
+  background: #f7f9fc !important;
+}
+
+html[data-theme="light"] .saga-hero h1,
+html[data-theme="light"] .azoth-poster h1 {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  background: none !important;
+  text-shadow: none !important;
+}
+
+html[data-theme="light"] .saga-hero .lede,
+html[data-theme="light"] .azoth-poster .lede,
+html[data-theme="light"] .comic-synopsis {
+  color: #374151 !important;
+}
+
+html[data-theme="light"] .saga-hero .lede strong,
+html[data-theme="light"] .comic-synopsis strong {
+  color: #111827 !important;
+}
+
+html[data-theme="light"] .saga-hero .kicker,
+html[data-theme="light"] .saga-kicker,
+html[data-theme="light"] .azoth-poster .kicker,
+html[data-theme="light"] .saga-hero-credit,
+html[data-theme="light"] .comic-ep-title,
+html[data-theme="light"] .comic-hero-badge,
+html[data-theme="light"] .dock-label,
+html[data-theme="light"] .panel-tag,
+html[data-theme="light"] .soundboard-kicker {
+  color: #92400e !important;
+  -webkit-text-fill-color: #92400e !important;
+}
+
+html[data-theme="light"] .saga-hero-azoth,
+html[data-theme="light"] .azoth-poster-figure {
+  background: #0b1220;
+}
+
+html[data-theme="light"] .saga-btn-ghost,
+html[data-theme="light"] .azoth-poster .btn-ghost {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  border: 1.5px solid rgba(17, 24, 39, 0.28) !important;
+  background: #ffffff !important;
+}
+
+html[data-theme="light"] .comic-wrap {
+  background: transparent;
+}
+
+html[data-theme="light"] .ep-crumb [aria-current="page"] {
+  color: #111827;
+}
+
+html[data-theme="light"] .ep-crumb a {
+  color: #1d4ed8;
+}
+
+html[data-theme="light"] .ep-tab-btn {
+  background: #ffffff;
+  border-color: rgba(17, 24, 39, 0.1);
+  color: #4b5563;
+}
+
+html[data-theme="light"] .ep-tab-btn.active,
+html[data-theme="light"] .ep-tab-btn:hover {
+  color: #111827;
+  border-color: #92400e;
+  background: #fffbeb;
+  box-shadow: none;
+}
+
+html[data-theme="light"] .comic-control-dock,
+html[data-theme="light"] .panel-card,
+html[data-theme="light"] .panel-info,
+html[data-theme="light"] .trailer-box,
+html[data-theme="light"] .comic-soundboard-card {
+  background: #ffffff;
+  border-color: rgba(17, 24, 39, 0.1);
+  box-shadow: 0 8px 20px rgba(17, 24, 39, 0.04);
+}
+
+html[data-theme="light"] .dock-mode-toggle {
+  background: #f3f4f6;
+  border-color: rgba(17, 24, 39, 0.08);
+}
+
+html[data-theme="light"] .mode-btn {
+  color: #4b5563;
+}
+
+html[data-theme="light"] .panel-title,
+html[data-theme="light"] .trailer-heading,
+html[data-theme="light"] .comic-soundboard-card h2 {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+html[data-theme="light"] .panel-script,
+html[data-theme="light"] .comic-soundboard-card p,
+html[data-theme="light"] .panel-audio-note,
+html[data-theme="light"] .btn-off {
+  color: #374151;
+}
+
+html[data-theme="light"] .panel-audio-ctrl {
+  background: #f3f4f6;
+  border-color: rgba(17, 24, 39, 0.08);
+}
+
+html[data-theme="light"] .btn-sfx-drop {
+  background: #f9fafb;
+  border-color: rgba(17, 24, 39, 0.1);
+  color: #111827;
+}
+
+html[data-theme="light"] .btn-sfx-drop:hover {
+  background: #fffbeb;
+  border-color: rgba(146, 64, 14, 0.4);
+}
+
+html[data-theme="light"] .btn-sfx-drop small {
+  color: #1d4ed8;
+}
+
+html[data-theme="light"] .ep-foot-nav {
+  border-top-color: rgba(17, 24, 39, 0.1);
+}
+
+html[data-theme="light"] footer.site {
+  background: #f7f9fc !important;
+  color: #374151;
+  border-top-color: rgba(17, 24, 39, 0.1);
+}
+
+html[data-theme="light"] footer.site .foot-brand strong {
+  color: #111827;
+}
+
+html[data-theme="light"] footer.site .foot-col a,
+html[data-theme="light"] footer.site .foot-brand p,
+html[data-theme="light"] footer.site .foot-end {
+  color: #374151;
+}
+
+html[data-theme="light"] footer.site .foot-col a:hover,
+html[data-theme="light"] footer.site .foot-brand .kicker,
+html[data-theme="light"] footer.site .foot-col h3 {
+  color: #92400e;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Matrix / gold                                                              */
+/* -------------------------------------------------------------------------- */
+
+html[data-theme="gold"] .saga-hero,
+html[data-theme="gold"] .azoth-poster,
+html[data-theme="gold"] footer.site,
+html[data-theme="gold"] body {
+  background: #0c0802;
+}
+
+html[data-theme="gold"] .saga-hero-azoth,
+html[data-theme="gold"] .azoth-poster-figure {
+  background: #0c0802;
+}
+
+html[data-theme="matrix"] .saga-hero .kicker,
+html[data-theme="matrix"] .saga-kicker,
+html[data-theme="matrix"] .saga-hero-credit,
+html[data-theme="matrix"] .comic-ep-title,
+html[data-theme="matrix"] .comic-hero-badge,
+html[data-theme="matrix"] .dock-label,
+html[data-theme="matrix"] .panel-tag {
+  color: #34d399;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Mobile — portrait first, copy below. Pad CTAs above the audio HUD.         */
+/* -------------------------------------------------------------------------- */
+
+@media (max-width: 960px) {
+  .panel-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1024px) {
+  .saga-hero,
+  .azoth-poster {
+    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: auto;
+    align-items: start;
+    align-content: start;
+  }
+
+  .saga-hero-azoth,
+  .azoth-poster-figure {
+    order: -1;
+    min-height: 38vh;
+    height: 38vh;
+    max-height: 360px;
+    flex: 0 0 auto;
+    margin: 0;
+  }
+
+  .saga-hero-copy,
+  .azoth-poster-copy {
+    flex: 1 0 auto;
+    justify-content: flex-start;
+    padding: 18px 20px calc(32px + 176px);
+    gap: 10px;
+    max-width: none;
+  }
+
+  .saga-hero h1,
+  .azoth-poster h1 {
+    font-size: clamp(2.6rem, 14vw, 4.2rem);
+    max-width: none;
+  }
+
+  .saga-hero .lede,
+  .azoth-poster .lede {
+    font-size: 1rem;
+  }
+
+  .saga-hero-credit,
+  .azoth-poster-credit {
+    right: 16px;
+    bottom: 12px;
+  }
+
+  footer.site .foot-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 28px 21px;
+  }
+}
+
+@media (max-width: 768px) {
+  .comic-wrap {
+    padding: 24px 13px 140px;
+  }
+
+  .comic-control-dock {
+    padding: 13px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dock-mode-toggle {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .dock-audio-actions {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .panel-info {
+    padding: 21px 13px;
+  }
+
+  .panel-audio-ctrl {
+    padding: 13px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .trailer-box,
+  .comic-soundboard-card {
+    padding: 20px 16px;
+  }
+}
+
+@media (max-width: 860px) {
+  .saga-hero-copy,
+  .azoth-poster-copy {
+    padding-bottom: calc(28px + 188px);
+  }
+}
+
+@media (max-width: 640px) {
+  .saga-hero-azoth,
+  .azoth-poster-figure {
+    height: min(32svh, 240px);
+    min-height: 188px;
+    max-height: 248px;
+  }
+
+  .saga-hero-copy,
+  .azoth-poster-copy {
+    padding: 12px 20px calc(24px + 188px);
+    gap: 8px;
+  }
+
+  .saga-hero h1,
+  .azoth-poster h1 {
+    font-size: clamp(2.3rem, 14vw, 3.1rem);
+  }
+
+  .saga-hero .lede,
+  .azoth-poster .lede,
+  .comic-synopsis {
+    font-size: 0.95rem;
+    line-height: 1.45;
+  }
+}
+
+@media (max-width: 560px) {
+  footer.site .foot-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

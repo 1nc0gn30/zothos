@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZOTHOS // INTERACTIVE LIVE WALLPAPER & FX</title>
+  <title>ZOTHOS // INTERACTIVE VISUAL FX ENGINE</title>
   <style>
     * {
       box-sizing: border-box;
@@ -21,10 +21,10 @@
       --gold: #fbbf24;
       --purple: #a855f7;
       --fg: #ecfdf5;
-      --card-bg: rgba(2, 8, 18, 0.85);
+      --card-bg: rgba(2, 8, 18, 0.88);
       --border: rgba(0, 255, 136, 0.4);
       --glow: 0 0 25px rgba(0, 255, 136, 0.5);
-      --font-mono: 'JetBrains Mono', 'Share Tech Mono', monospace;
+      --font-mono: 'JetBrains Mono', 'Share Tech Mono', 'DejaVu Sans Mono', monospace;
     }
 
     [data-theme="ghost"] {
@@ -32,7 +32,7 @@
       --accent-rgb: 192, 132, 252;
       --accent2: #a855f7;
       --fg: #faf5ff;
-      --card-bg: rgba(12, 4, 24, 0.88);
+      --card-bg: rgba(12, 4, 24, 0.90);
       --border: rgba(168, 85, 247, 0.45);
       --glow: 0 0 25px rgba(168, 85, 247, 0.55);
     }
@@ -42,7 +42,7 @@
       --accent-rgb: 251, 191, 36;
       --accent2: #f59e0b;
       --fg: #fefce8;
-      --card-bg: rgba(20, 14, 2, 0.88);
+      --card-bg: rgba(20, 14, 2, 0.90);
       --border: rgba(251, 191, 36, 0.45);
       --glow: 0 0 25px rgba(251, 191, 36, 0.55);
     }
@@ -52,7 +52,7 @@
       --accent-rgb: 0, 243, 255;
       --accent2: #38bdf8;
       --fg: #f0fdfa;
-      --card-bg: rgba(2, 14, 28, 0.88);
+      --card-bg: rgba(2, 14, 28, 0.90);
       --border: rgba(0, 243, 255, 0.45);
       --glow: 0 0 25px rgba(0, 243, 255, 0.55);
     }
@@ -88,25 +88,121 @@
       background-size: 100% 3px, 4px 100%;
     }
 
-    /* Floating Draggable Filter & Control HUD */
+    /* Top Action Bar (Persistent Exit & Fullscreen) */
+    .top-action-bar {
+      position: absolute;
+      top: 16px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+      pointer-events: auto;
+    }
+
+    .brand-pill {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      padding: 8px 18px;
+      border-radius: 999px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6), var(--glow);
+    }
+
+    .brand-pill .pulse-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+      animation: pulse 1.5s infinite alternate;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.85); opacity: 0.7; }
+      100% { transform: scale(1.25); opacity: 1; }
+    }
+
+    .brand-pill span {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--accent);
+    }
+
+    .exit-controls {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-exit {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.6);
+      color: #fca5a5;
+      padding: 8px 18px;
+      border-radius: 999px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      backdrop-filter: blur(12px);
+      transition: all 0.2s ease;
+      box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-exit:hover {
+      background: rgba(239, 68, 68, 0.9);
+      color: #ffffff;
+      box-shadow: 0 0 25px rgba(239, 68, 68, 0.8);
+      transform: translateY(-1px);
+    }
+
+    .btn-fullscreen {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--fg);
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      cursor: pointer;
+      backdrop-filter: blur(12px);
+      transition: all 0.2s ease;
+    }
+
+    .btn-fullscreen:hover {
+      background: var(--accent);
+      color: #02040a;
+      box-shadow: var(--glow);
+    }
+
+    /* Floating Draggable Control HUD */
     .hud-window {
       position: absolute;
-      top: 40px;
-      right: 40px;
-      width: 360px;
+      top: 75px;
+      right: 20px;
+      width: 350px;
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: 12px;
-      backdrop-filter: blur(16px);
-      box-shadow: var(--glow), 0 20px 40px rgba(0, 0, 0, 0.8);
-      z-index: 10;
-      overflow: hidden;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), var(--glow);
+      z-index: 50;
+      transition: opacity 0.2s ease, transform 0.2s ease;
     }
 
     .hud-header {
       padding: 12px 16px;
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(255, 255, 255, 0.04);
       border-bottom: 1px solid var(--border);
+      border-radius: 12px 12px 0 0;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -116,25 +212,11 @@
     .hud-title {
       font-size: 12px;
       font-weight: bold;
-      letter-spacing: 1.5px;
       color: var(--accent);
+      letter-spacing: 1px;
       display: flex;
       align-items: center;
-      gap: 8px;
-    }
-
-    .ai-orb {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 10px var(--accent);
-      animation: pulse 1.8s infinite alternate;
-    }
-
-    @keyframes pulse {
-      0% { transform: scale(0.85); opacity: 0.6; }
-      100% { transform: scale(1.25); opacity: 1; }
+      gap: 6px;
     }
 
     .hud-body {
@@ -144,264 +226,373 @@
       gap: 14px;
     }
 
-    .control-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .control-label {
-      font-size: 11px;
+    .section-title {
+      font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 1px;
-      color: rgba(255, 255, 255, 0.7);
-      display: flex;
-      justify-content: space-between;
+      color: var(--accent2);
+      margin-bottom: 4px;
     }
 
     .mode-buttons {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 6px;
+      gap: 8px;
     }
 
     .btn {
-      padding: 8px 12px;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--fg);
+      padding: 8px;
       border-radius: 6px;
-      color: #fff;
-      font-family: inherit;
+      font-family: var(--font-mono);
       font-size: 11px;
-      font-weight: 600;
       cursor: pointer;
+      text-align: center;
       transition: all 0.2s ease;
     }
 
     .btn:hover {
-      background: rgba(var(--accent-rgb), 0.15);
+      background: rgba(0, 255, 136, 0.15);
       border-color: var(--accent);
       color: var(--accent);
     }
 
     .btn.active {
       background: var(--accent);
+      color: #02040a;
       border-color: var(--accent);
-      color: #000;
-      box-shadow: 0 0 12px var(--accent);
+      font-weight: bold;
+      box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.6);
     }
 
-    select, input[type="range"] {
-      width: 100%;
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 6px 10px;
-      color: var(--fg);
-      font-family: inherit;
-      font-size: 11px;
-      outline: none;
+    .theme-picker {
+      display: flex;
+      gap: 8px;
+    }
+
+    .theme-dot {
+      flex: 1;
+      height: 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .theme-dot:hover {
+      transform: scale(1.05);
+      border-color: #fff;
+    }
+
+    .dot-emerald { background: #00ff88; }
+    .dot-ghost { background: #c084fc; }
+    .dot-gold { background: #fbbf24; }
+    .dot-cyan { background: #00f3ff; }
+
+    .slider-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: #94a3b8;
     }
 
     input[type="range"] {
-      padding: 0;
-      accent-color: var(--accent);
+      -webkit-appearance: none;
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 2px;
+      outline: none;
     }
 
-    .agent-status-badge {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px 12px;
-      background: rgba(var(--accent-rgb), 0.1);
-      border: 1px dashed var(--accent);
-      border-radius: 6px;
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 0 8px var(--accent);
+    }
+
+    .hint-bar {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      padding: 6px 18px;
+      border-radius: 999px;
       font-size: 11px;
+      color: #94a3b8;
+      backdrop-filter: blur(12px);
+      z-index: 40;
+      pointer-events: none;
+    }
+    .hint-bar kbd {
+      background: rgba(255,255,255,0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--accent);
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
 
-  <div class="crt-overlay"></div>
+  <!-- Background Animated Visual Canvas -->
   <canvas id="canvas-container"></canvas>
+  <div class="crt-overlay"></div>
 
-  <!-- Interactive Draggable Control HUD -->
-  <div class="hud-window" id="hudWindow">
-    <div class="hud-header" id="hudHeader">
-      <div class="hud-title">
-        <div class="ai-orb"></div>
-        ZOTHOS // FX ENGINE
-      </div>
-      <span style="font-size: 10px; color: var(--accent); opacity: 0.8;">[DRAG]</span>
+  <!-- Persistent Top Action Bar -->
+  <div class="top-action-bar">
+    <div class="brand-pill">
+      <div class="pulse-dot"></div>
+      <span>ZOTHOS // FX ENGINE</span>
     </div>
-
-    <div class="hud-body">
-      <!-- Visual Engine Selector -->
-      <div class="control-group">
-        <div class="control-label"><span>Visual Mode</span></div>
-        <div class="mode-buttons">
-          <button class="btn active" onclick="setVisualMode('matrix')">Matrix Rain</button>
-          <button class="btn" onclick="setVisualMode('sacred')">Sacred 3D</button>
-          <button class="btn" onclick="setVisualMode('neural')">Neural Node</button>
-          <button class="btn" onclick="setVisualMode('datamosh')">Datamosh Glitch</button>
-        </div>
-      </div>
-
-      <!-- Color Theme Dropdown -->
-      <div class="control-group">
-        <div class="control-label"><span>Alchemical Color Theme</span></div>
-        <select id="themeSelect" onchange="changeTheme(this.value)">
-          <option value="emerald">Emerald Matrix (Cyber Green)</option>
-          <option value="cyan">Azoth Prime (Neon Cyan)</option>
-          <option value="ghost">NullAI Ghost (Tactical Violet)</option>
-          <option value="gold">Hermetic Crucible (Alchemical Gold)</option>
-        </select>
-      </div>
-
-      <!-- Sliders for Interactivity -->
-      <div class="control-group">
-        <div class="control-label">
-          <span>Glitch Intensity</span>
-          <span id="glitchVal">35%</span>
-        </div>
-        <input type="range" min="0" max="100" value="35" id="glitchSlider" oninput="updateSliders()">
-      </div>
-
-      <div class="control-group">
-        <div class="control-label">
-          <span>Simulation Speed</span>
-          <span id="speedVal">1.2x</span>
-        </div>
-        <input type="range" min="5" max="30" value="12" id="speedSlider" oninput="updateSliders()">
-      </div>
-
-      <!-- Live OS Agent Status Badge -->
-      <div class="agent-status-badge">
-        <span>⚡ OS Agent Core: <strong>ONLINE</strong></span>
-        <span style="color: var(--accent);">Layer 2 [CYBERPUPPET]</span>
-      </div>
+    <div class="exit-controls">
+      <button class="btn-fullscreen" onclick="toggleFullscreen()" title="Toggle Fullscreen (F)">⛶ FULLSCREEN</button>
+      <button class="btn-exit" onclick="exitLiveWallpaper()" title="Exit & Return to Desktop (ESC)">✕ EXIT ENGINE [ESC]</button>
     </div>
   </div>
 
+  <!-- Floating Draggable Control HUD -->
+  <div class="hud-window" id="hudWindow">
+    <div class="hud-header" id="hudHeader">
+      <div class="hud-title">⚡ VISUAL FILTER & MATRIX FX</div>
+      <span style="font-size: 10px; color: #94a3b8;">DRAG TO MOVE</span>
+    </div>
+    <div class="hud-body">
+      <div>
+        <div class="section-title">Visual Paradigm</div>
+        <div class="mode-buttons">
+          <button class="btn active" onclick="setVisualMode('matrix')">Matrix Rain</button>
+          <button class="btn" onclick="setVisualMode('sacred')">Sacred Azoth</button>
+          <button class="btn" onclick="setVisualMode('neural')">Neural Net</button>
+          <button class="btn" onclick="setVisualMode('datamosh')">Datamosh</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title">Aura Theme</div>
+        <div class="theme-picker">
+          <div class="theme-dot dot-emerald" onclick="changeTheme('emerald')" title="Emerald Matrix"></div>
+          <div class="theme-dot dot-ghost" onclick="changeTheme('ghost')" title="Ghost Amethyst"></div>
+          <div class="theme-dot dot-gold" onclick="changeTheme('gold')" title="Celestial Gold"></div>
+          <div class="theme-dot dot-cyan" onclick="changeTheme('cyan')" title="Electric Cyan"></div>
+        </div>
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-label">
+          <span>Glitch Intensity</span>
+          <span id="glitchVal">25%</span>
+        </div>
+        <input type="range" id="glitchSlider" min="0" max="100" value="25" oninput="updateSliders()">
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-label">
+          <span>Simulation Speed</span>
+          <span id="speedVal">1.0x</span>
+        </div>
+        <input type="range" id="speedSlider" min="2" max="30" value="10" oninput="updateSliders()">
+      </div>
+
+      <button class="btn-exit" style="width: 100%; justify-content: center; margin-top: 4px;" onclick="exitLiveWallpaper()">
+        RETURN TO DESKTOP
+      </button>
+    </div>
+  </div>
+
+  <!-- Bottom keyboard hints -->
+  <div class="hint-bar">
+    <kbd>ESC</kbd> Exit to Desktop &nbsp;•&nbsp; <kbd>SPACE</kbd> Toggle HUD &nbsp;•&nbsp; <kbd>F</kbd> Fullscreen &nbsp;•&nbsp; <kbd>1-4</kbd> Switch Mode
+  </div>
+
   <script>
+    // ── EXIT HANDLING ───────────────────────────────────────────────────────
+    function exitLiveWallpaper() {
+      // Clean window close / redirect or message
+      if (window.opener) {
+        window.close();
+      } else {
+        window.close();
+        // Fallback for browsers preventing window.close()
+        window.location.href = "about:blank";
+      }
+    }
+
+    // Global Keybinds
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' || e.key === 'q' || e.key === 'Q') {
+        exitLiveWallpaper();
+      } else if (e.key === 'f' || e.key === 'F') {
+        toggleFullscreen();
+      } else if (e.key === ' ' || e.code === 'Space') {
+        toggleHud();
+      } else if (e.key === '1') {
+        setVisualMode('matrix');
+      } else if (e.key === '2') {
+        setVisualMode('sacred');
+      } else if (e.key === '3') {
+        setVisualMode('neural');
+      } else if (e.key === '4') {
+        setVisualMode('datamosh');
+      }
+    });
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        }
+      }
+    }
+
+    function toggleHud() {
+      const hud = document.getElementById('hudWindow');
+      hud.style.display = hud.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // ── CANVAS ENGINE ──────────────────────────────────────────────────────
     const canvas = document.getElementById('canvas-container');
     const ctx = canvas.getContext('2d');
 
-    let width = canvas.width = window.innerWidth;
-    let height = canvas.height = window.innerHeight;
-
-    window.addEventListener('resize', () => {
+    let width, height;
+    function resize() {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
-      initMatrix();
-    });
+    }
+    window.addEventListener('resize', resize);
+    resize();
 
     let currentMode = 'matrix';
-    let glitchIntensity = 0.35;
-    let speed = 1.2;
-    let mouse = { x: width / 2, y: height / 2, radius: 120 };
+    let glitchIntensity = 0.25;
+    let speed = 1.0;
+    let mouse = { x: width / 2, y: height / 2, down: false };
 
     window.addEventListener('mousemove', (e) => {
       mouse.x = e.clientX;
       mouse.y = e.clientY;
     });
+    window.addEventListener('mousedown', () => mouse.down = true);
+    window.addEventListener('mouseup', () => mouse.down = false);
 
-    // ── MATRIX RAIN ENGINE ──────────────────────────────────────────────────
-    const runes = 'ｦｱｳｴｵｶｷｹｺｻｼｽｾｿﾀﾂﾃﾅﾆﾇﾈﾊﾋﾎﾏﾐﾑﾒﾓﾔﾕﾗﾘﾜ0123456789ZOTHΩΨΔΞΦΑΒΓ';
+    // ── 1. MATRIX RAIN ENGINE ──────────────────────────────────────────────
+    const chars = '0123456789ABCDEFѰ🜂🜄🜁🜃ZOTHOSNULLAIΩΨλπµ§±√';
     const fontSize = 16;
-    let columns = Math.floor(width / fontSize);
-    let drops = [];
+    let columns = Math.floor(window.innerWidth / fontSize);
+    let drops = Array(columns).fill(1);
 
-    function initMatrix() {
-      columns = Math.floor(width / fontSize);
-      drops = [];
-      for (let i = 0; i < columns; i++) {
-        drops[i] = Math.random() * -100;
-      }
-    }
-    initMatrix();
+    window.addEventListener('resize', () => {
+      columns = Math.floor(window.innerWidth / fontSize);
+      drops = Array(columns).fill(1);
+    });
 
     function drawMatrix() {
-      ctx.fillStyle = 'rgba(2, 4, 10, 0.12)';
+      ctx.fillStyle = `rgba(2, 4, 10, ${0.08 * speed})`;
       ctx.fillRect(0, 0, width, height);
 
-      const color = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#00ff88';
-      ctx.fillStyle = color;
-      ctx.font = `${fontSize}px monospace`;
+      const computedStyle = getComputedStyle(document.documentElement);
+      const accent = computedStyle.getPropertyValue('--accent').trim();
+
+      ctx.fillStyle = accent;
+      ctx.font = `${fontSize}px 'JetBrains Mono', monospace`;
 
       for (let i = 0; i < drops.length; i++) {
-        const char = runes[Math.floor(Math.random() * runes.length)];
+        const text = chars.charAt(Math.floor(Math.random() * chars.length));
         const x = i * fontSize;
         const y = drops[i] * fontSize;
 
-        // Mouse reactive displacement
-        const dx = x - mouse.x;
-        const dy = y - mouse.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        if (dist < mouse.radius) {
+        // Head glyph glows brighter
+        if (Math.random() > 0.85) {
           ctx.fillStyle = '#ffffff';
-          ctx.fillText(char, x + (Math.random() - 0.5) * 8, y + (Math.random() - 0.5) * 8);
         } else {
-          ctx.fillStyle = color;
-          ctx.fillText(char, x, y);
+          ctx.fillStyle = accent;
         }
+
+        ctx.fillText(text, x, y);
 
         if (y > height && Math.random() > 0.975) {
           drops[i] = 0;
         }
-        drops[i] += speed * 0.8;
+        drops[i] += speed * 0.7;
       }
     }
 
-    // ── SACRED GEOMETRY 3D ENGINE ──────────────────────────────────────────
+    // ── 2. SACRED GEOMETRY / AZOTH ENGINE ──────────────────────────────────
     let angle = 0;
     function drawSacred() {
-      ctx.fillStyle = 'rgba(2, 4, 10, 0.18)';
+      ctx.fillStyle = 'rgba(2, 4, 10, 0.15)';
       ctx.fillRect(0, 0, width, height);
 
-      const cx = width / 2;
-      const cy = height / 2;
-      const color = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
-
       ctx.save();
-      ctx.translate(cx, cy);
-      ctx.rotate(angle);
+      ctx.translate(width / 2, height / 2);
+      angle += 0.01 * speed;
 
-      // Metatron's Cube Rings
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 1.5;
-      ctx.shadowColor = color;
-      ctx.shadowBlur = 15;
+      const computedStyle = getComputedStyle(document.documentElement);
+      const accent = computedStyle.getPropertyValue('--accent').trim();
+      const accent2 = computedStyle.getPropertyValue('--accent2').trim();
 
-      const r = Math.min(width, height) * 0.22;
-      for (let i = 0; i < 6; i++) {
-        const a = (i * Math.PI) / 3;
-        const nx = Math.cos(a) * r;
-        const ny = Math.sin(a) * r;
-        ctx.beginPath();
-        ctx.arc(nx, ny, r, 0, Math.PI * 2);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(nx * 0.5, ny * 0.5, r * 0.5, 0, Math.PI * 2);
-        ctx.stroke();
-      }
-
+      // Outer Ring
       ctx.beginPath();
-      ctx.arc(0, 0, r * 1.5, 0, Math.PI * 2);
+      ctx.arc(0, 0, 180 + Math.sin(angle * 2) * 10, 0, Math.PI * 2);
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 2;
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = accent;
       ctx.stroke();
 
+      // Rotating Hexagons & Triangles
+      for (let k = 0; k < 3; k++) {
+        ctx.save();
+        ctx.rotate(angle * (k % 2 === 0 ? 1 : -1) + (k * Math.PI / 3));
+        ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+          const a = (i * Math.PI) / 3;
+          const r = 140 - k * 35;
+          const x = Math.cos(a) * r;
+          const y = Math.sin(a) * r;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.strokeStyle = k === 1 ? accent2 : accent;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Center Pulsing Core
+      ctx.beginPath();
+      ctx.arc(0, 0, 24 + Math.sin(angle * 4) * 8, 0, Math.PI * 2);
+      ctx.fillStyle = accent;
+      ctx.shadowBlur = 30;
+      ctx.shadowColor = accent;
+      ctx.fill();
+
       ctx.restore();
-      angle += 0.008 * speed;
     }
 
-    // ── NEURAL NODE LATTICE ────────────────────────────────────────────────
-    let particles = [];
-    for (let i = 0; i < 70; i++) {
+    // ── 3. NEURAL NETWORK ENGINE ───────────────────────────────────────────
+    const particleCount = 70;
+    const particles = [];
+    for (let i = 0; i < particleCount; i++) {
       particles.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
         vx: (Math.random() - 0.5) * 1.5,
         vy: (Math.random() - 0.5) * 1.5,
         size: Math.random() * 3 + 1
@@ -409,10 +600,11 @@
     }
 
     function drawNeural() {
-      ctx.fillStyle = 'rgba(2, 4, 10, 0.25)';
+      ctx.fillStyle = 'rgba(2, 4, 10, 0.2)';
       ctx.fillRect(0, 0, width, height);
 
-      const color = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+      const computedStyle = getComputedStyle(document.documentElement);
+      const color = computedStyle.getPropertyValue('--accent').trim();
 
       for (let i = 0; i < particles.length; i++) {
         let p = particles[i];
@@ -422,6 +614,15 @@
         if (p.x < 0 || p.x > width) p.vx *= -1;
         if (p.y < 0 || p.y > height) p.vy *= -1;
 
+        // Mouse attraction
+        const dx = mouse.x - p.x;
+        const dy = mouse.y - p.y;
+        const mdist = Math.hypot(dx, dy);
+        if (mdist < 200) {
+          p.x += (dx / mdist) * 2;
+          p.y += (dy / mdist) * 2;
+        }
+
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fillStyle = color;
@@ -430,11 +631,11 @@
         for (let j = i + 1; j < particles.length; j++) {
           let p2 = particles[j];
           let dist = Math.hypot(p.x - p2.x, p.y - p2.y);
-          if (dist < 140) {
+          if (dist < 150) {
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `rgba(0, 255, 136, ${1 - dist / 140})`;
+            ctx.strokeStyle = `rgba(0, 255, 136, ${1 - dist / 150})`;
             ctx.lineWidth = 0.8;
             ctx.stroke();
           }
@@ -442,18 +643,18 @@
       }
     }
 
-    // ── DATAMOSH / GLITCH ENGINE ───────────────────────────────────────────
+    // ── 4. DATAMOSH / GLITCH ENGINE ────────────────────────────────────────
     function drawDatamosh() {
       drawMatrix();
-      if (Math.random() < glitchIntensity * 0.4) {
+      if (Math.random() < glitchIntensity * 0.5) {
         const sliceH = Math.random() * 40 + 10;
         const sliceY = Math.random() * (height - sliceH);
-        const shift = (Math.random() - 0.5) * 40;
+        const shift = (Math.random() - 0.5) * 50;
 
         const imgData = ctx.getImageData(0, sliceY, width, sliceH);
         ctx.putImageData(imgData, shift, sliceY);
 
-        ctx.fillStyle = `rgba(0, 243, 255, 0.3)`;
+        ctx.fillStyle = `rgba(0, 243, 255, 0.4)`;
         ctx.fillRect(0, sliceY, width, 2);
       }
     }
@@ -474,7 +675,9 @@
     function setVisualMode(mode) {
       currentMode = mode;
       document.querySelectorAll('.mode-buttons .btn').forEach(btn => btn.classList.remove('active'));
-      event.target.classList.add('active');
+      const buttons = Array.from(document.querySelectorAll('.mode-buttons .btn'));
+      const target = buttons.find(b => b.textContent.toLowerCase().includes(mode.substring(0, 4)));
+      if (target) target.classList.add('active');
     }
 
     function changeTheme(theme) {

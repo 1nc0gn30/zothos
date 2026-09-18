@@ -1,0 +1,66 @@
+---
+import { Menu, X } from '@lucide/astro'
+---
+
+<dropdown-button>
+  <button
+    type="button"
+    aria-haspopup="true"
+    aria-expanded="false"
+    aria-controls="dropdown-menu"
+    aria-label="Open navigation"
+    class="inline-flex rounded-lg border border-gray-100 bg-gray-100 px-4 py-2"
+  >
+    <Menu data-open="false" class="size-4 data-[open=false]:inline data-[open=true]:hidden" />
+
+    <X data-open="false" class="size-4 data-[open=false]:hidden data-[open=true]:inline" />
+  </button>
+</dropdown-button>
+
+<script>
+  class DropdownButton extends HTMLElement {
+    private isOpen = false
+
+    private clickHandler: (() => void) | null = null
+
+    connectedCallback() {
+      const buttonEl = this.querySelector('button')
+
+      if (!buttonEl) {
+        return
+      }
+
+      const buttonSVGs = [...buttonEl.querySelectorAll('svg')]
+
+      this.clickHandler = () => {
+        this.isOpen = !this.isOpen
+
+        buttonEl.setAttribute('aria-expanded', String(this.isOpen))
+        buttonEl.setAttribute('aria-label', this.isOpen ? 'Close navigation' : 'Open navigation')
+
+        buttonSVGs.forEach((svgEl) => svgEl.setAttribute('data-open', String(this.isOpen)))
+
+        document.dispatchEvent(
+          new CustomEvent('dropdown:toggle', {
+            bubbles: true,
+            detail: { open: this.isOpen },
+          }),
+        )
+      }
+
+      buttonEl.addEventListener('click', this.clickHandler)
+    }
+
+    disconnectedCallback() {
+      const buttonEl = this.querySelector('button')
+
+      if (buttonEl && this.clickHandler) {
+        buttonEl.removeEventListener('click', this.clickHandler)
+
+        this.clickHandler = null
+      }
+    }
+  }
+
+  customElements.define('dropdown-button', DropdownButton)
+</script>

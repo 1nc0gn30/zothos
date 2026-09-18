@@ -1,0 +1,2073 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>vOS Sandbox & WebContainer — In-Browser WebAssembly IDE | Zoth Studio</title>
+  
+  <meta name="description" content="Sovereign in-browser WebAssembly Virtual OS, POSIX Shell, and zero-cloud WebContainer sandbox. Compile and run React 18, Three.js 3D, and Web Audio directly in client hardware." />
+  <meta name="keywords" content="vos sandbox, webcontainer, webassembly ide, in-browser compiler, react 18 wasm, threejs sandbox, client side posix shell, zoth studio" />
+  <link rel="canonical" href="https://zoth.nullai.tech/studio/vos-sandbox.html" />
+
+  <!-- OpenGraph / Social -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Zoth Studio" />
+  <meta property="og:title" content="vOS Sandbox & WebContainer — In-Browser WebAssembly IDE" />
+  <meta property="og:description" content="Run full-stack applications directly in your browser with zero cloud server cost using client-side WebAssembly POSIX virtual operating systems." />
+  <meta property="og:image" content="https://zoth.nullai.tech/assets/media/deck/tools.jpg" />
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="/assets/zoth-agent-avatars.css" />
+  <link rel="stylesheet" href="/assets/zoth-tailwind-magic.css" />
+  <link rel="stylesheet" href="/assets/zoth-nav.css?v=11" />
+  <link rel="stylesheet" href="/assets/zoth-theme.css?v=11" />
+  <link rel="stylesheet" href="/assets/zoth-guide.css" />
+  <link rel="stylesheet" href="/assets/vendor/xterm/xterm.css" />
+  <link rel="stylesheet" href="/assets/zoth-interactive-dock.css?v=11" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Figtree:wght@400;500;600;700;800&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Syne:wght@700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Core Scripts & Libraries -->
+  <script src="/assets/jszip.min.js"></script>
+  <script src="/assets/vendor/three.min.js"></script>
+  <script src="/assets/vendor/xterm/xterm.js"></script>
+  <script src="/assets/vendor/xterm/addon-fit.js"></script>
+  <script src="/assets/zoth-theme.js?v=11"></script>
+  <script src="/assets/zoth-nav.js?v=11"></script>
+  <script src="/assets/zoth-interactive-dock.js?v=11"></script>
+  <script src="/assets/zoth-workbench.js?v=11"></script>
+  <script src="/assets/zoth-vos-runtime.js"></script>
+
+  <style>
+    /* =============================================================================
+       ⚡ vOS WORKSTATION ULTRA LUXURY 4-THEME TOKENS & RESPONSIVE ENGINE
+       ============================================================================= */
+    :root {
+      --vos-bg: #03050a;
+      --vos-header-bg: rgba(9, 13, 24, 0.94);
+      --vos-panel-bg: rgba(10, 15, 28, 0.90);
+      --vos-panel-header: rgba(15, 22, 42, 0.95);
+      --vos-border: rgba(0, 240, 255, 0.18);
+      --vos-border-focus: rgba(0, 240, 255, 0.5);
+      --vos-cyan: #00f0ff;
+      --vos-cyan-glow: rgba(0, 240, 255, 0.35);
+      --vos-gold: #fbbf24;
+      --vos-gold-glow: rgba(251, 191, 36, 0.35);
+      --vos-magenta: #d946ef;
+      --vos-green: #34d399;
+      --vos-red: #f43f5e;
+      --vos-text: #f8fafc;
+      --vos-muted: #94a3b8;
+      --vos-editor-bg: #03060d;
+      --vos-gutter-bg: rgba(0, 0, 0, 0.45);
+      --vos-gutter-text: #475569;
+      --vos-mono: "JetBrains Mono", "IBM Plex Mono", monospace;
+      --vos-display: "Syne", sans-serif;
+    }
+
+    html[data-theme="light"] {
+      --vos-bg: #f8fafc;
+      --vos-header-bg: #ffffff;
+      --vos-panel-bg: #ffffff;
+      --vos-panel-header: #f1f5f9;
+      --vos-border: rgba(15, 23, 42, 0.12);
+      --vos-border-focus: rgba(2, 132, 199, 0.6);
+      --vos-cyan: #0284c7;
+      --vos-cyan-glow: rgba(2, 132, 199, 0.25);
+      --vos-gold: #d97706;
+      --vos-gold-glow: rgba(217, 119, 6, 0.25);
+      --vos-magenta: #9333ea;
+      --vos-green: #16a34a;
+      --vos-red: #dc2626;
+      --vos-text: #0f172a;
+      --vos-muted: #64748b;
+      --vos-editor-bg: #ffffff;
+      --vos-gutter-bg: #f8fafc;
+      --vos-gutter-text: #94a3b8;
+    }
+
+    html[data-theme="matrix"] {
+      --vos-bg: #020b04;
+      --vos-header-bg: rgba(3, 18, 7, 0.96);
+      --vos-panel-bg: rgba(2, 15, 6, 0.94);
+      --vos-panel-header: rgba(5, 26, 10, 0.98);
+      --vos-border: rgba(34, 197, 94, 0.25);
+      --vos-border-focus: rgba(34, 197, 94, 0.7);
+      --vos-cyan: #22c55e;
+      --vos-cyan-glow: rgba(34, 197, 94, 0.35);
+      --vos-gold: #a3e635;
+      --vos-gold-glow: rgba(163, 230, 53, 0.35);
+      --vos-text: #86efac;
+      --vos-muted: #4ade80;
+      --vos-editor-bg: #020b04;
+      --vos-gutter-bg: rgba(0, 20, 5, 0.65);
+      --vos-gutter-text: #166534;
+    }
+
+    html[data-theme="gold"] {
+      --vos-bg: #0d0a02;
+      --vos-header-bg: rgba(24, 18, 6, 0.96);
+      --vos-panel-bg: rgba(19, 14, 4, 0.94);
+      --vos-panel-header: rgba(30, 22, 7, 0.98);
+      --vos-border: rgba(251, 191, 36, 0.25);
+      --vos-border-focus: rgba(251, 191, 36, 0.7);
+      --vos-cyan: #f59e0b;
+      --vos-cyan-glow: rgba(245, 158, 11, 0.35);
+      --vos-gold: #fbbf24;
+      --vos-gold-glow: rgba(251, 191, 36, 0.35);
+      --vos-text: #fef3c7;
+      --vos-muted: #fde68a;
+      --vos-editor-bg: #0d0a02;
+      --vos-gutter-bg: rgba(30, 20, 5, 0.65);
+      --vos-gutter-text: #b45309;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      max-height: 100vh;
+      max-width: 100vw;
+      overflow-x: hidden;
+      overflow-y: hidden;
+      background: var(--vos-bg);
+      color: var(--vos-text);
+      font-family: var(--font-theme-body, "Figtree", sans-serif);
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+    }
+
+    footer.site {
+      display: none !important;
+    }
+
+    /* Top Action Bar & Telemetry HUD */
+    .vos-top-hud {
+      min-height: 52px;
+      flex-shrink: 0;
+      background: var(--vos-header-bg);
+      border-bottom: 1px solid var(--vos-border);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 16px;
+      gap: 12px;
+      z-index: 40;
+      flex-wrap: wrap;
+    }
+
+    .vos-brand-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .vos-status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: rgba(52, 211, 153, 0.12);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      font-family: var(--vos-mono);
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--vos-green);
+      letter-spacing: 0.04em;
+    }
+
+    .vos-status-chip .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--vos-green);
+      box-shadow: 0 0 8px var(--vos-green);
+      animation: vosPulse 1.8s infinite ease-in-out;
+    }
+
+    @keyframes vosPulse {
+      0%, 100% { opacity: 0.4; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.3); }
+    }
+
+    /* Template Switcher Matrix */
+    .vos-template-picker {
+      display: flex;
+      align-items: center;
+      background: var(--vos-panel-header);
+      border: 1px solid var(--vos-border);
+      border-radius: 8px;
+      padding: 3px;
+      gap: 3px;
+      overflow-x: auto;
+      max-width: 100%;
+    }
+
+    .vos-tmpl-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 11px;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      color: var(--vos-muted);
+      font-size: 0.74rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      font-family: var(--font-theme-body, "Figtree", sans-serif);
+    }
+
+    .vos-tmpl-btn:hover {
+      color: var(--vos-text);
+      background: rgba(125, 125, 125, 0.12);
+    }
+
+    .vos-tmpl-btn.active {
+      background: var(--vos-cyan);
+      color: #03050a;
+      font-weight: 700;
+      box-shadow: 0 0 12px var(--vos-cyan-glow);
+    }
+
+    /* Hardware Telemetry Gauges */
+    .vos-telemetry-cluster {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: var(--vos-mono);
+      flex-shrink: 0;
+    }
+
+    .vos-meter-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      font-size: 0.68rem;
+    }
+
+    .vos-meter-label {
+      color: var(--vos-muted);
+      font-size: 0.62rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      font-weight: 600;
+    }
+
+    .vos-meter-bar-wrap {
+      width: 64px;
+      height: 4px;
+      background: rgba(125, 125, 125, 0.2);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .vos-meter-fill {
+      height: 100%;
+      background: var(--vos-cyan);
+      box-shadow: 0 0 6px var(--vos-cyan);
+      transition: width 0.4s ease;
+    }
+
+    .vos-meter-fill.warn {
+      background: var(--vos-gold);
+      box-shadow: 0 0 6px var(--vos-gold);
+    }
+
+    /* Action Buttons */
+    .vos-actions-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .vos-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 11px;
+      border-radius: 6px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--vos-border);
+      background: rgba(125, 125, 125, 0.08);
+      color: var(--vos-text);
+      transition: all 0.2s ease;
+      font-family: var(--font-theme-body, "Figtree", sans-serif);
+      white-space: nowrap;
+    }
+
+    .vos-btn .btn-icon-svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+      vertical-align: middle;
+    }
+
+    .vos-btn:hover {
+      background: rgba(125, 125, 125, 0.16);
+      border-color: var(--vos-cyan);
+      color: var(--vos-cyan);
+    }
+
+    .vos-btn.primary {
+      background: var(--vos-cyan);
+      color: #03050a;
+      border-color: var(--vos-cyan);
+      font-weight: 700;
+      box-shadow: 0 0 10px var(--vos-cyan-glow);
+    }
+
+    .vos-btn.primary:hover {
+      box-shadow: 0 0 16px var(--vos-cyan);
+      transform: translateY(-1px);
+    }
+
+    .vos-btn.hibernated {
+      background: rgba(244, 63, 94, 0.15);
+      border-color: var(--vos-red);
+      color: var(--vos-red);
+    }
+
+    /* Master Workspace Split Grid */
+    .vos-workspace-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+      min-height: 0;
+      width: 100%;
+    }
+
+    .vos-split-top {
+      flex: 1;
+      display: flex;
+      min-height: 0;
+      border-bottom: 1px solid var(--vos-border);
+      width: 100%;
+    }
+
+    /* Left Pane: Explorer & Editor */
+    .vos-pane-editor-wrap {
+      width: 50%;
+      min-width: 320px;
+      display: flex;
+      border-right: 1px solid var(--vos-border);
+      background: var(--vos-panel-bg);
+      position: relative;
+      min-height: 0;
+    }
+
+    /* Explorer Sidebar */
+    .vos-file-tree-pane {
+      width: 180px;
+      flex-shrink: 0;
+      border-right: 1px solid var(--vos-border);
+      display: flex;
+      flex-direction: column;
+      background: var(--vos-panel-bg);
+    }
+
+    .vos-pane-header {
+      height: 34px;
+      padding: 0 10px;
+      background: var(--vos-panel-header);
+      border-bottom: 1px solid var(--vos-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--vos-muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-family: var(--vos-mono);
+      flex-shrink: 0;
+    }
+
+    .vos-tree-actions {
+      display: flex;
+      gap: 4px;
+    }
+
+    .vos-icon-btn {
+      width: 22px;
+      height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      color: var(--vos-muted);
+      cursor: pointer;
+      font-size: 0.75rem;
+      transition: all 0.15s ease;
+    }
+
+    .vos-icon-btn:hover {
+      background: rgba(125, 125, 125, 0.15);
+      color: var(--vos-text);
+      border-color: var(--vos-border);
+    }
+
+    .vos-file-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 6px 0;
+      list-style: none;
+      margin: 0;
+      font-family: var(--vos-mono);
+      font-size: 0.75rem;
+    }
+
+    .vos-tree-node {
+      padding: 4px 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      user-select: none;
+      color: var(--vos-muted);
+      border-left: 2px solid transparent;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .vos-tree-node:hover {
+      background: rgba(125, 125, 125, 0.08);
+      color: var(--vos-text);
+    }
+
+    .vos-tree-node.active {
+      background: rgba(0, 240, 255, 0.12);
+      color: var(--vos-cyan);
+      border-left-color: var(--vos-cyan);
+      font-weight: 700;
+    }
+
+    .vos-tree-node.is-dir {
+      color: var(--vos-text);
+      font-weight: 600;
+    }
+
+    /* Editor Main Container */
+    .vos-code-editor-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      background: var(--vos-editor-bg);
+    }
+
+    .vos-tabs-bar {
+      height: 34px;
+      background: var(--vos-panel-header);
+      border-bottom: 1px solid var(--vos-border);
+      display: flex;
+      align-items: center;
+      padding: 0 4px;
+      gap: 2px;
+      overflow-x: auto;
+      flex-shrink: 0;
+    }
+
+    .vos-tab {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: rgba(125, 125, 125, 0.06);
+      border: 1px solid transparent;
+      border-bottom: none;
+      border-radius: 6px 6px 0 0;
+      font-family: var(--vos-mono);
+      font-size: 0.72rem;
+      color: var(--vos-muted);
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .vos-tab:hover {
+      background: rgba(125, 125, 125, 0.12);
+      color: var(--vos-text);
+    }
+
+    .vos-tab.active {
+      background: var(--vos-editor-bg);
+      color: var(--vos-cyan);
+      border-color: var(--vos-border);
+      border-bottom: 1px solid var(--vos-editor-bg);
+      margin-bottom: -1px;
+      font-weight: 700;
+    }
+
+    .vos-tab-close {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      font-size: 0.65rem;
+      color: var(--vos-muted);
+      opacity: 0.7;
+      transition: all 0.15s ease;
+    }
+
+    .vos-tab-close:hover {
+      background: rgba(244, 63, 94, 0.25);
+      color: var(--vos-red);
+      opacity: 1;
+    }
+
+    .vos-tab-add-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--vos-muted);
+      cursor: pointer;
+      font-size: 0.85rem;
+      margin-left: 2px;
+      transition: all 0.15s ease;
+    }
+
+    .vos-tab-add-btn:hover {
+      background: rgba(125, 125, 125, 0.15);
+      color: var(--vos-cyan);
+      border-color: var(--vos-border);
+    }
+
+    .vos-tab-dirty-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--vos-gold);
+    }
+
+    .vos-editor-body {
+      flex: 1;
+      display: flex;
+      position: relative;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .vos-line-numbers {
+      width: 44px;
+      padding: 12px 6px;
+      background: var(--vos-gutter-bg);
+      border-right: 1px solid var(--vos-border);
+      color: var(--vos-gutter-text);
+      font-family: var(--vos-mono);
+      font-size: 0.76rem;
+      line-height: 1.5;
+      text-align: right;
+      user-select: none;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .vos-code-textarea {
+      flex: 1;
+      padding: 12px 14px;
+      background: transparent;
+      border: none;
+      outline: none;
+      resize: none;
+      color: var(--vos-text);
+      font-family: var(--vos-mono);
+      font-size: 0.76rem;
+      line-height: 1.5;
+      white-space: pre;
+      overflow: auto;
+      tab-size: 2;
+    }
+
+    /* Right Pane: Live Browser Preview */
+    .vos-pane-preview-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 320px;
+      background: var(--vos-bg);
+      position: relative;
+      min-height: 0;
+    }
+
+    .vos-preview-toolbar {
+      height: 34px;
+      background: var(--vos-panel-header);
+      border-bottom: 1px solid var(--vos-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .vos-url-bar {
+      flex: 1;
+      max-width: 460px;
+      height: 24px;
+      background: var(--vos-bg);
+      border: 1px solid var(--vos-border);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      font-family: var(--vos-mono);
+      font-size: 0.68rem;
+      color: var(--vos-muted);
+      gap: 6px;
+      overflow: hidden;
+    }
+
+    .vos-url-bar .ssl-icon {
+      color: var(--vos-green);
+      flex-shrink: 0;
+    }
+
+    .vos-url-bar span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .vos-device-toggles {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+
+    .vos-device-btn {
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--vos-muted);
+      font-size: 0.72rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: var(--font-theme-body, "Figtree", sans-serif);
+    }
+
+    .vos-device-btn.active, .vos-device-btn:hover {
+      background: rgba(125, 125, 125, 0.12);
+      color: var(--vos-text);
+      border-color: var(--vos-border);
+    }
+
+    .vos-preview-stage {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: auto;
+      background: radial-gradient(circle at 50% 50%, var(--vos-panel-bg) 0%, var(--vos-bg) 100%);
+      position: relative;
+      min-height: 0;
+    }
+
+    .vos-device-frame {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .vos-device-frame.tablet {
+      width: 768px;
+      height: 92%;
+      max-height: 800px;
+      border: 1px solid var(--vos-border);
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+      overflow: hidden;
+    }
+
+    .vos-device-frame.mobile {
+      width: 390px;
+      height: 94%;
+      max-height: 780px;
+      border: 2px solid var(--vos-cyan);
+      border-radius: 32px;
+      box-shadow: 0 25px 70px var(--vos-cyan-glow), 0 10px 40px rgba(0,0,0,0.5);
+      overflow: hidden;
+    }
+
+    .vos-preview-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #ffffff;
+      display: block;
+    }
+
+    /* Live Preview Console Logger Drawer */
+    .vos-preview-console-drawer {
+      height: 120px;
+      background: var(--vos-panel-bg);
+      border-top: 1px solid var(--vos-border);
+      display: flex;
+      flex-direction: column;
+      font-family: var(--vos-mono);
+      font-size: 0.7rem;
+      flex-shrink: 0;
+    }
+
+    .vos-console-header {
+      height: 24px;
+      background: var(--vos-panel-header);
+      padding: 0 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--vos-muted);
+      font-weight: 700;
+      border-bottom: 1px solid var(--vos-border);
+      flex-shrink: 0;
+    }
+
+    .vos-console-logs {
+      flex: 1;
+      overflow-y: auto;
+      padding: 6px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .vos-log-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      line-height: 1.4;
+    }
+
+    .vos-log-time { color: var(--vos-muted); flex-shrink: 0; }
+    .vos-log-level { font-weight: 700; flex-shrink: 0; }
+    .vos-log-level.info { color: var(--vos-cyan); }
+    .vos-log-level.warn { color: var(--vos-gold); }
+    .vos-log-level.error { color: var(--vos-red); }
+    .vos-log-msg { color: var(--vos-text); word-break: break-all; }
+
+    /* Bottom Pane: Interactive WebAssembly Terminal */
+    .vos-split-bottom {
+      height: 220px;
+      min-height: 140px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      background: var(--vos-bg);
+      border-top: 1px solid var(--vos-border);
+      position: relative;
+    }
+
+    .vos-terminal-toolbar {
+      height: 30px;
+      background: var(--vos-panel-header);
+      border-bottom: 1px solid var(--vos-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+      flex-shrink: 0;
+    }
+
+    .vos-terminal-title {
+      font-family: var(--vos-mono);
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--vos-cyan);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .vos-quick-chips {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .vos-chip {
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: rgba(125, 125, 125, 0.1);
+      border: 1px solid var(--vos-border);
+      font-family: var(--vos-mono);
+      font-size: 0.62rem;
+      color: var(--vos-muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .vos-chip:hover {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: var(--vos-cyan);
+      color: var(--vos-cyan);
+    }
+
+    .vos-terminal-container {
+      flex: 1;
+      padding: 6px 10px;
+      overflow: hidden;
+      position: relative;
+      max-width: 100%;
+    }
+
+    #terminal-container,
+    #terminal-container .xterm,
+    #terminal-container .xterm-screen,
+    #terminal-container .xterm-viewport {
+      max-width: 100% !important;
+      overflow-x: auto !important;
+    }
+
+    /* Modal / Dialog styling */
+    .vos-modal-backdrop {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .vos-modal-card {
+      background: var(--vos-panel-bg);
+      border: 1px solid var(--vos-border);
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      color: var(--vos-text);
+    }
+
+    .vos-modal-title { font-size: 1.1rem; font-weight: 800; margin-bottom: 12px; color: var(--vos-cyan); }
+    .vos-modal-input {
+      width: 100%;
+      padding: 8px 12px;
+      background: var(--vos-bg);
+      border: 1px solid var(--vos-border);
+      color: var(--vos-text);
+      border-radius: 6px;
+      font-family: var(--vos-mono);
+      margin-bottom: 16px;
+      outline: none;
+    }
+    .vos-modal-input:focus {
+      border-color: var(--vos-cyan);
+    }
+
+    /* Responsive Layout Overrides */
+    @media (max-width: 960px) {
+      html, body {
+        height: auto !important;
+        max-height: none !important;
+        overflow-y: auto !important;
+      }
+      .vos-workspace-main {
+        overflow-y: visible !important;
+        height: auto !important;
+      }
+      .vos-split-top {
+        flex-direction: column;
+        height: auto;
+        flex: none;
+      }
+      .vos-pane-editor-wrap {
+        width: 100%;
+        min-width: 0;
+        height: 420px;
+        border-right: none;
+        border-bottom: 1px solid var(--vos-border);
+      }
+      .vos-pane-preview-wrap {
+        width: 100%;
+        min-width: 0;
+        height: 460px;
+      }
+      .vos-split-bottom {
+        height: 260px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .vos-top-hud {
+        padding: 8px 10px;
+      }
+      .vos-telemetry-cluster {
+        display: none;
+      }
+      .vos-file-tree-pane {
+        width: 120px;
+      }
+      .vos-pane-editor-wrap {
+        height: 380px;
+      }
+      .vos-pane-preview-wrap {
+        height: 400px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .vos-file-tree-pane {
+        width: 105px;
+      }
+      .vos-tmpl-btn {
+        padding: 4px 8px;
+        font-size: 0.7rem;
+      }
+      .vos-btn {
+        padding: 4px 8px;
+        font-size: 0.7rem;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="/assets/zoth-footer.css" />
+<link href="/assets/zoth-hud-embedded.css" rel="stylesheet"/>
+<script src="/assets/zoth-hud-embedded.js"></script>
+</head>
+<body>
+
+  <!-- Top Navigation & Telemetry HUD -->
+                                                                  <header class="bar" id="topbar" role="banner">
+      <a class="brand js-hub" href="/" aria-label="Zoth Studio Home">
+        <div class="brand-emblem-wrap">
+          <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth Golden Z Emblem" width="34" height="34" class="brand-emblem-img" />
+          <span class="brand-emblem-halo"></span>
+        </div>
+        <span class="brand-text-wrap">
+          <strong>Zoth</strong>
+          <small>by NullAI</small>
+        </span>
+        <span class="brand-status-badge">SOVEREIGN</span>
+      </a>
+
+      <nav class="menu" aria-label="Primary navigation" role="navigation">
+        <a class="nav-link nav-for-everyone" href="/#for-everyone" data-tip="Zero-Code Showcases — How non-tech founders, creators & teams depend on Zoth.">✦ For You</a>
+
+        <!-- 🔮 Core AI -->
+        <div class="nav-dropdown" data-dropdown-id="core">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Core AI</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🔮 CORE AI ARCHITECTURE</span><span class="nav-item-badge">6 NODES</span></div>
+            <a href="/zoth/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+            <a href="/agents/"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+            <a href="/studio/consensus.html"><span class="nav-item-icon-box">⚔️</span><div class="nav-item-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+            <a href="/studio/swarm.html"><span class="nav-item-icon-box">🌐</span><div class="nav-item-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+            <a href="/memory/"><span class="nav-item-icon-box">🧠</span><div class="nav-item-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+            <a href="/zoth-world.html"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+          </div>
+        </div>
+
+        <!-- 🪐 Studio -->
+        <div class="nav-dropdown" data-dropdown-id="studio">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Studio</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu nav-dropdown-mega">
+            <div class="nav-dropdown-header"><span>🪐 14+ STUDIO WORKSTATIONS</span><span class="nav-item-badge">LOCAL DAGS</span></div>
+            <a href="/studio/cockpit.html"><span class="nav-item-icon-box">🪐</span><div class="nav-item-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+            <a href="/studio/cockpit.html?tool=webgen"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+            <a href="/studio/cockpit.html?tool=vos-sandbox"><span class="nav-item-icon-box">💻</span><div class="nav-item-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+            <a href="/studio/cockpit.html?tool=nexus-3d"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+            <a href="/studio/cockpit.html?tool=omnipost"><span class="nav-item-icon-box">🎬</span><div class="nav-item-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+            <a href="/studio/cockpit.html?tool=math-pillars"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+            <a href="/studio/cockpit.html?tool=secure-comms"><span class="nav-item-icon-box">🔒</span><div class="nav-item-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+            <a href="/studio/cockpit.html?tool=signal-bridge"><span class="nav-item-icon-box">📡</span><div class="nav-item-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+            <a href="/studio/cockpit.html?tool=web3-hub"><span class="nav-item-icon-box">🪙</span><div class="nav-item-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+            <a href="/studio/cockpit.html?tool=pets"><span class="nav-item-icon-box">💎</span><div class="nav-item-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+            <a href="/studio/cockpit.html?tool=tool-nexus"><span class="nav-item-icon-box">🛠️</span><div class="nav-item-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+          </div>
+        </div>
+
+        <!-- 🌌 Universe -->
+        <div class="nav-dropdown" data-dropdown-id="universe">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Universe</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🌌 UNIVERSE &amp; PUBLICATIONS</span><span class="nav-item-badge">STORIES</span></div>
+            <a href="/comic/"><span class="nav-item-icon-box">🎨</span><div class="nav-item-body"><strong>AZOTH Anime Comic</strong><small>Season 1 Ep 1: Genesis in Silicon Rain (Audio)</small></div><span class="nav-item-badge">AUDIO</span></a>
+            <a href="/social/"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+            <a href="/articles/"><span class="nav-item-icon-box">📜</span><div class="nav-item-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+            <a href="/article/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+            <a href="/ai-webgpu.html"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+            <a href="/adytum/"><span class="nav-item-icon-box">🏛️</span><div class="nav-item-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+          </div>
+        </div>
+
+        <!-- 📚 Docs & Vault -->
+        <div class="nav-dropdown" data-dropdown-id="docs">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Docs & Vault</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>📚 DOCUMENTATION &amp; SECURITY</span><span class="nav-item-badge">SPECS</span></div>
+            <a href="/docs/"><span class="nav-item-icon-box">📚</span><div class="nav-item-body"><strong>Master Documentation</strong><small>Port Topology, 1-Click Install Scripts & API Guide</small></div><span class="nav-item-badge">DOCS</span></a>
+            <a href="/vault/"><span class="nav-item-icon-box">🔐</span><div class="nav-item-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+            <a href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+            <a href="/faq.html"><span class="nav-item-icon-box">❓</span><div class="nav-item-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+          </div>
+        </div>
+
+        <!-- ⚡ Action Pills -->
+        <button type="button" class="nav-pill nav-telemetry-pill" title="View Live Studio Telemetry & Background Daemons" aria-label="Studio Telemetry Status">
+          <span class="tel-dot online"></span><span class="tel-text">6/6 DAEMONS</span>
+        </button>
+
+        <button type="button" class="nav-pill nav-pet-pill" title="Active Companion Spirit: Azoth (Click to Summon / Switch Mascot)" aria-label="Active Companion Spirit">
+          <span class="pet-emoji">🔮</span><span class="pet-name">Azoth</span>
+        </button>
+
+        <a class="nav-pill nav-deck-pill js-deck" href="http://127.0.0.1:8484/" title="Open Local Operator Deck (:8484)">
+          <span class="deck-pulse"></span><span>DECK</span>
+        </a>
+
+        <button type="button" class="nav-pill nav-palette-btn" title="Open Global Command Palette (Ctrl+K)" aria-label="Command Palette">
+          <span class="palette-icon">🔍</span><kbd class="nav-kbd">Ctrl+K</kbd>
+        </button>
+
+        <button type="button" class="nav-pill nav-annotate-btn" title="Toggle On-Screen Annotator & Feedback (Shift+A)" aria-label="Toggle Annotator">
+          <span class="annotate-icon">✏️</span><span class="annotate-text">Annotate</span><kbd class="nav-kbd">Shift+A</kbd>
+        </button>
+
+        <div class="nav-dropdown nav-theme-dropdown">
+          <button class="nav-dropdown-btn nav-theme-current-btn" type="button" aria-haspopup="true" aria-expanded="false" title="Switch Visual Theme (Shift+T)">
+            <span class="current-theme-swatch" style="background:#00f0ff;"></span>
+            <span class="current-theme-emoji">🌙</span>
+            <span class="current-theme-label">Dark Void</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+        </div>
+
+        <a class="nav-pill git" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank" title="GitHub Repository — Open Source code, Debian packages, and releases">
+          <span>🐙 GitHub ↗</span>
+        </a>
+      </nav>
+
+      <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Toggle navigation menu">
+        <span class="burger-lines"><span class="b-line b-1"></span><span class="b-line b-2"></span><span class="b-line b-3"></span></span>
+        <span class="burger-text">Menu</span>
+      </button>
+      <div class="zoth-scroll-progress" id="zoth-scroll-progress"></div>
+    </header>
+
+    <nav class="drawer" id="drawer" aria-label="Universal Mobile Navigation" role="navigation">
+      <div class="drawer-header-brand">
+        <div class="d-brand-left">
+          <div class="brand-emblem-wrap">
+            <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth" width="28" height="28" class="brand-emblem-img" />
+          </div>
+          <span class="d-brand-title"><strong>Zoth Studio</strong><small>v12.0 Sovereign</small></span>
+        </div>
+        <button type="button" class="drawer-telemetry-badge" title="View Diagnostics HUD">● 6/6 DAEMONS</button>
+        <button type="button" class="drawer-close-btn" aria-label="Close mobile menu">✕</button>
+      </div>
+
+      <div class="drawer-section drawer-tools-section">
+        <div class="drawer-heading">⚡ Quick Actions</div>
+        <div class="drawer-quick-tools-grid">
+          <button type="button" class="drawer-tool-pill drawer-palette-trigger"><span>🔍</span> Command Palette <kbd class="nav-kbd">Ctrl+K</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-annotate-trigger"><span>✏️</span> On-Screen Annotator <kbd class="nav-kbd">Shift+A</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-telemetry-trigger"><span>⚡</span> Telemetry HUD</button>
+          <button type="button" class="drawer-tool-pill drawer-audio-trigger"><span>🔊</span> Audio FX</button>
+        </div>
+      </div>
+
+      <div class="drawer-section drawer-theme-section">
+        <div class="drawer-heading">🎨 Visual Theme (16 Archetypes)</div>
+        <div class="drawer-search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="drawer-theme-search-input" placeholder="Search 16 themes..." autocomplete="off" />
+        </div>
+        <div class="theme-filter-chips drawer-filter-chips">
+          <button type="button" class="theme-chip-btn active" data-drawer-cat="all">All (16)</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="studio originals">Originals</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="frontier ai & tech">Frontier</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="developer archetypes">Dev</button>
+        </div>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">✦ Featured</div>
+        <a class="drawer-link drawer-hero-link" href="/#for-everyone"><span class="d-link-icon">✦</span><div class="d-link-body"><strong>For You (No-Code Showcases)</strong><small>How Non-Tech Founders, Creators & Teams Use Zoth</small></div><span class="nav-item-badge">SHOWCASE</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🔮 Core AI & Pantheon</div>
+        <a class="drawer-link" href="/zoth/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+        <a class="drawer-link" href="/agents/"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+        <a class="drawer-link" href="/studio/consensus.html"><span class="d-link-icon">⚔️</span><div class="d-link-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+        <a class="drawer-link" href="/studio/swarm.html"><span class="d-link-icon">🌐</span><div class="d-link-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+        <a class="drawer-link" href="/memory/"><span class="d-link-icon">🧠</span><div class="d-link-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+        <a class="drawer-link" href="/zoth-world.html"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🪐 Workstations & DAGs</div>
+        <a class="drawer-link" href="/studio/cockpit.html"><span class="d-link-icon">🪐</span><div class="d-link-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=webgen"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=vos-sandbox"><span class="d-link-icon">💻</span><div class="d-link-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=nexus-3d"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=omnipost"><span class="d-link-icon">🎬</span><div class="d-link-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=math-pillars"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=secure-comms"><span class="d-link-icon">🔒</span><div class="d-link-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=signal-bridge"><span class="d-link-icon">📡</span><div class="d-link-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=web3-hub"><span class="d-link-icon">🪙</span><div class="d-link-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=pets"><span class="d-link-icon">💎</span><div class="d-link-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=tool-nexus"><span class="d-link-icon">🛠️</span><div class="d-link-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📜 Universe & Research</div>
+        <a class="drawer-link" href="/comic/"><span class="d-link-icon">🎨</span><div class="d-link-body"><strong>AZOTH Anime Comic Series</strong><small>Season 1 Ep 1: Genesis in Silicon Rain</small></div><span class="nav-item-badge">AUDIO</span></a>
+        <a class="drawer-link" href="/social/"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+        <a class="drawer-link" href="/articles/"><span class="d-link-icon">📜</span><div class="d-link-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+        <a class="drawer-link" href="/article/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+        <a class="drawer-link" href="/ai-webgpu.html"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+        <a class="drawer-link" href="/adytum/"><span class="d-link-icon">🏛️</span><div class="d-link-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📚 Docs & Security</div>
+        <a class="drawer-link" href="/docs/"><span class="d-link-icon">📚</span><div class="d-link-body"><strong>Complete Documentation</strong><small>Port Topology, 1-Click Install Scripts & API</small></div><span class="nav-item-badge">DOCS</span></a>
+        <a class="drawer-link" href="/vault/"><span class="d-link-icon">🔐</span><div class="d-link-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+        <a class="drawer-link" href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+        <a class="drawer-link" href="/faq.html"><span class="d-link-icon">❓</span><div class="d-link-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+      </div>
+
+      <div class="drawer-section drawer-footer-section">
+        <a class="drawer-pill-link js-deck" href="http://127.0.0.1:8484/">💻 Launch Local Operator Deck (:8484)</a>
+        <a class="drawer-pill-link" href="https://github.com/NullAITech/zoth-studio" target="_blank" rel="noopener noreferrer">🐙 GitHub Source Repository ↗</a>
+        <a class="drawer-pill-link" href="/downloads/zoth-studio-android.apk">📱 Download Android App (.apk)</a>
+      </div>
+    </nav>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+  <!-- vOS Action Bar & Telemetry HUD -->
+  <div class="vos-top-hud" role="toolbar" aria-label="vOS Sandbox Controls">
+    <div class="vos-brand-group">
+      <div class="vos-status-chip" title="Virtual Operating System & POSIX WebContainer Kernel State">
+        <span class="dot"></span>
+        <span id="runtime-status-text">WASM CONTAINER LIVE</span>
+      </div>
+    </div>
+
+    <div class="vos-template-picker" role="tablist" aria-label="Starter Templates">
+      <button type="button" class="vos-tmpl-btn active" data-tmpl="html" title="Vanilla HTML5/CSS/JS Cyber SPA">
+        <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        Cyber SPA
+      </button>
+      <button type="button" class="vos-tmpl-btn" data-tmpl="react" title="React 18 + Vite JSX Prototype">
+        <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"></circle><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5M7.8 7.8c-2.3 2.3-2.3 6.1 0 8.5M16.2 16.2c2.3-2.3 2.3-6.1 0-8.5"></path></svg>
+        React 18
+      </button>
+      <button type="button" class="vos-tmpl-btn" data-tmpl="three" title="Three.js 3D Omniverse WebGL">
+        <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+        Three.js 3D
+      </button>
+      <button type="button" class="vos-tmpl-btn" data-tmpl="synth" title="Web Audio PolySynth 808">
+        <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+        Web Audio
+      </button>
+    </div>
+
+    <div class="vos-telemetry-cluster" aria-label="Hardware Resource Emulation">
+      <div class="vos-meter-item" title="Simulated CPU Allocation">
+        <div class="vos-meter-label"><span>CPU</span><span id="meter-cpu-val">0.0%</span></div>
+        <div class="vos-meter-bar-wrap"><div class="vos-meter-fill" id="meter-cpu-fill" style="width:0%;"></div></div>
+      </div>
+      <div class="vos-meter-item" title="In-Memory VFS & WASM Heap">
+        <div class="vos-meter-label"><span>RAM</span><span id="meter-ram-val">0.0 MB</span></div>
+        <div class="vos-meter-bar-wrap"><div class="vos-meter-fill" id="meter-ram-fill" style="width:0%;"></div></div>
+      </div>
+      <div class="vos-meter-item" title="POSIX Virtual File System Inodes">
+        <div class="vos-meter-label"><span>VFS</span><span id="meter-vfs-val">0 files</span></div>
+        <div class="vos-meter-bar-wrap"><div class="vos-meter-fill" id="meter-vfs-fill" style="width:0%;"></div></div>
+      </div>
+    </div>
+
+    <div class="vos-actions-group">
+      <button type="button" class="vos-btn primary" id="btn-run" title="Run &amp; Compile Live Preview (Ctrl+Enter)">
+        <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+        Run
+      </button>
+      <button type="button" class="vos-btn" id="btn-hibernate" title="Scale-to-Zero CPU Throttling">
+        <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        Scale-to-Zero
+      </button>
+      <button type="button" class="vos-btn" id="btn-cruft-sweep" title="Sweep VFS Cruft &amp; Temp Inodes" onclick="sweepCruftVFS()">
+        <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+        Sweep Cruft
+      </button>
+      <button type="button" class="vos-btn" id="btn-snapshot" title="Export VFS State to JSON">
+        <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+        Snapshot
+      </button>
+      <button type="button" class="vos-btn" id="btn-zip" title="Download Full Project ZIP Archive">
+        <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        Export ZIP
+      </button>
+    </div>
+  </div>
+
+  <!-- Master Split Workstation -->
+  <main class="vos-workspace-main">
+    
+    <!-- Split Top: Editor & Live Preview -->
+    <div class="vos-split-top">
+      
+      <!-- Left Pane: File Explorer & Code Editor -->
+      <section class="vos-pane-editor-wrap">
+        
+        <!-- File Explorer -->
+        <div class="vos-file-tree-pane">
+          <div class="vos-pane-header">
+            <span>Explorer</span>
+            <div class="vos-tree-actions">
+              <button class="vos-icon-btn" id="btn-new-file" title="New File">
+                <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              </button>
+              <button class="vos-icon-btn" id="btn-refresh-tree" title="Refresh Tree">
+                <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+              </button>
+            </div>
+          </div>
+          <ul class="vos-file-list" id="file-tree-list">
+            <!-- Dynamically populated by VFS tree -->
+          </ul>
+        </div>
+
+        <!-- Code Editor -->
+        <div class="vos-code-editor-pane">
+          <div class="vos-tabs-bar" id="editor-tabs">
+            <div class="vos-tab active" data-file="/project/index.html">
+              <span>index.html</span>
+            </div>
+          </div>
+          <div class="vos-editor-body">
+            <div class="vos-line-numbers" id="line-numbers">1</div>
+            <textarea class="vos-code-textarea" id="code-editor" spellcheck="false" autocomplete="off"></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Pane: Live Browser Preview -->
+      <section class="vos-pane-preview-wrap">
+        <div class="vos-preview-toolbar">
+          <div class="vos-url-bar">
+            <span class="ssl-icon">🔒</span>
+            <span id="preview-url-text">http://localhost:5173/</span>
+          </div>
+
+          <div class="vos-device-toggles">
+            <button class="vos-device-btn active" data-mode="desktop" title="Desktop Viewport">
+              <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+              Desktop
+            </button>
+            <button class="vos-device-btn" data-mode="tablet" title="Tablet (768px)">
+              <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+              Tablet
+            </button>
+            <button class="vos-device-btn" data-mode="mobile" title="Mobile Phone (390px)">
+              <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+              Mobile
+            </button>
+          </div>
+
+          <div style="display: flex; gap: 4px;">
+            <button class="vos-icon-btn" id="btn-refresh-preview" title="Hot Reload Viewport">
+              <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+            </button>
+            <button class="vos-icon-btn" id="btn-popout" title="Pop-out Preview in New Tab">
+              <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Preview Viewport Frame -->
+        <div class="vos-preview-stage">
+          <div class="vos-device-frame" id="device-frame">
+            <iframe id="preview-iframe" class="vos-preview-iframe" sandbox="allow-scripts allow-modals allow-same-origin allow-forms"></iframe>
+          </div>
+        </div>
+
+        <!-- Live Console Logs Drawer -->
+        <div class="vos-preview-console-drawer">
+          <div class="vos-console-header">
+            <span>⚡ Sandbox Console Stream</span>
+            <button class="vos-icon-btn" id="btn-clear-console" title="Clear Console" style="font-size:0.65rem;">
+              <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+          </div>
+          <div class="vos-console-logs" id="console-log-stream">
+            <div class="vos-log-row">
+              <span class="vos-log-time">00:00:00</span>
+              <span class="vos-log-level info">[vOS]</span>
+              <span class="vos-log-msg">WebContainer process sandbox initialized. Ready for evaluation.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Split Bottom: Interactive WebAssembly Terminal (xterm.js) -->
+    <section class="vos-split-bottom">
+      <div class="vos-terminal-toolbar">
+        <div class="vos-terminal-title">
+          <span>⚡ WebAssembly Terminal (xterm.js)</span>
+          <span style="color:var(--vos-muted);font-weight:400;">operator@zoth-vos:~/project</span>
+        </div>
+        <div class="vos-quick-chips">
+          <span class="vos-chip" data-cmd="npm run dev">npm run dev</span>
+          <span class="vos-chip" data-cmd="bench">bench</span>
+          <span class="vos-chip" data-cmd="tree">tree</span>
+          <span class="vos-chip" data-cmd="top">top</span>
+          <span class="vos-chip" data-cmd="clear">clear</span>
+        </div>
+      </div>
+      <div class="vos-terminal-container" id="terminal-container"></div>
+    </section>
+  </main>
+
+  <!-- New File Modal Dialog -->
+  <div class="vos-modal-backdrop" id="new-file-modal">
+    <div class="vos-modal-card">
+      <h3 class="vos-modal-title">Create New Virtual File</h3>
+      <p style="font-size:0.8rem;color:var(--vos-muted);margin-bottom:12px;">Enter file path relative to /project (e.g. src/Button.jsx or style.css):</p>
+      <input type="text" id="modal-filename-input" class="vos-modal-input" placeholder="src/Component.jsx" />
+      <div style="display:flex;justify-content:flex-end;gap:8px;">
+        <button class="vos-btn" id="btn-modal-cancel">Cancel</button>
+        <button class="vos-btn primary" id="btn-modal-create">Create File</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Workstation Controller Script -->
+  <script>
+    (function () {
+      'use strict';
+
+      // 1. Initialize Master vOS Runtime
+      var runtime = new window.ZothVOSRuntime();
+      window.__ZOTH_VOS_INSTANCE__ = runtime;
+
+      var activeFilePath = '/project/index.html';
+      var editorEl = document.getElementById('code-editor');
+      var lineNumbersEl = document.getElementById('line-numbers');
+      var fileTreeEl = document.getElementById('file-tree-list');
+      var previewIframe = document.getElementById('preview-iframe');
+      var consoleStreamEl = document.getElementById('console-log-stream');
+      var deviceFrame = document.getElementById('device-frame');
+
+      // 2. Setup Interactive xterm.js Terminal with Multi-Theme Support
+      var term = null;
+      var fitAddon = null;
+      var currentLineBuffer = '';
+      var promptPrefix = '\x1b[1;36moperator@zoth-vos\x1b[0m:\x1b[1;34m~/project\x1b[0m$ ';
+
+      function getTerminalTheme(themeId) {
+        var t = themeId || document.documentElement.getAttribute('data-theme') || 'dark';
+        if (t === 'matrix') {
+          return {
+            background: '#020b04',
+            foreground: '#86efac',
+            cursor: '#22c55e',
+            selectionBackground: 'rgba(34, 197, 94, 0.3)',
+            black: '#020b04',
+            red: '#f87171',
+            green: '#22c55e',
+            yellow: '#a3e635',
+            blue: '#38bdf8',
+            magenta: '#c084fc',
+            cyan: '#22c55e',
+            white: '#86efac',
+            brightGreen: '#4ade80'
+          };
+        } else if (t === 'gold') {
+          return {
+            background: '#0d0a02',
+            foreground: '#fef3c7',
+            cursor: '#fbbf24',
+            selectionBackground: 'rgba(251, 191, 36, 0.3)',
+            black: '#0d0a02',
+            red: '#f87171',
+            green: '#34d399',
+            yellow: '#fbbf24',
+            blue: '#38bdf8',
+            magenta: '#c084fc',
+            cyan: '#f59e0b',
+            white: '#fef3c7',
+            brightYellow: '#fde68a'
+          };
+        } else if (t === 'light') {
+          return {
+            background: '#ffffff',
+            foreground: '#0f172a',
+            cursor: '#0284c7',
+            selectionBackground: 'rgba(2, 132, 199, 0.25)',
+            black: '#0f172a',
+            red: '#dc2626',
+            green: '#16a34a',
+            yellow: '#d97706',
+            blue: '#2563eb',
+            magenta: '#9333ea',
+            cyan: '#0284c7',
+            white: '#ffffff',
+            brightCyan: '#0ea5e9'
+          };
+        }
+        // Default dark
+        return {
+          background: '#020409',
+          foreground: '#f1f5f9',
+          cursor: '#00f0ff',
+          selectionBackground: 'rgba(0, 240, 255, 0.3)',
+          black: '#0a0f1d',
+          red: '#f43f5e',
+          green: '#34d399',
+          yellow: '#fbbf24',
+          blue: '#38bdf8',
+          magenta: '#c084fc',
+          cyan: '#00f0ff',
+          white: '#ffffff'
+        };
+      }
+
+      function initTerminal() {
+        var container = document.getElementById('terminal-container');
+        if (!window.Terminal || !container) return;
+
+        term = new window.Terminal({
+          cursorBlink: true,
+          cursorStyle: 'bar',
+          fontSize: 12,
+          lineHeight: 1.25,
+          fontFamily: '"JetBrains Mono", "IBM Plex Mono", monospace',
+          theme: getTerminalTheme(),
+          allowTransparency: true,
+          convertEol: true
+        });
+
+        if (window.FitAddon && window.FitAddon.FitAddon) {
+          fitAddon = new window.FitAddon.FitAddon();
+          term.loadAddon(fitAddon);
+        }
+
+        term.open(container);
+        setTimeout(function () {
+          if (fitAddon) {
+            try { fitAddon.fit(); } catch(e) {}
+          }
+        }, 150);
+
+        window.addEventListener('resize', function () {
+          if (fitAddon) {
+            try { fitAddon.fit(); } catch(e) {}
+          }
+        });
+
+        // Theme switch listener
+        window.addEventListener('zoth-theme-change', function (e) {
+          if (term) {
+            term.options.theme = getTerminalTheme(e.detail && e.detail.theme);
+          }
+        });
+
+        term.writeln('\x1b[1;36m⚡ Zoth Sovereign vOS & WebContainer Environment [WASM v1.0]\x1b[0m');
+        term.writeln('Type \x1b[1;33mhelp\x1b[0m for available commands, or click starter templates above.');
+        term.write(promptPrefix);
+
+        term.onData(function (data) {
+          if (data === '\r') { // Enter
+            term.write('\r\n');
+            var cmd = currentLineBuffer;
+            currentLineBuffer = '';
+            runtime.shell.execute(cmd, function (chunk) {
+              term.write(chunk);
+            }).then(function () {
+              term.write(promptPrefix);
+            });
+          } else if (data === '\u007F' || data === '\b') { // Backspace
+            if (currentLineBuffer.length > 0) {
+              currentLineBuffer = currentLineBuffer.slice(0, -1);
+              term.write('\b \b');
+            }
+          } else if (data === '\u0003') { // Ctrl+C
+            term.write('^C\r\n');
+            currentLineBuffer = '';
+            term.write(promptPrefix);
+          } else if (data >= ' ') {
+            currentLineBuffer += data;
+            term.write(data);
+          }
+        });
+      }
+
+      initTerminal();
+
+      // 3. UI Helpers & Line Numbers Sync
+      function updateLineNumbers() {
+        if (!editorEl || !lineNumbersEl) return;
+        var lines = editorEl.value.split('\n').length;
+        var nums = [];
+        for (var i = 1; i <= lines; i++) nums.push(i);
+        lineNumbersEl.innerHTML = nums.join('<br>');
+      }
+
+      // Multi-File Open Tabs Collection
+      var openTabs = ['/project/index.html', '/project/styles.css', '/project/app.js', '/project/README.md'];
+
+      // Ensure standard default VFS files exist
+      function ensureDefaultVFSFiles() {
+        if (!runtime.vfs.exists('/project/index.html')) {
+          runtime.vfs.writeFile('/project/index.html', '<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="utf-8" />\n  <meta name="viewport" content="width=device-width, initial-scale=1.0" />\n  <title>Zoth Sovereign App</title>\n  <link rel="stylesheet" href="styles.css" />\n</head>\n<body>\n  <div class="app-card">\n    <div class="badge">⚡ ZERO-CLOUD WASM CONTAINER</div>\n    <h1>Zoth Sovereign Workstation</h1>\n    <p>Client-side VFS live bundling active with index.html, styles.css, app.js, and README.md.</p>\n    <div class="counter-box">\n      <button id="btn-count" class="btn">⚡ Telemetry Pulse (<span id="count-val">0</span>)</button>\n      <button id="btn-reset" class="btn secondary">Reset</button>\n    </div>\n    <div id="log-output" class="log-box">System online. Listening for local client events...</div>\n  </div>\n  <script src="app.js"><' + '/script>\n</body>\n</html>');
+        }
+
+        if (!runtime.vfs.exists('/project/styles.css')) {
+          runtime.vfs.writeFile('/project/styles.css', '/* Zoth Sovereign App Stylesheet */\n:root {\n  --bg: #04060d;\n  --surface: #0a0f1d;\n  --cyan: #00f0ff;\n  --gold: #fbbf24;\n  --text: #f8fafc;\n  --muted: #94a3b8;\n  --border: rgba(0, 240, 255, 0.2);\n}\n\nbody {\n  margin: 0;\n  padding: 24px;\n  background: radial-gradient(circle at top, #091124, var(--bg));\n  color: var(--text);\n  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  min-height: calc(100vh - 48px);\n}\n\n.app-card {\n  background: var(--surface);\n  border: 1px solid var(--border);\n  border-radius: 16px;\n  padding: 28px;\n  max-width: 480px;\n  width: 100%;\n  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 240, 255, 0.1);\n  text-align: center;\n}\n\n.badge {\n  display: inline-block;\n  font-family: monospace;\n  font-size: 0.72rem;\n  font-weight: 700;\n  color: var(--cyan);\n  background: rgba(0, 240, 255, 0.1);\n  border: 1px solid rgba(0, 240, 255, 0.3);\n  padding: 4px 10px;\n  border-radius: 20px;\n  margin-bottom: 12px;\n}\n\nh1 {\n  margin: 0 0 8px;\n  font-size: 1.4rem;\n  color: #ffffff;\n  font-weight: 800;\n}\n\np {\n  color: var(--muted);\n  font-size: 0.88rem;\n  line-height: 1.5;\n  margin-bottom: 20px;\n}\n\n.counter-box {\n  display: flex;\n  gap: 8px;\n  justify-content: center;\n  margin-bottom: 16px;\n}\n\n.btn {\n  background: var(--cyan);\n  color: #03050a;\n  border: none;\n  border-radius: 8px;\n  padding: 10px 18px;\n  font-weight: 700;\n  cursor: pointer;\n  transition: transform 0.15s ease, box-shadow 0.15s ease;\n}\n\n.btn:hover {\n  transform: translateY(-1px);\n  box-shadow: 0 0 14px rgba(0, 240, 255, 0.4);\n}\n\n.btn.secondary {\n  background: rgba(255, 255, 255, 0.08);\n  color: var(--text);\n  border: 1px solid rgba(255, 255, 255, 0.15);\n}\n\n.log-box {\n  background: rgba(0, 0, 0, 0.4);\n  border: 1px solid rgba(255, 255, 255, 0.08);\n  border-radius: 8px;\n  padding: 10px;\n  font-family: monospace;\n  font-size: 0.75rem;\n  color: var(--gold);\n  text-align: left;\n}');
+        }
+
+        if (!runtime.vfs.exists('/project/app.js')) {
+          runtime.vfs.writeFile('/project/app.js', '// Zoth Sovereign In-Browser Virtual Execution Engine\n(function() {\n  console.log("[vOS Runtime] app.js initialized successfully.");\n  let count = 0;\n  const btn = document.getElementById("btn-count");\n  const btnReset = document.getElementById("btn-reset");\n  const countVal = document.getElementById("count-val");\n  const logEl = document.getElementById("log-output");\n\n  if (btn) {\n    btn.addEventListener("click", function() {\n      count++;\n      if (countVal) countVal.textContent = count;\n      if (logEl) logEl.textContent = "[Event " + count + "] Telemetry pulse fired at " + new Date().toLocaleTimeString();\n      console.log("Telemetry pulse count:", count);\n    });\n  }\n\n  if (btnReset) {\n    btnReset.addEventListener("click", function() {\n      count = 0;\n      if (countVal) countVal.textContent = 0;\n      if (logEl) logEl.textContent = "Telemetry reset to 0.";\n      console.log("Telemetry counter reset.");\n    });\n  }\n})();');
+        }
+
+        if (!runtime.vfs.exists('/project/README.md')) {
+          runtime.vfs.writeFile('/project/README.md', '# ⚡ Zoth Sovereign WebContainer Virtual OS\n\nWelcome to the sovereign, zero-cloud in-browser development environment.\n\n## 🚀 Virtual Filesystem (VFS)\n- `index.html` — Main application markup and layout.\n- `styles.css` — Custom styling & CSS variables.\n- `app.js` — Reactive client-side logic & event handlers.\n- `README.md` — Documentation and architectural specifications.\n\n## 🔒 Security & Privacy Invariants\n1. **Zero Cloud Telemetry**: All code compilation and AST parsing run entirely in your local browser sandbox.\n2. **Deterministic Bundling**: Inlines CSS and JS assets cleanly with no external network requests.\n3. **Scale-to-Zero**: Hibernates background execution when tab is inactive to preserve 0.0% CPU.');
+        }
+      }
+
+      ensureDefaultVFSFiles();
+
+      function renderTabs() {
+        var tabsEl = document.getElementById('editor-tabs');
+        if (!tabsEl) return;
+        var html = '';
+        openTabs.forEach(function(p) {
+          var isAct = p === activeFilePath;
+          var fileName = p.split('/').pop();
+          var icon = fileName.endsWith('.html') ? '🌐' : (fileName.endsWith('.css') ? '🎨' : (fileName.endsWith('.js') || fileName.endsWith('.jsx') ? '⚡' : (fileName.endsWith('.md') ? '📖' : '📄')));
+          html += '<div class="vos-tab' + (isAct ? ' active' : '') + '" data-file="' + p + '">';
+          html += '  <span>' + icon + ' ' + fileName + '</span>';
+          if (openTabs.length > 1) {
+            html += '  <span class="vos-tab-close" data-close="' + p + '" title="Close Tab">✕</span>';
+          }
+          html += '</div>';
+        });
+        html += '<button class="vos-tab-add-btn" id="btn-tab-add-file" title="New File Tab">+</button>';
+        tabsEl.innerHTML = html;
+
+        // Tab click listeners
+        tabsEl.querySelectorAll('.vos-tab').forEach(function(el) {
+          el.addEventListener('click', function(e) {
+            if (e.target.classList.contains('vos-tab-close')) return;
+            var f = el.getAttribute('data-file');
+            if (f) loadFileIntoEditor(f);
+          });
+        });
+
+        // Tab close listeners
+        tabsEl.querySelectorAll('.vos-tab-close').forEach(function(closeBtn) {
+          closeBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var targetPath = closeBtn.getAttribute('data-close');
+            closeTab(targetPath);
+          });
+        });
+
+        // Add file button in tabs
+        var addBtn = document.getElementById('btn-tab-add-file');
+        if (addBtn) {
+          addBtn.addEventListener('click', function() {
+            var modal = document.getElementById('new-file-modal');
+            var input = document.getElementById('modal-filename-input');
+            if (modal && input) {
+              modal.style.display = 'flex';
+              input.value = '';
+              input.focus();
+            }
+          });
+        }
+      }
+
+      function openFileTab(path) {
+        if (!openTabs.includes(path)) {
+          openTabs.push(path);
+        }
+        loadFileIntoEditor(path);
+      }
+
+      function closeTab(path) {
+        var idx = openTabs.indexOf(path);
+        if (idx !== -1) {
+          openTabs.splice(idx, 1);
+          if (activeFilePath === path) {
+            var nextPath = openTabs[Math.min(idx, openTabs.length - 1)] || '/project/index.html';
+            loadFileIntoEditor(nextPath);
+          } else {
+            renderTabs();
+          }
+        }
+      }
+
+      function deleteFileFromVFS(path) {
+        if (!confirm('Are you sure you want to delete ' + path + '?')) return;
+        runtime.vfs.deleteFile(path);
+        closeTab(path);
+        renderFileTree();
+        triggerLivePreview();
+        if (term) {
+          term.writeln('\r\n\x1b[1;31m[VFS] Deleted file: ' + path + '\x1b[0m');
+          term.write(promptPrefix);
+        }
+      }
+
+      function loadFileIntoEditor(path) {
+        if (!runtime.vfs.exists(path)) return;
+        activeFilePath = path;
+        if (!openTabs.includes(path)) {
+          openTabs.push(path);
+        }
+        var content = runtime.vfs.readFile(path);
+        if (editorEl) {
+          editorEl.value = content;
+          updateLineNumbers();
+        }
+
+        renderTabs();
+        renderFileTree();
+      }
+
+      function renderFileTree() {
+        if (!fileTreeEl) return;
+        var tree = runtime.vfs.getTree('/project');
+        if (!tree) return;
+
+        var html = '';
+        function buildTreeHtml(node, depth) {
+          var padding = depth * 14 + 10;
+          if (node.type === 'dir') {
+            html += '<li class="vos-tree-node is-dir" style="padding-left:' + padding + 'px;">📁 ' + node.name + '</li>';
+            if (node.children) {
+              node.children.forEach(function (child) {
+                buildTreeHtml(child, depth + 1);
+              });
+            }
+          } else {
+            var isAct = node.path === activeFilePath;
+            var icon = node.name.endsWith('.html') ? '🌐' : (node.name.endsWith('.css') ? '🎨' : (node.name.endsWith('.jsx') || node.name.endsWith('.js') ? '⚡' : (node.name.endsWith('.md') ? '📖' : '📄')));
+            html += '<li class="vos-tree-node' + (isAct ? ' active' : '') + '" data-path="' + node.path + '" style="padding-left:' + padding + 'px; justify-content:space-between; display:flex;">';
+            html += '  <span>' + icon + ' ' + node.name + '</span>';
+            html += '  <button class="vos-icon-btn btn-tree-del" data-del="' + node.path + '" title="Delete File" style="width:18px; height:18px; font-size:0.65rem; opacity:0.6;">🗑️</button>';
+            html += '</li>';
+          }
+        }
+
+        buildTreeHtml(tree, 0);
+        fileTreeEl.innerHTML = html;
+
+        // Add click events
+        fileTreeEl.querySelectorAll('.vos-tree-node:not(.is-dir)').forEach(function (el) {
+          el.addEventListener('click', function (e) {
+            if (e.target.closest('.btn-tree-del')) return;
+            var p = el.getAttribute('data-path');
+            if (p) openFileTab(p);
+          });
+        });
+
+        // Add delete file listeners
+        fileTreeEl.querySelectorAll('.btn-tree-del').forEach(function (delBtn) {
+          delBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var targetPath = delBtn.getAttribute('data-del');
+            if (targetPath) deleteFileFromVFS(targetPath);
+          });
+        });
+      }
+
+      // 4. Live Preview Compilation with Full Multi-File Bundling
+      var compileDebounce = null;
+      function triggerLivePreview() {
+        if (!previewIframe) return;
+        try {
+          var compiledHtml = '';
+          if (activeFilePath.endsWith('.md')) {
+            var mdContent = runtime.vfs.readFile(activeFilePath) || '';
+            var escaped = mdContent
+              .replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;');
+            
+            var htmlMd = escaped
+              .replace(/^# (.*$)/gim, '<h1 style="color:#00f0ff;font-family:sans-serif;border-bottom:1px solid rgba(0,240,255,0.2);padding-bottom:8px;">$1</h1>')
+              .replace(/^## (.*$)/gim, '<h2 style="color:#fbbf24;font-family:sans-serif;margin-top:18px;">$1</h2>')
+              .replace(/^### (.*$)/gim, '<h3 style="color:#38bdf8;font-family:sans-serif;">$1</h3>')
+              .replace(/^\- (.*$)/gim, '<li style="margin-bottom:4px;color:#e2e8f0;">$1</li>')
+              .replace(/`([^`]+)`/gim, '<code style="background:rgba(255,255,255,0.1);color:#34d399;padding:2px 6px;border-radius:4px;font-family:monospace;">$1</code>');
+
+            compiledHtml = '<!DOCTYPE html><html><head><meta charset="utf-8"/><style>body{background:#04060d;color:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:24px;line-height:1.6;}ul{padding-left:20px;}</style></head><body>' + htmlMd + '</body></html>';
+          } else {
+            var rawHtml = runtime.vfs.readFile('/project/index.html') || runtime.buildPreview();
+            var styles = runtime.vfs.readFile('/project/styles.css') || '';
+            var script = runtime.vfs.readFile('/project/app.js') || '';
+
+            // Inline styles.css
+            if (styles) {
+              if (rawHtml.includes('href="styles.css"') || rawHtml.includes("href='styles.css'") || rawHtml.includes('href="./styles.css"')) {
+                rawHtml = rawHtml.replace(/<link[^>]*href=["']\s*\.?\/?styles\.css["'][^>]*>/gi, '<style>\n' + styles + '\n</style>');
+              } else if (rawHtml.includes('</head>')) {
+                rawHtml = rawHtml.replace('</head>', '<style>\n' + styles + '\n</style>\n</head>');
+              }
+            }
+
+            // Inline app.js
+            if (script) {
+              if (rawHtml.includes('src="app.js"') || rawHtml.includes("src='app.js'") || rawHtml.includes('src="./app.js"')) {
+                rawHtml = rawHtml.replace(/<script[^>]*src=["']\s*\.?\/?app\.js["'][^>]*><\/script>/gi, '<script>\n' + script + '\n<' + '/script>');
+              } else if (rawHtml.includes('</body>')) {
+                rawHtml = rawHtml.replace('</body>', '<script>\n' + script + '\n<' + '/script>\n</body>');
+              }
+            }
+
+            compiledHtml = rawHtml;
+          }
+
+          var blob = new Blob([compiledHtml], { type: 'text/html' });
+          var blobUrl = URL.createObjectURL(blob);
+          previewIframe.src = blobUrl;
+          logToConsole('info', 'Live multi-file bundle compiled and injected into preview viewport.');
+        } catch (err) {
+          logToConsole('error', 'Bundle Build Error: ' + err.message);
+        }
+      }
+
+      function logToConsole(level, message) {
+        if (!consoleStreamEl) return;
+        var now = new Date().toTimeString().split(' ')[0];
+        var row = document.createElement('div');
+        row.className = 'vos-log-row';
+        row.innerHTML = [
+          '<span class="vos-log-time">' + now + '</span>',
+          '<span class="vos-log-level ' + level + '">[' + level.toUpperCase() + ']</span>',
+          '<span class="vos-log-msg">' + message + '</span>'
+        ].join('');
+        consoleStreamEl.appendChild(row);
+        consoleStreamEl.scrollTop = consoleStreamEl.scrollHeight;
+      }
+
+      // Listen for preview iframe console messages
+      window.addEventListener('message', function (e) {
+        if (e.data && e.data.type === 'ZOTH_VOS_CONSOLE') {
+          logToConsole(e.data.level || 'info', e.data.message);
+        }
+      });
+
+      // 5. Code Editor Typing & Auto-Sync
+      if (editorEl) {
+        editorEl.addEventListener('input', function () {
+          updateLineNumbers();
+          runtime.vfs.writeFile(activeFilePath, editorEl.value);
+
+          if (compileDebounce) clearTimeout(compileDebounce);
+          compileDebounce = setTimeout(triggerLivePreview, 400);
+        });
+
+        // Editor Tab Key Indentation
+        editorEl.addEventListener('keydown', function (e) {
+          if (e.key === 'Tab') {
+            e.preventDefault();
+            var start = this.selectionStart;
+            var end = this.selectionEnd;
+            this.value = this.value.substring(0, start) + '  ' + this.value.substring(end);
+            this.selectionStart = this.selectionEnd = start + 2;
+            editorEl.dispatchEvent(new Event('input'));
+          }
+        });
+      }
+
+      // Global Shortcut: Ctrl+Enter or Cmd+Enter to Run
+      window.addEventListener('keydown', function (e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          e.preventDefault();
+          var runBtn = document.getElementById('btn-run');
+          if (runBtn) runBtn.click();
+        }
+      });
+
+      // 6. Template Pickers
+      document.querySelectorAll('.vos-tmpl-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          document.querySelectorAll('.vos-tmpl-btn').forEach(function (b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+          var tmplKey = btn.getAttribute('data-tmpl');
+          runtime.loadTemplate(tmplKey);
+          
+          if (tmplKey === 'react') activeFilePath = '/project/src/App.jsx';
+          else if (tmplKey === 'three' || tmplKey === 'synth') activeFilePath = '/project/main.js';
+          else activeFilePath = '/project/index.html';
+
+          loadFileIntoEditor(activeFilePath);
+          triggerLivePreview();
+          if (term) {
+            term.writeln('\r\n\x1b[1;36m[Template Loader] Loaded ' + tmplKey.toUpperCase() + ' template into /project.\x1b[0m');
+            term.write(promptPrefix);
+          }
+        });
+      });
+
+      // Listen for custom vOS events from shell
+      window.addEventListener('zoth-vos-trigger-preview', triggerLivePreview);
+      window.addEventListener('zoth-vos-load-template', function (e) {
+        var key = e.detail && e.detail.template;
+        var btn = document.querySelector('.vos-tmpl-btn[data-tmpl="' + key + '"]');
+        if (btn) btn.click();
+      });
+
+      // 7. Device Viewport Mode Toggles
+      document.querySelectorAll('.vos-device-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          document.querySelectorAll('.vos-device-btn').forEach(function (b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+          var mode = btn.getAttribute('data-mode');
+          if (deviceFrame) {
+            deviceFrame.className = 'vos-device-frame ' + (mode === 'desktop' ? '' : mode);
+          }
+        });
+      });
+
+      // 8. Toolbar & Action Buttons
+      var btnRun = document.getElementById('btn-run');
+      if (btnRun) {
+        btnRun.addEventListener('click', function () {
+          triggerLivePreview();
+          if (window.ZothAudioFX) window.ZothAudioFX.playClick(880, 0.08);
+        });
+      }
+
+      var btnRefPrev = document.getElementById('btn-refresh-preview');
+      if (btnRefPrev) {
+        btnRefPrev.addEventListener('click', function () {
+          triggerLivePreview();
+        });
+      }
+
+      var btnPopout = document.getElementById('btn-popout');
+      if (btnPopout) {
+        btnPopout.addEventListener('click', function () {
+          var compiledHtml = runtime.buildPreview();
+          var blob = new Blob([compiledHtml], { type: 'text/html' });
+          var blobUrl = URL.createObjectURL(blob);
+          window.open(blobUrl, '_blank');
+        });
+      }
+
+      var btnClearCons = document.getElementById('btn-clear-console');
+      if (btnClearCons) {
+        btnClearCons.addEventListener('click', function () {
+          if (consoleStreamEl) consoleStreamEl.innerHTML = '';
+        });
+      }
+
+      // Scale-to-Zero Hibernate Toggle
+      var hibBtn = document.getElementById('btn-hibernate');
+      if (hibBtn) {
+        hibBtn.addEventListener('click', function () {
+          var statusText = document.getElementById('runtime-status-text');
+          if (runtime.isHibernated) {
+            runtime.wake();
+            hibBtn.classList.remove('hibernated');
+            hibBtn.innerHTML = '<svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg> Scale-to-Zero';
+            if (statusText) statusText.textContent = 'WASM CONTAINER LIVE';
+            triggerLivePreview();
+            if (term) term.writeln('\r\n\x1b[1;32m[vOS Kernel] Woke from Scale-to-Zero hibernation.\x1b[0m');
+          } else {
+            runtime.hibernate();
+            hibBtn.classList.add('hibernated');
+            hibBtn.innerHTML = '<svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Wake Container';
+            if (statusText) statusText.textContent = 'HIBERNATED (0% CPU)';
+            if (previewIframe) {
+              previewIframe.srcdoc = '<div style="background:#03050c;color:#94a3b8;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:sans-serif;"><h3>Scale-to-Zero Active</h3><p style="font-size:0.85rem;">Container CPU throttled to 0.0% with zero server overhead.</p></div>';
+            }
+            if (term) term.writeln('\r\n\x1b[1;33m[vOS Kernel] Entered Scale-to-Zero hibernation mode (0% CPU load).\x1b[0m');
+          }
+          if (term) term.write(promptPrefix);
+        });
+      }
+
+      window.sweepCruftVFS = function () {
+        if (!runtime || !runtime.vfs) return;
+        var swept = 0;
+        var tree = runtime.vfs.tree();
+        Object.keys(tree).forEach(function(path) {
+          if (path.includes('/tmp/') || path.endsWith('.bak') || path.endsWith('.swp') || path.endsWith('~')) {
+            runtime.vfs.deleteFile(path);
+            swept++;
+          }
+        });
+        if (term) {
+          term.writeln('\r\n\x1b[1;32m[vOS Janitor] Swept ' + swept + ' cruft & temporary inodes from VFS.\x1b[0m');
+          term.write(promptPrefix);
+        }
+        renderFileTree();
+        triggerLivePreview();
+      };
+
+      // Snapshot Export & ZIP buttons
+      var btnSnapshot = document.getElementById('btn-snapshot');
+      if (btnSnapshot) {
+        btnSnapshot.addEventListener('click', function () {
+          runtime.shell.execute('snapshot', function (chunk) {
+            if (term) term.write(chunk);
+          });
+        });
+      }
+
+      var btnZip = document.getElementById('btn-zip');
+      if (btnZip) {
+        btnZip.addEventListener('click', function () {
+          runtime.shell.execute('zip', function (chunk) {
+            if (term) term.write(chunk);
+          });
+        });
+      }
+
+      // Quick Terminal Chips
+      document.querySelectorAll('.vos-chip').forEach(function (chip) {
+        chip.addEventListener('click', function () {
+          var cmd = chip.getAttribute('data-cmd');
+          if (term && cmd) {
+            term.writeln(cmd);
+            runtime.shell.execute(cmd, function (chunk) {
+              term.write(chunk);
+            }).then(function () {
+              term.write(promptPrefix);
+            });
+          }
+        });
+      });
+
+      // New File Modal
+      var modal = document.getElementById('new-file-modal');
+      var modalInput = document.getElementById('modal-filename-input');
+      var btnNewFile = document.getElementById('btn-new-file');
+      if (btnNewFile && modal && modalInput) {
+        btnNewFile.addEventListener('click', function () {
+          modal.style.display = 'flex';
+          modalInput.value = '';
+          modalInput.focus();
+        });
+      }
+
+      var btnModalCancel = document.getElementById('btn-modal-cancel');
+      if (btnModalCancel && modal) {
+        btnModalCancel.addEventListener('click', function () {
+          modal.style.display = 'none';
+        });
+      }
+
+      var btnModalCreate = document.getElementById('btn-modal-create');
+      if (btnModalCreate && modal && modalInput) {
+        btnModalCreate.addEventListener('click', function () {
+          var rawName = modalInput.value.trim();
+          if (rawName) {
+            var norm = runtime.vfs.normalizePath(rawName, '/project');
+            runtime.vfs.writeFile(norm, '// New file: ' + norm + '\n');
+            loadFileIntoEditor(norm);
+            modal.style.display = 'none';
+            if (term) term.writeln('\r\n\x1b[1;32m[VFS] Created file: ' + norm + '\x1b[0m');
+            if (term) term.write(promptPrefix);
+          }
+        });
+      }
+
+      // Refresh Tree Button
+      var btnRefreshTree = document.getElementById('btn-refresh-tree');
+      if (btnRefreshTree) {
+        btnRefreshTree.addEventListener('click', renderFileTree);
+      }
+
+      // 9. Real-Time Hardware Telemetry UI Loop
+      setInterval(function () {
+        var cpu = runtime.metrics.cpu;
+        var ram = runtime.metrics.ram;
+        var files = runtime.vfs.getAllFiles('/project');
+
+        var cpuVal = document.getElementById('meter-cpu-val');
+        var cpuFill = document.getElementById('meter-cpu-fill');
+        if (cpuVal) cpuVal.textContent = cpu.toFixed(1) + '%';
+        if (cpuFill) cpuFill.style.width = Math.min(cpu * 3, 100) + '%';
+
+        var ramVal = document.getElementById('meter-ram-val');
+        var ramFill = document.getElementById('meter-ram-fill');
+        if (ramVal) ramVal.textContent = ram.toFixed(1) + ' MB';
+        if (ramFill) ramFill.style.width = Math.min((ram / 64) * 100, 100) + '%';
+
+        var vfsVal = document.getElementById('meter-vfs-val');
+        var vfsFill = document.getElementById('meter-vfs-fill');
+        if (vfsVal) vfsVal.textContent = files.length + ' files';
+        if (vfsFill) vfsFill.style.width = Math.min((files.length / 20) * 100, 100) + '%';
+      }, 1000);
+
+      // Initial Bootstrap
+      loadFileIntoEditor(activeFilePath);
+      triggerLivePreview();
+
+    })();
+  </script>
+</body>
+</html>

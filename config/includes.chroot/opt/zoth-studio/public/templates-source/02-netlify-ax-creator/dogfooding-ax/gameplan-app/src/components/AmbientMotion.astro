@@ -1,0 +1,221 @@
+---
+---
+
+<script>
+  const heroStage = document.querySelector('.hero-visual-stage');
+  const heroTilt = document.querySelector('.hero-visual-tilt');
+  const floatSections = document.querySelectorAll('.float-section');
+  const beam = document.querySelector('.spotlight-beam');
+  const phaseSteps = document.querySelectorAll('.phase-step');
+
+  let targetY = 0;
+  let currentY = 0;
+  let scrollTicking = false;
+  let lastScrollY = 0;
+  let velocity = 0;
+  let skew = 0;
+
+  let mouseX = window.innerWidth / 2;
+  let mouseY = window.innerHeight / 2;
+  let tiltTicking = false;
+
+  let gyroTargetX = 0;
+  let gyroTargetY = 0;
+  let gyroX = 0;
+  let gyroY = 0;
+  let useGyro = false;
+  let gyroPermissionState = 'prompt';
+
+  let reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const clamp = (val, min, max) => Math.min(Math.max(val, min), max);
+
+  const isTouchDevice = () => {
+    return window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+  };
+
+  const updateScroll = () => {
+    const newY = window.scrollY;
+    velocity = (newY - lastScrollY) * 0.08;
+    lastScrollY = newY;
+
+    targetY = newY;
+    currentY += (targetY - currentY) * 0.07;
+
+    if (heroStage && !reduced) {
+      const heroY = currentY * 0.18;
+      const heroScale = 1 + currentY * 0.00008;
+      const heroOpacity = Math.max(0.25, 1 - currentY * 0.0006);
+      heroStage.style.transform = `translate3d(0, ${heroY}px, 0) scale(${Math.min(heroScale, 1.12)})`;
+      heroStage.style.opacity = `${heroOpacity}`;
+    }
+
+    if (!reduced) {
+      const targetSkew = clamp(velocity, -2.2, 2.2);
+      skew += (targetSkew - skew) * 0.12;
+
+      floatSections.forEach((el, i) => {
+        const rect = el.getBoundingClientRect();
+        const viewportCenter = window.innerHeight / 2;
+        const distance = (rect.top + rect.height / 2 - viewportCenter) / window.innerHeight;
+        const speed = i % 2 === 0 ? -14 : 14;
+        el.style.transform = `translate3d(0, ${distance * speed}px, 0) skewY(${skew}deg)`;
+      });
+    }
+
+    if (beam && phaseSteps.length > 0) {
+      let active = null;
+      let best = Infinity;
+      const center = window.innerHeight / 2;
+
+      phaseSteps.forEach((step) => {
+        const rect = step.getBoundingClientRect();
+        const dist = Math.abs(rect.top + rect.height / 2 - center);
+        if (dist < best) {
+          best = dist;
+          active = step;
+        }
+      });
+
+      if (active) {
+        const rect = active.getBoundingClientRect();
+        const top = rect.top + rect.height / 2;
+        beam.style.setProperty('--spotlight-y', `${top}px`);
+      }
+
+      const showBeam = newY > window.innerHeight * 0.45;
+      beam.style.setProperty('--spotlight-opacity', showBeam ? '1' : '0');
+    }
+
+    scrollTicking = false;
+  };
+
+  const onScroll = () => {
+    if (!scrollTicking) {
+      requestAnimationFrame(updateScroll);
+      scrollTicking = true;
+    }
+  };
+
+  const applyTilt = () => {
+    if (!heroTilt || reduced) {
+      tiltTicking = false;
+      return;
+    }
+
+    let nx, ny;
+
+    if (useGyro) {
+      gyroX += (gyroTargetX - gyroX) * 0.1;
+      gyroY += (gyroTargetY - gyroY) * 0.1;
+      nx = gyroY / 45;
+      ny = gyroX / 45;
+    } else {
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      nx = (mouseX - cx) / cx;
+      ny = (mouseY - cy) / cy;
+    }
+
+    const rotX = clamp(-ny * 10, -10, 10);
+    const rotY = clamp(nx * 12, -12, 12);
+
+    heroTilt.style.setProperty('--mouse-tilt-x', `${rotX}deg`);
+    heroTilt.style.setProperty('--mouse-tilt-y', `${rotY}deg`);
+
+    tiltTicking = false;
+  };
+
+  const onMouseMove = (e) => {
+    if (useGyro) return;
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    if (!tiltTicking) {
+      requestAnimationFrame(applyTilt);
+      tiltTicking = true;
+    }
+  };
+
+  const onDeviceOrientation = (e) => {
+    if (!useGyro) return;
+    const beta = e.beta || 0;
+    const gamma = e.gamma || 0;
+    gyroTargetX = clamp(beta, -45, 45);
+    gyroTargetY = clamp(gamma, -45, 45);
+
+    if (!tiltTicking) {
+      requestAnimationFrame(applyTilt);
+      tiltTicking = true;
+    }
+  };
+
+  const enableGyro = async () => {
+    if (!isTouchDevice()) return;
+
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+      try {
+        const response = await DeviceOrientationEvent.requestPermission();
+        gyroPermissionState = response;
+        if (response === 'granted') {
+          useGyro = true;
+          window.addEventListener('deviceorientation', onDeviceOrientation, { passive: true });
+        }
+      } catch (err) {
+        gyroPermissionState = 'denied';
+      }
+    } else {
+      useGyro = true;
+      window.addEventListener('deviceorientation', onDeviceOrientation, { passive: true });
+    }
+  };
+
+  const tryEnableGyroOnce = () => {
+    if (gyroPermissionState !== 'prompt') return;
+    enableGyro();
+  };
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('mousemove', onMouseMove, { passive: true });
+
+  window.addEventListener(
+    'touchmove',
+    (e) => {
+      if (useGyro || !e.touches[0]) return;
+      const t = e.touches[0];
+      mouseX = t.clientX;
+      mouseY = t.clientY;
+      if (!tiltTicking) {
+        requestAnimationFrame(applyTilt);
+        tiltTicking = true;
+      }
+    },
+    { passive: true }
+  );
+
+  window.addEventListener('touchstart', tryEnableGyroOnce, { once: true, passive: true });
+  window.addEventListener('click', tryEnableGyroOnce, { once: true, passive: true });
+
+  window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', (e) => {
+    reduced = e.matches;
+    if (reduced) {
+      if (heroStage) {
+        heroStage.style.transform = '';
+        heroStage.style.opacity = '';
+      }
+      if (heroTilt) {
+        heroTilt.style.setProperty('--mouse-tilt-x', '0deg');
+        heroTilt.style.setProperty('--mouse-tilt-y', '0deg');
+      }
+      floatSections.forEach((el) => {
+        el.style.transform = '';
+      });
+      if (beam) beam.style.setProperty('--spotlight-opacity', '0');
+    } else {
+      onScroll();
+      applyTilt();
+    }
+  });
+
+  onScroll();
+  applyTilt();
+</script>

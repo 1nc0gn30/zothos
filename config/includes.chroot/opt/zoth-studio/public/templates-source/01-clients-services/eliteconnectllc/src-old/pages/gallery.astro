@@ -1,0 +1,68 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import HeroSection from "../components/HeroSection.astro";
+import { gallery } from "../data/site";
+
+const title = "Elite Connect Project Gallery | Security, Cabling, AV And Access Control";
+const description = "View real Elite Connect work: security cameras, access control, structured cabling, audio visual, and managed technology projects across Virginia Beach and Hampton Roads.";
+
+const categories = [...new Set(gallery.map((g) => g.category))];
+---
+
+<BaseLayout title={title} description={description} canonical="/gallery/">
+    <HeroSection
+    variant="page"
+    align="left"
+    bgImage="/assets/gallery/camera-installation.jpg"
+    eyebrow="Work gallery"
+    title="Real projects. Real properties. Real results."
+    lead="Photos from actual Elite Connect installations across Virginia Beach and Hampton Roads. Every image shows the kind of work that happens on-site."
+    ctas={[{ label: "Request Similar Work", href: "/contact/", variant: "primary" }]}
+    placeholderDesc="Hero image: wide-angle montage or drone shot of a completed commercial security and cabling installation."
+  />
+
+  <section class="section section-tight reveal">
+    <div class="gallery-grid" id="gallery-grid">
+      {gallery.map((item, i) => (
+        <figure class="gallery-item" data-category={item.category}>
+          <div class="gallery-img-wrap">
+            <img src={item.src} alt={item.alt} loading={i < 4 ? "eager" : "lazy"} />
+          </div>
+          <figcaption>
+            <span class="gallery-tag">{item.category}</span>
+            <span class="gallery-caption">{item.caption}</span>
+          </figcaption>
+        </figure>
+      ))}
+    </div>
+  </section>
+
+  <section class="section band reveal">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Process</p>
+        <h2>Every project follows a clear path.</h2>
+      </div>
+      <p>Consultation, design, installation, and support. Photos like these come from real jobs where that process was followed start to finish.</p>
+    </div>
+    <div class="proof-grid reveal-stagger">
+      <article class="proof-card"><h3>Consult</h3><p>Walk the property, identify risks, and understand what the owner needs.</p></article>
+      <article class="proof-card"><h3>Design</h3><p>Plan camera angles, cable routes, hardware placement, and access points.</p></article>
+      <article class="proof-card"><h3>Install</h3><p>Execute clean, labeled, professional work that can be maintained later.</p></article>
+      <article class="proof-card"><h3>Support</h3><p>Stay available for adjustments, expansions, and ongoing service.</p></article>
+    </div>
+  </section>
+
+  <script type="module">
+    const items = document.querySelectorAll('.gallery-item');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('revealed');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    items.forEach((item) => observer.observe(item));
+  </script>
+</BaseLayout>

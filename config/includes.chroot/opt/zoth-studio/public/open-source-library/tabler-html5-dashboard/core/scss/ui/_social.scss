@@ -1,0 +1,29 @@
+@use 'sass:map';
+@use '../config';
+
+@use '../config' as *;
+
+.social {
+  position: relative;
+  display: inline-block;
+  height: config.$avatar-size;
+  aspect-ratio: 1;
+  vertical-align: bottom;
+  background: no-repeat center/cover;
+}
+
+@each $app in config.$social-apps {
+  .social-app-#{$app} {
+    background-image: url('#{config.$assets-base}/img/social/#{$app}.svg');
+
+    &.social-gray {
+      background-image: url('#{config.$assets-base}/img/social/#{$app}-gray.svg');
+    }
+  }
+}
+
+@each $flag-size, $size in config.$flag-sizes {
+  .social-#{$flag-size} {
+    height: map.get($size, size);
+  }
+}

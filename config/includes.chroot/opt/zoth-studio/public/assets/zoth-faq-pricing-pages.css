@@ -1,0 +1,135 @@
+/* ==========================================================================
+   Zoth Studio — shared page-scoped fixes for /faq.html and /pricing/ ONLY.
+   ==========================================================================
+   WHY THIS FILE EXISTS
+   Both pages link it, and it is linked LAST by both, but nothing in it is
+   global: every rule is scoped to a class only these two posters use
+   (.faq-poster / .pricing-poster / .faq-list) or overrides the shared
+   footer / skip-link / burger only from these two pages.
+
+   The shared sheets it has to correct are NOT edited here, because they are
+   used site-wide (zoth-agent-avatars.css is @imported by zoth-theme.css and
+   agents.css, so it animates every `img[src*="azoth"]` / `img[alt*="Azoth"]`
+   on 30+ pages; zoth-mobile.css drives the burger and the mobile hit areas
+   on every page).
+
+   1. HERO STILLS MUST STAY INSIDE THEIR OWN COLUMN
+      zoth-agent-avatars.css animates `img[src*="azoth"]` and
+      `img[alt*="Azoth"]` to scale(1.024) rotate(0.8deg) !important. That is
+      right for a 72px avatar, but both pages use a full-bleed Azoth portrait
+      as the poster still, and the drift pushed the painted box outside the
+      grid column: measured left=631 right=1449 (vw 1440) and left=-4 right=394
+      (vw 390), plus 7px past the bottom of the poster on desktop. The crop was
+      SILENT, because .faq-poster / .pricing-poster and body all clip
+      horizontally (documentElement.scrollWidth did not move). The rotation is
+      the part that cannot be made safe at any width: any non-zero angle pushes
+      the corners of a full-bleed rectangle past its own box, so the loop is
+      now a scale-DOWN breathe with 0deg rotation and the painted box can
+      never exceed the column. Same approach and same reasoning as the
+      page-scoped fix already used on /agents/ and /registry/.
+      Specificity note: .faq-poster-figure img.hero-still (0,2,1) beats the
+      shared `img[src*="azoth"]` (0,1,1) even though both are !important.
+
+   2. THE FAQ POSTER MUST NEVER CROP ITS OWN HERO COPY
+      zoth-faq-poster.css caps the mobile poster at
+      max-height: calc(100svh - 54px) AND overflow:hidden, while the copy is
+      flex:1 0 auto. On a short/landscape viewport the copy therefore falls
+      outside the cap and is clipped: measured at 844x390 the copy box ended
+      53px below the poster and BOTH hero buttons ("Read the questions",
+      "Ask Azoth") were cut off. /pricing/ never had the cap and does not clip
+      at any tested size, so the cap is removed here (min-height is kept, so
+      the poster still fills the first screen at 390x844).
+
+   3. MOBILE HIT AREAS
+      Everything below is >=44x44 at <=1024px. 1024px is the breakpoint
+      zoth-mobile.css already uses for the mobile chrome, so the two agree.
+      The footer links grow via symmetric padding plus a matching negative
+      margin: the text does not move, only the hit box. The hover underline is
+      pulled back inside the enlarged box so it still spans exactly the label.
+
+   Theme safety: no colour, font or background is set here. Only geometry.
+   ========================================================================== */
+
+/* --- 1. Hero still: scale-down breathe, never a rotated overshoot -------- */
+.faq-poster-figure img.hero-still,
+.pricing-poster-figure img.hero-still {
+  animation: zothHeroStillBreathe 9s ease-in-out infinite alternate !important;
+  transform-origin: 50% 100%;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+@keyframes zothHeroStillBreathe {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(0, 0, 0) scale(0.972); }
+}
+
+/* --- 2. FAQ poster: no max-height cap, so hero copy can never be cut ----- */
+@media (max-width: 900px) {
+  .faq-poster {
+    max-height: none;
+  }
+}
+
+/* --- 3. Touch targets at the mobile breakpoint -------------------------- */
+@media (max-width: 1024px) {
+  /* Skip link: real control (keyboard focus lands on it), styled 38px tall
+     by the shared sheets. It is position:absolute and off-screen until
+     focused, so growing it moves nothing. */
+  a.skip,
+  a.skip-to-content {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  /* Burger: real control, held at 38x38 by zoth-mobile.css. The header is
+     content-sized (fixed, flex, align-items:center) and --zoth-header-h is
+     54px, so a 44px burger grows the bar to 52px and still fits. */
+  header.bar .burger,
+  header#topbar .burger {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+
+  /* Footer navigation: real controls. Short single-word labels ("FAQ",
+     "Docs") were 22-41px wide at 44px tall; the padding grows the box
+     symmetrically and the negative margin keeps the text in place. */
+  footer.site .foot-col a,
+  footer.site .foot-meta a {
+    min-height: 44px;
+    min-width: 44px;
+    padding-left: 12px;
+    padding-right: 12px;
+    margin-left: -12px;
+  }
+
+  /* Keep the hover underline spanning the label, not the enlarged hit box. */
+  footer.site .mega-footer-link::after {
+    left: 12px;
+    width: calc(100% - 24px);
+  }
+
+  /* "← Back to Hub" is a standalone control, not an inline phrase: it is the
+     only way back from the end of the FAQ list, so it gets a real 44px box.
+     (The inline "Support / Patron" link inside the answer prose is left
+     alone on purpose — see the report.) */
+  .faq-list-foot a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* --- 4. Reduced motion -------------------------------------------------- */
+/* Required, and also load-order proof: the shared reduced-motion reset in
+   zoth-agent-avatars.css targets `img[src*="azoth"]` (0,1,1) and would lose
+   to the rule in section 1, so the still is switched off here as well. */
+@media (prefers-reduced-motion: reduce) {
+  .faq-poster-figure img.hero-still,
+  .pricing-poster-figure img.hero-still {
+    animation: none !important;
+    transform: none !important;
+  }
+}

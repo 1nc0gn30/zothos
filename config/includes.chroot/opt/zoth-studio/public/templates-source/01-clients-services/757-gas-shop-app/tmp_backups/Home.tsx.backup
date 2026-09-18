@@ -1,0 +1,224 @@
+import React, { useState, useEffect } from 'react';
+import { Navigate, useNavigate, Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
+import { Lock, Zap, MapPin, CheckCircle2, Mail } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { useAuthStore } from '../store/authStore';
+import { motion } from 'motion/react';
+import { Logo } from '../components/Logo';
+
+const Home = () => {
+  const { user } = useAuthStore();
+  const navigate = useNavigate();
+  const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [signupSuccessEmail, setSignupSuccessEmail] = useState<string | null>(null);
+
+  // If user is already logged in, redirect to shop
+  if (user) {
+    return <Navigate to="/shop" replace />;
+  }
+
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    if (isLogin) {
+      setSignupSuccessEmail(null);
+    }
+
+    try {
+      if (isLogin) {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+        });
+        if (error) throw error;
+        setSignupSuccessEmail(email);
+        setPassword('');
+        setIsLogin(true);
+      }
+    } catch (err: any) {
+      setError(err.message || 'An error occurred during authentication.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background flex flex-col md:flex-row">
+      <Helmet>
+        <title>757 Gas | Premium Cannabis Pickup</title>
+        <meta name="description" content="757 Gas - Premium cannabis pickup service in the 757 area. Sign up now for exclusive access." />
+      </Helmet>
+
+      {/* Left side - Branding & Info */}
+      <div className="flex-1 bg-zinc-950 text-white flex flex-col justify-center p-8 md:p-16 relative overflow-hidden">
+        {/* Decorative background element */}
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/20 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
+
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="max-w-xl mx-auto z-10"
+        >
+          <div className="flex items-center space-x-4 mb-8">
+            <div className="p-3 glass-effect rounded-2xl">
+              <Logo className="h-14 w-14" />
+            </div>
+            <h1 className="text-4xl md:text-5xl font-black tracking-tighter">757 GAS</h1>
+          </div>
+          
+          <h2 className="text-3xl md:text-4xl font-bold mb-6 leading-tight">
+            Premium Quality.<br />
+            <span className="text-primary">Discreet Pickup.</span>
+          </h2>
+          
+          <p className="text-zinc-400 text-lg mb-12 max-w-md">
+            The 757's premier cannabis pickup service. Join our exclusive network for top-tier products and seamless transactions.
+          </p>
+
+          <div className="space-y-6">
+            <div className="flex items-start space-x-4 p-6 rounded-2xl bg-gradient-to-br from-zinc-900/50 to-zinc-800/30 border border-zinc-700/30 shadow-lg hover:shadow-primary/10 transition-all duration-300">
+              <div className="p-2 bg-primary/10 rounded-lg text-primary mt-1 shadow-inner">
+                <Zap className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg">Fast Ordering</h3>
+                <p className="text-zinc-500 text-sm">Browse our live menu and place orders instantly.</p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-4 p-6 rounded-2xl bg-gradient-to-br from-zinc-900/50 to-zinc-800/30 border border-zinc-700/30 shadow-lg hover:shadow-primary/10 transition-all duration-300">
+              <div className="p-2 bg-primary/10 rounded-lg text-primary mt-1 shadow-inner">
+                <MapPin className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg">Secure Meetups</h3>
+                <p className="text-zinc-500 text-sm">Safe, coordinated pickup locations throughout the 757.</p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-4 p-6 rounded-2xl bg-gradient-to-br from-zinc-900/50 to-zinc-800/30 border border-zinc-700/30 shadow-lg hover:shadow-primary/10 transition-all duration-300">
+              <div className="p-2 bg-primary/10 rounded-lg text-primary mt-1 shadow-inner">
+                <Lock className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg">Private & Discreet</h3>
+                <p className="text-zinc-500 text-sm">Your privacy is our priority. Secure wallet and order history.</p>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Right side - Auth Form */}
+      <div className="flex-1 flex items-center justify-center p-8 bg-background">
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="w-full max-w-md"
+        >
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold mb-2">{isLogin ? 'Welcome Back' : 'Join 757 Gas'}</h2>
+            <p className="text-muted-foreground">
+              {isLogin ? 'Enter your credentials to access your account' : 'Create an account to start ordering'}
+            </p>
+          </div>
+
+          {error && (
+            <div className="bg-destructive/10 text-destructive p-4 rounded-lg mb-6 text-sm font-medium">
+              {error}
+            </div>
+          )}
+
+          {signupSuccessEmail && (
+            <div className="mb-6 rounded-lg border border-primary/30 bg-primary/10 p-4">
+              <div className="flex items-start gap-3">
+                <div className="rounded-full bg-primary/20 p-2 text-primary">
+                  <CheckCircle2 className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="font-semibold text-foreground">Signup successful</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    We sent a verification email to <span className="font-medium text-foreground">{signupSuccessEmail}</span>.
+                    Open that email and click the verification link before signing in.
+                  </p>
+                  <div className="mt-2 inline-flex items-center gap-2 text-xs font-medium text-primary">
+                    <Mail className="h-4 w-4" />
+                    Check your inbox and spam folder
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <form onSubmit={handleAuth} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1" htmlFor="email">Email</label>
+              <input
+                id="email"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="input-field"
+                placeholder="you@example.com"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1" htmlFor="password">Password</label>
+              <input
+                id="password"
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="input-field"
+                placeholder="••••••••"
+                minLength={6}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+            >
+              {loading ? 'Processing...' : (isLogin ? 'Sign In' : 'Create Account')}
+            </button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <button
+              onClick={() => {
+                setIsLogin(!isLogin);
+                setError(null);
+                setSignupSuccessEmail(null);
+              }}
+              className="text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
+              {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+            </button>
+          </div>
+          
+          <div className="mt-8 text-center text-xs text-muted-foreground">
+            By continuing, you agree to our <Link to="/terms" className="hover:text-primary underline">Terms of Service</Link>.
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
+};
+
+export default Home;

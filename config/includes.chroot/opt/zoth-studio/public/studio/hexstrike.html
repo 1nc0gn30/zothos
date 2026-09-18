@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HEXSTRIKE // Security Terminal</title>
+    <link rel="stylesheet" href="/assets/zoth-theme.css">
+    <link rel="stylesheet" href="/assets/zoth-nav.css">
+    <style>
+        :root {
+            --hex-red: #ff0000;
+            --hex-red-glow: rgba(255, 0, 0, 0.4);
+            --hex-bg: #050000;
+            --hex-panel: rgba(20, 0, 0, 0.9);
+            --hex-border: #440000;
+        }
+
+        body {
+            background-color: var(--hex-bg) !important;
+            color: var(--hex-red) !important;
+            font-family: 'IBM Plex Mono', 'JetBrains Mono', monospace !important;
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hex-header {
+            padding: 15px 25px;
+            background: linear-gradient(90deg, #1a0000 0%, #050000 100%);
+            border-bottom: 2px solid var(--hex-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.1);
+        }
+
+        .hex-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .hex-title span {
+            color: #fff;
+            text-shadow: 0 0 10px var(--hex-red);
+        }
+
+        .hex-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .hex-input {
+            background: #000;
+            border: 1px solid var(--hex-border);
+            color: #fff;
+            padding: 8px 12px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .hex-input:focus {
+            border-color: var(--hex-red);
+            box-shadow: 0 0 10px var(--hex-red-glow);
+        }
+
+        .hex-select {
+            background: #000;
+            border: 1px solid var(--hex-border);
+            color: var(--hex-red);
+            padding: 8px;
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        .hex-btn {
+            background: var(--hex-red);
+            color: #000;
+            border: none;
+            padding: 8px 20px;
+            font-weight: 800;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 0 15px var(--hex-red-glow);
+            transition: all 0.2s;
+        }
+
+        .hex-btn:hover {
+            background: #ff4d4d;
+            box-shadow: 0 0 25px var(--hex-red);
+            transform: translateY(-1px);
+        }
+
+        .hex-btn:disabled {
+            background: #440000;
+            color: #888;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .hex-main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            gap: 1px;
+            background-color: var(--hex-border);
+        }
+
+        .hex-pane {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--hex-bg);
+        }
+
+        .pane-header {
+            padding: 8px 15px;
+            background: #110000;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            border-bottom: 1px solid var(--hex-border);
+            color: #888;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .pane-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .log-entry {
+            margin-bottom: 10px;
+            border-left: 2px solid #330000;
+            padding-left: 15px;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .ai-entry {
+            color: #ffaaaa;
+            font-style: italic;
+            border-left-color: var(--hex-red);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-5px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #330000; border-radius: 3px; }
+
+        .status-pill {
+            font-size: 0.6rem;
+            padding: 2px 8px;
+            border: 1px solid var(--hex-red);
+            border-radius: 999px;
+            color: var(--hex-red);
+        }
+    </style>
+</head>
+<body>
+    <header class="hex-header">
+        <div class="hex-title">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2">
+                <path d="M12 2L3 7V17L12 22L21 17V7L12 2Z"/>
+                <path d="M12 12L12 22M12 12L3 7M12 12L21 7"/>
+            </svg>
+            <span>HEX</span>STRIKE
+        </div>
+        <div class="hex-controls">
+            <select id="toolSelect" class="hex-select">
+                <optgroup label="OSINT">
+                    <option value="emailharvester">EmailHarvester</option>
+                    <option value="sublist3r">Sublist3r</option>
+                    <option value="photon">Photon</option>
+                </optgroup>
+                <optgroup label="Web">
+                    <option value="nikto">Nikto</option>
+                    <option value="whatweb">WhatWeb</option>
+                    <option value="gobuster">Gobuster</option>
+                </optgroup>
+                <optgroup label="Infrastructure">
+                    <option value="nmap">Nmap</option>
+                    <option value="sqlmap">SQLMap</option>
+                    <option value="searchsploit">SearchSploit</option>
+                    <option value="dnsenum">DNSEnum</option>
+                </optgroup>
+            </select>
+            <input type="text" id="targetInput" class="hex-input" placeholder="TARGET IP/DOMAIN">
+            <button id="executeBtn" class="hex-btn">Execute Strike</button>
+        </div>
+        <div class="status-pill">SECURITY_TIER: HACKER</div>
+    </header>
+
+    <main class="hex-main">
+        <div class="hex-pane">
+            <div class="pane-header">
+                <span>RAW_OUTPUT.LOG</span>
+                <span>UTF-8</span>
+            </div>
+            <div id="toolLogs" class="pane-content"></div>
+        </div>
+        <div class="hex-pane">
+            <div class="pane-header">
+                <span>NEURAL_INTELLIGENCE.EXE</span>
+                <span>LOCAL_AI_CORE</span>
+            </div>
+            <div id="aiLogs" class="pane-content"></div>
+        </div>
+    </main>
+
+    <script>
+        const toolSelect = document.getElementById('toolSelect');
+        const targetInput = document.getElementById('targetInput');
+        const executeBtn = document.getElementById('executeBtn');
+        const toolLogs = document.getElementById('toolLogs');
+        const aiLogs = document.getElementById('aiLogs');
+
+        async function executeStrike() {
+            const target = targetInput.value.trim();
+            const tool = toolSelect.value;
+
+            if (!target) {
+                alert('Please enter a target.');
+                return;
+            }
+
+            executeBtn.disabled = true;
+            executeBtn.textContent = 'STRIKING...';
+
+            appendLog(toolLogs, `\n> DISPATCHING ${tool.toUpperCase()} ON ${target}...`, 'system');
+            appendLog(aiLogs, `\n> ANALYZING VECTOR: ${target}...`, 'system');
+
+            try {
+                // Note: In a real deployment, this points to the Zoth Tool API or a dedicated HexStrike proxy
+                const response = await fetch('http://localhost:8000/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tool, target })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    appendLog(toolLogs, `[ERROR] ${data.error}`, 'error');
+                } else {
+                    appendLog(toolLogs, data.output || 'No output returned.', 'raw');
+                    appendLog(aiLogs, data.analysis || 'AI analysis unavailable.', 'ai');
+                }
+            } catch (err) {
+                appendLog(toolLogs, `[CONNECTION ERROR] Could not reach HexStrike Engine. Ensure backend is running.`, 'error');
+                appendLog(aiLogs, `[NEURAL ERROR] Intelligence link severed.`, 'error');
+            } finally {
+                executeBtn.disabled = false;
+                executeBtn.textContent = 'Execute Strike';
+            }
+        }
+
+        function appendLog(container, text, type) {
+            const div = document.createElement('div');
+            div.className = 'log-entry ' + (type === 'ai' ? 'ai-entry' : '');
+            div.textContent = text;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        executeBtn.addEventListener('click', executeStrike);
+    </script>
+</body>
+</html>

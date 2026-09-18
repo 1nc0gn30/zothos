@@ -1,0 +1,98 @@
+# AI Agent UI Gallery — Technical & Architecture Guide
+> The premier open-source collection of 50+ modular, plug-and-play AI chatbot and agent UI components built for React 19 and Tailwind CSS v4.
+
+## Overview
+- **Name**: AI Agent UI Gallery
+- **Developer**: Tech Pro / nealfrazier.tech
+- **URL**: https://ai-agentui.757tech.pro/
+- **Portfolio Showcase**: https://nealfrazier.tech
+- **Tech Stack**: React 19, TypeScript 5.8, Tailwind CSS v4, Motion (Framer Motion v12), Vite 6, Lucide React, Syntax Highlighter.
+- **LLM Integrations**: Google Gemini 2.5/3, OpenAI GPT-4o, Ollama local runtime, and built-in offline showcase fallback engine.
+
+## Key Capabilities & Component Variants
+The gallery contains 50 distinct component variants spanning 10 design aesthetics:
+1. **Minimal**: Clean whitespace, subtle borders, high legibility.
+2. **Glass**: Backdrop blur filters, translucent frosted glass overlays, glowing borders.
+3. **Brutalist**: High-contrast black/white borders, hard drop shadows, bold typography.
+4. **Playful**: Vibrant color palettes, soft rounded corners, animated badges.
+5. **Neo-Tokyo**: Dark theme with neon cyan/magenta accents and futuristic glow.
+6. **Corporate**: Professional enterprise design, structured layout.
+7. **Dark Mode**: Deep slate `#020617` background with optimized contrast ratio.
+8. **Gradient**: Smooth multi-stop background transitions.
+9. **Retro**: Win95/classic computing aesthetic with inset borders.
+10. **Cyberpunk**: Bold yellow/black accents, sharp corners, futuristic HUD elements.
+
+## Agent Capabilities
+- **Voice**: Real-time voice synthesis and acoustic modeling interface.
+- **Vision**: Multi-modal image analysis, OCR, and object segmentation.
+- **Files**: Document parsing, PDF analysis, and file attachment handlers.
+- **Code**: Live syntax highlighting, code snippet copying, pair programming view.
+- **Search**: Web search grounding, live index queries, citation display.
+- **Translation**: Multi-language localization across 50+ languages.
+- **Creative**: Generative art, copywriting, and ideation partner.
+
+## React 19 & Tailwind v4 Integration Code
+
+```tsx
+import React, { useState } from "react";
+import { Sparkles, Send, Mic } from "lucide-react";
+
+export function AgentWidget({ name = "AI Assistant" }) {
+  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState([
+    { role: "assistant", content: "Hello! How can I assist your workflow today?" }
+  ]);
+
+  const handleSend = () => {
+    if (!input.trim()) return;
+    setMessages(prev => [...prev, { role: "user", content: input }]);
+    setInput("");
+  };
+
+  return (
+    <div className="w-full max-w-md bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-3xl p-4 text-white shadow-2xl">
+      <div className="flex items-center justify-between pb-3 border-b border-white/10">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
+            <Sparkles size={16} />
+          </div>
+          <span className="font-bold text-sm">{name}</span>
+        </div>
+        <span className="w-2 h-2 bg-emerald-500 rounded-full animate-ping" />
+      </div>
+
+      <div className="h-64 overflow-y-auto py-4 space-y-3">
+        {messages.map((m, i) => (
+          <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+            <div className={`p-3 text-xs rounded-2xl max-w-[85%] ${m.role === "user" ? "bg-blue-600 text-white" : "bg-slate-800 text-slate-200"}`}>
+              {m.content}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex items-center gap-2 pt-2 border-t border-white/10">
+        <input 
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleSend()}
+          placeholder="Type a message..."
+          className="flex-1 bg-slate-800/60 border border-white/10 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <button onClick={handleSend} className="p-2 bg-blue-600 rounded-xl hover:bg-blue-500 transition-all">
+          <Send size={14} />
+        </button>
+      </div>
+    </div>
+  );
+}
+```
+
+## Accessibility (AX) Compliance
+- WCAG 2.1 AA Compliant `:focus-visible` ring indicators.
+- Skip navigation link (`#main-content`).
+- Keyboard shortcuts: `ArrowLeft`/`ArrowRight` (variant cycle), `/` or `Ctrl+K` (search focus), `Esc` (modal close), `Alt+C` (toggle source code), `Alt+M` (mute/unmute sound).
+- Dynamic ARIA live announcements for screen readers.
+
+## Author & Licensing
+Created by Tech Pro for [nealfrazier.tech](https://nealfrazier.tech). Licensed under MIT.

@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+@theme {
+  --color-netlify: #20c6b7;
+  --color-hacker: #00ff41;
+  --color-cyber-bg: #0a0a0a;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer base {
+  body {
+    @apply bg-cyber-bg text-gray-100 font-sans selection:bg-netlify selection:text-white;
+    background-image: radial-gradient(circle at 50% 50%, #111 0%, #0a0a0a 100%);
+  }
+}
+
+@layer utilities {
+  .crt-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    z-index: 100;
+    background-size: 100% 4px, 3px 100%;
+    pointer-events: none;
+    opacity: 0.15;
+  }
+
+  .glitch-hover:hover {
+    animation: glitch 0.3s cubic-bezier(.25,.46,.45,.94) both infinite;
+  }
+
+  @keyframes scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
+  }
+
+  .animate-scanline {
+    animation: scanline 4s linear infinite;
+  }
+
+  @keyframes glitch {
+    0% { transform: translate(0); }
+    20% { transform: translate(-2px, 2px); }
+    40% { transform: translate(-2px, -2px); }
+    60% { transform: translate(2px, 2px); }
+    80% { transform: translate(2px, -2px); }
+    100% { transform: translate(0); }
+  }
+
+  .text-shadow-hacker {
+    text-shadow: 0 0 8px rgba(0, 255, 65, 0.5);
+  }
+
+  .border-gradient-teal {
+    border: 1px solid transparent;
+    background: linear-gradient(to right, #0a0a0a, #0a0a0a) padding-box,
+                linear-gradient(to right, #20c6b7, #00ff41) border-box;
+  }
+  
+  .marquee {
+    display: flex;
+    white-space: nowrap;
+    animation: marquee 30s linear infinite;
+  }
+
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .mesh-gradient {
+    background: radial-gradient(at 50% 0%, rgba(32, 198, 183, 0.05) 0%, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(0, 255, 65, 0.03) 0%, transparent 50%);
+  }
+}
+
+/* WCAG 2.1 AA Focus Rings */
+*:focus-visible {
+  outline: 3px solid #00f0ff;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px rgba(0, 240, 255, 0.15);
+  border-radius: 4px;
+}

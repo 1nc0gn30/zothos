@@ -1,0 +1,1170 @@
+/* Mission Control — compact Azoth poster above the operator deck. Loaded after theme. */
+
+.mc-ambient-canvas,
+.ambient-mesh,
+.rune-matrix-canvas,
+body::before,
+body::after {
+  display: none !important;
+}
+
+html,
+body {
+  height: auto !important;
+  min-height: 100%;
+  max-width: 100vw;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  background: var(--bg, #050508);
+  color: var(--text-body, var(--text, #f1f5f9));
+}
+
+body.mission-page {
+  font-family: var(--font-sans, "Figtree", system-ui, sans-serif);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+main#main-content {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  z-index: 1;
+  display: block;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  height: auto;
+}
+
+.skip-to-content,
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 16px;
+  background: var(--gold, #fbbf24);
+  color: #050508;
+  padding: 10px 18px;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.82rem;
+  font-weight: 700;
+  border-radius: 8px;
+  z-index: 10000;
+  text-decoration: none;
+}
+
+.skip-to-content:focus,
+.skip-link:focus {
+  top: 16px;
+  outline: 2px solid var(--text-primary, #fff);
+  outline-offset: 2px;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Compact poster — copy left, Azoth right. Deck stays below.                 */
+/* Do not cover 18% of the portrait. contain + center bottom only.            */
+/* -------------------------------------------------------------------------- */
+
+.mc-poster {
+  position: relative;
+  width: 100%;
+  min-height: min(48svh, 420px);
+  display: grid;
+  grid-template-columns: minmax(18rem, 38rem) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+  overflow-x: hidden;
+  overflow-y: visible;
+  background: var(--bg, #050508);
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+}
+
+.mc-poster-copy {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 14px;
+  max-width: 38rem;
+  padding: clamp(22px, 4vw, 48px) clamp(20px, 4vw, 48px) clamp(28px, 5vw, 52px);
+}
+
+.mc-poster .kicker {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold, #fbbf24);
+  font-weight: 700;
+  background: none;
+  border: 0;
+}
+
+html .mc-poster h1,
+.mc-poster h1 {
+  font-family: var(--font-display, "Syne", system-ui, sans-serif) !important;
+  font-size: clamp(2.6rem, 6vw, 4.6rem) !important;
+  font-weight: 800 !important;
+  line-height: 0.92 !important;
+  letter-spacing: -0.05em !important;
+  max-width: 10ch;
+  margin: 0;
+  background: none !important;
+  color: var(--text-primary, #fff6dc) !important;
+  -webkit-text-fill-color: var(--text-primary, #fff6dc) !important;
+  -webkit-background-clip: border-box !important;
+  background-clip: border-box !important;
+  text-shadow: none !important;
+  overflow-wrap: normal !important;
+  word-break: keep-all !important;
+  hyphens: none !important;
+}
+
+.mc-poster .lede {
+  margin: 0;
+  max-width: 34rem;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  color: var(--text-subhead, var(--mute, #cbd5e1));
+}
+
+.mc-poster-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.mc-poster-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 12px 20px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  box-sizing: border-box;
+}
+
+.mc-poster-actions .btn:hover {
+  text-decoration: none;
+}
+
+.mc-poster-actions .btn-gold {
+  background: var(--gold, #fbbf24) !important;
+  color: #050508 !important;
+  box-shadow: 0 8px 24px rgba(251, 191, 36, 0.28) !important;
+  border: 0 !important;
+}
+
+.mc-poster-actions .btn-gold:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+}
+
+.mc-poster-actions .btn-ghost {
+  background: transparent !important;
+  color: var(--text-primary, #fff) !important;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.16)) !important;
+  box-shadow: none !important;
+}
+
+.mc-poster-actions .btn-ghost:hover {
+  border-color: var(--gold, #fbbf24) !important;
+  color: var(--gold, #fbbf24) !important;
+}
+
+.mc-poster-visual {
+  position: relative;
+  z-index: 1;
+  min-height: min(48svh, 420px);
+  align-self: stretch;
+  overflow: hidden;
+  background: #050508;
+}
+
+.mc-poster-visual img.mc-poster-azoth {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: contain;
+  object-position: center bottom;
+  pointer-events: none;
+}
+
+.mc-poster-visual::after {
+  display: none;
+}
+
+.mc-poster-credit {
+  position: absolute;
+  right: 20px;
+  bottom: 16px;
+  z-index: 3;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold, #fbbf24);
+  pointer-events: none;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Workspace — existing operator inventory stays the working surface          */
+/* -------------------------------------------------------------------------- */
+
+.mc-workspace {
+  --mc-cyan: var(--cyan, #00f0ff);
+  --mc-magenta: var(--magenta, #ff007a);
+  --mc-purple: var(--violet, #a855f7);
+  --mc-emerald: var(--green, #10b981);
+  --mc-amber: var(--gold, #f59e0b);
+  --mc-muted: var(--muted, #8b949e);
+  --mc-border: var(--border-card, rgba(0, 240, 255, 0.14));
+  --mc-border-bright: var(--line-strong, rgba(0, 240, 255, 0.4));
+  --dial-track: rgba(255, 255, 255, 0.08);
+  --fib-8: 8px;
+  --fib-13: 13px;
+  --fib-21: 21px;
+  --fib-34: 34px;
+  --fib-55: 55px;
+  --fib-89: 89px;
+  --fib-radius-md: 13px;
+  --fib-radius-lg: 21px;
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: var(--fib-21, 21px) clamp(16px, 3vw, 21px) var(--fib-89, 89px);
+  box-sizing: border-box;
+  min-width: 0;
+  scroll-margin-top: calc(var(--zoth-header-h, 54px) + var(--zoth-ribbon, 0px) + 12px);
+}
+
+.mc-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.mc-stat-box {
+  background: var(--surface-card, var(--panel, rgba(15, 22, 44, 0.7)));
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+  border-radius: 12px;
+  padding: 14px 16px;
+  text-align: center;
+  min-width: 0;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.mc-stat-box:hover {
+  border-color: var(--mc-cyan, var(--cyan, #00f0ff));
+  transform: translateY(-2px);
+}
+
+.mc-stat-val {
+  font-family: var(--font-display, "Syne", sans-serif);
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--mc-cyan, var(--cyan, #00f0ff));
+}
+
+.mc-stat-label {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.68rem;
+  color: var(--muted, #8b949e);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.mc-tab-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 32px;
+  border-bottom: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+  padding-bottom: 16px;
+}
+
+.mc-tab-btn {
+  padding: var(--fib-8, 8px) var(--fib-21, 21px);
+  border-radius: var(--fib-radius-md, 13px);
+  background: var(--panel, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+  color: var(--muted, #8b949e);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 44px;
+}
+
+.mc-tab-btn svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.mc-tab-btn:hover {
+  background: color-mix(in srgb, var(--cyan, #00f0ff) 10%, transparent);
+  color: var(--text-primary, #f8fafc);
+  border-color: var(--mc-cyan, var(--cyan, #00f0ff));
+}
+
+.mc-tab-btn.active {
+  background: var(--mc-cyan, var(--cyan, #00f0ff));
+  color: #05070f;
+  border-color: var(--mc-cyan, var(--cyan, #00f0ff));
+  box-shadow: 0 0 24px color-mix(in srgb, var(--cyan, #00f0ff) 35%, transparent);
+}
+
+.mc-section {
+  display: none;
+  animation: mcFadeIn 0.25s ease;
+}
+
+.mc-section.active {
+  display: block;
+}
+
+@keyframes mcFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+.mc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
+  gap: 24px;
+}
+
+.mc-card {
+  background: var(--surface-card, var(--panel-solid, #0f162c));
+  border: 1px solid var(--mc-border, var(--border-card, rgba(0, 240, 255, 0.14)));
+  border-radius: var(--fib-radius-lg, 21px);
+  padding: var(--fib-34, 34px) var(--fib-21, 21px);
+  min-width: 0;
+  transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+.mc-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--mc-cyan, var(--cyan, #00f0ff)), transparent);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.mc-card:hover {
+  background: var(--surface-elevated, var(--surface-highlight, #151e3a));
+  border-color: var(--mc-border-bright, var(--line-strong, rgba(0, 240, 255, 0.4)));
+  transform: translateY(-3px);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4), 0 0 20px color-mix(in srgb, var(--cyan, #00f0ff) 15%, transparent);
+}
+
+.mc-card:hover::before {
+  opacity: 1;
+}
+
+.mc-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+  gap: 12px;
+}
+
+.mc-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--cyan, #00f0ff) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--cyan, #00f0ff) 25%, transparent);
+  color: var(--mc-cyan, #00f0ff);
+  flex-shrink: 0;
+}
+
+.mc-card-icon svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+.mc-badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.badge-shipped {
+  background: color-mix(in srgb, var(--green, #10b981) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--green, #10b981) 40%, transparent);
+  color: var(--mc-emerald, var(--green, #10b981));
+}
+
+.badge-horizon {
+  background: color-mix(in srgb, var(--violet, #a855f7) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--violet, #a855f7) 40%, transparent);
+  color: var(--mc-purple, var(--violet, #a855f7));
+}
+
+.badge-power {
+  background: color-mix(in srgb, var(--magenta, #ff007a) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--magenta, #ff007a) 40%, transparent);
+  color: var(--mc-magenta, var(--magenta, #ff007a));
+}
+
+html .mc-workspace h2.mc-card-title,
+.mc-card-title {
+  font-family: var(--font-display, "Syne", sans-serif);
+  font-size: 1.35rem !important;
+  line-height: 1.2 !important;
+  font-weight: 800;
+  margin: 0 0 8px;
+  color: var(--text-primary, #f8fafc);
+  letter-spacing: -0.03em;
+  overflow-wrap: normal !important;
+  word-break: keep-all !important;
+  hyphens: none !important;
+  text-wrap: pretty;
+}
+
+.mc-card-desc {
+  color: var(--muted, #94a3b8);
+  font-size: 0.92rem;
+  line-height: 1.6;
+  margin: 0 0 18px;
+}
+
+.mc-feature-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px;
+}
+
+.mc-feature-list li {
+  position: relative;
+  padding-left: 20px;
+  margin-bottom: 8px;
+  color: var(--text-subhead, #cbd5e1);
+  font-size: 0.86rem;
+}
+
+.mc-feature-list li::before {
+  content: "▹";
+  position: absolute;
+  left: 0;
+  color: var(--mc-cyan, var(--cyan, #00f0ff));
+  font-weight: bold;
+}
+
+.mc-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 14px;
+  border-top: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+}
+
+.mc-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--mc-cyan, var(--cyan, #00f0ff));
+  text-decoration: none;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.8rem;
+  font-weight: 700;
+  min-height: 44px;
+  transition: all 0.2s ease;
+}
+
+.mc-link-btn:hover {
+  color: var(--text-primary, #f8fafc);
+  transform: translateX(3px);
+}
+
+.mc-widget {
+  background: var(--panel-solid, #080c18);
+  border: 1px solid var(--mc-border, var(--border-card));
+  border-radius: 16px;
+  padding: 24px;
+  margin-top: 36px;
+}
+
+.mc-widget-title {
+  font-family: var(--font-display, "Syne", sans-serif);
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin: 0 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-primary, #f8fafc);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Dynamic Telemetry Controls & Widget Matrix                                 */
+/* -------------------------------------------------------------------------- */
+
+.telemetry-controls-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: var(--surface-card, rgba(10, 15, 30, 0.82));
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+  border-radius: 14px;
+  padding: 12px 18px;
+  margin-bottom: 24px;
+  backdrop-filter: blur(12px);
+}
+
+.telemetry-widget-card {
+  background: var(--surface-card, rgba(10, 14, 26, 0.85));
+  border: 1px solid var(--mc-border, rgba(0, 240, 255, 0.14));
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+  position: relative;
+  cursor: grab;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  user-select: none;
+}
+
+.telemetry-widget-card:hover {
+  border-color: var(--mc-border-bright, rgba(0, 240, 255, 0.4));
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
+}
+
+.telemetry-widget-card.dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+  transform: scale(0.98);
+}
+
+.telemetry-widget-card.drag-over {
+  border-color: var(--gold, #fbbf24);
+  box-shadow: 0 0 16px rgba(251, 191, 36, 0.4);
+}
+
+.dial-svg-wrap {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 12px auto;
+}
+
+.dial-svg-wrap svg {
+  transform: rotate(-90deg);
+  display: block;
+}
+
+.dial-bg-circle {
+  stroke: var(--dial-track, rgba(255, 255, 255, 0.08));
+}
+
+.dial-center-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono, monospace);
+  pointer-events: none;
+}
+
+.dial-main-val {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-primary, #ffffff);
+  font-family: var(--font-mono, monospace);
+  line-height: 1.1;
+}
+
+.dial-sub-val {
+  font-size: 0.62rem;
+  color: var(--text-subhead, #94a3b8);
+  font-family: var(--font-mono, monospace);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.telemetry-chip {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.15));
+  background: var(--panel, rgba(255, 255, 255, 0.05));
+  color: var(--muted, #94a3b8);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  user-select: none;
+}
+
+.telemetry-chip svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+
+.telemetry-chip:hover {
+  background: color-mix(in srgb, var(--cyan, #00f0ff) 12%, transparent);
+  color: var(--text-primary, #ffffff);
+  border-color: var(--cyan, #00f0ff);
+}
+
+.telemetry-chip.active {
+  background: color-mix(in srgb, var(--cyan, #00f0ff) 20%, transparent);
+  border-color: var(--cyan, #00f0ff);
+  color: var(--cyan, #00f0ff);
+}
+
+.drag-handle-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  font-size: 0.72rem;
+  font-family: var(--font-mono, monospace);
+  color: var(--muted, #64748b);
+  cursor: grab;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+}
+
+.drag-handle-badge svg {
+  width: 12px;
+  height: 12px;
+}
+
+.tel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #14f195;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.tel-dot.online {
+  box-shadow: 0 0 8px #14f195;
+  animation: mcDotPulse 2s infinite ease-in-out;
+}
+
+@keyframes mcDotPulse {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.25); }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Footer — full bleed                                                        */
+/* -------------------------------------------------------------------------- */
+
+footer.site {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  box-sizing: border-box;
+  border-top: 1px solid var(--line, rgba(247, 244, 238, 0.1));
+  background: var(--bg, #050508);
+}
+
+footer.site .mega-footer-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+footer.site .mega-footer-link:hover {
+  color: var(--gold, #fbbf24);
+  text-decoration: none;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Mobile — portrait first, Azoth above type, then deck                       */
+/* -------------------------------------------------------------------------- */
+
+@media (max-width: 1080px) {
+  .mc-poster {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .mc-poster-visual {
+    order: -1;
+    min-height: min(42svh, 380px);
+  }
+
+  .mc-poster-copy {
+    justify-content: flex-start;
+    padding: 20px 22px 28px;
+    max-width: none;
+  }
+
+  html .mc-poster h1,
+  .mc-poster h1 {
+    font-size: clamp(2.4rem, 10vw, 3.6rem) !important;
+    max-width: none;
+  }
+
+  .mc-poster-credit {
+    display: none;
+  }
+
+  .mc-workspace {
+    padding: var(--fib-21, 21px) var(--fib-21, 21px) calc(var(--fib-55, 55px) + env(safe-area-inset-bottom, 16px));
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 880px) {
+  .mc-poster-visual {
+    min-height: min(48svh, 360px);
+  }
+
+  .mc-poster-copy {
+    padding: 20px 18px 28px;
+  }
+
+  html .mc-poster h1,
+  .mc-poster h1 {
+    font-size: clamp(2.4rem, 14vw, 3.4rem) !important;
+  }
+
+  .mc-workspace {
+    padding: var(--fib-13, 13px) var(--fib-13, 13px) calc(var(--fib-55, 55px) + env(safe-area-inset-bottom, 16px));
+  }
+
+  .mc-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mc-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mc-tab-bar {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mc-tab-btn {
+    flex: 0 0 auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .mc-poster-actions .btn {
+    flex: 1 1 auto;
+  }
+
+  .mc-poster-visual {
+    min-height: 46vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mc-section,
+  .mc-card,
+  .mc-tab-btn,
+  .mc-link-btn,
+  .mc-poster-actions .btn-gold:hover {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* THEME 2: Solar Light (WCAG AAA contrast, pure white cards, crisp dark text) */
+/* -------------------------------------------------------------------------- */
+
+html[data-theme="light"],
+html.theme-light {
+  --mc-border: rgba(15, 23, 42, 0.12);
+  --mc-border-bright: rgba(37, 99, 235, 0.4);
+  --dial-track: rgba(15, 23, 42, 0.08);
+  --mc-cyan: #0284c7;
+  --mc-emerald: #059669;
+  --mc-purple: #7c3aed;
+  --mc-magenta: #db2777;
+  --mc-amber: #d97706;
+  --mc-muted: #475569;
+}
+
+html[data-theme="light"] body,
+html.theme-light body,
+html[data-theme="light"] body.mission-page,
+html.theme-light body.mission-page {
+  background: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+html[data-theme="light"] .mc-poster,
+html.theme-light .mc-poster {
+  background: #f8fafc;
+  border-bottom-color: rgba(15, 23, 42, 0.1);
+}
+
+html[data-theme="light"] .mc-poster h1,
+html.theme-light .mc-poster h1 {
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+  background: none !important;
+  text-shadow: none !important;
+}
+
+html[data-theme="light"] .mc-poster .lede,
+html.theme-light .mc-poster .lede {
+  color: #334155 !important;
+}
+
+html[data-theme="light"] .mc-poster .kicker,
+html[data-theme="light"] .mc-poster-credit,
+html.theme-light .mc-poster .kicker,
+html.theme-light .mc-poster-credit {
+  color: #b45309 !important;
+}
+
+html[data-theme="light"] .mc-poster-visual,
+html.theme-light .mc-poster-visual {
+  background: #0f172a;
+}
+
+html[data-theme="light"] .mc-poster-actions .btn-ghost,
+html.theme-light .mc-poster-actions .btn-ghost {
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+  border: 1px solid rgba(15, 23, 42, 0.28) !important;
+  background: #ffffff !important;
+}
+
+html[data-theme="light"] .mc-poster-actions .btn-gold,
+html.theme-light .mc-poster-actions .btn-gold {
+  background: #f59e0b !important;
+  color: #000000 !important;
+}
+
+html[data-theme="light"] .mc-workspace,
+html.theme-light .mc-workspace {
+  color: #0f172a;
+}
+
+html[data-theme="light"] .mc-stat-box,
+html[data-theme="light"] .mc-card,
+html[data-theme="light"] .mc-widget,
+html[data-theme="light"] .telemetry-controls-bar,
+html[data-theme="light"] .telemetry-widget-card,
+html.theme-light .mc-stat-box,
+html.theme-light .mc-card,
+html.theme-light .mc-widget,
+html.theme-light .telemetry-controls-bar,
+html.theme-light .telemetry-widget-card {
+  background: #ffffff !important;
+  border-color: rgba(15, 23, 42, 0.12) !important;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  color: #0f172a !important;
+}
+
+html[data-theme="light"] .mc-card:hover,
+html[data-theme="light"] .telemetry-widget-card:hover,
+html.theme-light .mc-card:hover,
+html.theme-light .telemetry-widget-card:hover {
+  background: #f8fafc !important;
+  border-color: rgba(2, 132, 199, 0.4) !important;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+html[data-theme="light"] .mc-stat-val,
+html.theme-light .mc-stat-val {
+  color: #0284c7 !important;
+}
+
+html[data-theme="light"] .mc-stat-label,
+html[data-theme="light"] .mc-card-desc,
+html[data-theme="light"] .mc-feature-list li,
+html.theme-light .mc-stat-label,
+html.theme-light .mc-card-desc,
+html.theme-light .mc-feature-list li {
+  color: #334155 !important;
+}
+
+html[data-theme="light"] .mc-card-icon,
+html.theme-light .mc-card-icon {
+  background: rgba(2, 132, 199, 0.1) !important;
+  border-color: rgba(2, 132, 199, 0.3) !important;
+  color: #0284c7 !important;
+}
+
+html[data-theme="light"] .mc-card-title,
+html[data-theme="light"] .mc-widget-title,
+html[data-theme="light"] .mc-workspace h2,
+html[data-theme="light"] .mc-workspace h3,
+html[data-theme="light"] .dial-main-val,
+html.theme-light .mc-card-title,
+html.theme-light .mc-widget-title,
+html.theme-light .mc-workspace h2,
+html.theme-light .mc-workspace h3,
+html.theme-light .dial-main-val {
+  color: #0f172a !important;
+  text-shadow: none !important;
+}
+
+html[data-theme="light"] .dial-sub-val,
+html.theme-light .dial-sub-val {
+  color: #64748b !important;
+}
+
+html[data-theme="light"] .mc-tab-bar,
+html.theme-light .mc-tab-bar {
+  border-bottom-color: rgba(15, 23, 42, 0.1);
+}
+
+html[data-theme="light"] .mc-tab-btn,
+html.theme-light .mc-tab-btn {
+  background: #ffffff;
+  color: #475569;
+  border-color: rgba(15, 23, 42, 0.16);
+}
+
+html[data-theme="light"] .mc-tab-btn:hover,
+html.theme-light .mc-tab-btn:hover {
+  background: #f0f9ff;
+  color: #0284c7;
+  border-color: #0284c7;
+}
+
+html[data-theme="light"] .mc-tab-btn.active,
+html.theme-light .mc-tab-btn.active {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #0284c7;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);
+}
+
+html[data-theme="light"] .telemetry-chip,
+html.theme-light .telemetry-chip {
+  background: #f1f5f9;
+  border-color: rgba(15, 23, 42, 0.15);
+  color: #475569;
+}
+
+html[data-theme="light"] .telemetry-chip:hover,
+html.theme-light .telemetry-chip:hover {
+  background: #e0f2fe;
+  border-color: #0284c7;
+  color: #0284c7;
+}
+
+html[data-theme="light"] .telemetry-chip.active,
+html.theme-light .telemetry-chip.active {
+  background: #e0f2fe;
+  border-color: #0284c7;
+  color: #0284c7;
+}
+
+html[data-theme="light"] .drag-handle-badge,
+html.theme-light .drag-handle-badge {
+  background: #f1f5f9;
+  border-color: rgba(15, 23, 42, 0.12);
+  color: #64748b;
+}
+
+html[data-theme="light"] .mc-card-footer,
+html.theme-light .mc-card-footer {
+  border-top-color: rgba(15, 23, 42, 0.1);
+}
+
+html[data-theme="light"] .mc-link-btn,
+html.theme-light .mc-link-btn {
+  color: #0284c7;
+}
+
+html[data-theme="light"] .mc-link-btn:hover,
+html.theme-light .mc-link-btn:hover {
+  color: #0369a1;
+}
+
+html[data-theme="light"] footer.site,
+html.theme-light footer.site {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-top-color: rgba(15, 23, 42, 0.1) !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* THEME 3: Matrix CRT                                                        */
+/* -------------------------------------------------------------------------- */
+
+html[data-theme="matrix"] {
+  --mc-border: rgba(0, 255, 102, 0.22);
+  --mc-border-bright: rgba(0, 255, 102, 0.55);
+  --dial-track: rgba(0, 255, 102, 0.12);
+  --mc-cyan: #00ff66;
+  --mc-emerald: #00ff66;
+  --mc-purple: #34d399;
+  --mc-magenta: #a7f3d0;
+  --mc-amber: #86efac;
+}
+
+html[data-theme="matrix"] body,
+html[data-theme="matrix"] .mc-poster {
+  background: #000800 !important;
+}
+
+html[data-theme="matrix"] .mc-poster h1 {
+  color: #00ff66 !important;
+  -webkit-text-fill-color: #00ff66 !important;
+  text-shadow: 0 0 12px rgba(0, 255, 102, 0.4) !important;
+}
+
+html[data-theme="matrix"] .mc-poster .kicker,
+html[data-theme="matrix"] .mc-poster-credit {
+  color: #00ff66;
+}
+
+html[data-theme="matrix"] .mc-stat-box,
+html[data-theme="matrix"] .mc-card,
+html[data-theme="matrix"] .mc-widget,
+html[data-theme="matrix"] .telemetry-controls-bar,
+html[data-theme="matrix"] .telemetry-widget-card {
+  background: rgba(0, 16, 4, 0.88) !important;
+  border-color: rgba(0, 255, 102, 0.22) !important;
+}
+
+html[data-theme="matrix"] .mc-card:hover,
+html[data-theme="matrix"] .telemetry-widget-card:hover {
+  box-shadow: 0 0 24px rgba(0, 255, 102, 0.22);
+  border-color: #00ff66 !important;
+}
+
+html[data-theme="matrix"] .mc-tab-btn.active {
+  background: #00ff66;
+  color: #000800;
+  border-color: #00ff66;
+  box-shadow: 0 0 20px rgba(0, 255, 102, 0.4);
+}
+
+html[data-theme="matrix"] .telemetry-chip.active {
+  background: rgba(0, 255, 102, 0.15);
+  border-color: #00ff66;
+  color: #00ff66;
+}
+
+/* -------------------------------------------------------------------------- */
+/* THEME 4: Hermetic Gold                                                     */
+/* -------------------------------------------------------------------------- */
+
+html[data-theme="gold"] {
+  --mc-border: rgba(251, 191, 36, 0.22);
+  --mc-border-bright: rgba(251, 191, 36, 0.55);
+  --dial-track: rgba(251, 191, 36, 0.12);
+  --mc-cyan: #fbbf24;
+  --mc-emerald: #f59e0b;
+  --mc-purple: #fde68a;
+  --mc-magenta: #fef3c7;
+  --mc-amber: #d97706;
+}
+
+html[data-theme="gold"] body,
+html[data-theme="gold"] .mc-poster {
+  background: #0c0802 !important;
+}
+
+html[data-theme="gold"] .mc-poster h1 {
+  color: #f8ecc4 !important;
+  -webkit-text-fill-color: #f8ecc4 !important;
+  text-shadow: 0 0 14px rgba(251, 191, 36, 0.35) !important;
+}
+
+html[data-theme="gold"] .mc-poster .kicker,
+html[data-theme="gold"] .mc-poster-credit {
+  color: #fbbf24;
+}
+
+html[data-theme="gold"] .mc-stat-box,
+html[data-theme="gold"] .mc-card,
+html[data-theme="gold"] .mc-widget,
+html[data-theme="gold"] .telemetry-controls-bar,
+html[data-theme="gold"] .telemetry-widget-card {
+  background: rgba(20, 14, 4, 0.88) !important;
+  border-color: rgba(251, 191, 36, 0.22) !important;
+}
+
+html[data-theme="gold"] .mc-card:hover,
+html[data-theme="gold"] .telemetry-widget-card:hover {
+  box-shadow: 0 0 24px rgba(251, 191, 36, 0.22);
+  border-color: #fbbf24 !important;
+}
+
+html[data-theme="gold"] .mc-tab-btn.active {
+  background: #fbbf24;
+  color: #0c0802;
+  border-color: #fbbf24;
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+}
+
+html[data-theme="gold"] .telemetry-chip.active {
+  background: rgba(251, 191, 36, 0.15);
+  border-color: #fbbf24;
+  color: #fbbf24;
+}

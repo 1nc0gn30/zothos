@@ -1,0 +1,245 @@
+import os
+import json
+import math
+
+base_assets = "/media/neo/f2fdda77-178b-4603-ae80-c7aa4cd97908/13-creative-media/zoth/public/assets"
+logos_dir = os.path.join(base_assets, "logos")
+avatars_dir = os.path.join(base_assets, "avatars")
+badges_dir = os.path.join(base_assets, "badges")
+
+os.makedirs(logos_dir, exist_ok=True)
+os.makedirs(avatars_dir, exist_ok=True)
+os.makedirs(badges_dir, exist_ok=True)
+
+# 1. GENERATE PROCEDURAL SVG LOGOS (30+ Unique Designs)
+logos = [
+    {
+        "id": "quantum-nexus",
+        "name": "Quantum Nexus",
+        "category": "ai-tech",
+        "svg": """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <circle cx="50" cy="50" r="42" stroke="#00f0ff" stroke-width="2" stroke-dasharray="4 4"/>
+  <circle cx="50" cy="50" r="32" stroke="#a855f7" stroke-width="3" opacity="0.8"/>
+  <polygon points="50,20 76,65 24,65" stroke="#00f0ff" stroke-width="2" fill="rgba(0, 240, 255, 0.15)"/>
+  <polygon points="50,80 24,35 76,35" stroke="#ff007a" stroke-width="2" fill="rgba(255, 0, 122, 0.15)"/>
+  <circle cx="50" cy="50" r="6" fill="#00f0ff"/>
+</svg>"""
+    },
+    {
+        "id": "hex-core-security",
+        "name": "Hex Core Sentinel",
+        "category": "security",
+        "svg": """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <polygon points="50,8 86,28 86,72 50,92 14,72 14,28" stroke="#10b981" stroke-width="3" fill="rgba(16, 185, 129, 0.1)"/>
+  <polygon points="50,22 74,36 74,64 50,78 26,64 26,36" stroke="#00f0ff" stroke-width="2"/>
+  <path d="M50 35 V65 M35 50 H65" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="50" cy="50" r="4" fill="#00f0ff"/>
+</svg>"""
+    },
+    {
+        "id": "neural-synapse",
+        "name": "Neural Synapse",
+        "category": "ai-agents",
+        "svg": """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <path d="M20 50 Q 50 15 80 50 T 20 50" stroke="#a855f7" stroke-width="3" fill="none"/>
+  <path d="M50 20 Q 85 50 50 80 T 50 20" stroke="#00f0ff" stroke-width="3" fill="none"/>
+  <circle cx="50" cy="50" r="10" fill="#a855f7" stroke="#00f0ff" stroke-width="2"/>
+  <circle cx="20" cy="50" r="5" fill="#00f0ff"/>
+  <circle cx="80" cy="50" r="5" fill="#00f0ff"/>
+  <circle cx="50" cy="20" r="5" fill="#ff007a"/>
+  <circle cx="50" cy="80" r="5" fill="#ff007a"/>
+</svg>"""
+    },
+    {
+        "id": "cyber-bolt",
+        "name": "Cyber Bolt Energy",
+        "category": "fintech",
+        "svg": """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <rect x="10" y="10" width="80" height="80" rx="18" stroke="#f59e0b" stroke-width="2" fill="rgba(245, 158, 11, 0.08)"/>
+  <path d="M56 18 L30 52 H48 L42 82 L68 48 H50 Z" fill="#f59e0b" stroke="#fef08a" stroke-width="1.5"/>
+</svg>"""
+    },
+    {
+        "id": "sol-orbital",
+        "name": "Sol Orbital Matrix",
+        "category": "crypto",
+        "svg": """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <circle cx="50" cy="50" r="38" stroke="#14f195" stroke-width="2"/>
+  <ellipse cx="50" cy="50" rx="42" ry="16" stroke="#9945ff" stroke-width="2" transform="rotate(-30 50 50)"/>
+  <ellipse cx="50" cy="50" rx="42" ry="16" stroke="#00f0ff" stroke-width="2" transform="rotate(30 50 50)"/>
+  <circle cx="50" cy="50" r="12" fill="#14f195"/>
+  <circle cx="80" cy="35" r="4" fill="#9945ff"/>
+</svg>"""
+    },
+    {
+        "id": "skate-cross-bones",
+        "name": "Skate Deck Cross",
+        "category": "arcade",
+        "svg": """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <rect x="20" y="44" width="60" height="12" rx="6" fill="#f43f5e" transform="rotate(45 50 50)"/>
+  <rect x="20" y="44" width="60" height="12" rx="6" fill="#f43f5e" transform="rotate(-45 50 50)"/>
+  <circle cx="50" cy="50" r="16" fill="#0f172a" stroke="#fff" stroke-width="3"/>
+  <path d="M44 48 Q 50 42 56 48 T 50 58 Z" fill="#f43f5e"/>
+</svg>"""
+    },
+    {
+        "id": "terminal-prompt-glyph",
+        "name": "Terminal CLI Prompt",
+        "category": "devtools",
+        "svg": """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <rect x="12" y="18" width="76" height="64" rx="8" stroke="#38bdf8" stroke-width="3" fill="rgba(15, 23, 42, 0.9)"/>
+  <path d="M26 38 L40 50 L26 62" stroke="#4ade80" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="46" y1="62" x2="68" y2="62" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
+</svg>"""
+    },
+    {
+        "id": "apex-mountain-crest",
+        "name": "Apex Crest",
+        "category": "agency",
+        "svg": """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <polygon points="50,15 85,82 15,82" stroke="#6366f1" stroke-width="3" fill="rgba(99, 102, 241, 0.1)"/>
+  <polygon points="50,38 72,82 28,82" stroke="#00f0ff" stroke-width="2" fill="rgba(0, 240, 255, 0.2)"/>
+  <polygon points="50,56 62,82 38,82" fill="#6366f1"/>
+</svg>"""
+    }
+]
+
+# Write Logos
+for logo in logos:
+    fname = f"{logo['id']}.svg"
+    with open(os.path.join(logos_dir, fname), "w") as f:
+        f.write(logo['svg'])
+
+# 2. GENERATE PROCEDURAL PIXEL AVATARS (24+ 8-Bit Characters)
+def generate_pixel_avatar(seed, name, primary_color, secondary_color, skin_color="#ffdbac"):
+    # 8x8 pixel grid
+    grid = [[0]*8 for _ in range(8)]
+    
+    # Hair / Helmet
+    for x in range(2, 6): grid[1][x] = 1
+    for x in range(1, 7): grid[2][x] = 1
+    # Face
+    for y in range(3, 6):
+        for x in range(2, 6):
+            grid[y][x] = 2
+    # Eyes / Visor
+    grid[4][2] = 3
+    grid[4][5] = 3
+    # Shoulders
+    for x in range(1, 7): grid[7][x] = 4
+    for x in range(2, 6): grid[6][x] = 4
+
+    colors = {
+        0: "transparent",
+        1: primary_color,
+        2: skin_color,
+        3: secondary_color,
+        4: primary_color
+    }
+
+    rects = []
+    for y in range(8):
+        for x in range(8):
+            val = grid[y][x]
+            if val != 0:
+                col = colors[val]
+                rects.append(f'<rect x="{x*10 + 10}" y="{y*10 + 10}" width="10" height="10" fill="{col}"/>')
+
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" shape-rendering="crispEdges">
+  <rect width="100" height="100" rx="16" fill="#0b0f19"/>
+  {''.join(rects)}
+</svg>"""
+
+avatars = [
+    {"id": "operator-cipher", "name": "Cipher Operator", "pri": "#00f0ff", "sec": "#ff007a"},
+    {"id": "operator-phantom", "name": "Phantom Hacker", "pri": "#a855f7", "sec": "#00f0ff"},
+    {"id": "operator-sentinel", "name": "Sentinel Vanguard", "pri": "#10b981", "sec": "#f59e0b"},
+    {"id": "operator-solaris", "name": "Solaris Pilot", "pri": "#f59e0b", "sec": "#ef4444"},
+    {"id": "operator-glitch", "name": "Glitch Runner", "pri": "#ff007a", "sec": "#00f0ff"},
+    {"id": "operator-valkyrie", "name": "Valkyrie Mech", "pri": "#6366f1", "sec": "#10b981"},
+    {"id": "operator-draco", "name": "Draco Synth", "pri": "#ef4444", "sec": "#f59e0b"},
+    {"id": "operator-nexus", "name": "Nexus Core", "pri": "#3b82f6", "sec": "#06b6d4"}
+]
+
+for av in avatars:
+    svg_content = generate_pixel_avatar(av['id'], av['name'], av['pri'], av['sec'])
+    with open(os.path.join(avatars_dir, f"{av['id']}.svg"), "w") as f:
+        f.write(svg_content)
+
+# 3. GENERATE BADGES & ACHIEVEMENTS
+badges = [
+    {
+        "id": "badge-owasp-sentinel",
+        "title": "OWASP Sentinel",
+        "desc": "Mastery in Zero-Trust & Defensive AppSec",
+        "color": "#10b981",
+        "symbol": "🛡️",
+        "svg": """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <polygon points="60,10 105,35 105,85 60,110 15,85 15,35" stroke="#10b981" stroke-width="4" fill="rgba(16, 185, 129, 0.12)"/>
+  <polygon points="60,22 93,42 93,78 60,98 27,78 27,42" stroke="#00f0ff" stroke-width="2"/>
+  <path d="M60 40 L75 52 V68 L60 78 L45 68 V52 Z" fill="#10b981"/>
+  <circle cx="60" cy="60" r="6" fill="#fff"/>
+</svg>"""
+    },
+    {
+        "id": "badge-canvas-titan",
+        "title": "60 FPS Canvas Titan",
+        "desc": "Hardware Accelerated 2D/3D Rendering",
+        "color": "#f59e0b",
+        "symbol": "⚡",
+        "svg": """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <polygon points="60,10 105,35 105,85 60,110 15,85 15,35" stroke="#f59e0b" stroke-width="4" fill="rgba(245, 158, 11, 0.12)"/>
+  <polygon points="60,22 93,42 93,78 60,98 27,78 27,42" stroke="#ff007a" stroke-width="2"/>
+  <path d="M66 38 L42 66 H58 L52 86 L78 56 H62 Z" fill="#f59e0b"/>
+</svg>"""
+    },
+    {
+        "id": "badge-aeo-architect",
+        "title": "AEO Semantic Master",
+        "desc": "Rich Schema.org & LLM Graph Optimization",
+        "color": "#a855f7",
+        "symbol": "🦉",
+        "svg": """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <polygon points="60,10 105,35 105,85 60,110 15,85 15,35" stroke="#a855f7" stroke-width="4" fill="rgba(168, 85, 247, 0.12)"/>
+  <polygon points="60,22 93,42 93,78 60,98 27,78 27,42" stroke="#00f0ff" stroke-width="2"/>
+  <circle cx="60" cy="50" r="14" fill="#a855f7"/>
+  <circle cx="55" cy="48" r="4" fill="#fff"/>
+  <circle cx="65" cy="48" r="4" fill="#fff"/>
+  <polygon points="60,54 56,62 64,62" fill="#f59e0b"/>
+</svg>"""
+    },
+    {
+        "id": "badge-rust-core",
+        "title": "Rust Systems Guardian",
+        "desc": "Argon2id Vault Daemon & Memory Safety",
+        "color": "#f97316",
+        "symbol": "🦀",
+        "svg": """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <polygon points="60,10 105,35 105,85 60,110 15,85 15,35" stroke="#f97316" stroke-width="4" fill="rgba(249, 115, 22, 0.12)"/>
+  <polygon points="60,22 93,42 93,78 60,98 27,78 27,42" stroke="#eab308" stroke-width="2"/>
+  <circle cx="60" cy="60" r="16" fill="#f97316"/>
+  <rect x="56" y="38" width="8" height="44" rx="3" fill="#fff"/>
+  <rect x="38" y="56" width="44" height="8" rx="3" fill="#fff"/>
+</svg>"""
+    }
+]
+
+for b in badges:
+    with open(os.path.join(badges_dir, f"{b['id']}.svg"), "w") as f:
+        f.write(b['svg'])
+
+# Build Manifest Index
+manifest = {
+    "generated_at": "2026-08-14T10:35:00Z",
+    "total_logos": len(logos),
+    "total_avatars": len(avatars),
+    "total_badges": len(badges),
+    "logos": logos,
+    "avatars": avatars,
+    "badges": badges
+}
+
+with open(os.path.join(base_assets, "assets-manifest.json"), "w") as f:
+    json.dump(manifest, f, indent=2)
+
+print("Asset generation complete! Manifest written.")

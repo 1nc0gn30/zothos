@@ -1,0 +1,137 @@
+---
+import { readComponentMarkup } from '../utils/componentMarkup'
+
+interface Props {
+  src: string
+  title: string
+  dark?: boolean
+  index?: number
+  wrapper?: string
+}
+
+const { src, title, dark = false, index = 1, wrapper = '' } = Astro.props
+
+const sourceHtml = readComponentMarkup(src)
+---
+
+<component-preview data-src={src} class="block">
+  <iframe
+    data-preview="true"
+    {src}
+    {title}
+    class:list={[
+      wrapper,
+      dark ? 'bg-gray-900' : 'bg-white',
+      'mx-auto w-full ring ring-gray-200 transition-[max-width] duration-300 data-[preview=false]:hidden data-[preview=true]:block',
+    ]}
+    style="max-width: 100%;"
+    loading={index === 1 && !dark ? 'eager' : 'lazy'}></iframe>
+
+  <div
+    data-preview="true"
+    class="prose prose-pre:m-0 prose-pre:rounded-none max-w-none data-[preview=true]:hidden"
+  >
+    <pre data-html set:text={sourceHtml} />
+  </div>
+</component-preview>
+
+<script>
+  class ComponentPreview extends HTMLElement {
+    private contentHtml: string | null = null
+    private contentSrc: string | null = null
+
+    private iframeEl: HTMLIFrameElement | null = null
+    private previewEl: HTMLPreElement | null = null
+
+    private breakpointHandler: ((event: CustomEvent<{ width: string }>) => void) | null = null
+    private copyHandler: (() => void) | null = null
+    private viewHandler: ((event: CustomEvent<{ previewing: boolean }>) => void) | null = null
+
+    connectedCallback() {
+      this.contentSrc = this.dataset.src || null
+
+      if (!this.contentSrc) {
+        return
+      }
+
+      this.iframeEl = this.querySelector('iframe')
+      this.previewEl = this.querySelector('[data-html]')
+
+      if (!this.iframeEl || !this.previewEl) {
+        return
+      }
+
+      this.setupEventListeners()
+    }
+
+    disconnectedCallback() {
+      if (this.contentSrc && this.breakpointHandler && this.copyHandler && this.viewHandler) {
+        // @ts-expect-error -- CustomEvent handler is not assignable to EventListener
+        document.removeEventListener(`breakpoint:change:${this.contentSrc}`, this.breakpointHandler)
+        document.removeEventListener(`preview:copy:${this.contentSrc}`, this.copyHandler)
+        // @ts-expect-error -- CustomEvent handler is not assignable to EventListener
+        document.removeEventListener(`preview:view:${this.contentSrc}`, this.viewHandler)
+
+        this.breakpointHandler = null
+        this.copyHandler = null
+        this.viewHandler = null
+      }
+    }
+
+    private setupEventListeners() {
+      this.breakpointHandler = (breakpointEvent) => {
+        const newWidth = breakpointEvent.detail.width
+
+        if (this.iframeEl) {
+          this.iframeEl.style.maxWidth = newWidth
+        }
+      }
+
+      this.copyHandler = () => {
+        const contentHtml = this.getContent()
+
+        try {
+          if (contentHtml) {
+            navigator.clipboard.writeText(contentHtml)
+          }
+        } catch {
+          // We do nothing
+        }
+      }
+
+      this.viewHandler = (viewEvent) => {
+        const isPreviewing = viewEvent.detail.previewing
+
+        const previewToggleElements = this.querySelectorAll('[data-preview]')
+
+        previewToggleElements.forEach((previewToggleElement) => {
+          previewToggleElement.setAttribute('data-preview', isPreviewing ? 'true' : 'false')
+        })
+      }
+
+      if (this.contentSrc) {
+        // @ts-expect-error -- CustomEvent handler is not assignable to EventListener
+        document.addEventListener(`breakpoint:change:${this.contentSrc}`, this.breakpointHandler)
+        document.addEventListener(`preview:copy:${this.contentSrc}`, this.copyHandler)
+        // @ts-expect-error -- CustomEvent handler is not assignable to EventListener
+        document.addEventListener(`preview:view:${this.contentSrc}`, this.viewHandler)
+      }
+    }
+
+    private getContent(): string | null {
+      if (this.contentHtml) {
+        return this.contentHtml
+      }
+
+      if (this.previewEl) {
+        this.contentHtml = this.previewEl.textContent?.trim() || null
+
+        return this.contentHtml
+      }
+
+      return null
+    }
+  }
+
+  customElements.define('component-preview', ComponentPreview)
+</script>

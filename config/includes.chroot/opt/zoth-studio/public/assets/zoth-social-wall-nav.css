@@ -1,0 +1,227 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ZOTH STUDIO — SOCIAL WALL COMPREHENSION LAYER
+   Page-scoped stylesheet, owned by /social/index.html only.
+
+   WHY: the wall renders 77 transmissions / ~60,000px of mobile scroll with no
+   index, no anchors and no way back to the toolbar (the .feed-controls "sticky"
+   toolbar never actually sticks — html/body overflow-x:hidden makes it a
+   scroll-boundary, so it scrolls away with the hero). A first-time visitor
+   could not tell how much page there was, or reach the top again.
+
+   WHAT: (1) a static jump-index built ONLY from labels already rendered on the
+   page (the six campaign-dispatch badges + the eight existing category labels
+   from the filter bar) — it is plain HTML, so it works with JavaScript off,
+   where the filter buttons do nothing at all; (2) a fixed back-to-top control;
+   (3) 44x44 mobile targets for the controls this page owns; (4) no-crop sizing
+   for the two portrait comic trailers that were being object-fit:cover'd into a
+   16/9 window; (5) removal of the false pointer/hover affordance on media boxes
+   that have no click handler.
+
+   THEMES: every colour is a zoth-theme token (--panel-solid/--text/--muted/
+   --line/--gold/--surface-highlight/--font-mono), so dark, light, matrix, gold
+   and the vendor themes all resolve. No hardcoded hex except as a fallback.
+
+   Link this file AFTER the page's inline <style> block so same-specificity
+   overrides win on source order; !important is used only where the inline block
+   already uses it.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. JUMP INDEX ─────────────────────────────────────────────────────────── */
+
+.feed-index {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--fib-21, 21px) var(--pad, 21px) 0;
+  box-sizing: border-box;
+}
+
+.feed-index-inner {
+  background: var(--panel-solid, #0d1222);
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.12));
+  border-radius: var(--radius-fib-md, 13px);
+  padding: var(--fib-21, 21px);
+  box-shadow: 0 12px 34px var(--shadow-color, rgba(0, 0, 0, 0.45));
+}
+
+.feed-index-title {
+  margin: 0 0 var(--fib-13, 13px);
+  font-family: var(--font-display, var(--font-theme-heading, serif));
+  font-size: clamp(1rem, 2.2vw, 1.3rem);
+  line-height: 1.2;
+  color: var(--text, #f8fafc);
+  letter-spacing: 0.01em;
+}
+
+.feed-index-groups {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--fib-21, 21px);
+}
+
+.feed-index-label {
+  margin: 0 0 var(--fib-8, 8px);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted, #94a3b8);
+}
+
+.feed-index-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--fib-8, 8px);
+}
+
+.feed-index-list a {
+  display: flex;
+  align-items: center;
+  gap: var(--fib-8, 8px);
+  /* 44px minimum target on every viewport — these are the page's real controls */
+  min-height: 44px;
+  padding: 8px 12px;
+  box-sizing: border-box;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.12));
+  border-radius: var(--radius-fib-sm, 8px);
+  background: var(--surface-highlight, rgba(255, 255, 255, 0.02));
+  color: var(--text-body, #f1f5f9);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.76rem;
+  font-weight: 600;
+  line-height: 1.35;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  transition: border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+
+.feed-index-list a:hover,
+.feed-index-list a:focus-visible {
+  border-color: var(--gold, #fbbf24);
+  color: var(--text-primary, #fff);
+  transform: translateX(2px);
+}
+
+.feed-index-list a:focus-visible {
+  outline: 3px solid var(--gold, #fbbf24);
+  outline-offset: 2px;
+}
+
+/* ── 2. ANCHOR LANDING — clear the fixed 54px header ───────────────────────── */
+
+.social-card[id],
+.feed-index {
+  scroll-margin-top: 66px;
+}
+
+/* ── 4. MEDIA SIZING — two portrait trailers were cropped to a horizontal band.
+   azoth-s01e02-trailer.mp4 and azoth-s01e03-trailer.mp4 are 1080x1620 (2:3
+   portrait, verified with ffprobe). They carried inline aspect-ratio:16/9 with
+   object-fit:cover, so ~66% of each frame was cropped out by the media box.     */
+
+.card-media-box video.feed-portrait-trailer {
+  aspect-ratio: 1080 / 1620 !important;
+  object-fit: contain !important;
+  max-height: 70vh !important;
+  height: auto !important;
+}
+
+/* ── 5. FALSE AFFORDANCE — 54 of 69 media boxes have no click handler and no
+   <video> controls, yet inherited cursor:pointer and a hover zoom from the
+   inline block. Keep the pointer/zoom only where the box really does something. */
+
+.card-media-box:not([onclick]):not(:has(video)) {
+  cursor: default;
+}
+
+.card-media-box:not([onclick]):not(:has(video)):hover img {
+  transform: none;
+}
+
+/* ── 6. RESPONSIVE — deliberate breakpoints: 360 (index 2-up, halves the height
+   of the index on phones), 768 (phone target sizing), 1024 (index groups side
+   by side + 2-up lists).                                                        */
+
+@media (min-width: 360px) {
+  .feed-index-list {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 1024px) {
+  .feed-index-groups {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--fib-34, 34px);
+  }
+  .feed-index-list {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .feed-index {
+    padding-left: var(--fib-13, 13px);
+    padding-right: var(--fib-13, 13px);
+  }
+  .feed-index-inner {
+    padding: var(--fib-13, 13px);
+  }
+}
+
+/* Phone: every control this page owns gets a real 44x44 hit box.
+   (Shared header/footer chrome is out of scope for this page.) */
+@media (max-width: 768px) {
+  .card-reactions .reaction-btn,
+  .secondary-actions .icon-action-btn,
+  .card-actions-bar .btn-share-x,
+  .card-actions-bar .btn-ducky-x,
+  .card-actions .action-btn {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+
+  .secondary-actions {
+    display: flex;
+    gap: var(--fib-8, 8px);
+  }
+
+  .campaign-links-row .campaign-link-btn {
+    min-height: 44px !important;
+    padding-top: 11px !important;
+    padding-bottom: 11px !important;
+  }
+
+  /* Campaign/dispatch CTAs are rendered as buttons but were plain inline links
+     (17-39px tall). They are always the whole content of their own paragraph,
+     so promoting them to inline-flex raises the target without disturbing a
+     single line of surrounding prose. No mid-sentence link exists in a
+     .card-content paragraph (measured: all 7 <a> in a card paragraph are
+     CTA-shaped and carry a trailing arrow glyph). */
+  .card-content p > a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .feed-top {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+}
+
+/* ── 7. MOTION GUARD ───────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .feed-index-list a,
+  .feed-top {
+    transition: none !important;
+  }
+  .feed-index-list a:hover,
+  .feed-top:hover {
+    transform: none !important;
+  }
+}

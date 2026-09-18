@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LibSignal Core Protocol | End-to-End Cryptographic Visualizer &amp; Telemetry</title>
+  
+  <!-- Canonical & SEO Meta Tags -->
+  <link rel="canonical" href="https://nullai.tech/libsignal/">
+  <meta name="description" content="Production-grade showcase of the LibSignal cryptographic library. Interactive Double Ratchet simulator, PQXDH post-quantum key agreement, Sealed Sender metadata protection, and ZKGroup zero-knowledge credential inspector.">
+  <meta name="keywords" content="Signal, LibSignal, Cryptography, Double Ratchet, E2EE, X3DH, PQXDH, Kyber, Post-Quantum, Sealed Sender, ZKGroup, AES-GCM, HKDF, Security, Zoth Studio Team">
+  <meta name="author" content="Zoth Studio Team">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#0b0f19">
+
+  <!-- OpenGraph Tags -->
+  <meta property="og:title" content="LibSignal Core Protocol | End-to-End Cryptographic Visualizer">
+  <meta property="og:description" content="Explore the cryptography of Signal messaging: Double Ratchet, X3DH, PQXDH, Sealed Sender, and ZKGroup proofs in an interactive visual suite.">
+  <meta property="og:image" content="https://nullai.tech/libsignal/og-image.svg">
+  <meta property="og:url" content="https://nullai.tech/libsignal/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Zoth Studio Team Tech Portfolio Showcase">
+
+  <!-- Twitter Card Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@nullai">
+  <meta name="twitter:creator" content="@nullai">
+  <meta name="twitter:title" content="LibSignal Core Protocol | Interactive Cryptographic Visualizer">
+  <meta name="twitter:description" content="Interactive visualizer for the Signal cryptographic protocol stack including Double Ratchet and PQXDH Post-Quantum encryption.">
+  <meta name="twitter:image" content="https://nullai.tech/libsignal/og-image.svg">
+
+  <!-- Web Manifest & Icons -->
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="og-image.svg">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Schema.org JSON-LD Structured Data (AEO) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://nullai.tech/libsignal/#software",
+        "name": "LibSignal Cryptographic Visualizer & Engine",
+        "operatingSystem": "Web, Cross-Platform, Linux, Windows, macOS",
+        "applicationCategory": "DeveloperApplication",
+        "softwareVersion": "0.86.14",
+        "description": "Interactive web application and visual simulator for the Signal cryptographic library, demonstrating Double Ratchet, PQXDH, Sealed Sender, and ZKGroup primitives.",
+        "offers": {
+          "@type": "Offer",
+          "price": "0.00",
+          "priceCurrency": "USD"
+        },
+        "author": {
+          "@type": "Person",
+          "name": "Zoth Studio Team",
+          "url": "https://nullai.tech"
+        }
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://nullai.tech/libsignal/#website",
+        "url": "https://nullai.tech/libsignal/",
+        "name": "LibSignal Protocol Visualizer",
+        "publisher": {
+          "@type": "Organization",
+          "name": "Zoth Studio Team Tech Solutions",
+          "url": "https://nullai.tech"
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://nullai.tech/libsignal/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is the Double Ratchet Algorithm?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The Double Ratchet algorithm combines a Diffie-Hellman ratchet and a Key Derivation Function (KDF) ratchet to provide end-to-end encryption with forward secrecy and post-breakout recovery."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How does Post-Quantum PQXDH work in Signal?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "PQXDH (Post-Quantum Extended Triple Diffie-Hellman) adds a Kyber-768 key encapsulation mechanism alongside traditional Curve25519 DH keys to protect sessions against quantum computer decryption."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is Sealed Sender?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Sealed Sender removes sender identity metadata from encrypted transmission envelopes so service providers and network monitors cannot see who is messaging whom."
+            }
+          }
+        ]
+      },
+      {
+        "@type": "HowTo",
+        "@id": "https://nullai.tech/libsignal/#howto",
+        "name": "How to Simulate Signal End-to-End Encryption",
+        "step": [
+          {
+            "@type": "HowToStep",
+            "name": "Establish Initial Key State",
+            "text": "Perform X3DH or PQXDH key agreement to derive the initial Root Key and Chain Keys."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Advance DH Ratchet",
+            "text": "Generate new ephemeral Diffie-Hellman keys to ratchet the Root Key forward and provide breakout security."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Encrypt Message",
+            "text": "Derive a single-use Message Key using HKDF and encrypt payload with AES-256-GCM."
+          }
+        ]
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": "https://nullai.tech/libsignal/#breadcrumb",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Portfolio",
+            "item": "https://nullai.tech"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "LibSignal Showcase",
+            "item": "https://nullai.tech/libsignal/"
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
+<link rel="stylesheet" href="/assets/zoth-theme.css?v=11">
+<link rel="stylesheet" href="/assets/zoth-nav.css?v=11">
+<script src="/assets/zoth-theme.js?v=11"></script>
+<script src="/assets/zoth-nav.js?v=11" defer></script>
+
+  <link rel="stylesheet" href="/assets/zoth-footer.css" />
+</head>
+<body>
+  <!-- Accessibility Skip Navigation -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Live ARIA Status Region for Screen Readers -->
+  <div id="aria-live-status" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Dynamic Canvas Background -->
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+  <div class="container">
+    <!-- Header Banner -->
+                                                        <header class="bar" id="topbar" role="banner">
+      <a class="brand js-hub" href="/" aria-label="Zoth Studio Home">
+        <div class="brand-emblem-wrap">
+          <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth Golden Z Emblem" width="34" height="34" class="brand-emblem-img" />
+          <span class="brand-emblem-halo"></span>
+        </div>
+        <span class="brand-text-wrap">
+          <strong>Zoth</strong>
+          <small>by NullAI</small>
+        </span>
+        <span class="brand-status-badge">SOVEREIGN</span>
+      </a>
+
+      <nav class="menu" aria-label="Primary navigation" role="navigation">
+        <a class="nav-link nav-for-everyone" href="/#for-everyone" data-tip="Zero-Code Showcases — How non-tech founders, creators & teams depend on Zoth.">✦ For You</a>
+
+        <!-- 🔮 Core AI -->
+        <div class="nav-dropdown" data-dropdown-id="core">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Core AI</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🔮 CORE AI ARCHITECTURE</span><span class="nav-item-badge">6 NODES</span></div>
+            <a href="/zoth/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+            <a href="/agents/"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+            <a href="/studio/consensus.html"><span class="nav-item-icon-box">⚔️</span><div class="nav-item-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+            <a href="/studio/swarm.html"><span class="nav-item-icon-box">🌐</span><div class="nav-item-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+            <a href="/memory/"><span class="nav-item-icon-box">🧠</span><div class="nav-item-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+            <a href="/zoth-world.html"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+          </div>
+        </div>
+
+        <!-- 🪐 Studio -->
+        <div class="nav-dropdown" data-dropdown-id="studio">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Studio</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu nav-dropdown-mega">
+            <div class="nav-dropdown-header"><span>🪐 14+ STUDIO WORKSTATIONS</span><span class="nav-item-badge">LOCAL DAGS</span></div>
+            <a href="/studio/cockpit.html"><span class="nav-item-icon-box">🪐</span><div class="nav-item-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+            <a href="/studio/cockpit.html?tool=webgen"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+            <a href="/studio/cockpit.html?tool=vos-sandbox"><span class="nav-item-icon-box">💻</span><div class="nav-item-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+            <a href="/studio/cockpit.html?tool=nexus-3d"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+            <a href="/studio/cockpit.html?tool=omnipost"><span class="nav-item-icon-box">🎬</span><div class="nav-item-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+            <a href="/studio/math-pillars.html"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+            <a href="/studio/cockpit.html?tool=secure-comms"><span class="nav-item-icon-box">🔒</span><div class="nav-item-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+            <a href="/studio/cockpit.html?tool=signal-bridge"><span class="nav-item-icon-box">📡</span><div class="nav-item-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+            <a href="/studio/cockpit.html?tool=web3-hub"><span class="nav-item-icon-box">🪙</span><div class="nav-item-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+            <a href="/studio/cockpit.html?tool=pets"><span class="nav-item-icon-box">💎</span><div class="nav-item-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+            <a href="/studio/cockpit.html?tool=tool-nexus"><span class="nav-item-icon-box">🛠️</span><div class="nav-item-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+          </div>
+        </div>
+
+        <!-- 🌌 Universe -->
+        <div class="nav-dropdown" data-dropdown-id="universe">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Universe</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🌌 UNIVERSE &amp; PUBLICATIONS</span><span class="nav-item-badge">STORIES</span></div>
+            <a href="/comic/"><span class="nav-item-icon-box">🎨</span><div class="nav-item-body"><strong>AZOTH Anime Comic</strong><small>Season 1 Ep 1: Genesis in Silicon Rain (Audio)</small></div><span class="nav-item-badge">AUDIO</span></a>
+            <a href="/social/"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+            <a href="/articles/"><span class="nav-item-icon-box">📜</span><div class="nav-item-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+            <a href="/article/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+            <a href="/ai-webgpu.html"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+            <a href="/adytum/"><span class="nav-item-icon-box">🏛️</span><div class="nav-item-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+          </div>
+        </div>
+
+        <!-- 📚 Docs & Vault -->
+        <div class="nav-dropdown" data-dropdown-id="docs">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Docs & Vault</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>📚 DOCUMENTATION &amp; SECURITY</span><span class="nav-item-badge">SPECS</span></div>
+            <a href="/docs/"><span class="nav-item-icon-box">📚</span><div class="nav-item-body"><strong>Master Documentation</strong><small>Port Topology, 1-Click Install Scripts & API Guide</small></div><span class="nav-item-badge">DOCS</span></a>
+            <a href="/vault/"><span class="nav-item-icon-box">🔐</span><div class="nav-item-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+            <a href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+            <a href="/faq.html"><span class="nav-item-icon-box">❓</span><div class="nav-item-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+          </div>
+        </div>
+
+        <!-- ⚡ Action Pills -->
+        <button type="button" class="nav-pill nav-telemetry-pill" title="View Live Studio Telemetry & Background Daemons" aria-label="Studio Telemetry Status">
+          <span class="tel-dot online"></span><span class="tel-text">6/6 DAEMONS</span>
+        </button>
+
+        <button type="button" class="nav-pill nav-pet-pill" title="Active Companion Spirit: Azoth (Click to Summon / Switch Mascot)" aria-label="Active Companion Spirit">
+          <span class="pet-emoji">🔮</span><span class="pet-name">Azoth</span>
+        </button>
+
+        <a class="nav-pill nav-deck-pill js-deck" href="http://127.0.0.1:8484/" title="Open Local Operator Deck (:8484)">
+          <span class="deck-pulse"></span><span>DECK</span>
+        </a>
+
+        <button type="button" class="nav-pill nav-palette-btn" title="Open Global Command Palette (Ctrl+K)" aria-label="Command Palette">
+          <span class="palette-icon">🔍</span><kbd class="nav-kbd">Ctrl+K</kbd>
+        </button>
+
+        <button type="button" class="nav-pill nav-annotate-btn" title="Toggle On-Screen Annotator & Feedback (Shift+A)" aria-label="Toggle Annotator">
+          <span class="annotate-icon">✏️</span><span class="annotate-text">Annotate</span><kbd class="nav-kbd">Shift+A</kbd>
+        </button>
+
+        <div class="nav-dropdown nav-theme-dropdown">
+          <button class="nav-dropdown-btn nav-theme-current-btn" type="button" aria-haspopup="true" aria-expanded="false" title="Switch Visual Theme (Shift+T)">
+            <span class="current-theme-swatch" style="background:#00f0ff;"></span>
+            <span class="current-theme-emoji">🌙</span>
+            <span class="current-theme-label">Dark Void</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+        </div>
+
+        <a class="nav-pill git" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank" title="GitHub Repository — Open Source code, Debian packages, and releases">
+          <span>🐙 GitHub ↗</span>
+        </a>
+      </nav>
+
+      <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Toggle navigation menu">
+        <span class="burger-lines"><span class="b-line b-1"></span><span class="b-line b-2"></span><span class="b-line b-3"></span></span>
+        <span class="burger-text">Menu</span>
+      </button>
+      <div class="zoth-scroll-progress" id="zoth-scroll-progress"></div>
+    </header>
+
+    <nav class="drawer" id="drawer" aria-label="Universal Mobile Navigation" role="navigation">
+      <div class="drawer-header-brand">
+        <div class="d-brand-left">
+          <div class="brand-emblem-wrap">
+            <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth" width="28" height="28" class="brand-emblem-img" />
+          </div>
+          <span class="d-brand-title"><strong>Zoth Studio</strong><small>v12.0 Sovereign</small></span>
+        </div>
+        <button type="button" class="drawer-telemetry-badge" title="View Diagnostics HUD">● 6/6 DAEMONS</button>
+        <button type="button" class="drawer-close-btn" aria-label="Close mobile menu">✕</button>
+      </div>
+
+      <div class="drawer-section drawer-tools-section">
+        <div class="drawer-heading">⚡ Quick Actions</div>
+        <div class="drawer-quick-tools-grid">
+          <button type="button" class="drawer-tool-pill drawer-palette-trigger"><span>🔍</span> Command Palette <kbd class="nav-kbd">Ctrl+K</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-annotate-trigger"><span>✏️</span> On-Screen Annotator <kbd class="nav-kbd">Shift+A</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-telemetry-trigger"><span>⚡</span> Telemetry HUD</button>
+          <button type="button" class="drawer-tool-pill drawer-audio-trigger"><span>🔊</span> Audio FX</button>
+        </div>
+      </div>
+
+      <div class="drawer-section drawer-theme-section">
+        <div class="drawer-heading">🎨 Visual Theme (16 Archetypes)</div>
+        <div class="drawer-search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="drawer-theme-search-input" placeholder="Search 16 themes..." autocomplete="off" />
+        </div>
+        <div class="theme-filter-chips drawer-filter-chips">
+          <button type="button" class="theme-chip-btn active" data-drawer-cat="all">All (16)</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="studio originals">Originals</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="frontier ai & tech">Frontier</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="developer archetypes">Dev</button>
+        </div>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">✦ Featured</div>
+        <a class="drawer-link drawer-hero-link" href="/#for-everyone"><span class="d-link-icon">✦</span><div class="d-link-body"><strong>For You (No-Code Showcases)</strong><small>How Non-Tech Founders, Creators & Teams Use Zoth</small></div><span class="nav-item-badge">SHOWCASE</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🔮 Core AI & Pantheon</div>
+        <a class="drawer-link" href="/zoth/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+        <a class="drawer-link" href="/agents/"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+        <a class="drawer-link" href="/studio/consensus.html"><span class="d-link-icon">⚔️</span><div class="d-link-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+        <a class="drawer-link" href="/studio/swarm.html"><span class="d-link-icon">🌐</span><div class="d-link-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+        <a class="drawer-link" href="/memory/"><span class="d-link-icon">🧠</span><div class="d-link-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+        <a class="drawer-link" href="/zoth-world.html"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🪐 Workstations & DAGs</div>
+        <a class="drawer-link" href="/studio/cockpit.html"><span class="d-link-icon">🪐</span><div class="d-link-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=webgen"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=vos-sandbox"><span class="d-link-icon">💻</span><div class="d-link-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=nexus-3d"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=omnipost"><span class="d-link-icon">🎬</span><div class="d-link-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=math-pillars"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=secure-comms"><span class="d-link-icon">🔒</span><div class="d-link-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=signal-bridge"><span class="d-link-icon">📡</span><div class="d-link-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=web3-hub"><span class="d-link-icon">🪙</span><div class="d-link-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+        <a class="drawer-link" href="/pets/"><span class="d-link-icon">💎</span><div class="d-link-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=tool-nexus"><span class="d-link-icon">🛠️</span><div class="d-link-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📜 Universe & Research</div>
+        <a class="drawer-link" href="/comic/"><span class="d-link-icon">🎨</span><div class="d-link-body"><strong>AZOTH Anime Comic Series</strong><small>Season 1 Ep 1: Genesis in Silicon Rain</small></div><span class="nav-item-badge">AUDIO</span></a>
+        <a class="drawer-link" href="/social/"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+        <a class="drawer-link" href="/articles/"><span class="d-link-icon">📜</span><div class="d-link-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+        <a class="drawer-link" href="/article/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+        <a class="drawer-link" href="/ai-webgpu.html"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+        <a class="drawer-link" href="/adytum/"><span class="d-link-icon">🏛️</span><div class="d-link-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📚 Docs & Security</div>
+        <a class="drawer-link" href="/docs/"><span class="d-link-icon">📚</span><div class="d-link-body"><strong>Complete Documentation</strong><small>Port Topology, 1-Click Install Scripts & API</small></div><span class="nav-item-badge">DOCS</span></a>
+        <a class="drawer-link" href="/vault/"><span class="d-link-icon">🔐</span><div class="d-link-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+        <a class="drawer-link" href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+        <a class="drawer-link" href="/faq.html"><span class="d-link-icon">❓</span><div class="d-link-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+      </div>
+
+      <div class="drawer-section drawer-footer-section">
+        <a class="drawer-pill-link js-deck" href="http://127.0.0.1:8484/">💻 Launch Local Operator Deck (:8484)</a>
+        <a class="drawer-pill-link" href="https://github.com/NullAITech/zoth-studio" target="_blank" rel="noopener noreferrer">🐙 GitHub Source Repository ↗</a>
+        <a class="drawer-pill-link" href="/downloads/zoth-studio-android.apk">📱 Download Android App (.apk)</a>
+      </div>
+    </nav>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <!-- Main Content Area -->
+    <main id="main-content" role="main">
+      <div class="dashboard-grid">
+        
+        <!-- Left Pane: Protocol Inspector Workspaces -->
+        <div class="main-workspace">
+          
+          <!-- Protocol Navigation Tabs -->
+          <nav class="tabs-nav" role="tablist" aria-label="Cryptographic Protocols">
+            <button class="tab-btn active" data-tab="tab-ratchet" role="tab" aria-selected="true" aria-controls="tab-ratchet">
+              Double Ratchet
+            </button>
+            <button class="tab-btn" data-tab="tab-x3dh" role="tab" aria-selected="false" aria-controls="tab-x3dh">
+              X3DH / PQXDH Handshake
+            </button>
+            <button class="tab-btn" data-tab="tab-sealed" role="tab" aria-selected="false" aria-controls="tab-sealed">
+              Sealed Sender
+            </button>
+            <button class="tab-btn" data-tab="tab-zkgroup" role="tab" aria-selected="false" aria-controls="tab-zkgroup">
+              ZKGroup Proofs
+            </button>
+            <button class="tab-btn" data-tab="tab-safety" role="tab" aria-selected="false" aria-controls="tab-safety">
+              Safety Number (QR)
+            </button>
+          </nav>
+
+          <!-- Tab Pane 1: Double Ratchet Simulator -->
+          <div id="tab-ratchet" class="tab-pane" role="tabpanel">
+            <section class="glass-card" aria-labelledby="ratchet-heading">
+              <div class="card-header">
+                <h2 id="ratchet-heading" class="card-title">
+                  <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                  Double Ratchet State Machine
+                </h2>
+                <span id="ratchet-step-badge" class="badge badge-cyan">DH Ratchet Step #1</span>
+              </div>
+
+              <!-- Ratchet Visual Stage -->
+              <div class="ratchet-stage">
+                <!-- Alice Box -->
+                <div class="party-box">
+                  <div class="party-header">
+                    <div class="avatar avatar-alice">A</div>
+                    <div>
+                      <div class="party-name">Alice</div>
+                      <div style="font-size: 0.75rem; color: var(--text-muted);">Sender State</div>
+                    </div>
+                  </div>
+                  <div class="key-list">
+                    <div class="key-item">
+                      <span class="key-label">Chain Key (CKs):</span>
+                      <span id="alice-ck-val" class="key-value">...</span>
+                    </div>
+                    <div class="key-item">
+                      <span class="key-label">DH Pub (Eph):</span>
+                      <span id="alice-dh-val" class="key-value">...</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Channel Pipe -->
+                <div class="pipe-channel">
+                  <div style="font-size: 0.75rem; color: var(--accent-cyan); font-weight: 700;">AES-256-GCM</div>
+                  <div class="packet-anim" aria-hidden="true"><div class="packet-dot"></div></div>
+                  <div style="font-size: 0.7rem; color: var(--text-muted);">HKDF Ratchet Pipe</div>
+                </div>
+
+                <!-- Bob Box -->
+                <div class="party-box">
+                  <div class="party-header">
+                    <div class="avatar avatar-bob">B</div>
+                    <div>
+                      <div class="party-name">Bob</div>
+                      <div style="font-size: 0.75rem; color: var(--text-muted);">Receiver State</div>
+                    </div>
+                  </div>
+                  <div class="key-list">
+                    <div class="key-item">
+                      <span class="key-label">Chain Key (CKr):</span>
+                      <span id="bob-ck-val" class="key-value">...</span>
+                    </div>
+                    <div class="key-item">
+                      <span class="key-label">DH Pub (Eph):</span>
+                      <span id="bob-dh-val" class="key-value">...</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Master Root Key Status Bar -->
+              <div style="background: rgba(3, 7, 18, 0.8); padding: 0.75rem 1rem; border-radius: 0.5rem; margin-bottom: 1.25rem; font-family: var(--font-mono); font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.05)">
+                <span>Master Root Key (RK): <strong id="rk-val" style="color: var(--accent-cyan);">...</strong></span>
+                <span class="badge badge-emerald">Forward Secret</span>
+              </div>
+
+              <!-- Transmission Playground Form -->
+              <div class="form-group">
+                <label for="msg-input" class="form-label">E2EE Message Payload to Encrypt &amp; Transmit:</label>
+                <input type="text" id="msg-input" class="form-input" value="Hello Bob, securing our communication via LibSignal!" placeholder="Enter confidential message...">
+              </div>
+
+              <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                <button id="btn-send-alice" class="btn btn-primary">
+                  🚀 Send from Alice (Alt+E)
+                </button>
+                <button id="btn-send-bob" class="btn btn-secondary">
+                  📥 Send from Bob
+                </button>
+                <button id="btn-advance-ratchet" class="btn btn-outline">
+                  🔄 Step DH Ratchet (Alt+S)
+                </button>
+                <button id="btn-reset-session" class="btn btn-secondary" style="margin-left: auto;">
+                  🧹 Reset (Alt+R)
+                </button>
+              </div>
+            </section>
+          </div>
+
+          <!-- Tab Pane 2: X3DH / PQXDH Handshake -->
+          <div id="tab-x3dh" class="tab-pane" style="display: none;" role="tabpanel">
+            <section class="glass-card" aria-labelledby="x3dh-heading">
+              <div class="card-header">
+                <h2 id="x3dh-heading" class="card-title">Extended Triple Diffie-Hellman &amp; Post-Quantum (PQXDH)</h2>
+                <span class="badge badge-purple">Kyber-768 Hybrid</span>
+              </div>
+              <p style="color: var(--text-secondary); margin-bottom: 1rem; font-size: 0.9rem;">
+                X3DH establishes a shared secret key between two parties who mutually authenticate each other using Identity Keys (IK), Signed Prekeys (SPK), and One-Time Prekeys (OPK). PQXDH integrates Kyber-768 Post-Quantum KEM to resist future quantum computer decryption.
+              </p>
+              <button id="btn-run-x3dh" class="btn btn-primary" style="margin-bottom: 1rem;">
+                ⚡ Execute PQXDH Key Exchange
+              </button>
+              <div id="x3dh-output"></div>
+            </section>
+          </div>
+
+          <!-- Tab Pane 3: Sealed Sender -->
+          <div id="tab-sealed" class="tab-pane" style="display: none;" role="tabpanel">
+            <section class="glass-card" aria-labelledby="sealed-heading">
+              <div class="card-header">
+                <h2 id="sealed-heading" class="card-title">Sealed Sender (Unidentified Sender) Protocol</h2>
+                <span class="badge badge-cyan">Metadata Stripped</span>
+              </div>
+              <p style="color: var(--text-secondary); margin-bottom: 1rem; font-size: 0.9rem;">
+                Sealed Sender prevents service providers and network observers from discovering who is talking to whom by encrypting sender identity inside an inner envelope authenticated with a Sender Certificate.
+              </p>
+              <button id="btn-inspect-sealed" class="btn btn-primary" style="margin-bottom: 1rem;">
+                🛡️ Inspect Sealed Envelope
+              </button>
+              <div id="sealed-sender-output"></div>
+            </section>
+          </div>
+
+          <!-- Tab Pane 4: ZKGroup -->
+          <div id="tab-zkgroup" class="tab-pane" style="display: none;" role="tabpanel">
+            <section class="glass-card" aria-labelledby="zk-heading">
+              <div class="card-header">
+                <h2 id="zk-heading" class="card-title">Zero-Knowledge Group Credentials (ZKGroup)</h2>
+                <span class="badge badge-emerald">Ristretto255 ZKP</span>
+              </div>
+              <p style="color: var(--text-secondary); margin-bottom: 1rem; font-size: 0.9rem;">
+                ZKGroup allows Signal clients to perform group operations (adding members, checking credentials) anonymously without leaking the user's profile key or group graph to central servers.
+              </p>
+              <button id="btn-verify-zk" class="btn btn-primary" style="margin-bottom: 1rem;">
+                🔑 Generate &amp; Verify ZK Proof
+              </button>
+              <div id="zkgroup-output"></div>
+            </section>
+          </div>
+
+          <!-- Tab Pane 5: Safety Number -->
+          <div id="tab-safety" class="tab-pane" style="display: none;" role="tabpanel">
+            <section class="glass-card" aria-labelledby="safety-heading">
+              <div class="card-header">
+                <h2 id="safety-heading" class="card-title">Out-of-Band Safety Number Fingerprint</h2>
+                <span class="badge badge-cyan">MitM Protection</span>
+              </div>
+              <p style="color: var(--text-secondary); margin-bottom: 1rem; font-size: 0.9rem;">
+                Safety numbers are 60-digit fingerprints derived by hashing sorted Identity Keys. Users compare these numbers in person or via QR code to detect Man-in-the-Middle attacks.
+              </p>
+              <button id="btn-gen-safety" class="btn btn-primary" style="margin-bottom: 1rem;">
+                🎲 Compute Fingerprint
+              </button>
+              <div style="background: rgba(3, 7, 18, 0.9); padding: 1.5rem; border-radius: 0.5rem; text-align: center; border: 1px solid var(--accent-cyan)">
+                <div id="safety-num-display" style="font-family: var(--font-mono); font-size: 1.1rem; color: var(--accent-cyan); letter-spacing: 0.15em; white-space: pre-wrap; font-weight: 700;">
+                  Computing...
+                </div>
+              </div>
+            </section>
+          </div>
+
+        </div>
+
+        <!-- Right Pane: Telemetry & Console Log -->
+        <aside class="sidebar-workspace">
+          
+          <!-- Telemetry Line Chart -->
+          <section class="glass-card" aria-labelledby="telemetry-heading">
+            <div class="card-header">
+              <h3 id="telemetry-heading" class="card-title">Live Cryptographic Telemetry</h3>
+              <span class="badge badge-emerald">Real-time</span>
+            </div>
+            <canvas id="telemetry-canvas" aria-label="Live entropy and latency chart"></canvas>
+            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">
+              <span>Sent: <strong id="msg-sent-count" style="color: var(--accent-cyan);">0</strong></span>
+              <span>Received: <strong id="msg-recv-count" style="color: var(--accent-emerald);">0</strong></span>
+              <span>Cipher: <strong>AES-256-GCM</strong></span>
+            </div>
+          </section>
+
+          <!-- Console Activity Log -->
+          <section class="glass-card" aria-labelledby="console-heading">
+            <div class="card-header">
+              <h3 id="console-heading" class="card-title">Console Activity Stream</h3>
+              <span class="badge badge-cyan">ARIA Live</span>
+            </div>
+            <div id="console-log" class="console-box" role="log" aria-live="polite" aria-atomic="false"></div>
+          </section>
+
+        </aside>
+      </div>
+    </main>
+
+    <!-- Footer -->
+                                                <footer class="site" role="contentinfo">
+      <div class="foot-wrap">
+        <div aria-hidden="true" class="foot-watermark">ZOTH</div>
+        <div class="foot-grid">
+          <div class="foot-brand-col">
+            <p class="foot-kicker">Local · loopback · no telemetry</p>
+            <a class="foot-brand-lockup" href="/">
+              <img alt="Master Azoth" class="foot-azoth" decoding="async" height="72" loading="lazy" src="/assets/mascot/azoth-bust.jpg" width="72" />
+              <span class="foot-brand-text">
+                <img alt="" class="foot-brand-logo" decoding="async" height="28" loading="lazy" src="/assets/brand/zoth-golden-z-192.png" width="28" />
+                <strong class="foot-brand-title">Zoth Studio</strong>
+              </span>
+            </a>
+            <small class="foot-brand-desc">Local-first workspace for a team of AI agents. Files stay on this machine.</small>
+            <div class="foot-actions">
+              <a class="foot-btn foot-btn-on" href="/#install">Install locally</a>
+              <a class="foot-btn foot-btn-ghost" href="/pricing/">Support the forge</a>
+            </div>
+          </div>
+          <div class="foot-col">
+            <h3>Studio</h3>
+            <a class="mega-footer-link js-deck" href="http://127.0.0.1:8484/">Operator Deck</a>
+            <a class="mega-footer-link" href="/studio/">Workstations</a>
+            <a class="mega-footer-link" href="/studio/webgen.html">WebGen</a>
+            <a class="mega-footer-link" href="/studio/swarm.html">3D Swarm</a>
+            <a class="mega-footer-link" href="/studio/consensus.html">Consensus</a>
+          </div>
+          <div class="foot-col">
+            <h3>Agents</h3>
+            <a class="mega-footer-link" href="/zoth/">Master Azoth</a>
+            <a class="mega-footer-link" href="/agents/">21-Agent pantheon</a>
+            <a class="mega-footer-link" href="/pets/">Companions</a>
+            <a class="mega-footer-link" href="/vault/">Sovereign vault</a>
+            <a class="mega-footer-link" href="/adytum/">Adytum</a>
+          </div>
+          <div class="foot-col">
+            <h3>Universe</h3>
+            <a class="mega-footer-link" href="/comic/">Azoth comic</a>
+            <a class="mega-footer-link" href="/social/">Social wall</a>
+            <a class="mega-footer-link" href="/showcase.html">Showcase</a>
+            <a class="mega-footer-link" href="/signal/">Signal</a>
+            <a class="mega-footer-link" href="/article/">Manifesto</a>
+          </div>
+          <div class="foot-col">
+            <h3>Resources</h3>
+            <a class="mega-footer-link" href="/docs/">Docs</a>
+            <a class="mega-footer-link" href="/faq.html">FAQ</a>
+            <a class="mega-footer-link" href="/pricing/">Support / Patron</a>
+            <a class="mega-footer-link" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub ↗</a>
+            <a class="mega-footer-link" href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI ↗</a>
+          </div>
+        </div>
+        <div class="foot-bottom">
+          <p>© 2026 NullAI Tech. MIT. Local sovereign execution — zero telemetry.</p>
+          <nav aria-label="Footer meta" class="foot-meta">
+            <a href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub</a>
+            <a href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI</a>
+            <a href="/docs/">Docs</a>
+            <a href="/faq.html">FAQ</a>
+          </nav>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Keyboard Shortcuts Modal -->
+  <div id="hotkey-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="modal-title" style="color: var(--text-primary); font-size: 1.2rem; font-weight: 700;">Keyboard Hotkeys</h3>
+        <button id="btn-close-modal" class="btn btn-secondary" style="padding: 0.3rem 0.6rem;" aria-label="Close hotkey dialog">✕</button>
+      </div>
+      <div>
+        <div class="hotkey-row">
+          <span>Advance DH Ratchet Step</span>
+          <kbd>Alt + S</kbd>
+        </div>
+        <div class="hotkey-row">
+          <span>Encrypt &amp; Transmit Payload</span>
+          <kbd>Alt + E</kbd>
+        </div>
+        <div class="hotkey-row">
+          <span>Reset Session Keys</span>
+          <kbd>Alt + R</kbd>
+        </div>
+        <div class="hotkey-row">
+          <span>Toggle Audio Synthesizer</span>
+          <kbd>Alt + M</kbd>
+        </div>
+        <div class="hotkey-row">
+          <span>Close Modal Dialog</span>
+          <kbd>Esc</kbd>
+        </div>
+        <div class="hotkey-row">
+          <span>Open Shortcuts Cheat Sheet</span>
+          <kbd>?</kbd>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Module -->
+  <script src="app.js"></script>
+</body>
+</html>

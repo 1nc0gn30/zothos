@@ -1,0 +1,405 @@
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { motion } from 'motion/react';
+import {
+  ArrowDownLeft,
+  ArrowUpRight,
+  CircleAlert,
+  ExternalLink,
+  FileText,
+  RefreshCcw,
+  ShieldCheck,
+  Wallet as WalletIcon,
+} from 'lucide-react';
+import HelpTip from '../components/HelpTip';
+import { useAuthStore } from '../store/authStore';
+import { getCreditPackages } from '../lib/stripe';
+import { supabase } from '../lib/supabase';
+import { WalletTransaction } from '../types/database';
+
+function getMessage(error: unknown) {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return 'Something went wrong. Please try again.';
+}
+
+const packageMeta: Record<number, { label: string; description: string }> = {
+  20: {
+    label: 'Starter',
+    description: 'A small refill for a quick order.',
+  },
+  40: {
+    label: 'Standard',
+    description: 'A balanced option for regular shoppers.',
+  },
+  100: {
+    label: 'Large',
+    description: 'The highest available top-up.',
+  },
+};
+
+export default function WalletPage() {
+  const { profile, fetchProfile, user } = useAuthStore();
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
+  const [packages, setPackages] = useState(() => getCreditPackages());
+
+  const loadCreditPackages = async () => {
+    const fallback = getCreditPackages(user?.id);
+
+    try {
+      const query = user?.id ? `?userId=${encodeURIComponent(user.id)}` : '';
+      const response = await fetch(`/api/depay-packages${query}`);
+      if (!response.ok) {
+        setPackages(fallback);
+        return;
+      }
+
+      const data = (await response.json()) as { packages?: typeof fallback };
+      if (!data.packages || !Array.isArray(data.packages)) {
+        setPackages(fallback);
+        return;
+      }
+
+      setPackages(data.packages);
+    } catch {
+      setPackages(fallback);
+    }
+  };
+
+  const loadWalletActivity = async () => {
+    if (!user) {
+      setTransactions([]);
+      return;
+    }
+    const { data, error } = await supabase
+      .from('wallet_transactions')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw error;
+    }
+    setTransactions(data || []);
+  };
+
+  useEffect(() => {
+    async function initialise() {
+      try {
+        await Promise.all([loadWalletActivity(), loadCreditPackages()]);
+      } catch (loadError) {
+        setError(getMessage(loadError));
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    initialise();
+
+    // Strategy: Refresh when the user comes back to the tab after Stripe checkout
+    const handleFocus = () => {
+      if (user) {
+        fetchProfile(user.id);
+        loadWalletActivity();
+        loadCreditPackages();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [user]);
+
+  const handleRefresh = async () => {
+    if (!user) return;
+    setRefreshing(true);
+    setError(null);
+    try {
+      await Promise.all([fetchProfile(user.id), loadWalletActivity()]);
+    } catch (refreshError) {
+      setError(getMessage(refreshError));
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const balance = Number(profile?.wallet_balance ?? 0);
+  
+  // Adjusted to match 'credit' type used in the Supabase SQL function
+  const deposits = transactions.filter((t) => t.type === 'credit' || t.type === 'deposit').length;
+  const charges = transactions.filter((t) => t.type !== 'credit' && t.type !== 'deposit').length;
+
+  if (loading) {
+    return (
+      <div className="flex h-72 items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-10 w-10 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Loading wallet</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="mx-auto max-w-6xl overflow-x-hidden pb-24"
+    >
+      <section className="bg-zinc-950 text-white relative overflow-hidden rounded-[1.8rem] p-6 sm:p-8 shadow-xl border border-zinc-800">
+        <div className="absolute top-[-20%] right-[-10%] w-[60%] h-[150%] bg-primary/20 rounded-full blur-[80px] pointer-events-none" />
+        
+        <div className="relative z-10 grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="text-xs font-bold uppercase tracking-wider text-zinc-400">Wallet</div>
+              <HelpTip text="Use your wallet balance at checkout. Refresh after a top-up if you need to confirm the latest amount." />
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/20 text-primary">Checkout ready</span>
+            </div>
+            <h1 className="mt-4 font-display text-4xl font-black tracking-tight sm:text-5xl">${balance.toFixed(2)}</h1>
+            <p className="text-zinc-400 mt-3 max-w-2xl text-sm sm:text-base">
+              Keep credits ready for faster checkout, then refresh after a top-up whenever you want to confirm the latest balance and wallet activity.
+            </p>
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+              <button 
+                type="button" 
+                onClick={handleRefresh} 
+                disabled={refreshing} 
+                className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-5 py-2.5 rounded-xl font-bold hover:bg-primary/90 transition-colors disabled:opacity-50"
+              >
+                <RefreshCcw size={16} className={refreshing ? 'animate-spin' : ''} />
+                {refreshing ? 'Refreshing' : 'Refresh wallet'}
+              </button>
+              <div className="inline-flex items-center justify-center gap-2 bg-zinc-900 text-zinc-300 px-5 py-2.5 rounded-xl font-bold border border-zinc-800">
+                <span>Fixed credit amounts only</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <article className="bg-zinc-900/80 border border-zinc-800 rounded-[1.35rem] p-5 backdrop-blur-sm flex flex-col justify-between">
+              <div className="flex items-center gap-2 text-primary">
+                <WalletIcon size={16} />
+                <span className="text-xs font-bold uppercase tracking-wider">Current balance</span>
+              </div>
+              <div>
+                <div className="mt-3 text-3xl font-semibold text-white">${balance.toFixed(2)}</div>
+                <p className="text-zinc-400 mt-1 text-sm">{balance > 0 ? 'Ready for checkout' : 'Add credits to begin'}</p>
+              </div>
+            </article>
+            <article className="bg-zinc-900/50 border border-zinc-800 rounded-[1.35rem] p-5 backdrop-blur-sm flex flex-col justify-between">
+              <div className="text-xs font-bold uppercase tracking-wider text-zinc-400">Activity snapshot</div>
+              <div className="mt-3 grid grid-cols-3 gap-2 sm:gap-3 text-center">
+                <div className="rounded-2xl bg-zinc-950 border border-zinc-800 p-2 sm:p-3 flex flex-col justify-center">
+                  <div className="text-lg sm:text-xl font-semibold text-white">{deposits}</div>
+                  <div className="mt-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-zinc-500 truncate">Deposits</div>
+                </div>
+                <div className="rounded-2xl bg-zinc-950 border border-zinc-800 p-2 sm:p-3 flex flex-col justify-center">
+                  <div className="text-lg sm:text-xl font-semibold text-white">{charges}</div>
+                  <div className="mt-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-zinc-500 truncate">Charges</div>
+                </div>
+                <div className="rounded-2xl bg-zinc-950 border border-zinc-800 p-2 sm:p-3 flex flex-col justify-center">
+                  <div className="text-lg sm:text-xl font-semibold text-white">{transactions.length}</div>
+                  <div className="mt-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-zinc-500 truncate">Entries</div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      {error && <div className="bg-destructive/10 text-destructive p-4 rounded-xl mt-6 text-sm font-medium border border-destructive/20">{error}</div>}
+
+      <section className="mt-10">
+        <div className="mb-6 flex items-center gap-2">
+          <div className="min-w-0">
+            <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Top up</div>
+            <h2 className="mt-2 font-display text-3xl font-bold tracking-tight">Buy credits</h2>
+          </div>
+          <HelpTip text="Each option opens a payment link in a new tab." />
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-3">
+          {packages.map((pack) => {
+            const meta = packageMeta[pack.amount];
+
+            return (
+              <a
+                key={pack.amount}
+                href={pack.href}
+                target="_blank"
+                rel="noreferrer"
+                onClick={(event) => {
+                  if (pack.isPlaceholder) {
+                    event.preventDefault();
+                  }
+                }}
+                className={`bg-card border border-border block rounded-[1.8rem] p-6 transition-all group ${
+                  pack.isPlaceholder
+                    ? 'opacity-80 cursor-not-allowed'
+                    : 'hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg'
+                }`}
+              >
+                <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary mb-4">
+                  {pack.amount === 40
+                    ? 'Most balanced'
+                    : pack.amount === 100
+                      ? 'Best for heavy use'
+                      : 'Quick refill'}
+                </div>
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{meta.label}</div>
+                    <div className="mt-2 font-display text-5xl font-black">${pack.amount}</div>
+                    <div className="mt-1 text-sm font-semibold text-muted-foreground">
+                      credits
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-full bg-muted text-muted-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                    <ExternalLink size={20} />
+                  </div>
+                </div>
+
+                <p className="text-muted-foreground mt-5 text-sm">{meta.description}</p>
+                <div className="mt-5 rounded-2xl border border-border bg-muted/50 p-4">
+                  <div className="flex items-start gap-3 text-sm text-muted-foreground">
+                    <CircleAlert size={18} className="mt-0.5 shrink-0 text-primary" />
+                    <p className="m-0 leading-relaxed">
+                      Payments are powered by Tech Pro. Stripe payment disputes go through Tech Pro. Credit balance disputes are handled by 757 GAS. Review the{' '}
+                      <Link to="/terms" className="text-primary hover:underline cursor-pointer">
+                        Terms of Service
+                      </Link>
+                      .
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-muted-foreground group-hover:text-primary transition-colors">
+                  <span>{pack.isPlaceholder ? 'Payment link unavailable' : 'Open Stripe link'}</span>
+                  <ExternalLink size={16} />
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="mt-10">
+        <div className="bg-muted/30 border border-border rounded-[1.8rem] p-6 sm:p-8">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+            <div className="min-w-0 max-w-3xl">
+              <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Payments and disputes</div>
+              <h2 className="mt-2 font-display text-3xl font-bold tracking-tight">How wallet payments and credit issues are handled</h2>
+              <p className="text-muted-foreground mt-3 text-sm sm:text-base leading-relaxed">
+                Credit top-ups use Tech Pro as the payment system. That means payment processor and Stripe disputes follow the Tech Pro payment trail, while wallet credit disputes inside 757 GAS are reviewed by 757 GAS directly.
+              </p>
+            </div>
+            <Link to="/terms" className="inline-flex items-center justify-center gap-2 bg-background border border-border text-foreground px-5 py-2.5 rounded-xl font-bold hover:bg-muted transition-colors whitespace-nowrap">
+              <FileText size={16} />
+              Terms of Service
+            </Link>
+          </div>
+
+          <div className="mt-8 grid gap-5 md:grid-cols-2">
+            <article className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+              <div className="flex items-center gap-2 text-primary">
+                <ShieldCheck size={18} />
+                <span className="text-xs font-bold uppercase tracking-wider">Payment disputes</span>
+              </div>
+              <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
+                If a Stripe payment is disputed, that dispute is handled through Tech Pro as the payment system powering the checkout link.
+              </p>
+            </article>
+
+            <article className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+              <div className="flex items-center gap-2 text-primary">
+                <WalletIcon size={18} />
+                <span className="text-xs font-bold uppercase tracking-wider">Credit disputes</span>
+              </div>
+              <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
+                If your payment is complete but the expected wallet credits or related credit balance issue needs review, 757 Gas Shop handles that dispute directly.
+              </p>
+            </article>
+          </div>
+
+          <p className="text-muted-foreground mt-6 text-sm">
+            Using the wallet means you should review the{' '}
+            <Link to="/terms" className="text-primary hover:underline cursor-pointer font-medium">
+              Terms of Service
+            </Link>{' '}
+            before checkout.
+          </p>
+        </div>
+      </section>
+
+      <section className="mt-12">
+        <div className="mb-6 flex items-end justify-between gap-4">
+          <div className="min-w-0">
+            <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Activity</div>
+            <h2 className="mt-2 font-display text-3xl font-bold tracking-tight">Recent wallet activity</h2>
+          </div>
+          <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-muted text-foreground">
+            <span>{transactions.length} entries</span>
+          </div>
+        </div>
+
+        <div className="bg-card border border-border overflow-hidden rounded-[2rem] shadow-sm">
+          {transactions.length === 0 ? (
+            <div className="px-8 py-16 text-center text-muted-foreground">
+              <WalletIcon className="h-12 w-12 mx-auto mb-4 opacity-20" />
+              <p className="font-medium">No wallet activity yet.</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-border">
+              {transactions.map((transaction) => (
+                <div
+                  key={transaction.id}
+                  className="flex flex-col gap-4 px-5 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-8 hover:bg-muted/30 transition-colors"
+                >
+                  <div className="flex min-w-0 items-center gap-5">
+                    <div
+                      className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${
+                        transaction.type === 'credit' || transaction.type === 'deposit'
+                          ? 'bg-green-500/10 text-green-500'
+                          : 'bg-destructive/10 text-destructive'
+                      }`}
+                    >
+                      {transaction.type === 'credit' || transaction.type === 'deposit' ? (
+                        <ArrowDownLeft size={24} />
+                      ) : (
+                        <ArrowUpRight size={24} />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="break-words font-bold text-lg">{transaction.description}</div>
+                      <div className="mt-1 break-words text-sm text-muted-foreground font-medium">
+                        {new Date(transaction.created_at).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                        {transaction.status ? ` • ${transaction.status}` : ''}
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    className={`w-full text-left text-xl font-black sm:w-auto sm:text-right ${
+                      transaction.amount >= 0
+                        ? 'text-green-500'
+                        : 'text-foreground'
+                    }`}
+                  >
+                    {transaction.amount >= 0 ? '+' : ''}
+                    {Number(transaction.amount).toFixed(2)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+    </motion.div>
+  );
+}

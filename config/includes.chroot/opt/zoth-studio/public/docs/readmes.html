@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Zoth Studio — README library</title>
+  <meta name="description" content="Renders the Zoth Studio product README and topic manuals (HUD, workstations, themes, Signal/SimpleX) as pages on the hub."/>
+  <link rel="canonical" href="https://zoth.nullai.tech/docs/readmes.html"/>
+  <meta name="theme-color" content="#030306"/>
+  <link rel="icon" type="image/svg+xml" href="/assets/brand/zoth-seal-hermetic-on-dark.svg"/>
+  <link href="/assets/zoth-theme.css?v=13" rel="stylesheet"/>
+  <script src="/assets/zoth-theme.js?v=13"></script>
+  <link href="/assets/zoth-nav.css?v=16" rel="stylesheet"/>
+  <link href="/assets/zoth-footer.css" rel="stylesheet"/>
+  <link href="/docs/readmes.css" rel="stylesheet"/>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <main id="main-content" class="md-lib">
+    <nav class="md-nav" id="md-nav" aria-label="README library"></nav>
+    <article class="md-article" id="md-article">
+      <p>Loading…</p>
+    </article>
+  </main>
+  <script src="/assets/zoth-md.js"></script>
+  <script>
+  (function () {
+    var nav = document.getElementById('md-nav');
+    var article = document.getElementById('md-article');
+    function paramDoc() {
+      var q = new URLSearchParams(location.search);
+      return (q.get('doc') || 'readme').replace(/\.md$/i, '');
+    }
+    function fileFor(id, catalog) {
+      var hit = catalog.docs.filter(function (d) { return d.id === id || d.file.replace(/\.md$/i, '') === id; })[0];
+      return hit || catalog.docs[0];
+    }
+    function renderNav(catalog, current) {
+      var groups = {};
+      catalog.docs.forEach(function (d) {
+        groups[d.group] = groups[d.group] || [];
+        groups[d.group].push(d);
+      });
+      var html = '';
+      Object.keys(groups).forEach(function (g) {
+        html += '<h2>' + g + '</h2>';
+        groups[g].forEach(function (d) {
+          var on = d.id === current.id ? ' is-on' : '';
+          html += '<a class="' + on + '" href="/docs/readmes.html?doc=' + encodeURIComponent(d.id) + '">' + d.title + '<small>' + (d.blurb || '') + '</small></a>';
+        });
+      });
+      nav.innerHTML = html;
+    }
+    fetch('/docs/catalog.json').then(function (r) { return r.json(); }).then(function (catalog) {
+      var current = fileFor(paramDoc(), catalog);
+      renderNav(catalog, current);
+      document.title = current.title + ' — Zoth README library';
+      return fetch('/docs/' + current.file).then(function (r) {
+        if (!r.ok) throw new Error('Missing ' + current.file);
+        return r.text();
+      }).then(function (md) {
+        article.innerHTML = window.ZothMd.render(md);
+      });
+    }).catch(function (err) {
+      article.innerHTML = '<p class="md-err">' + (err && err.message ? err.message : 'Could not load README') + '</p>';
+    });
+  })();
+  </script>
+  <script defer src="/assets/zoth-nav.js?v=18"></script>
+  <script defer src="/assets/zoth-gate.js"></script>
+                    <footer class="site" role="contentinfo">
+      <div class="foot-wrap">
+        <div aria-hidden="true" class="foot-watermark">ZOTH</div>
+        <div class="foot-grid">
+          <div class="foot-brand-col">
+            <p class="foot-kicker">Local · loopback · no telemetry</p>
+            <a class="foot-brand-lockup" href="/">
+              <img alt="Master Azoth" class="foot-azoth" decoding="async" height="72" loading="lazy" src="/assets/mascot/azoth-bust.jpg" width="72" />
+              <span class="foot-brand-text">
+                <img alt="" class="foot-brand-logo" decoding="async" height="28" loading="lazy" src="/assets/brand/zoth-golden-z-192.png" width="28" />
+                <strong class="foot-brand-title">Zoth Studio</strong>
+              </span>
+            </a>
+            <small class="foot-brand-desc">Local-first workspace for a team of AI agents. Files stay on this machine.</small>
+            <div class="foot-actions">
+              <a class="foot-btn foot-btn-on" href="/#install">Install locally</a>
+              <a class="foot-btn foot-btn-ghost" href="/pricing/">Support the forge</a>
+            </div>
+          </div>
+          <div class="foot-col">
+            <h3>Studio</h3>
+            <a class="mega-footer-link" href="/studio/cyberpunk-hud.html">Cyberpunk HUD</a>
+            <a class="mega-footer-link" href="/studio/tool-nexus.html">Tool Nexus (298+)</a>
+            <a class="mega-footer-link js-deck" href="http://127.0.0.1:8484/">Operator Deck</a>
+            <a class="mega-footer-link" href="/studio/">Workstations (28+)</a>
+            <a class="mega-footer-link" href="/studio/webgen.html">WebGen</a>
+            <a class="mega-footer-link" href="/studio/swarm.html">3D Swarm</a>
+            <a class="mega-footer-link" href="/studio/consensus.html">Consensus</a>
+          </div>
+          <div class="foot-col">
+            <h3>Agents</h3>
+            <a class="mega-footer-link" href="/zoth/">Master Azoth</a>
+            <a class="mega-footer-link" href="/agents/">21-Agent pantheon</a>
+            <a class="mega-footer-link" href="/pets/">Companions</a>
+            <a class="mega-footer-link" href="/vault/">Sovereign vault</a>
+            <a class="mega-footer-link" href="/adytum/">Adytum</a>
+          </div>
+          <div class="foot-col">
+            <h3>Universe</h3>
+            <a class="mega-footer-link" href="/comic/">Azoth comic</a>
+            <a class="mega-footer-link" href="/social/">Social wall</a>
+            <a class="mega-footer-link" href="/showcase.html">Showcase</a>
+            <a class="mega-footer-link" href="/signal/">Signal</a>
+            <a class="mega-footer-link" href="/article/">Manifesto</a>
+          </div>
+          <div class="foot-col">
+            <h3>Resources</h3>
+            <a class="mega-footer-link" href="/docs/">Docs</a>
+            <a class="mega-footer-link" href="/faq.html">FAQ</a>
+            <a class="mega-footer-link" href="/pricing/">Support / Patron</a>
+            <a class="mega-footer-link" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub ↗</a>
+            <a class="mega-footer-link" href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI ↗</a>
+          </div>
+        </div>
+        <div class="foot-bottom">
+          <p>© 2026 NullAI Tech. MIT. Local sovereign execution — zero telemetry.</p>
+          <nav aria-label="Footer meta" class="foot-meta">
+            <a href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub</a>
+            <a href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI</a>
+            <a href="/docs/">Docs</a>
+            <a href="/faq.html">FAQ</a>
+          </nav>
+        </div>
+      </div>
+    </footer>
+</body>
+</html>

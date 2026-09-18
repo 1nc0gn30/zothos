@@ -1,0 +1,80 @@
+---
+import { nav, site } from "../data/site";
+import ThemeToggle from "./ThemeToggle.astro";
+
+const currentPath = Astro.url.pathname;
+---
+
+<header class="site-header" id="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="Elite Connect home">
+      <span class="logo-wrap">
+        <img
+          src={site.logo}
+          alt="Elite Connect LLC"
+          width="1536"
+          height="1024"
+          loading="eager"
+          decoding="async"
+        />
+      </span>
+    </a>
+
+    <nav class="nav-links" aria-label="Primary navigation">
+      {nav.map((item) => (
+        <a
+          href={item.href}
+          class:list={[currentPath === item.href || (item.href !== "/" && currentPath.startsWith(item.href)) && "active"]}
+        >
+          {item.label}
+        </a>
+      ))}
+    </nav>
+
+    <div class="header-actions">
+      <a class="phone-link" href={site.phoneHref} aria-label={`Call ${site.phone}`}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        <span>{site.phone}</span>
+      </a>
+      <a class="button button-small" href="/contact/">Free Consultation</a>
+      <button
+        class="menu-toggle"
+        id="menu-toggle"
+        aria-label="Toggle menu"
+        aria-expanded="false"
+        aria-controls="mobile-drawer"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-backdrop" id="mobile-backdrop" aria-hidden="true"></div>
+<nav id="mobile-drawer" class="mobile-drawer" aria-label="Mobile navigation">
+  <div class="drawer-header">
+    <span class="drawer-title">Menu</span>
+    <button class="drawer-close" id="drawer-close" aria-label="Close menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="drawer-links">
+    {nav.map((item) => (
+      <a
+        href={item.href}
+        class:list={[currentPath === item.href || (item.href !== "/" && currentPath.startsWith(item.href)) && "active"]}
+      >
+        {item.label}
+      </a>
+    ))}
+    <a href="/client-portal/">Client Portal</a>
+  </div>
+  <div class="drawer-footer">
+    <a class="button" href="/contact/">Free Consultation</a>
+    <a class="phone-link-drawer" href={site.phoneHref}>{site.phone}</a>
+  </div>
+</nav>
+
+

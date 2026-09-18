@@ -1,0 +1,219 @@
+@import "tailwindcss";
+
+:root {
+  --bg-deep: #05070a;
+  --bg-base: #0b0f15;
+  --bg-raised: #111820;
+  --bg-overlay: #18202b;
+  --border: #1e2a38;
+  --border-subtle: #16202c;
+  --text: #e8edf3;
+  --text-primary: #f7fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #5f738a;
+  --accent: #00f0ff;
+  --accent-dim: #00b8c4;
+  --accent-bg: rgba(0, 240, 255, 0.12);
+  --accent-border: rgba(0, 240, 255, 0.35);
+  --success: #2ee8a0;
+  --error: #ff4d6d;
+  --warn: #ffb020;
+  --info: #00f0ff;
+  --node-leaf: #00f0ff;
+  --node-orchestrator: #ff2a8c;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+}
+
+[data-theme='parrot'] {
+  --bg-deep: #05070a;
+  --bg-base: #0b0f15;
+  --bg-raised: #111820;
+  --bg-overlay: #18202b;
+  --border: #1e2a38;
+  --border-subtle: #16202c;
+  --text: #e8edf3;
+  --text-secondary: #94a3b8;
+  --text-muted: #5f738a;
+  --accent: #00f0ff;
+  --accent-dim: #00b8c4;
+  --accent-bg: rgba(0, 240, 255, 0.12);
+  --accent-border: rgba(0, 240, 255, 0.35);
+}
+
+[data-theme='dark'] {
+  --bg-deep: #05070a;
+  --bg-base: #0b0f15;
+  --bg-raised: #111820;
+  --bg-overlay: #18202b;
+  --border: #1e2a38;
+  --border-subtle: #16202c;
+  --text: #e8edf3;
+  --text-secondary: #94a3b8;
+  --text-muted: #5f738a;
+  --accent: #00f0ff;
+  --accent-dim: #00b8c4;
+  --accent-bg: rgba(0, 240, 255, 0.12);
+  --accent-border: rgba(0, 240, 255, 0.35);
+}
+
+[data-theme='light'] {
+  --bg-deep: #f6f7fa;
+  --bg-base: #ffffff;
+  --bg-raised: #ffffff;
+  --bg-overlay: #eef1f6;
+  --border: #d9e0e8;
+  --border-subtle: #edf1f5;
+  --text: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --accent: #007a8a;
+  --accent-dim: #005f6b;
+  --accent-bg: rgba(0, 122, 138, 0.10);
+  --accent-border: rgba(0, 122, 138, 0.30);
+  --success: #0d8a5c;
+  --error: #c41e3a;
+  --warn: #b45f00;
+  --info: #007a8a;
+  --node-leaf: #007a8a;
+  --node-orchestrator: #c2185b;
+}
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body, #root {
+    margin: 0; padding: 0; height: 100%; width: 100%;
+    overflow: hidden; background: var(--bg-deep); color: var(--text);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #333; border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb:hover { background: #444; }
+
+  .react-flow__node { cursor: pointer; }
+  .react-flow__controls {
+    background: var(--bg-raised) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 10px !important;
+    overflow: hidden;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.25);
+  }
+  .react-flow__controls-button {
+    background: var(--bg-raised) !important;
+    border-bottom: 1px solid var(--border-subtle) !important;
+    fill: var(--text-secondary) !important;
+    width: 32px !important; height: 32px !important; padding: 6px !important;
+  }
+  .react-flow__controls-button:hover {
+    background: var(--bg-overlay) !important;
+    fill: var(--text) !important;
+  }
+  .react-flow__controls-button svg { max-width: 14px; max-height: 14px; }
+  .react-flow__minimap {
+    background: var(--bg-raised) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 10px !important;
+    overflow: hidden;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.25);
+  }
+  .react-flow__minimap-mask { fill: rgba(5,7,10,0.9); }
+  .react-flow__minimap-node { fill: #52525b; }
+  .react-flow__background { background: var(--bg-deep) !important; }
+  .react-flow__edge-path { stroke: var(--accent); stroke-width: 2; }
+  .react-flow__connection-line { stroke: var(--accent) !important; stroke-width: 2; }
+  .react-flow__node-agentNode { z-index: 10; }
+
+  /* ── Agent Node Animations ── */
+  @keyframes statusGlowRunning {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 176, 32, 0); }
+    50% { box-shadow: 0 0 20px 4px rgba(255, 176, 32, 0.25); }
+  }
+  @keyframes statusGlowDone {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(46, 232, 160, 0); }
+    50% { box-shadow: 0 0 20px 4px rgba(46, 232, 160, 0.25); }
+  }
+  @keyframes statusGlowError {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 77, 109, 0); }
+    50% { box-shadow: 0 0 20px 4px rgba(255, 77, 109, 0.25); }
+  }
+  @keyframes borderPulse {
+    0%, 100% { border-color: rgba(0, 240, 255, 0.4); }
+    50% { border-color: rgba(0, 240, 255, 0.8); }
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes toastSlideIn {
+    from { opacity: 0; transform: translateX(100%) scale(0.95); }
+    to { opacity: 1; transform: translateX(0) scale(1); }
+  }
+  @keyframes toastSlideOut {
+    from { opacity: 1; transform: translateX(0) scale(1); }
+    to { opacity: 0; transform: translateX(100%) scale(0.95); }
+  }
+  @keyframes toastProgress {
+    from { width: 100%; }
+    to { width: 0%; }
+  }
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .animate-shimmer {
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: shimmer 3s ease-in-out infinite;
+  }
+  .animate-fade-in-up {
+    animation: fadeInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .animate-slide-in-right {
+    animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .animate-toast-in {
+    animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .animate-toast-out {
+    animation: toastSlideOut 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* ── Edge Styles ── */
+  .react-flow__edge.animated .react-flow__edge-path {
+    stroke-dasharray: 8 4;
+    animation: dashFlow 0.8s linear infinite;
+  }
+  @keyframes dashFlow {
+    to { stroke-dashoffset: -24; }
+  }
+  .react-flow__edge:hover .react-flow__edge-path {
+    stroke-width: 3 !important;
+    filter: drop-shadow(0 0 4px var(--accent));
+  }
+  .react-flow__edge.selected .react-flow__edge-path {
+    stroke: var(--accent) !important;
+    stroke-width: 3 !important;
+  }
+
+  /* ── Selection Ring ── */
+  .react-flow__node-agentNode.selected {
+    z-index: 50 !important;
+  }
+}
+
+/* ── Scanner-grade overlay ── */
+.scanlines {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.04;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,240,255,0.03) 2px, rgba(0,240,255,0.03) 4px);
+}

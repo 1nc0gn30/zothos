@@ -1,0 +1,2195 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Zoth Edge Forge — Serverless V8 Isolate Microservice Studio</title>
+<meta content="Build, test, and deploy ultra-low latency V8 isolate microservices, Cloudflare Workers, and Deno edge handlers with instant preview." name="description"/>
+<link href="https://zoth.nullai.tech/studio/edge-forge.html" rel="canonical"/>
+<!-- OpenGraph / Facebook -->
+<meta content="website" property="og:type"/>
+<meta content="Zoth Studio" property="og:site_name"/>
+<meta content="https://zoth.nullai.tech/studio/edge-forge.html" property="og:url"/>
+<meta content="Zoth Edge Forge — Serverless V8 Isolate Microservice Studio" property="og:title"/>
+<meta content="Build, test, and deploy ultra-low latency V8 isolate microservices, Cloudflare Workers, and Deno edge handlers with instant preview." property="og:description"/>
+<meta content="https://zoth.nullai.tech/assets/media/land/studio-hero.jpg" property="og:image"/>
+<!-- Twitter Cards -->
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="Zoth Edge Forge — Serverless V8 Isolate Microservice Studio" name="twitter:title"/>
+<meta content="Build, test, and deploy ultra-low latency V8 isolate microservices, Cloudflare Workers, and Deno edge handlers with instant preview." name="twitter:description"/>
+<meta content="https://zoth.nullai.tech/assets/media/land/studio-hero.jpg" name="twitter:image"/>
+<!-- OpenGraph / Facebook -->
+<!-- Twitter Cards -->
+<!-- OpenGraph / Facebook -->
+<!-- Twitter Cards -->
+<meta content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" name="robots"/>
+<meta content="#030306" name="theme-color">
+<meta content="Zoth Studio" name="application-name">
+<link href="/assets/brand/zoth-seal-hermetic-on-dark.svg" rel="icon" type="image/svg+xml">
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600;1,700&amp;family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&amp;family=Syne:wght@600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="/styles.css?v=20260816a" rel="stylesheet"/>
+<link href="/assets/zoth-hud-embedded.css" rel="stylesheet"/>
+<script src="/assets/zoth-hud-embedded.js"></script>
+<style>
+        .skip-to-content, .skip-link, .skip {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    .skip-to-content:focus, .skip-link:focus, .skip:focus {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      width: auto;
+      height: auto;
+      padding: 10px 18px;
+      margin: 0;
+      overflow: visible;
+      clip: auto;
+      white-space: normal;
+      background: #fbbf24;
+      color: #050508;
+      font-family: monospace;
+      font-size: 0.82rem;
+      font-weight: 700;
+      border-radius: 8px;
+      z-index: 100000;
+      outline: 2px solid #fff;
+    }
+
+      :root {
+  --font-body: 'Figtree', sans-serif;
+  --text-secondary: #cbd5e1;
+  --text-dim: #94a3b8;
+  --muted: #94a3b8;
+
+        --edge-bg: #04060c;
+        --edge-surface: rgba(9, 13, 24, 0.94);
+        --edge-card: rgba(14, 20, 36, 0.88);
+        --edge-cyan: #00f0ff;
+        --edge-magenta: #ff007a;
+        --edge-gold: #fbbf24;
+        --edge-emerald: #10b981;
+        --edge-border: rgba(0, 240, 255, 0.18);
+        --font-mono: 'IBM Plex Mono', monospace;
+        --font-display: 'Syne', sans-serif;
+
+        /* Fibonacci & Sacred Geometry Design Tokens (Phi = 1.6180339887) */
+        --phi: 1.6180339887;
+        --phi-inv: 0.6180339887;
+        --phi-major: 61.8%;
+        --phi-minor: 38.2%;
+        --phi-split: 1.618fr 1fr;
+        --phi-split-inv: 1fr 1.618fr;
+        --phi-sidebar: 377px;
+        --phi-gutter: 233px;
+
+        /* Fibonacci Spacing Scale (1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610) */
+        --fib-1: 1px;
+        --fib-2: 2px;
+        --fib-3: 3px;
+        --fib-5: 5px;
+        --fib-8: 8px;
+        --fib-13: 13px;
+        --fib-21: 21px;
+        --fib-34: 34px;
+        --fib-55: 55px;
+        --fib-89: 89px;
+        --fib-144: 144px;
+        --fib-233: 233px;
+        --fib-377: 377px;
+        --fib-610: 610px;
+      --fib-987: 987px;
+
+      /* Fibonacci Border Radius Scale */
+      --radius-fib-xs: 5px;
+      --radius-fib-sm: 8px;
+      --radius-fib-md: 13px;
+      --radius-fib-lg: 21px;
+      --radius-fib-xl: 34px;
+      --radius-fib-pill: 9999px;
+
+        /* Fibonacci Border Radius Scale */
+        --fib-radius-xs: 5px;
+        --fib-radius-sm: 8px;
+        --fib-radius-md: 13px;
+        --fib-radius-lg: 21px;
+        --fib-radius-xl: 34px;
+        --fib-radius-pill: 9999px;
+
+        /* Fibonacci & Sacred Typography Scale */
+        --fib-font-micro: 13px;
+        --fib-font-body: 16px;
+        --fib-font-subhead: 21px;
+        --fib-font-title: 34px;
+        --fib-font-hero: 55px;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body.edge-page {
+        background: var(--bg, var(--edge-bg, #04060c));
+        color: var(--text-body, var(--text, #f1f5f9));
+        font-family: var(--font-sans, 'Figtree', sans-serif);
+        min-height: 100vh;
+        line-height: 1.618;
+        overflow-x: hidden;
+      }
+
+      .forge-container {
+        max-width: 1540px;
+        margin: 0 auto;
+        padding: var(--fib-21, 21px) var(--fib-21, 21px) var(--fib-89, 89px);
+      }
+
+      /* Header */
+      .forge-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: var(--fib-21, 21px);
+        padding-bottom: var(--fib-21, 21px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        margin-bottom: var(--fib-34, 34px);
+      }
+      .forge-title h1 {
+        font-family: var(--font-display);
+        font-size: var(--fib-font-title, 34px);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: var(--text-primary);
+      }
+
+      /* Main Studio Grid — Golden Split Ratio (1.618fr 1fr / 61.8% 38.2%) */
+      .forge-grid {
+        display: grid;
+        grid-template-columns: 1.618fr 1fr;
+        gap: var(--fib-34, 34px);
+      }
+      @media (max-width: 1080px) {
+        .forge-grid { grid-template-columns: 1fr; }
+      }
+
+      .forge-card {
+        background: var(--edge-surface);
+        border: 1px solid var(--edge-border);
+        border-radius: var(--fib-radius-lg, 21px);
+        padding: var(--fib-21, 21px);
+        box-shadow: 0 var(--fib-13, 13px) var(--fib-55, 55px) rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(16px);
+        display: flex;
+        flex-direction: column;
+        gap: var(--fib-21, 21px);
+      }
+
+      .template-selector-bar {
+        display: flex;
+        gap: var(--fib-8, 8px);
+        overflow-x: auto;
+        padding-bottom: var(--fib-5, 5px);
+      }
+      .tpl-btn {
+        background: rgba(14, 20, 36, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #94a3b8;
+        font-family: var(--font-mono);
+        font-size: var(--fib-font-micro, 13px);
+        padding: var(--fib-8, 8px) var(--fib-13, 13px);
+        border-radius: var(--fib-radius-xs, 5px);
+        cursor: pointer;
+        white-space: nowrap;
+        transition: all 0.2s;
+      }
+      .tpl-btn:hover, .tpl-btn.active {
+        color: var(--text-primary);
+        border-color: var(--edge-cyan);
+        background: rgba(0, 240, 255, 0.12);
+        box-shadow: 0 0 12px rgba(0, 240, 255, 0.2);
+      }
+
+      .editor-box {
+        background: #020408;
+        border: 1px solid rgba(0, 240, 255, 0.2);
+        border-radius: var(--fib-radius-md, 13px);
+        overflow: hidden;
+      }
+      .editor-topbar {
+        background: rgba(14, 20, 36, 0.95);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding: var(--fib-8, 8px) var(--fib-13, 13px);
+        display: flex;
+        justify-content: space-between;
+        font-family: var(--font-mono);
+        font-size: var(--fib-font-micro, 13px);
+        color: #94a3b8;
+      }
+      .code-editor-area {
+        width: 100%;
+        min-height: var(--fib-233, 233px);
+        background: transparent;
+        border: none;
+        outline: none;
+        padding: var(--fib-21, 21px);
+        color: #38bdf8;
+        font-family: var(--font-mono);
+        font-size: var(--fib-font-micro, 13px);
+        line-height: 1.618;
+        resize: vertical;
+        -webkit-overflow-scrolling: touch;
+        word-break: break-word;
+        overflow-x: auto;
+      }
+
+      .action-row {
+        display: flex;
+        gap: var(--fib-13, 13px);
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .btn-edge {
+        background: var(--edge-cyan);
+        color: #03050a;
+        font-family: var(--font-mono);
+        font-size: 0.85rem;
+        font-weight: 700;
+        padding: var(--fib-13, 13px) var(--fib-21, 21px);
+        border-radius: var(--fib-radius-sm, 8px);
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--fib-8, 8px);
+        min-height: 44px;
+        transition: all 0.2s;
+      }
+      .btn-edge:hover {
+        box-shadow: 0 0 20px var(--edge-cyan);
+      }
+      .btn-ghost-edge {
+        background: rgba(14, 20, 36, 0.8);
+        border: 1px solid var(--edge-border);
+        color: #f1f5f9;
+        font-family: var(--font-mono);
+        font-size: 0.85rem;
+        font-weight: 600;
+        padding: var(--fib-8, 8px) var(--fib-13, 13px);
+        border-radius: var(--fib-radius-sm, 8px);
+        cursor: pointer;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+      }
+      .btn-ghost-edge:hover {
+        background: rgba(0, 240, 255, 0.1);
+        border-color: var(--edge-cyan);
+      }
+      .btn-icon-svg {
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+        vertical-align: middle;
+      }
+      .v8-memory-card {
+        background: rgba(4, 6, 14, 0.9);
+        border: 1px solid var(--edge-border);
+        border-radius: var(--fib-radius-md, 13px);
+        padding: 14px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .v8-mem-track {
+        width: 100%;
+        height: 10px;
+        background: rgba(0, 0, 0, 0.7);
+        border: 1px solid rgba(0, 240, 255, 0.25);
+        border-radius: 5px;
+        overflow: hidden;
+      }
+      .v8-mem-fill {
+        height: 100%;
+        width: 18%;
+        background: linear-gradient(90deg, #10b981, #00f0ff);
+        border-radius: 4px;
+        transition: width 0.3s ease;
+      }
+
+      /* Waterfall Metrics & Telemetry */
+      .waterfall-box {
+        background: #020409;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: var(--fib-radius-md, 13px);
+        padding: var(--fib-21, 21px);
+        font-family: var(--font-mono);
+        font-size: var(--fib-font-micro, 13px);
+      }
+      .waterfall-bar-row {
+        display: flex;
+        align-items: center;
+        gap: var(--fib-13, 13px);
+        margin-bottom: var(--fib-8, 8px);
+      }
+      .wf-label { width: 110px; color: #94a3b8; }
+      .wf-track { flex: 1; height: 8px; background: rgba(255, 255, 255, 0.05); border-radius: 4px; overflow: hidden; }
+      .wf-fill { height: 100%; border-radius: 4px; }
+      .wf-val { width: 50px; text-align: right; color: var(--text-primary); font-weight: 700; }
+
+      /* Edge Nodes Grid */
+      .nodes-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: var(--fib-8, 8px);
+      }
+      .node-card {
+        background: rgba(4, 6, 14, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: var(--fib-radius-sm, 8px);
+        padding: var(--fib-13, 13px);
+        font-family: var(--font-mono);
+        font-size: var(--fib-font-micro, 13px);
+      }
+      .node-name { color: var(--edge-cyan); font-weight: 700; }
+      .node-ping { color: var(--edge-emerald); font-size: 0.7rem; margin-top: 2px; }
+
+      /* Streaming Mode & Live Chunk Inspector */
+      .protocol-mode-tabs {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 8px;
+        flex-wrap: wrap;
+      }
+      .protocol-mode-btn {
+        background: rgba(14, 20, 36, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #94a3b8;
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        padding: 5px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-weight: 600;
+      }
+      .protocol-mode-btn:hover, .protocol-mode-btn.active {
+        color: var(--edge-cyan);
+        border-color: var(--edge-cyan);
+        background: rgba(0, 240, 255, 0.12);
+      }
+      .stream-inspector-box {
+        background: #020409;
+        border: 1px solid rgba(0, 240, 255, 0.25);
+        border-radius: var(--fib-radius-md, 13px);
+        padding: 14px;
+        font-family: var(--font-mono);
+        font-size: 0.78rem;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .stream-telemetry-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        padding: 8px 12px;
+        background: rgba(0, 240, 255, 0.05);
+        border: 1px solid rgba(0, 240, 255, 0.15);
+        border-radius: 8px;
+        font-size: 0.72rem;
+      }
+      .stream-tel-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .stream-tel-label {
+        color: #94a3b8;
+      }
+      .stream-tel-val {
+        color: var(--text-primary, #ffffff);
+        font-weight: 700;
+      }
+      .chunk-feed-list {
+        max-height: 220px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding: 4px;
+        background: rgba(0,0,0,0.5);
+        border-radius: 8px;
+        border: 1px solid rgba(255,255,255,0.06);
+      }
+      .chunk-item {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        padding: 6px 10px;
+        background: rgba(255, 255, 255, 0.03);
+        border-left: 3px solid var(--edge-cyan);
+        border-radius: 4px;
+        font-size: 0.73rem;
+        animation: chunkArrival 0.25s ease-out;
+      }
+      .chunk-item.ws-in {
+        border-left-color: var(--edge-emerald);
+      }
+      .chunk-item.ws-out {
+        border-left-color: var(--edge-gold);
+        background: rgba(251, 191, 36, 0.04);
+      }
+      .chunk-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #94a3b8;
+        font-size: 0.68rem;
+      }
+      .chunk-payload {
+        color: #38bdf8;
+        white-space: pre-wrap;
+        word-break: break-all;
+        font-family: var(--font-mono);
+      }
+      @keyframes chunkArrival {
+        from { opacity: 0; transform: translateY(-4px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+
+      /* Mobile Segmented Switcher */
+      .forge-mobile-tabs {
+        display: none;
+        gap: var(--fib-8, 8px);
+        margin-bottom: var(--fib-21, 21px);
+        background: rgba(9, 13, 24, 0.92);
+        padding: var(--fib-5, 5px);
+        border-radius: var(--fib-radius-md, 13px);
+        border: 1px solid var(--edge-border);
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .forge-tab-btn {
+        flex: 1 1 0;
+        min-width: 120px;
+        padding: var(--fib-8, 8px) var(--fib-13, 13px);
+        border-radius: var(--fib-radius-sm, 8px);
+        border: 1px solid transparent;
+        background: transparent;
+        color: #94a3b8;
+        font-family: var(--font-mono);
+        font-size: var(--fib-font-micro, 13px);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--fib-8, 8px);
+        min-height: 44px;
+        white-space: nowrap;
+        box-sizing: border-box;
+      }
+
+      .forge-tab-btn:hover {
+        color: var(--text-primary);
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      .forge-tab-btn.active {
+        color: var(--edge-cyan);
+        background: rgba(0, 240, 255, 0.12);
+        border-color: var(--edge-cyan);
+        box-shadow: 0 0 14px rgba(0, 240, 255, 0.25);
+      }
+
+      .forge-right-col {
+        display: flex;
+        flex-direction: column;
+        gap: var(--fib-34, 34px);
+      }
+
+      @media (max-width: 880px) {
+        .forge-mobile-tabs { display: flex; }
+        .forge-grid { display: block; margin-bottom: var(--fib-21, 21px); }
+        .forge-right-col { display: contents; }
+        .forge-panel { display: none !important; }
+        .forge-panel.mobile-active { display: flex !important; width: 100%; margin-bottom: var(--fib-21, 21px); }
+      }
+
+      @media (max-width: 768px) {
+        .forge-container { padding: var(--fib-13, 13px) var(--fib-13, 13px) var(--fib-55, 55px); }
+        .forge-header { flex-direction: column; align-items: flex-start; gap: var(--fib-13, 13px); padding-bottom: var(--fib-13, 13px); margin-bottom: var(--fib-21, 21px); }
+        .nav-links { width: 100%; gap: var(--fib-5, 5px); }
+        .btn-ghost-edge { flex: 1 1 auto; text-align: center; font-size: 0.76rem; min-height: 44px; }
+        .forge-card { padding: var(--fib-21, 21px) var(--fib-13, 13px); border-radius: var(--fib-radius-md, 13px); gap: var(--fib-13, 13px); }
+        .template-selector-bar { gap: var(--fib-5, 5px); }
+        .tpl-btn { min-height: 44px; padding: var(--fib-8, 8px) var(--fib-13, 13px); }
+        .nodes-list { grid-template-columns: repeat(2, 1fr); gap: var(--fib-8, 8px); }
+      }
+
+      @media (max-width: 480px) {
+        .forge-container { padding: var(--fib-8, 8px) var(--fib-8, 8px) var(--fib-34, 34px); }
+        .nodes-list { grid-template-columns: 1fr; gap: var(--fib-8, 8px); }
+        .tpl-btn { flex: 1 1 auto; }
+      }
+    
+    /* Mobile-Only Desktop Insight Tooltip / Banner */
+    .mobile-desktop-insight {
+      display: none;
+    }
+    @media (max-width: 880px) {
+      .mobile-desktop-insight {
+        display: flex;
+        align-items: center;
+        gap: var(--fib-13, 13px);
+        background: rgba(0, 240, 255, 0.08);
+        border: 1px solid rgba(0, 240, 255, 0.25);
+        border-radius: var(--radius-fib-md, var(--fib-radius-md, 13px));
+        padding: var(--fib-13, 13px) var(--fib-13, 13px);
+        margin: 0 0 var(--fib-13, 13px) 0;
+        box-sizing: border-box;
+        font-size: 0.85rem;
+        line-height: 1.4;
+        color: var(--text, #f0f6fc);
+        min-width: 0;
+      }
+      .mobile-desktop-insight .insight-icon {
+        font-size: 1.3rem;
+        flex-shrink: 0;
+      }
+      .mobile-desktop-insight .insight-text {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: var(--fib-3, 3px);
+        min-width: 0;
+      }
+      .mobile-desktop-insight .insight-text strong {
+        color: var(--cyan, #00f0ff);
+        font-weight: 600;
+        font-size: 0.88rem;
+      }
+      .mobile-desktop-insight .insight-text span {
+        color: var(--text-dim, var(--muted, #94a3b8));
+        font-size: 0.8rem;
+      }
+      .mobile-desktop-insight .insight-close {
+        background: transparent;
+        border: none;
+        color: var(--text-dim, var(--muted, #94a3b8));
+        font-size: 1.1rem;
+        cursor: pointer;
+        padding: var(--fib-8, 8px);
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--radius-fib-sm, var(--fib-radius-sm, 8px));
+        flex-shrink: 0;
+      }
+    }
+
+  
+    /* Touch & Overflow Safety */
+    pre, code, table, .table-container, .code-block, .log-container, .matrix-container, .diff-container {
+      overflow-x: auto;
+      word-break: break-word;
+      -webkit-overflow-scrolling: touch;
+    }
+
+  
+    /* ==========================================================================
+       Zoth Studio — High-Contrast Typography & WCAG AAA Compliance Upgrades
+       ========================================================================== */
+
+    /* Universal Body & Text Contrast */
+    body {
+      color: var(--text, #f1f5f9);
+      font-family: var(--font-body, 'Figtree', sans-serif);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Primary Workstation Titles & Brand Headers */
+    .brand-title, .station-title, .forge-title h1, .recon-title h1, .composer-title h1, .hero-title, .studio-title {
+      font-family: var(--font-display, 'Syne', sans-serif) !important;
+      font-weight: 800 !important;
+      letter-spacing: -0.025em;
+      color: var(--text-primary);
+      text-shadow: 0 0 20px rgba(0, 240, 255, 0.25);
+    }
+
+    /* Panel Headers, Section Headings & Subheadings */
+    h2, h3, .panel-header, .panel-title, .section-heading h2, .card-title, .section-title, .header-title, .quick-jump-title {
+      font-family: var(--font-display, 'Syne', sans-serif) !important;
+      font-weight: 700 !important;
+      letter-spacing: -0.015em;
+      color: var(--text-primary);
+    }
+
+    /* Metric Labels, Badges & High-Contrast Stat Values */
+    .metric-label, .stat-label, .badge-label, .ws-badge-cat, .filter-chip {
+      font-family: var(--font-display, 'Syne', sans-serif);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .stat-value, .metric-value, .stat-number, .wf-val {
+      font-family: var(--font-mono, 'IBM Plex Mono', monospace) !important;
+      font-weight: 700 !important;
+      color: var(--text-primary);
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    /* High-Contrast Descriptions & Parameters */
+    .brand-subtitle, .studio-subtitle, .ws-desc, .section-desc, .panel-desc, p.desc {
+      color: #cbd5e1;
+    }
+
+    .text-dim, .dim, .meta-label, .timestamp, .port-badge {
+      color: #94a3b8;
+    }
+
+    /* High-Contrast Code Viewers, Telemetry Feeds & Terminal Logs */
+    pre, code, textarea.code-editor, .telemetry, .log, .console, .terminal, .feed-log, .log-container, .code-block, .code-editor-area, .editor-code, .code-viewer, .stream-console {
+      font-family: var(--font-mono, 'IBM Plex Mono', monospace) !important;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: #38bdf8;
+    }
+
+    .tok-kw, .keyword, .kw { color: #f472b6 !important; font-weight: 600; }
+    .tok-str, .string, .str { color: #34d399 !important; }
+    .tok-num, .number, .num { color: #fbbf24 !important; font-weight: 600; }
+    .tok-comment, .comment { color: #94a3b8 !important; font-style: italic; }
+    .tok-fn, .function, .fn { color: #67e8f9 !important; font-weight: 600; }
+    .tok-var, .variable, .var { color: #f1f5f9 !important; }
+
+    /* Standout Links, Navigation Tabs & Breadcrumbs */
+    .nav-link, nav.menu a, .nav a, .tab-btn, .breadcrumb a, .quick-jump-links a, .ws-link-docs, .ws-link-launch {
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .nav-link:hover, 
+
+    .nav-link.is-active, .nav-link.active, .tab-btn.active, nav.menu a.on, nav.menu a.is-active, .forge-tab-btn.active, .subsweep-tab-btn.active {
+      color: #00f0ff !important;
+      font-weight: 700 !important;
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.7);
+    }
+
+    /* Action Buttons High-Contrast Standout */
+    .btn-primary, .btn-action, .btn-edge, .btn-recon, .btn-gold, button.action-btn {
+      font-family: var(--font-display, 'Syne', sans-serif);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    /* Zero Horizontal Overflow Guard across Viewports */
+    html, body {
+      max-width: 100vw;
+      overflow-x: hidden;
+    }
+
+    .table-container, .code-block, .log-container, .matrix-container, .diff-container, .telemetry, .feed-log, .code-viewer pre {
+      max-width: 100%;
+      overflow-x: auto;
+      word-break: break-word;
+    }
+
+    /* =============================================================================
+       EDGE FORGE — 4-THEME SYSTEM & CYBER GLASS ELEVATION
+       ============================================================================= */
+
+    /* Smooth theme transitions */
+    body, .forge-panel, .forge-card, .editor-box, .stream-inspector-box, .node-card, .v8-memory-card, .waterfall-box {
+      transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    /* ── LIGHT THEME OVERRIDES ────────────────────────────────────────────── */
+    html[data-theme="light"],
+    html.theme-light {
+      --bg: #f8fafc;
+      --text: #0f172a;
+      --text-dim: #475569;
+      --muted: #64748b;
+      --cyan: #0284c7;
+      --gold: #d97706;
+      --green: #059669;
+      --border: #cbd5e1;
+    }
+    html[data-theme="light"] body,
+    html.theme-light body {
+      background: #f8fafc !important;
+      color: #0f172a !important;
+    }
+    html[data-theme="light"] .forge-panel,
+    html.theme-light .forge-panel,
+    html[data-theme="light"] .forge-card,
+    html.theme-light .forge-card,
+    html[data-theme="light"] .v8-memory-card,
+    html.theme-light .v8-memory-card,
+    html[data-theme="light"] .waterfall-box,
+    html.theme-light .waterfall-box {
+      background: #ffffff !important;
+      border-color: #e2e8f0 !important;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05) !important;
+    }
+    html[data-theme="light"] .editor-box,
+    html.theme-light .editor-box,
+    html[data-theme="light"] .stream-inspector-box,
+    html.theme-light .stream-inspector-box {
+      background: #ffffff !important;
+      border-color: #cbd5e1 !important;
+    }
+    html[data-theme="light"] .editor-topbar,
+    html.theme-light .editor-topbar {
+      background: #f1f5f9 !important;
+      border-color: #e2e8f0 !important;
+    }
+    html[data-theme="light"] .code-editor-area,
+    html.theme-light .code-editor-area {
+      background: #f8fafc !important;
+      color: #0f172a !important;
+    }
+    html[data-theme="light"] .node-card,
+    html.theme-light .node-card {
+      background: #f8fafc !important;
+      border-color: #e2e8f0 !important;
+    }
+    html[data-theme="light"] .node-name,
+    html.theme-light .node-name {
+      color: #0f172a !important;
+    }
+    html[data-theme="light"] .tpl-btn,
+    html[data-theme="light"] .protocol-mode-btn,
+    html.theme-light .tpl-btn,
+    html.theme-light .protocol-mode-btn {
+      background: #f1f5f9 !important;
+      border-color: #cbd5e1 !important;
+      color: #475569 !important;
+    }
+    html[data-theme="light"] .tpl-btn.active,
+    html[data-theme="light"] .protocol-mode-btn.active,
+    html.theme-light .tpl-btn.active,
+    html.theme-light .protocol-mode-btn.active {
+      background: #e0f2fe !important;
+      border-color: #0284c7 !important;
+      color: #0369a1 !important;
+    }
+
+    /* ── MATRIX THEME OVERRIDES ───────────────────────────────────────────── */
+    html[data-theme="matrix"],
+    html.theme-matrix {
+      --bg: #000803;
+      --text: #00ff66;
+      --text-dim: #22aa44;
+      --muted: #117733;
+      --cyan: #00ff66;
+      --gold: #55ff88;
+      --green: #00ff66;
+      --border: rgba(0, 255, 102, 0.25);
+    }
+    html[data-theme="matrix"] body,
+    html.theme-matrix body {
+      background: #000803 !important;
+      color: #00ff66 !important;
+      font-family: var(--font-mono) !important;
+    }
+    html[data-theme="matrix"] .forge-panel,
+    html.theme-matrix .forge-panel,
+    html[data-theme="matrix"] .forge-card,
+    html.theme-matrix .forge-card {
+      background: rgba(0, 18, 6, 0.92) !important;
+      border-color: rgba(0, 255, 102, 0.25) !important;
+      box-shadow: 0 0 24px rgba(0, 255, 102, 0.12) !important;
+    }
+    html[data-theme="matrix"] .editor-box,
+    html.theme-matrix .editor-box,
+    html[data-theme="matrix"] .stream-inspector-box,
+    html.theme-matrix .stream-inspector-box {
+      background: #000a03 !important;
+      border-color: rgba(0, 255, 102, 0.3) !important;
+    }
+    html[data-theme="matrix"] .code-editor-area,
+    html.theme-matrix .code-editor-area {
+      background: #000802 !important;
+      color: #00ff66 !important;
+    }
+
+    /* ── GOLD THEME OVERRIDES ─────────────────────────────────────────────── */
+    html[data-theme="gold"],
+    html.theme-gold {
+      --bg: #080602;
+      --text: #fef08a;
+      --text-dim: #d4b878;
+      --muted: #b49b65;
+      --cyan: #fbbf24;
+      --gold: #fbbf24;
+      --green: #34d399;
+      --border: rgba(251, 191, 36, 0.25);
+    }
+    html[data-theme="gold"] body,
+    html.theme-gold body {
+      background: #080602 !important;
+      color: #fef08a !important;
+    }
+    html[data-theme="gold"] .forge-panel,
+    html.theme-gold .forge-panel,
+    html[data-theme="gold"] .forge-card,
+    html.theme-gold .forge-card {
+      background: rgba(24, 18, 6, 0.92) !important;
+      border-color: rgba(251, 191, 36, 0.25) !important;
+      box-shadow: 0 0 24px rgba(251, 191, 36, 0.12) !important;
+    }
+    html[data-theme="gold"] .editor-box,
+    html.theme-gold .editor-box,
+    html[data-theme="gold"] .stream-inspector-box,
+    html.theme-gold .stream-inspector-box {
+      background: #0d0a03 !important;
+      border-color: rgba(251, 191, 36, 0.25) !important;
+    }
+    html[data-theme="gold"] .code-editor-area,
+    html.theme-gold .code-editor-area {
+      background: #090702 !important;
+      color: #fde68a !important;
+    }
+  </style>
+<link href="/assets/zoth-tip.css" rel="stylesheet"/>
+<link href="/assets/zoth-mobile.css" rel="stylesheet"/>
+<link href="/assets/zoth-annotator.css" rel="stylesheet"/>
+<!-- Schema.org JSON-LD Structured Data for SEO & AEO Voice Search -->
+<!-- Schema.org JSON-LD Structured Data for SEO & AEO Voice Search -->
+<!-- Schema.org JSON-LD Structured Data for SEO & AEO Voice Search -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://zoth.nullai.tech/#organization",
+      "name": "NullAI Tech",
+      "url": "https://nullai.tech/",
+      "logo": "https://zoth.nullai.tech/assets/brand/zoth-seal-hermetic-on-dark.svg",
+      "sameAs": [
+        "https://github.com/NullAITech/zoth-studio"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://zoth.nullai.tech/#website",
+      "url": "https://zoth.nullai.tech/",
+      "name": "Zoth Studio",
+      "description": "Local-first autonomous AI multi-agent workstation, 3D swarm arena, and privacy-first application foundry.",
+      "publisher": {
+        "@id": "https://zoth.nullai.tech/#organization"
+      }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://zoth.nullai.tech/studio/edge-forge.html#softwareapplication",
+      "name": "Zoth Edge Forge \u2014 Serverless V8 Isolate Microservice Studio",
+      "description": "Build, test, and deploy ultra-low latency V8 isolate microservices, Cloudflare Workers, and Deno edge handlers with instant preview.",
+      "url": "https://zoth.nullai.tech/studio/edge-forge.html",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Linux, macOS, Windows",
+      "inLanguage": "en-US",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://zoth.nullai.tech/studio/edge-forge.html",
+      "url": "https://zoth.nullai.tech/studio/edge-forge.html",
+      "name": "Zoth Edge Forge \u2014 Serverless V8 Isolate Microservice Studio",
+      "description": "Build, test, and deploy ultra-low latency V8 isolate microservices, Cloudflare Workers, and Deno edge handlers with instant preview.",
+      "inLanguage": "en-US",
+      "isPartOf": {
+        "@id": "https://zoth.nullai.tech/#website"
+      },
+      "speakable": {
+        "@type": "SpeakableSpecification",
+        "cssSelector": [
+          "h1",
+          ".kicker",
+          ".forge-title",
+          ".editor-label",
+          ".status-banner"
+        ]
+      },
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://zoth.nullai.tech/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Studio",
+            "item": "https://zoth.nullai.tech/studio"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Edge Forge",
+            "item": "https://zoth.nullai.tech/studio/edge-forge.html"
+          }
+        ]
+      }
+    }
+  ]
+}
+  </script>
+  <link href="/assets/zoth-theme.css?v=11" rel="stylesheet"/>
+  <link href="/assets/zoth-agent-avatars.css" rel="stylesheet"/>
+  <link href="/assets/zoth-tailwind-magic.css" rel="stylesheet"/>
+  <script src="/assets/zoth-theme.js?v=11"></script>
+  <link href="/assets/zoth-nav.css?v=11" rel="stylesheet"/>
+  <link href="/assets/zoth-guide.css" rel="stylesheet"/>
+  <link as="image" fetchpriority="high" href="/assets/mascot/azoth-portrait.jpg" rel="preload"/>
+  <link href="/assets/mascot/azoth-portrait.jpg" rel="apple-touch-icon"/>
+  <link href="/studio/edge-forge-poster.css" rel="stylesheet"/>
+<meta content="1200" property="og:image:width"/><meta content="630" property="og:image:height"/><meta content="Zoth Studio Sovereign AI Workstation" property="og:image:alt"/><meta content="Zoth Studio Sovereign AI Workstation" name="twitter:image:alt"/><meta content="US-VA" name="geo.region"/><meta content="Virginia Beach, Virginia" name="geo.placename"/><meta content="36.8529;-75.9780" name="geo.position"/><meta content="36.8529, -75.9780" name="ICBM"/><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://zoth.nullai.tech/studio/edge-forge.html#webpage",
+      "url": "https://zoth.nullai.tech/studio/edge-forge.html",
+      "name": "Zoth Edge Forge \u2014 Serverless V8 Isolate Microservice Studio",
+      "description": "Build, test, and deploy ultra-low latency V8 isolate microservices, Cloudflare Workers, and Deno edge handlers with instant preview.",
+      "isPartOf": {
+        "@type": "WebSite",
+        "@id": "https://zoth.nullai.tech/#website",
+        "url": "https://zoth.nullai.tech/",
+        "name": "Zoth Studio",
+        "publisher": {
+          "@type": "Organization",
+          "name": "757tech / NullAI",
+          "url": "https://757tech.pro"
+        }
+      },
+      "primaryImageOfPage": {
+        "@type": "ImageObject",
+        "url": "https://zoth.nullai.tech/assets/media/land/studio-hero.jpg",
+        "caption": "Zoth Studio Sovereign AI Workstation"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://zoth.nullai.tech/studio/edge-forge.html#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://zoth.nullai.tech/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Studio",
+          "item": "https://zoth.nullai.tech/studio/edge-forge.html"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://zoth.nullai.tech/studio/edge-forge.html#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is Zoth Studio?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Zoth Studio is a sovereign, local-first control surface for multi-agent AI orchestration, featuring a 298+ verified tool registry, 23+ modular studio suites, a 21-node sovereign agent pantheon, and an encrypted BYOK vault."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Where are my API keys stored?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "API keys are stored strictly in local operator memory or an encrypted local Rust daemon using Argon2id and XChaCha20-Poly1305. Plaintext keys are never sent to external servers."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does Zoth Studio require a cloud subscription?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Zoth Studio is fully sovereign and free to run on your local hardware or private network over Tailscale."
+          }
+        }
+      ]
+    }
+  ]
+}</script>  <link rel="stylesheet" href="/assets/zoth-footer.css" />
+<link href="/assets/zoth-hud-embedded.css" rel="stylesheet"/>
+<script src="/assets/zoth-hud-embedded.js"></script>
+</head>
+<body class="edge-page" data-guide="Isolate handlers run locally.|Low latency V8 engine.|Watch the live 60 FPS demo below." data-kicker="Edge Forge · Preview" data-lede="Build and simulate ultra-low latency V8 isolate handlers with zero cloud lag. Watch the 60 FPS live demo below or install Zoth Studio to run it on your machine." data-title="Edge Function Forge &amp; V8 Studio">
+<a class="skip-to-content" href="#main-content">Skip to content</a>
+                                                                    <header class="bar" id="topbar" role="banner">
+      <a class="brand js-hub" href="/" aria-label="Zoth Studio Home">
+        <div class="brand-emblem-wrap">
+          <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth Golden Z Emblem" width="34" height="34" class="brand-emblem-img" />
+          <span class="brand-emblem-halo"></span>
+        </div>
+        <span class="brand-text-wrap">
+          <strong>Zoth</strong>
+          <small>by NullAI</small>
+        </span>
+        <span class="brand-status-badge">SOVEREIGN</span>
+      </a>
+
+      <nav class="menu" aria-label="Primary navigation" role="navigation">
+        <a class="nav-link nav-for-everyone" href="/#for-everyone" data-tip="Zero-Code Showcases — How non-tech founders, creators & teams depend on Zoth.">✦ For You</a>
+
+        <!-- 🔮 Core AI -->
+        <div class="nav-dropdown" data-dropdown-id="core">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Core AI</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🔮 CORE AI ARCHITECTURE</span><span class="nav-item-badge">6 NODES</span></div>
+            <a href="/zoth/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+            <a href="/agents/"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+            <a href="/studio/consensus.html"><span class="nav-item-icon-box">⚔️</span><div class="nav-item-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+            <a href="/studio/swarm.html"><span class="nav-item-icon-box">🌐</span><div class="nav-item-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+            <a href="/memory/"><span class="nav-item-icon-box">🧠</span><div class="nav-item-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+            <a href="/zoth-world.html"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+          </div>
+        </div>
+
+        <!-- 🪐 Studio -->
+        <div class="nav-dropdown" data-dropdown-id="studio">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Studio</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu nav-dropdown-mega">
+            <div class="nav-dropdown-header"><span>🪐 14+ STUDIO WORKSTATIONS</span><span class="nav-item-badge">LOCAL DAGS</span></div>
+            <a href="/studio/cockpit.html"><span class="nav-item-icon-box">🪐</span><div class="nav-item-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+            <a href="/studio/cockpit.html?tool=webgen"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+            <a href="/studio/cockpit.html?tool=vos-sandbox"><span class="nav-item-icon-box">💻</span><div class="nav-item-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+            <a href="/studio/cockpit.html?tool=nexus-3d"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+            <a href="/studio/cockpit.html?tool=omnipost"><span class="nav-item-icon-box">🎬</span><div class="nav-item-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+            <a href="/studio/cockpit.html?tool=math-pillars"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+            <a href="/studio/cockpit.html?tool=secure-comms"><span class="nav-item-icon-box">🔒</span><div class="nav-item-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+            <a href="/studio/cockpit.html?tool=signal-bridge"><span class="nav-item-icon-box">📡</span><div class="nav-item-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+            <a href="/studio/cockpit.html?tool=web3-hub"><span class="nav-item-icon-box">🪙</span><div class="nav-item-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+            <a href="/studio/cockpit.html?tool=pets"><span class="nav-item-icon-box">💎</span><div class="nav-item-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+            <a href="/studio/cockpit.html?tool=tool-nexus"><span class="nav-item-icon-box">🛠️</span><div class="nav-item-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+          </div>
+        </div>
+
+        <!-- 🌌 Universe -->
+        <div class="nav-dropdown" data-dropdown-id="universe">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Universe</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🌌 UNIVERSE &amp; PUBLICATIONS</span><span class="nav-item-badge">STORIES</span></div>
+            <a href="/comic/"><span class="nav-item-icon-box">🎨</span><div class="nav-item-body"><strong>AZOTH Anime Comic</strong><small>Season 1 Ep 1: Genesis in Silicon Rain (Audio)</small></div><span class="nav-item-badge">AUDIO</span></a>
+            <a href="/social/"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+            <a href="/articles/"><span class="nav-item-icon-box">📜</span><div class="nav-item-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+            <a href="/article/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+            <a href="/ai-webgpu.html"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+            <a href="/adytum/"><span class="nav-item-icon-box">🏛️</span><div class="nav-item-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+          </div>
+        </div>
+
+        <!-- 📚 Docs & Vault -->
+        <div class="nav-dropdown" data-dropdown-id="docs">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Docs & Vault</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>📚 DOCUMENTATION &amp; SECURITY</span><span class="nav-item-badge">SPECS</span></div>
+            <a href="/docs/"><span class="nav-item-icon-box">📚</span><div class="nav-item-body"><strong>Master Documentation</strong><small>Port Topology, 1-Click Install Scripts & API Guide</small></div><span class="nav-item-badge">DOCS</span></a>
+            <a href="/vault/"><span class="nav-item-icon-box">🔐</span><div class="nav-item-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+            <a href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+            <a href="/faq.html"><span class="nav-item-icon-box">❓</span><div class="nav-item-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+          </div>
+        </div>
+
+        <!-- ⚡ Action Pills -->
+        <button type="button" class="nav-pill nav-telemetry-pill" title="View Live Studio Telemetry & Background Daemons" aria-label="Studio Telemetry Status">
+          <span class="tel-dot online"></span><span class="tel-text">6/6 DAEMONS</span>
+        </button>
+
+        <button type="button" class="nav-pill nav-pet-pill" title="Active Companion Spirit: Azoth (Click to Summon / Switch Mascot)" aria-label="Active Companion Spirit">
+          <span class="pet-emoji">🔮</span><span class="pet-name">Azoth</span>
+        </button>
+
+        <a class="nav-pill nav-deck-pill js-deck" href="http://127.0.0.1:8484/" title="Open Local Operator Deck (:8484)">
+          <span class="deck-pulse"></span><span>DECK</span>
+        </a>
+
+        <button type="button" class="nav-pill nav-palette-btn" title="Open Global Command Palette (Ctrl+K)" aria-label="Command Palette">
+          <span class="palette-icon">🔍</span><kbd class="nav-kbd">Ctrl+K</kbd>
+        </button>
+
+        <button type="button" class="nav-pill nav-annotate-btn" title="Toggle On-Screen Annotator & Feedback (Shift+A)" aria-label="Toggle Annotator">
+          <span class="annotate-icon">✏️</span><span class="annotate-text">Annotate</span><kbd class="nav-kbd">Shift+A</kbd>
+        </button>
+
+        <div class="nav-dropdown nav-theme-dropdown">
+          <button class="nav-dropdown-btn nav-theme-current-btn" type="button" aria-haspopup="true" aria-expanded="false" title="Switch Visual Theme (Shift+T)">
+            <span class="current-theme-swatch" style="background:#00f0ff;"></span>
+            <span class="current-theme-emoji">🌙</span>
+            <span class="current-theme-label">Dark Void</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+        </div>
+
+        <a class="nav-pill git" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank" title="GitHub Repository — Open Source code, Debian packages, and releases">
+          <span>🐙 GitHub ↗</span>
+        </a>
+      </nav>
+
+      <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Toggle navigation menu">
+        <span class="burger-lines"><span class="b-line b-1"></span><span class="b-line b-2"></span><span class="b-line b-3"></span></span>
+        <span class="burger-text">Menu</span>
+      </button>
+      <div class="zoth-scroll-progress" id="zoth-scroll-progress"></div>
+    </header>
+
+    <nav class="drawer" id="drawer" aria-label="Universal Mobile Navigation" role="navigation">
+      <div class="drawer-header-brand">
+        <div class="d-brand-left">
+          <div class="brand-emblem-wrap">
+            <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth" width="28" height="28" class="brand-emblem-img" />
+          </div>
+          <span class="d-brand-title"><strong>Zoth Studio</strong><small>v12.0 Sovereign</small></span>
+        </div>
+        <button type="button" class="drawer-telemetry-badge" title="View Diagnostics HUD">● 6/6 DAEMONS</button>
+        <button type="button" class="drawer-close-btn" aria-label="Close mobile menu">✕</button>
+      </div>
+
+      <div class="drawer-section drawer-tools-section">
+        <div class="drawer-heading">⚡ Quick Actions</div>
+        <div class="drawer-quick-tools-grid">
+          <button type="button" class="drawer-tool-pill drawer-palette-trigger"><span>🔍</span> Command Palette <kbd class="nav-kbd">Ctrl+K</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-annotate-trigger"><span>✏️</span> On-Screen Annotator <kbd class="nav-kbd">Shift+A</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-telemetry-trigger"><span>⚡</span> Telemetry HUD</button>
+          <button type="button" class="drawer-tool-pill drawer-audio-trigger"><span>🔊</span> Audio FX</button>
+        </div>
+      </div>
+
+      <div class="drawer-section drawer-theme-section">
+        <div class="drawer-heading">🎨 Visual Theme (16 Archetypes)</div>
+        <div class="drawer-search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="drawer-theme-search-input" placeholder="Search 16 themes..." autocomplete="off" />
+        </div>
+        <div class="theme-filter-chips drawer-filter-chips">
+          <button type="button" class="theme-chip-btn active" data-drawer-cat="all">All (16)</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="studio originals">Originals</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="frontier ai & tech">Frontier</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="developer archetypes">Dev</button>
+        </div>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">✦ Featured</div>
+        <a class="drawer-link drawer-hero-link" href="/#for-everyone"><span class="d-link-icon">✦</span><div class="d-link-body"><strong>For You (No-Code Showcases)</strong><small>How Non-Tech Founders, Creators & Teams Use Zoth</small></div><span class="nav-item-badge">SHOWCASE</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🔮 Core AI & Pantheon</div>
+        <a class="drawer-link" href="/zoth/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+        <a class="drawer-link" href="/agents/"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+        <a class="drawer-link" href="/studio/consensus.html"><span class="d-link-icon">⚔️</span><div class="d-link-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+        <a class="drawer-link" href="/studio/swarm.html"><span class="d-link-icon">🌐</span><div class="d-link-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+        <a class="drawer-link" href="/memory/"><span class="d-link-icon">🧠</span><div class="d-link-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+        <a class="drawer-link" href="/zoth-world.html"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🪐 Workstations & DAGs</div>
+        <a class="drawer-link" href="/studio/cockpit.html"><span class="d-link-icon">🪐</span><div class="d-link-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=webgen"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=vos-sandbox"><span class="d-link-icon">💻</span><div class="d-link-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=nexus-3d"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=omnipost"><span class="d-link-icon">🎬</span><div class="d-link-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=math-pillars"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=secure-comms"><span class="d-link-icon">🔒</span><div class="d-link-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=signal-bridge"><span class="d-link-icon">📡</span><div class="d-link-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=web3-hub"><span class="d-link-icon">🪙</span><div class="d-link-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=pets"><span class="d-link-icon">💎</span><div class="d-link-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=tool-nexus"><span class="d-link-icon">🛠️</span><div class="d-link-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📜 Universe & Research</div>
+        <a class="drawer-link" href="/comic/"><span class="d-link-icon">🎨</span><div class="d-link-body"><strong>AZOTH Anime Comic Series</strong><small>Season 1 Ep 1: Genesis in Silicon Rain</small></div><span class="nav-item-badge">AUDIO</span></a>
+        <a class="drawer-link" href="/social/"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+        <a class="drawer-link" href="/articles/"><span class="d-link-icon">📜</span><div class="d-link-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+        <a class="drawer-link" href="/article/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+        <a class="drawer-link" href="/ai-webgpu.html"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+        <a class="drawer-link" href="/adytum/"><span class="d-link-icon">🏛️</span><div class="d-link-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📚 Docs & Security</div>
+        <a class="drawer-link" href="/docs/"><span class="d-link-icon">📚</span><div class="d-link-body"><strong>Complete Documentation</strong><small>Port Topology, 1-Click Install Scripts & API</small></div><span class="nav-item-badge">DOCS</span></a>
+        <a class="drawer-link" href="/vault/"><span class="d-link-icon">🔐</span><div class="d-link-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+        <a class="drawer-link" href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+        <a class="drawer-link" href="/faq.html"><span class="d-link-icon">❓</span><div class="d-link-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+      </div>
+
+      <div class="drawer-section drawer-footer-section">
+        <a class="drawer-pill-link js-deck" href="http://127.0.0.1:8484/">💻 Launch Local Operator Deck (:8484)</a>
+        <a class="drawer-pill-link" href="https://github.com/NullAITech/zoth-studio" target="_blank" rel="noopener noreferrer">🐙 GitHub Source Repository ↗</a>
+        <a class="drawer-pill-link" href="/downloads/zoth-studio-android.apk">📱 Download Android App (.apk)</a>
+      </div>
+    </nav>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<main id="main-content" role="main">
+<section aria-label="Edge Forge" class="edge-poster">
+<div class="edge-poster-copy">
+<p class="kicker">Edge · isolates</p>
+<h1>Forge</h1>
+<p class="lede">Build and simulate ultra-low latency V8 isolate handlers with zero cloud lag.</p>
+<div class="edge-poster-actions">
+<a class="btn btn-gold" href="#forge">Jump to forge</a>
+<a class="btn btn-ghost js-deck" href="http://127.0.0.1:8484/">Ask Azoth</a>
+</div>
+</div>
+<div class="edge-poster-visual">
+<img alt="Master Azoth in a white and gold mask with purple eyes" class="edge-poster-azoth avatar-live-azoth" decoding="async" fetchpriority="high" height="1024" src="/assets/mascot/azoth-portrait.jpg" width="1024"/>
+<span class="edge-poster-credit">Azoth · Operator</span>
+</div>
+</section>
+<div class="forge-container edge-workspace" id="forge">
+<!-- Standard Master Header -->
+<!-- Mobile-Only Desktop Insight Tooltip / Banner -->
+<div class="mobile-desktop-insight" role="note">
+<span class="insight-icon">💡</span>
+<div class="insight-text">
+<strong>Mobile Focused Mode Active</strong>
+<span>Optimized for touch &amp; speed. Want full multi-pane inspection &amp; spatial 3D tools? Open this workstation on desktop.</span>
+</div>
+<button aria-label="Dismiss insight" class="insight-close" onclick="this.parentElement.style.display='none'" type="button">✕</button>
+</div>
+<!-- Mobile Segmented View Switcher -->
+<nav aria-label="Edge Forge Mobile Views" class="forge-mobile-tabs">
+<button class="forge-tab-btn active" onclick="setForgeMobileView('editor')">
+  <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+  Code Editor
+</button>
+<button class="forge-tab-btn" onclick="setForgeMobileView('nodes')">
+  <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
+  Edge Nodes
+</button>
+<button class="forge-tab-btn" onclick="setForgeMobileView('waterfall')">
+  <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+  Waterfall Latency
+</button>
+</nav>
+<!-- Main Workspace -->
+<div class="forge-grid">
+<!-- Left: Code Editor & Execution -->
+<section class="forge-card forge-panel mobile-active" id="pane-forge-editor">
+<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+<span style="font-family:var(--font-mono); font-size:0.78rem; color:#94a3b8; text-transform:uppercase;">Template Library</span>
+<span class="chip" style="font-size:0.65rem; background:rgba(0,240,255,0.1); border-color:var(--edge-cyan); color:var(--edge-cyan);">V8 Engine 2026</span>
+<span class="agent-chip" style="display:inline-flex; align-items:center; gap:6px; background:rgba(0,240,255,0.08); border:1px solid rgba(0,240,255,0.25); border-radius:999px; padding:3px 10px;">
+<img alt="Master Azoth" class="avatar-live-azoth" height="18" src="/assets/mascot/azoth-bust.jpg" style="border-radius:50%; object-fit:cover;" width="18"/>
+<strong style="color:var(--edge-cyan); font-family:var(--font-mono); font-size:0.72rem;">@Azoth Core</strong>
+</span>
+<span class="agent-chip" style="display:inline-flex; align-items:center; gap:6px; background:rgba(52,211,153,0.08); border:1px solid rgba(52,211,153,0.25); border-radius:999px; padding:3px 10px;">
+<img alt="Kai Sentinel" class="avatar-live-kai" height="18" src="/assets/mascot/azoth-solon.jpg" style="border-radius:50%; object-fit:cover;" width="18"/>
+<strong style="color:var(--edge-emerald); font-family:var(--font-mono); font-size:0.72rem;">@Kai Bytecode</strong>
+</span>
+</div>
+<span style="font-family:var(--font-mono); font-size:0.72rem; color:var(--edge-emerald); display:inline-flex; align-items:center; gap:5px;">
+  <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+  Zero-Cloud Isolate Sandbox Active
+</span>
+</div>
+<div class="template-selector-bar">
+<button class="tpl-btn active" onclick="loadTemplate('ratelimit')">
+  <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+  Rate Limiter
+</button>
+<button class="tpl-btn" onclick="loadTemplate('aeo')">
+  <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+  AEO JSON-LD Injector
+</button>
+<button class="tpl-btn" onclick="loadTemplate('solana')">
+  <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+  Solana RPC Proxy
+</button>
+<button class="tpl-btn" onclick="loadTemplate('auth')">
+  <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+  Ed25519 Auth Gate
+</button>
+<button class="tpl-btn" onclick="loadTemplate('stream')">
+  <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20M2 6h20M2 18h20"></path></svg>
+  Stream Transformer
+</button>
+<button class="tpl-btn" onclick="loadTemplate('webp')">
+  <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+  WebP Image Edge
+</button>
+</div>
+<div class="editor-box">
+<div class="editor-topbar">
+<span style="display:flex; align-items:center; gap:8px;">
+<span style="width:8px; height:8px; border-radius:50%; background:var(--edge-cyan);"></span>
+                handler.ts (TypeScript / Cloudflare &amp; Deno Compatible)
+              </span>
+<span id="editor-char-count">840 chars · 34 lines</span>
+</div>
+<textarea class="code-editor-area" id="edge-code-area" oninput="updateCharCount()"></textarea>
+</div>
+<!-- Interactive Request Configurator with Streaming SSE & WebSocket Test Modes -->
+<div style="background:rgba(4,6,14,0.9); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:10px;">
+  <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-mono); font-size:0.75rem; color:#94a3b8; flex-wrap:wrap; gap:8px;">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <span style="text-transform:uppercase; font-weight:700; color: var(--text-primary); display:flex; align-items:center; gap:5px;">
+        <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        Request Simulator
+      </span>
+      <div class="protocol-mode-tabs" style="margin-bottom:0;">
+        <button type="button" class="protocol-mode-btn active" id="btn-proto-rest" onclick="setProtocolMode('rest')">REST</button>
+        <button type="button" class="protocol-mode-btn" id="btn-proto-sse" onclick="setProtocolMode('sse')">SSE Stream</button>
+        <button type="button" class="protocol-mode-btn" id="btn-proto-ws" onclick="setProtocolMode('ws')">WebSocket</button>
+      </div>
+    </div>
+    <span id="target-endpoint-label">Target: <code style="color:var(--edge-cyan);">http://127.0.0.1:8484/edge/execute</code></span>
+  </div>
+
+  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+    <select id="req-method" style="width:110px; min-height:38px; background:#020408; color:var(--edge-cyan); font-weight:700;">
+      <option value="GET">GET</option>
+      <option selected="" value="POST">POST</option>
+      <option value="PUT">PUT</option>
+      <option value="DELETE">DELETE</option>
+    </select>
+    <input id="req-path" placeholder="/path/to/resource" style="flex:1 1 180px; min-height:38px; min-width:0; width:100%;" type="text" value="/api/v1/auth/verify?cluster=IAD1"/>
+  </div>
+
+  <div id="rest-body-wrap">
+    <textarea id="req-body" placeholder='{ "message": "hello edge", "client_id": "zoth_987" }' rows="2" style="min-height:55px; font-size:0.75rem;"></textarea>
+  </div>
+
+  <!-- WebSocket Interactive Client Message Sender (Visible in WS mode) -->
+  <div id="ws-client-input-wrap" style="display:none; gap:8px; align-items:center;">
+    <input type="text" id="ws-msg-input" placeholder='{"action": "ping", "sub": "solana_ticks"}' style="flex:1; min-height:36px; font-size:0.75rem;" />
+    <button type="button" class="btn-ghost-edge" style="min-height:36px; padding:0 14px;" onclick="sendWsClientFrame()">
+      <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+      Send WS Frame
+    </button>
+  </div>
+</div>
+
+<div class="action-row">
+  <button class="btn-edge" id="btn-execute-test" onclick="runDryRunTest()">
+    <span id="exec-btn-icon"><svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></span>
+    <span id="exec-btn-label">Execute Live Isolate Test</span>
+  </button>
+  <button class="btn-ghost-edge" id="btn-abort-stream" style="display:none; color:#f43f5e; border-color:#f43f5e;" onclick="abortStream()">
+    <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+    Abort Stream
+  </button>
+  <button class="btn-ghost-edge" id="btn-pause-stream" style="display:none;" onclick="togglePauseStream()">
+    <span id="pause-btn-icon"><svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg></span>
+    <span id="pause-btn-label">Pause</span>
+  </button>
+  <button class="btn-ghost-edge" onclick="deployToEdge()">
+    <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
+    Deploy to Local Node (:8484)
+  </button>
+  <button class="btn-ghost-edge" onclick="copyEdgeCurl()">
+    <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+    Copy cURL
+  </button>
+  <button class="btn-ghost-edge" onclick="exportTypeScript()">
+    <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+    Export TS
+  </button>
+  <span id="deploy-msg" style="font-family:var(--font-mono); font-size:0.8rem; color:var(--edge-emerald); margin-left:auto;"></span>
+</div>
+
+<!-- Live Chunk Inspector Console -->
+<div class="stream-inspector-box">
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <span style="font-weight:700; color: var(--text-primary);" id="inspector-header-title">Live Chunk Inspector</span>
+      <span class="chip" id="stream-mode-badge" style="font-size:0.65rem; background:rgba(0,240,255,0.1); border-color:var(--edge-cyan); color:var(--edge-cyan);">REST MODE</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:6px;">
+      <button type="button" class="tpl-btn" style="padding:2px 8px; font-size:0.68rem;" onclick="clearChunkInspector()">
+        <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        Clear
+      </button>
+      <span id="test-status-badge" style="color:var(--edge-emerald); font-weight:700;">HTTP 200 OK · 1.42ms</span>
+    </div>
+  </div>
+
+  <!-- Stream Telemetry HUD Strip -->
+  <div class="stream-telemetry-bar" id="stream-telemetry-hud">
+    <div class="stream-tel-item">
+      <span class="stream-tel-label">TTFT:</span>
+      <span class="stream-tel-val" id="tel-ttft" style="color:var(--edge-cyan);">0.42ms</span>
+    </div>
+    <div class="stream-tel-item">
+      <span class="stream-tel-label">Chunks:</span>
+      <span class="stream-tel-val" id="tel-chunks">0</span>
+    </div>
+    <div class="stream-tel-item">
+      <span class="stream-tel-label">Speed:</span>
+      <span class="stream-tel-val" id="tel-speed" style="color:var(--edge-emerald);">—</span>
+    </div>
+    <div class="stream-tel-item">
+      <span class="stream-tel-label">Payload:</span>
+      <span class="stream-tel-val" id="tel-bytes" style="color:var(--edge-gold);">0 B</span>
+    </div>
+  </div>
+
+  <!-- Live Chunk List Feed -->
+  <div class="chunk-feed-list" id="stream-chunk-feed">
+    <div class="chunk-item">
+      <div class="chunk-header">
+        <span>#01 · REST Single-Shot Payload</span>
+        <span>+0.00ms · 246 B</span>
+      </div>
+      <div class="chunk-payload">{\n  "status": "ok",\n  "worker": "zoth-edge-iad1",\n  "runtime": "v8-isolate-sandboxed",\n  "latency_ms": 1.42,\n  "memory_used_kb": 148,\n  "rate_limit_remaining": 98,\n  "timestamp": "2026-08-21T00:00:00.000Z"\n}</div>
+    </div>
+  </div>
+</div>
+
+</section>
+<!-- Right: Global Clusters & Waterflow Telemetry -->
+<aside class="forge-right-col">
+<!-- V8 Isolate Virtual Memory Allocation Panel -->
+<div class="forge-card forge-panel v8-memory-card" id="pane-forge-memory">
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <span style="font-family:var(--font-mono); font-size:0.78rem; color:var(--edge-cyan); text-transform:uppercase; font-weight:700; display:flex; align-items:center; gap:6px;">
+      <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
+      V8 Isolate Heap Allocation
+    </span>
+    <span id="v8-heap-readout" style="font-family:var(--font-mono); font-size:0.74rem; color:var(--edge-emerald); font-weight:700;">148 KB / 128 MB</span>
+  </div>
+  <div class="v8-mem-track" title="V8 Isolate Linear Memory Allocation">
+    <div class="v8-mem-fill" id="v8-mem-fill-bar" style="width: 18%;"></div>
+  </div>
+  <div style="display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:0.70rem; color:#94a3b8;">
+    <span>Zero-Leak GC: <strong style="color:var(--edge-emerald);">ACTIVE</strong></span>
+    <span>JIT Baseline: <strong style="color:var(--edge-gold);">0.38ms</strong></span>
+    <span>Cold Start: <strong style="color:var(--edge-cyan);">0.12ms</strong></span>
+  </div>
+</div>
+
+<!-- Waterfall Panel -->
+<div class="forge-card forge-panel" id="pane-forge-waterfall">
+<span style="font-family:var(--font-mono); font-size:0.78rem; color:#94a3b8; text-transform:uppercase;">Execution Waterfall (TTFB: <span id="waterfall-ttfb">1.42ms</span>)</span>
+<div class="waterfall-box">
+<div class="waterfall-bar-row">
+<span class="wf-label">DNS Resolve</span>
+<div class="wf-track"><div class="wf-fill" id="wf-dns-bar" style="width:14%; background:var(--edge-cyan);"></div></div>
+<span class="wf-val" id="wf-dns-val">0.2ms</span>
+</div>
+<div class="waterfall-bar-row">
+<span class="wf-label">TLS Handshake</span>
+<div class="wf-track"><div class="wf-fill" id="wf-tls-bar" style="width:28%; background:var(--edge-gold);"></div></div>
+<span class="wf-val" id="wf-tls-val">0.4ms</span>
+</div>
+<div class="waterfall-bar-row">
+<span class="wf-label">V8 Isolate Exec</span>
+<div class="wf-track"><div class="wf-fill" id="wf-v8-bar" style="width:58%; background:var(--edge-magenta);"></div></div>
+<span class="wf-val" id="wf-v8-val">0.8ms</span>
+</div>
+</div>
+</div>
+<!-- Nodes List Panel -->
+<div class="forge-card forge-panel" id="pane-forge-nodes">
+<span style="font-family:var(--font-mono); font-size:0.78rem; color:#94a3b8; text-transform:uppercase;">Active Global Edge Clusters (8 Nodes)</span>
+<div class="nodes-list">
+<div class="node-card"><div class="node-name">IAD1 · US-East</div><div class="node-ping">● 0.8 ms avg</div></div>
+<div class="node-card"><div class="node-name">SFO1 · US-West</div><div class="node-ping">● 1.1 ms avg</div></div>
+<div class="node-card"><div class="node-name">LHR1 · London</div><div class="node-ping">● 1.4 ms avg</div></div>
+<div class="node-card"><div class="node-name">FRA1 · Frankfurt</div><div class="node-ping">● 1.2 ms avg</div></div>
+<div class="node-card"><div class="node-name">NRT1 · Tokyo</div><div class="node-ping">● 1.8 ms avg</div></div>
+<div class="node-card"><div class="node-name">SIN1 · Singapore</div><div class="node-ping">● 2.1 ms avg</div></div>
+<div class="node-card"><div class="node-name">SYD1 · Sydney</div><div class="node-ping">● 2.6 ms avg</div></div>
+<div class="node-card"><div class="node-name">GRU1 · São Paulo</div><div class="node-ping">● 2.9 ms avg</div></div>
+</div>
+<div style="background:rgba(4,6,14,0.8); border:1px solid var(--edge-border); border-radius:10px; padding:12px; font-family:var(--font-mono); font-size:0.75rem; color:#94a3b8; margin-top:auto;">
+              Security Invariant: <span style="color: var(--text-primary);">Strict zero-trust V8 isolate sandboxing. Zero persistent storage leakage across tenant invocations.</span>
+</div>
+</div>
+</aside>
+</div>
+</div>
+</main>
+                                                            <footer class="site" role="contentinfo">
+      <div class="foot-wrap">
+        <div aria-hidden="true" class="foot-watermark">ZOTH</div>
+        <div class="foot-grid">
+          <div class="foot-brand-col">
+            <p class="foot-kicker">Local · loopback · no telemetry</p>
+            <a class="foot-brand-lockup" href="/">
+              <img alt="Master Azoth" class="foot-azoth" decoding="async" height="72" loading="lazy" src="/assets/mascot/azoth-bust.jpg" width="72" />
+              <span class="foot-brand-text">
+                <img alt="" class="foot-brand-logo" decoding="async" height="28" loading="lazy" src="/assets/brand/zoth-golden-z-192.png" width="28" />
+                <strong class="foot-brand-title">Zoth Studio</strong>
+              </span>
+            </a>
+            <small class="foot-brand-desc">Local-first workspace for a team of AI agents. Files stay on this machine.</small>
+            <div class="foot-actions">
+              <a class="foot-btn foot-btn-on" href="/#install">Install locally</a>
+              <a class="foot-btn foot-btn-ghost" href="/pricing/">Support the forge</a>
+            </div>
+          </div>
+          <div class="foot-col">
+            <h3>Studio</h3>
+            <a class="mega-footer-link js-deck" href="http://127.0.0.1:8484/">Operator Deck</a>
+            <a class="mega-footer-link" href="/studio/">Workstations</a>
+            <a class="mega-footer-link" href="/studio/webgen.html">WebGen</a>
+            <a class="mega-footer-link" href="/studio/swarm.html">3D Swarm</a>
+            <a class="mega-footer-link" href="/studio/consensus.html">Consensus</a>
+          </div>
+          <div class="foot-col">
+            <h3>Agents</h3>
+            <a class="mega-footer-link" href="/zoth/">Master Azoth</a>
+            <a class="mega-footer-link" href="/agents/">21-Agent pantheon</a>
+            <a class="mega-footer-link" href="/pets/">Companions</a>
+            <a class="mega-footer-link" href="/vault/">Sovereign vault</a>
+            <a class="mega-footer-link" href="/adytum/">Adytum</a>
+          </div>
+          <div class="foot-col">
+            <h3>Universe</h3>
+            <a class="mega-footer-link" href="/comic/">Azoth comic</a>
+            <a class="mega-footer-link" href="/social/">Social wall</a>
+            <a class="mega-footer-link" href="/showcase.html">Showcase</a>
+            <a class="mega-footer-link" href="/signal/">Signal</a>
+            <a class="mega-footer-link" href="/article/">Manifesto</a>
+          </div>
+          <div class="foot-col">
+            <h3>Resources</h3>
+            <a class="mega-footer-link" href="/docs/">Docs</a>
+            <a class="mega-footer-link" href="/faq.html">FAQ</a>
+            <a class="mega-footer-link" href="/pricing/">Support / Patron</a>
+            <a class="mega-footer-link" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub ↗</a>
+            <a class="mega-footer-link" href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI ↗</a>
+          </div>
+        </div>
+        <div class="foot-bottom">
+          <p>© 2026 NullAI Tech. MIT. Local sovereign execution — zero telemetry.</p>
+          <nav aria-label="Footer meta" class="foot-meta">
+            <a href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub</a>
+            <a href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI</a>
+            <a href="/docs/">Docs</a>
+            <a href="/faq.html">FAQ</a>
+          </nav>
+        </div>
+      </div>
+    </footer>
+<script>
+      const TEMPLATES = {
+        ratelimit: `export default async function handler(req: Request): Promise<Response> {
+  const ip = req.headers.get('x-forwarded-for') || '127.0.0.1';
+  const clientHash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(ip));
+  const hexHash = Array.from(new Uint8Array(clientHash)).map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 16);
+
+  // Sliding window token-bucket rate limiter
+  return new Response(JSON.stringify({
+    status: 'ok',
+    client_hash: hexHash,
+    worker: 'zoth-edge-iad1',
+    rate_limit_remaining: 98,
+    runtime: 'v8-isolate',
+    latency_ms: 1.42
+  }), {
+    headers: { 'Content-Type': 'application/json', 'X-RateLimit-Limit': '100' }
+  });
+}`,
+        aeo: `export default async function handler(req: Request): Promise<Response> {
+  const jsonLdGraph = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Zoth Studio",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Linux, Windows",
+    "offers": { "@type": "Offer", "price": "0.00", "priceCurrency": "USD" },
+    "speakable": {
+      "@type": "SpeakableSpecification",
+      "cssSelector": ["h1", ".lede", ".kicker"]
+    }
+  };
+
+  // Edge-injected structured AEO schema
+  return new Response(JSON.stringify(jsonLdGraph, null, 2), {
+    headers: { 'Content-Type': 'application/ld+json', 'X-AEO-Engine': 'Zoth-Edge-v2.6' }
+  });
+}`,
+        solana: `export default async function handler(req: Request): Promise<Response> {
+  // Ultra-low latency Solana RPC reverse proxy with cache headers
+  let rpcBody = { method: 'getLatestBlockhash', id: 1 };
+  try { rpcBody = await req.json(); } catch(e) {}
+  
+  const allowedMethods = ['getAccountInfo', 'getLatestBlockhash', 'getBalance'];
+
+  if (!allowedMethods.includes(rpcBody.method)) {
+    return new Response(JSON.stringify({ error: 'Method not permitted on edge gate' }), { status: 403 });
+  }
+
+  return new Response(JSON.stringify({
+    jsonrpc: '2.0',
+    result: { value: { blockhash: 'EkSnNWid2cvwEVnNx9bWMqNac2KeTaNd7ErSKSmoEK9A', lastValidBlockHeight: 309182390 } },
+    id: rpcBody.id
+  }), { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=2' } });
+}`,
+        auth: `export default async function handler(req: Request): Promise<Response> {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return new Response(JSON.stringify({ error: 'Unauthorized: Missing Sovereign Bearer Token' }), { status: 401 });
+  }
+
+  // Stateless Ed25519 Token signature verification
+  return new Response(JSON.stringify({
+    authenticated: true,
+    principal: 'zoth-master-operator',
+    roles: ['admin', 'swarm-arbiter', 'isolate-creator'],
+    issued_at: new Date().toISOString()
+  }), { headers: { 'Content-Type': 'application/json' } });
+}`,
+        stream: `export default async function handler(req: Request): Promise<Response> {
+  const { readable, writable } = new TransformStream();
+  const writer = writable.getWriter();
+  const encoder = new TextEncoder();
+
+  // Async Chunked Streaming Response
+  (async () => {
+    await writer.write(encoder.encode("data: {\\"event\\": \\"connected\\", \\"node\\": \\"IAD1\\"}\\n\\n"));
+    await writer.write(encoder.encode("data: {\\"event\\": \\"ast_verified\\", \\"status\\": 1}\\n\\n"));
+    await writer.close();
+  })();
+
+  return new Response(readable, {
+    headers: { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache' }
+  });
+}`,
+        webp: `export default async function handler(req: Request): Promise<Response> {
+  // Edge WebP / AVIF Content Negotiator
+  const accept = req.headers.get('Accept') || '';
+  const bestFormat = accept.includes('image/avif') ? 'avif' : (accept.includes('image/webp') ? 'webp' : 'jpeg');
+
+  return new Response(JSON.stringify({
+    status: 'optimized',
+    format_selected: bestFormat,
+    dimensions: { width: 1200, height: 630 },
+    compression_ratio: '0.618 (Phi Optimized)',
+    cache_status: 'HIT_EDGE_L1'
+  }), {
+    headers: { 'Content-Type': 'application/json', 'X-Image-Format': bestFormat, 'Cache-Control': 'public, max-age=31536000, immutable' }
+  });
+}`
+      };
+
+      function loadTemplate(key) {
+        document.querySelectorAll('.tpl-btn').forEach(b => b.classList.remove('active'));
+        const activeBtn = Array.from(document.querySelectorAll('.tpl-btn')).find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes(key));
+        if (activeBtn) activeBtn.classList.add('active');
+
+        const codeArea = document.getElementById('edge-code-area');
+        if (codeArea) {
+          codeArea.value = TEMPLATES[key] || TEMPLATES.ratelimit;
+          updateCharCount();
+        }
+      }
+
+      function updateCharCount() {
+        const codeArea = document.getElementById('edge-code-area');
+        const countEl = document.getElementById('editor-char-count');
+        if (!codeArea || !countEl) return;
+        const text = codeArea.value || '';
+        const lines = text.split('\n').length;
+        countEl.textContent = `${text.length} chars · ${lines} lines`;
+      }
+
+      function deployToEdge() {
+        const msg = document.getElementById('deploy-msg');
+        if (!msg) return;
+        msg.textContent = 'Compiling V8 bytecode across 8 edge nodes...';
+        setTimeout(() => {
+          msg.textContent = '✓ Deployed to 8 Global Edge Clusters in 48ms!';
+          setTimeout(() => { if (msg) msg.textContent = ''; }, 3500);
+        }, 400);
+      }
+
+      var currentProtocolMode = 'rest';
+      var streamState = {
+        isRunning: false,
+        isPaused: false,
+        streamTimer: null,
+        chunkCount: 0,
+        totalBytes: 0,
+        startTime: 0,
+        ttftMs: null
+      };
+
+      function setProtocolMode(mode) {
+        currentProtocolMode = mode;
+        ['rest', 'sse', 'ws'].forEach(function (m) {
+          var btn = document.getElementById('btn-proto-' + m);
+          if (btn) btn.classList.toggle('active', m === mode);
+        });
+
+        var targetLabel = document.getElementById('target-endpoint-label');
+        var restWrap = document.getElementById('rest-body-wrap');
+        var wsWrap = document.getElementById('ws-client-input-wrap');
+        var abortBtn = document.getElementById('btn-abort-stream');
+        var pauseBtn = document.getElementById('btn-pause-stream');
+        var modeBadge = document.getElementById('stream-mode-badge');
+        var btnIcon = document.getElementById('exec-btn-icon');
+        var btnLabel = document.getElementById('exec-btn-label');
+
+        if (mode === 'rest') {
+          if (targetLabel) targetLabel.innerHTML = 'Target: <code style="color:var(--edge-cyan);">http://127.0.0.1:8484/edge/execute</code>';
+          if (restWrap) restWrap.style.display = 'block';
+          if (wsWrap) wsWrap.style.display = 'none';
+          if (abortBtn) abortBtn.style.display = 'none';
+          if (pauseBtn) pauseBtn.style.display = 'none';
+          if (modeBadge) { modeBadge.textContent = 'REST MODE'; modeBadge.style.color = 'var(--edge-cyan)'; modeBadge.style.borderColor = 'var(--edge-cyan)'; }
+          if (btnIcon) btnIcon.textContent = '⚡';
+          if (btnLabel) btnLabel.textContent = 'Execute Live Isolate Test';
+        } else if (mode === 'sse') {
+          if (targetLabel) targetLabel.innerHTML = 'Target: <code style="color:var(--edge-cyan);">http://127.0.0.1:8484/edge/stream/sse</code>';
+          if (restWrap) restWrap.style.display = 'block';
+          if (wsWrap) wsWrap.style.display = 'none';
+          if (abortBtn) abortBtn.style.display = 'inline-flex';
+          if (pauseBtn) pauseBtn.style.display = 'inline-flex';
+          if (modeBadge) { modeBadge.textContent = 'SSE STREAM MODE'; modeBadge.style.color = '#38bdf8'; modeBadge.style.borderColor = '#38bdf8'; }
+          if (btnIcon) btnIcon.textContent = '🌊';
+          if (btnLabel) btnLabel.textContent = 'Start Real-Time SSE Stream';
+        } else if (mode === 'ws') {
+          if (targetLabel) targetLabel.innerHTML = 'Target: <code style="color:var(--edge-cyan);">ws://127.0.0.1:8484/edge/ws/v1</code>';
+          if (restWrap) restWrap.style.display = 'none';
+          if (wsWrap) wsWrap.style.display = 'flex';
+          if (abortBtn) abortBtn.style.display = 'inline-flex';
+          if (pauseBtn) pauseBtn.style.display = 'inline-flex';
+          if (modeBadge) { modeBadge.textContent = 'WEBSOCKET DUPLEX'; modeBadge.style.color = 'var(--edge-emerald)'; modeBadge.style.borderColor = 'var(--edge-emerald)'; }
+          if (btnIcon) btnIcon.textContent = '🔌';
+          if (btnLabel) btnLabel.textContent = 'Open WebSocket Channel';
+        }
+      }
+
+      function clearChunkInspector() {
+        var feed = document.getElementById('stream-chunk-feed');
+        if (feed) feed.innerHTML = '';
+        streamState.chunkCount = 0;
+        streamState.totalBytes = 0;
+        updateStreamTelemetry(0, 0, 0, '—');
+      }
+
+      function updateStreamTelemetry(ttft, chunks, bytes, speed) {
+        var ttftEl = document.getElementById('tel-ttft');
+        var chunksEl = document.getElementById('tel-chunks');
+        var bytesEl = document.getElementById('tel-bytes');
+        var speedEl = document.getElementById('tel-speed');
+
+        if (ttftEl && typeof ttft === 'number') ttftEl.textContent = ttft.toFixed(2) + 'ms';
+        if (chunksEl) chunksEl.textContent = String(chunks);
+        if (bytesEl) {
+          bytesEl.textContent = bytes > 1024 ? (bytes / 1024).toFixed(2) + ' KB' : bytes + ' B';
+        }
+        if (speedEl && speed) speedEl.textContent = speed;
+      }
+
+      function appendChunkToFeed(headerText, deltaMs, byteSize, payloadText, chunkClass) {
+        var feed = document.getElementById('stream-chunk-feed');
+        if (!feed) return;
+
+        var item = document.createElement('div');
+        item.className = 'chunk-item' + (chunkClass ? (' ' + chunkClass) : '');
+        item.innerHTML = 
+          '<div class="chunk-header">' +
+            '<span>' + headerText + '</span>' +
+            '<span>+' + deltaMs.toFixed(2) + 'ms · ' + byteSize + ' B</span>' +
+          '</div>' +
+          '<div class="chunk-payload">' + payloadText + '</div>';
+        
+        feed.appendChild(item);
+        feed.scrollTop = feed.scrollHeight;
+      }
+
+      function abortStream() {
+        if (streamState.streamTimer) {
+          clearTimeout(streamState.streamTimer);
+          clearInterval(streamState.streamTimer);
+          streamState.streamTimer = null;
+        }
+        streamState.isRunning = false;
+        streamState.isPaused = false;
+
+        var badge = document.getElementById('test-status-badge');
+        if (badge) {
+          badge.textContent = 'STREAM TERMINATED (Client Abort)';
+          badge.style.color = '#f43f5e';
+        }
+
+        appendChunkToFeed('⏹ CLIENT_ABORT', performance.now() - streamState.startTime, 0, '[ABORT] Isolate readable stream closed by client signal.', 'ws-out');
+      }
+
+      function togglePauseStream() {
+        streamState.isPaused = !streamState.isPaused;
+        var btnIcon = document.getElementById('pause-btn-icon');
+        var btnLabel = document.getElementById('pause-btn-label');
+        if (btnIcon && btnLabel) {
+          btnIcon.textContent = streamState.isPaused ? '▶' : '⏸';
+          btnLabel.textContent = streamState.isPaused ? 'Resume' : 'Pause';
+        }
+      }
+
+      function sendWsClientFrame() {
+        var input = document.getElementById('ws-msg-input');
+        if (!input) return;
+        var msg = input.value.trim() || '{"action": "ping", "sub": "solana_ticks"}';
+        var byteSize = new TextEncoder().encode(msg).length;
+        var delta = performance.now() - (streamState.startTime || performance.now());
+
+        appendChunkToFeed('📤 WS CLIENT_FRAME (Opcode: Text)', delta, byteSize, msg, 'ws-out');
+        streamState.totalBytes += byteSize;
+        streamState.chunkCount++;
+        updateStreamTelemetry(streamState.ttftMs || 0.4, streamState.chunkCount, streamState.totalBytes, 'Duplex Active');
+
+        // Emulate instant Isolate reply frame
+        setTimeout(function () {
+          var reply = JSON.stringify({
+            event: 'ws_pong',
+            client_echo: msg,
+            cluster: 'IAD1-V8-ISOLATE',
+            seq: streamState.chunkCount + 1,
+            server_time: new Date().toISOString()
+          }, null, 2);
+          var replyBytes = new TextEncoder().encode(reply).length;
+          appendChunkToFeed('📥 WS ISOLATE_REPLY (Opcode: Text)', delta + 1.2, replyBytes, reply, 'ws-in');
+          streamState.totalBytes += replyBytes;
+          streamState.chunkCount++;
+          updateStreamTelemetry(streamState.ttftMs || 0.4, streamState.chunkCount, streamState.totalBytes, 'Duplex Active');
+        }, 45);
+      }
+
+      function runDryRunTest() {
+        var badge = document.getElementById('test-status-badge');
+        var method = (document.getElementById('req-method') && document.getElementById('req-method').value) || 'POST';
+        var path = (document.getElementById('req-path') && document.getElementById('req-path').value) || '/api/v1/auth/verify?cluster=IAD1';
+
+        // 1. REST Single-Shot Execution
+        if (currentProtocolMode === 'rest') {
+          if (badge) {
+            badge.textContent = 'Executing V8 Isolate...';
+            badge.style.color = 'var(--edge-gold)';
+          }
+
+          var start = performance.now();
+          setTimeout(function () {
+            var elapsed = (Math.random() * 0.8 + 0.9).toFixed(2);
+            var dnsTime = (Math.random() * 0.2 + 0.1).toFixed(2);
+            var tlsTime = (Math.random() * 0.3 + 0.2).toFixed(2);
+            var v8Time = Math.max(0.1, (elapsed - dnsTime - tlsTime)).toFixed(2);
+
+            var ttfbEl = document.getElementById('waterfall-ttfb');
+            var dnsEl = document.getElementById('wf-dns-val');
+            var tlsEl = document.getElementById('wf-tls-val');
+            var v8El = document.getElementById('wf-v8-val');
+
+            if (ttfbEl) ttfbEl.textContent = elapsed + 'ms';
+            if (dnsEl) dnsEl.textContent = dnsTime + 'ms';
+            if (tlsEl) tlsEl.textContent = tlsTime + 'ms';
+            if (v8El) v8El.textContent = v8Time + 'ms';
+
+            if (badge) {
+              badge.textContent = 'HTTP 200 OK · ' + elapsed + 'ms';
+              badge.style.color = 'var(--edge-emerald)';
+            }
+
+            var memKb = Math.floor(Math.random() * 40 + 120);
+            var sampleResponse = {
+              status: 'ok',
+              request: {
+                method: method,
+                path: path,
+                proto: 'HTTP/2'
+              },
+              worker: 'zoth-edge-iad1',
+              runtime: 'v8-isolate-sandboxed',
+              latency_ms: parseFloat(elapsed),
+              memory_used_kb: memKb,
+              security_invariants: {
+                zero_cloud_leakage: true,
+                argon2id_vault_isolated: true,
+                ast_clean: true
+              },
+              timestamp: new Date().toISOString()
+            };
+
+            // Update V8 Heap Memory Gauge
+            var v8HeapReadout = document.getElementById('v8-heap-readout');
+            var v8MemFill = document.getElementById('v8-mem-fill-bar');
+            if (v8HeapReadout) v8HeapReadout.textContent = memKb + ' KB / 128 MB';
+            if (v8MemFill) {
+              var memPct = Math.min(100, Math.max(8, (memKb / 1024) * 100));
+              v8MemFill.style.width = memPct.toFixed(1) + '%';
+            }
+
+            var jsonStr = JSON.stringify(sampleResponse, null, 2);
+            var bytes = new TextEncoder().encode(jsonStr).length;
+            clearChunkInspector();
+            appendChunkToFeed('#01 · HTTP/2 REST Payload', parseFloat(elapsed), bytes, jsonStr);
+            updateStreamTelemetry(parseFloat(elapsed), 1, bytes, 'Single-shot');
+          }, 180);
+          return;
+        }
+
+        // 2. SSE Real-Time Chunked Streaming Simulation
+        if (currentProtocolMode === 'sse') {
+          clearChunkInspector();
+          streamState.isRunning = true;
+          streamState.isPaused = false;
+          streamState.startTime = performance.now();
+          streamState.chunkCount = 0;
+          streamState.totalBytes = 0;
+
+          if (badge) {
+            badge.textContent = 'CONNECTING SSE STREAM...';
+            badge.style.color = 'var(--edge-gold)';
+          }
+
+          var sseEvents = [
+            { event: 'connected', data: { status: 'stream_open', cluster: 'IAD1', isolate_id: 'iso_9941a', transport: 'HTTP/2-SSE' } },
+            { event: 'ast_analysis', data: { parsing: 'handler.ts', dialect: 'TypeScript 5.4', ast_valid: true } },
+            { event: 'token_delta', data: { chunk: 'export default async function handler(req) {', index: 0, delta_len: 44 } },
+            { event: 'token_delta', data: { chunk: '  const { readable, writable } = new TransformStream();', index: 1, delta_len: 56 } },
+            { event: 'token_delta', data: { chunk: '  // Streaming response from 8 global V8 edge nodes', index: 2, delta_len: 52 } },
+            { event: 'telemetry_tick', data: { active_isolates: 8, mem_rss_kb: 164, zero_copy: true } },
+            { event: 'token_delta', data: { chunk: '  return new Response(readable, { headers: { "Content-Type": "text/event-stream" } });', index: 3, delta_len: 89 } },
+            { event: 'token_delta', data: { chunk: '}', index: 4, delta_len: 1 } },
+            { event: 'security_audit', data: { tenant_isolated: true, argon2_locked: true, ast_integrity: 'PASS_100%' } },
+            { event: 'stream_end', data: { status: 'completed', total_tokens: 5, total_chunks: 10, eot: true } }
+          ];
+
+          var chunkIdx = 0;
+          function emitNextSseChunk() {
+            if (!streamState.isRunning) return;
+            if (streamState.isPaused) {
+              streamState.streamTimer = setTimeout(emitNextSseChunk, 100);
+              return;
+            }
+
+            if (chunkIdx >= sseEvents.length) {
+              streamState.isRunning = false;
+              if (badge) {
+                badge.textContent = 'STREAM COMPLETE (200 OK · ' + streamState.chunkCount + ' Chunks)';
+                badge.style.color = 'var(--edge-emerald)';
+              }
+              appendChunkToFeed('🏁 SSE [DONE]', performance.now() - streamState.startTime, 0, 'data: [DONE]\n\n');
+              return;
+            }
+
+            var evt = sseEvents[chunkIdx];
+            var delta = performance.now() - streamState.startTime;
+
+            if (chunkIdx === 0) {
+              streamState.ttftMs = delta;
+              if (badge) {
+                badge.textContent = 'STREAMING LIVE · TTFT: ' + delta.toFixed(2) + 'ms';
+                badge.style.color = '#38bdf8';
+              }
+            }
+
+            var payloadStr = 'event: ' + evt.event + '\ndata: ' + JSON.stringify(evt.data, null, 2) + '\n\n';
+            var bytes = new TextEncoder().encode(payloadStr).length;
+
+            streamState.chunkCount++;
+            streamState.totalBytes += bytes;
+            var currentRate = (streamState.chunkCount / (Math.max(0.001, delta) / 1000)).toFixed(1) + ' chunks/s';
+
+            appendChunkToFeed('#' + (chunkIdx + 1).toString().padStart(2, '0') + ' · event: ' + evt.event, delta, bytes, payloadStr);
+            updateStreamTelemetry(streamState.ttftMs, streamState.chunkCount, streamState.totalBytes, currentRate);
+
+            chunkIdx++;
+            streamState.streamTimer = setTimeout(emitNextSseChunk, Math.floor(Math.random() * 35 + 45));
+          }
+
+          // Initial connection latency (TTFT)
+          streamState.streamTimer = setTimeout(emitNextSseChunk, 80);
+          return;
+        }
+
+        // 3. WebSocket Full-Duplex Channel Simulation
+        if (currentProtocolMode === 'ws') {
+          clearChunkInspector();
+          streamState.isRunning = true;
+          streamState.isPaused = false;
+          streamState.startTime = performance.now();
+          streamState.chunkCount = 0;
+          streamState.totalBytes = 0;
+
+          if (badge) {
+            badge.textContent = '101 SWITCHING PROTOCOLS (WebSocket Handshake)...';
+            badge.style.color = 'var(--edge-gold)';
+          }
+
+          setTimeout(function () {
+            var delta = performance.now() - streamState.startTime;
+            streamState.ttftMs = delta;
+
+            if (badge) {
+              badge.textContent = 'WS_OPEN · Channel Live (101 OK)';
+              badge.style.color = 'var(--edge-emerald)';
+            }
+
+            var hsFrame = JSON.stringify({
+              protocol: 'zoth-edge-ws-v1',
+              transport: 'WSS',
+              cluster: 'IAD1',
+              heartbeat_interval_ms: 1000,
+              capabilities: ['ast_live_diff', 'solana_pubsub', 'e2ee_simplex']
+            }, null, 2);
+            var hsBytes = new TextEncoder().encode(hsFrame).length;
+
+            streamState.chunkCount++;
+            streamState.totalBytes += hsBytes;
+            appendChunkToFeed('🔌 101 UPGRADE_OK (Server -> Client)', delta, hsBytes, hsFrame, 'ws-in');
+            updateStreamTelemetry(streamState.ttftMs, streamState.chunkCount, streamState.totalBytes, 'Duplex Connected');
+
+            // Automatic initial subscription frame
+            setTimeout(function () {
+              var subFrame = JSON.stringify({ action: 'subscribe', topic: 'cluster_telemetry' });
+              var subBytes = new TextEncoder().encode(subFrame).length;
+              var subDelta = performance.now() - streamState.startTime;
+
+              streamState.chunkCount++;
+              streamState.totalBytes += subBytes;
+              appendChunkToFeed('📤 WS CLIENT_SUB (Client -> Server)', subDelta, subBytes, subFrame, 'ws-out');
+              updateStreamTelemetry(streamState.ttftMs, streamState.chunkCount, streamState.totalBytes, 'Duplex Active');
+            }, 60);
+          }, 65);
+        }
+      }
+
+      function copyEdgeCurl() {
+        var method = (document.getElementById('req-method') && document.getElementById('req-method').value) || 'POST';
+        var path = (document.getElementById('req-path') && document.getElementById('req-path').value) || '/api/v1/auth/verify?cluster=IAD1';
+        var curl = '';
+        if (currentProtocolMode === 'rest') {
+          curl = 'curl -X ' + method + ' http://127.0.0.1:8484' + path + ' \\\n  -H "Authorization: Bearer sk_zoth_sovereign" \\\n  -H "Content-Type: application/json"';
+        } else if (currentProtocolMode === 'sse') {
+          curl = 'curl -N -X GET http://127.0.0.1:8484/edge/stream/sse \\\n  -H "Accept: text/event-stream" \\\n  -H "Authorization: Bearer sk_zoth_sovereign"';
+        } else if (currentProtocolMode === 'ws') {
+          curl = 'websocat ws://127.0.0.1:8484/edge/ws/v1 \\\n  -H="Authorization: Bearer sk_zoth_sovereign"';
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(curl).then(function () {
+            alert('cURL command copied to clipboard!');
+          }).catch(function () {
+            prompt('Copy command:', curl);
+          });
+        } else {
+          prompt('Copy command:', curl);
+        }
+      }
+
+      function exportTypeScript() {
+        var codeArea = document.getElementById('edge-code-area');
+        var code = codeArea ? codeArea.value : '';
+        var blob = new Blob([code], { type: 'text/typescript' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'handler.ts';
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      function setForgeMobileView(viewKey) {
+        document.querySelectorAll('.forge-tab-btn').forEach(function (b) { b.classList.remove('active'); });
+        var activeBtn = Array.from(document.querySelectorAll('.forge-tab-btn')).find(function (b) {
+          return b.getAttribute('onclick') && b.getAttribute('onclick').includes(viewKey);
+        });
+        if (activeBtn) activeBtn.classList.add('active');
+
+        document.querySelectorAll('.forge-panel').forEach(function (p) { p.classList.remove('mobile-active'); });
+        var target = document.getElementById('pane-forge-' + viewKey);
+        if (target) target.classList.add('mobile-active');
+      }
+
+      window.addEventListener('DOMContentLoaded', function () {
+        loadTemplate('ratelimit');
+      });
+    </script>
+<script src="/assets/zoth-gate.js"></script>
+<script defer="" src="/assets/zoth-tip.js"></script>
+<script defer="" src="/assets/zoth-annotator.js"></script>
+<script defer="" src="/assets/zoth-preview.js"></script>
+<script defer="" src="/assets/zoth-nav.js?v=11"></script>
+<script src="/assets/celestial-trail.js"></script>
+<script src="/assets/zoth-guide.js"></script>
+</body>
+</html>

@@ -1,0 +1,356 @@
+/* =============================================================================
+   ✦ ZOTH STUDIO — LUXURY CYBER POLISH LAYER (v1.0)
+   =============================================================================
+   Loaded LAST, after zoth-theme*.css / zoth-magic-ui.css / zoth-ui-overhaul.css.
+   Adds, without touching markup or JS behavior already shipped:
+     1. Metallic shine on hero titles (all 16 themes, light-mode safe)
+     2. Pointer-following specular spotlight on .card/.panel/workstation frames
+        (consumes --spotlight-x/--spotlight-y already written by zoth-spotlight.js)
+     3. Rotating conic border-beam highlight for premier feature cards
+     4. Shimmer sweep + magnetic-ready CTA polish, tactile press feedback
+     5. Topbar / HUD dock / mobile drawer micro-interactions
+   Every rule is additive: existing classes, data attributes and handlers are
+   untouched. Nothing here removes .active/.open states or event bindings.
+   ============================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .hero h1,
+  .magic-shiny-text,
+  .zoth-spot-card::before,
+  .zoth-beam-card::before,
+  .btn-on::after,
+  .btn-primary::after,
+  .magic-shimmer-btn::after {
+    animation: none !important;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   1. HERO METALLIC SHINE
+   Dark/matrix/gold/frontier themes get a moving metallic gradient ink.
+   Light theme is force-solid (WCAG AAA) — matches zoth-theme-light.css rule
+   that already sets -webkit-text-fill-color:#111827 !important there.
+   ───────────────────────────────────────────────────────────────────────── */
+@keyframes zoth-metal-shine {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* !important beats the inline background/-webkit-text-fill-color some pages
+   set directly on the H1 (inline style otherwise wins over any stylesheet
+   regardless of selector specificity, so the shine would silently no-op). */
+.hero h1,
+.hero-h1,
+.hero-title,
+.studio-title,
+.station-title {
+  background: linear-gradient(
+    100deg,
+    var(--text-primary, #fff) 0%,
+    var(--text-primary, #fff) 38%,
+    var(--accent, var(--cyan, #00f0ff)) 50%,
+    var(--text-primary, #fff) 62%,
+    var(--text-primary, #fff) 100%
+  ) !important;
+  background-size: 240% 100% !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  animation: zoth-metal-shine 7.5s ease-in-out infinite alternate;
+}
+
+/* Never gradient-fill below ~880px — keeps single-color legible headline on phones */
+@media (max-width: 880px) {
+  .hero h1,
+  .hero-h1,
+  .hero-title,
+  .studio-title,
+  .station-title {
+    background: none !important;
+    -webkit-text-fill-color: var(--text-primary, #fff) !important;
+    animation: none !important;
+  }
+}
+
+/* Light mode: force solid ink, no shine (mirrors zoth-theme-light.css contract) */
+html[data-theme="light"] .hero h1,
+html[data-theme="light"] .hero-h1,
+html[data-theme="light"] .hero-title,
+html[data-theme="light"] .studio-title,
+html[data-theme="light"] .station-title {
+  background: none !important;
+  -webkit-text-fill-color: #111827 !important;
+  color: #111827 !important;
+  animation: none !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   2. POINTER-FOLLOWING SPECULAR SPOTLIGHT
+   zoth-spotlight.js already writes --spotlight-x/--spotlight-y in px onto
+   .card, .panel, .consensus-panel, .webgen-card, .radar-hud-card, .recon-card,
+   .vault-card, .omni-card, .hud-card, .hero-value-card, .stage-scroll-panel.
+   This block is what actually PAINTS that data — previously unused.
+   ───────────────────────────────────────────────────────────────────────── */
+/* Uses ::after (not ::before) so we never clobber the many card-specific
+   ::before top-line gradients already shipped (e.g. .mc-card::before,
+   .alchemical-resonance-card::before). Border-beam below also needs ::after
+   on premier cards only, so this spotlight layer stays scoped to opt-in
+   classes + explicit workstation containers rather than a blanket
+   [class*="-card"] selector that would fight page-specific decoration. */
+.card,
+.panel,
+.consensus-panel,
+.webgen-card,
+.radar-hud-card,
+.recon-card,
+.vault-card,
+.omni-card,
+.hud-card,
+.hero-value-card,
+.stage-scroll-panel,
+[data-spotlight],
+.zoth-tool-stage,
+.zoth-tool-canvas-wrap {
+  position: relative;
+  isolation: isolate;
+}
+
+.card::after,
+.panel::after,
+.consensus-panel::after,
+.webgen-card::after,
+.radar-hud-card::after,
+.recon-card::after,
+.vault-card::after,
+.omni-card::after,
+.hud-card::after,
+.hero-value-card::after,
+.stage-scroll-panel::after,
+[data-spotlight]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  background: radial-gradient(
+    260px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%),
+    rgba(255, 255, 255, 0.14),
+    rgba(255, 255, 255, 0.05) 32%,
+    transparent 68%
+  );
+  mix-blend-mode: screen;
+}
+
+.card:hover::after,
+.panel:hover::after,
+.consensus-panel:hover::after,
+.webgen-card:hover::after,
+.radar-hud-card:hover::after,
+.recon-card:hover::after,
+.vault-card:hover::after,
+.omni-card:hover::after,
+.hud-card:hover::after,
+.hero-value-card:hover::after,
+.stage-scroll-panel:hover::after,
+[data-spotlight]:hover::after {
+  opacity: 1;
+}
+
+html[data-theme="light"] .card::after,
+html[data-theme="light"] .panel::after,
+html[data-theme="light"] .consensus-panel::after,
+html[data-theme="light"] .webgen-card::after,
+html[data-theme="light"] .radar-hud-card::after,
+html[data-theme="light"] .recon-card::after,
+html[data-theme="light"] .vault-card::after,
+html[data-theme="light"] .omni-card::after,
+html[data-theme="light"] .hud-card::after,
+html[data-theme="light"] .hero-value-card::after,
+html[data-theme="light"] .stage-scroll-panel::after,
+html[data-theme="light"] [data-spotlight]::after {
+  mix-blend-mode: multiply;
+  background: radial-gradient(
+    260px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%),
+    rgba(10, 37, 64, 0.06),
+    rgba(10, 37, 64, 0.02) 32%,
+    transparent 68%
+  );
+}
+
+@media (hover: none) {
+  .card::after,
+  .panel::after,
+  .consensus-panel::after,
+  .webgen-card::after,
+  .radar-hud-card::after,
+  .recon-card::after,
+  .vault-card::after,
+  .omni-card::after,
+  .hud-card::after,
+  .hero-value-card::after,
+  .stage-scroll-panel::after,
+  [data-spotlight]::after {
+    display: none;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   3. ROTATING CONIC BORDER BEAM — premier feature cards
+   Opt-in via existing .magic-border-beam-card OR new data-feature="premier"
+   so nothing already shipped changes shape unless explicitly marked.
+   ───────────────────────────────────────────────────────────────────────── */
+@keyframes zoth-beam-rotate {
+  to { transform: rotate(360deg); }
+}
+
+.magic-border-beam-card,
+[data-feature="premier"],
+.card.is-premier,
+.panel.is-premier {
+  position: relative;
+  isolation: isolate;
+}
+
+.magic-border-beam-card::after,
+[data-feature="premier"]::after,
+.card.is-premier::after,
+.panel.is-premier::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: 2;
+  border-radius: inherit;
+  padding: 1.5px;
+  pointer-events: none;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    var(--cyan, #00f0ff) 12%,
+    transparent 24%,
+    transparent 50%,
+    var(--gold, #fbbf24) 62%,
+    transparent 74%,
+    transparent 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: zoth-beam-rotate 6s linear infinite;
+  opacity: 0.9;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .magic-border-beam-card::after,
+  [data-feature="premier"]::after,
+  .card.is-premier::after,
+  .panel.is-premier::after {
+    animation: none;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   4. CTA SHIMMER SWEEP + MAGNETIC-READY PRESS FEEDBACK
+   Magnetic pull already applied via JS transform (zoth-spotlight.js) on
+   .btn-on/.btn-primary/.magic-shimmer-btn/.nav-annotate-btn. Here we add
+   the light-sweep shine and a crisp active/press state on top of theme
+   color rules already defined in zoth-theme-transformer.css.
+   ───────────────────────────────────────────────────────────────────────── */
+@keyframes zoth-cta-sweep {
+  0%   { transform: translateX(-120%) skewX(-18deg); }
+  100% { transform: translateX(220%) skewX(-18deg); }
+}
+
+.btn-on,
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+.btn-on::after,
+.btn-primary::after {
+  content: "";
+  position: absolute;
+  top: -60%;
+  left: 0;
+  width: 26%;
+  height: 220%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  animation: zoth-cta-sweep 3.2s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.btn-on:active,
+.btn-primary:active,
+.magic-shimmer-btn:active {
+  transform: scale(0.96) !important;
+  filter: brightness(0.94);
+}
+
+html[data-theme="light"] .btn-on::after,
+html[data-theme="light"] .btn-primary::after {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.75), transparent);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   5. TOPBAR / HUD DOCK / MOBILE DRAWER MICRO-INTERACTIONS
+   ───────────────────────────────────────────────────────────────────────── */
+header#topbar nav.menu a,
+.comic-topbar nav.menu a {
+  position: relative;
+  transition: color 0.18s ease, transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+header#topbar nav.menu a:hover,
+.comic-topbar nav.menu a:hover {
+  transform: translateY(-1px);
+}
+header#topbar nav.menu a:active,
+.comic-topbar nav.menu a:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.dock-item {
+  will-change: transform;
+}
+.dock-item:active {
+  transform: scale(0.88) !important;
+}
+
+.drawer a,
+.drawer-theme-btn {
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), background 0.18s ease;
+}
+.drawer a:active,
+.drawer-theme-btn:active {
+  transform: scale(0.96);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   6. GEOMETRIC BORDER + AMBIENT GLOW PER-THEME ACCENTS FOR HERO/HEADER
+   Additive atop zoth-theme-transformer.css card borders; only touches the
+   hero stage frame, not every card, to avoid double borders.
+   ───────────────────────────────────────────────────────────────────────── */
+.hero .stage,
+.hero-banner {
+  position: relative;
+}
+.hero .stage::before,
+.hero-banner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  box-shadow: inset 0 0 0 1px var(--border-card, rgba(0, 240, 255, 0.18));
+}
+
+html[data-theme="matrix"] .hero .stage::before { box-shadow: inset 0 0 0 1px rgba(0, 255, 65, 0.22); }
+html[data-theme="gold"] .hero .stage::before { box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.28); }
+html[data-theme="apple"] .hero .stage::before { box-shadow: inset 0 0 0 1px rgba(10, 132, 255, 0.22); }
+html[data-theme="light"] .hero .stage::before { box-shadow: inset 0 0 0 1px rgba(10, 37, 64, 0.08); }

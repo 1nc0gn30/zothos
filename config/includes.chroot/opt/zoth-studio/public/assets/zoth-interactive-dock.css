@@ -1,0 +1,337 @@
+/* =============================================================================
+   🛸 ZOTH STUDIO — 2026 AAA CYBERPUNK FLOATING COCKPIT DOCK (v2.0 ULTRA)
+   Zero Cartoon Emojis · Pure Crisp Vector Glyphs · Kinetic Spring Physics
+   ============================================================================= */
+
+:root {
+  --dock-bg: rgba(6, 9, 18, 0.88);
+  --dock-border: rgba(0, 240, 255, 0.35);
+  --dock-glow: rgba(0, 240, 255, 0.25);
+  --dock-gold: #fbbf24;
+  --dock-gold-glow: rgba(251, 191, 36, 0.3);
+  --dock-cyan: #00f0ff;
+  --dock-purple: #c084fc;
+  --dock-text: #f8fafc;
+  --dock-item-bg: rgba(14, 20, 38, 0.7);
+  --dock-item-hover: rgba(0, 240, 255, 0.16);
+  --dock-font-mono: 'IBM Plex Mono', monospace;
+  --dock-font-display: 'Syne', system-ui, sans-serif;
+}
+
+html[data-theme="light"] {
+  --dock-bg: rgba(255, 255, 255, 0.94);
+  --dock-border: rgba(2, 132, 199, 0.35);
+  --dock-glow: rgba(2, 132, 199, 0.18);
+  --dock-gold: #d97706;
+  --dock-cyan: #0284c7;
+  --dock-purple: #7c3aed;
+  --dock-text: #0f172a;
+  --dock-item-bg: rgba(241, 245, 249, 0.85);
+  --dock-item-hover: rgba(2, 132, 199, 0.15);
+}
+
+html[data-theme="matrix"] {
+  --dock-bg: rgba(2, 14, 6, 0.92);
+  --dock-border: rgba(0, 255, 65, 0.4);
+  --dock-glow: rgba(0, 255, 65, 0.25);
+  --dock-gold: #00ff41;
+  --dock-cyan: #55ff77;
+  --dock-purple: #00ff88;
+  --dock-text: #86efac;
+  --dock-item-bg: rgba(3, 24, 10, 0.8);
+  --dock-item-hover: rgba(0, 255, 65, 0.2);
+}
+
+html[data-theme="gold"] {
+  --dock-bg: rgba(14, 10, 3, 0.92);
+  --dock-border: rgba(251, 191, 36, 0.45);
+  --dock-glow: rgba(251, 191, 36, 0.3);
+  --dock-gold: #fbbf24;
+  --dock-cyan: #f59e0b;
+  --dock-purple: #fde047;
+  --dock-text: #fef3c7;
+  --dock-item-bg: rgba(26, 18, 5, 0.85);
+  --dock-item-hover: rgba(251, 191, 36, 0.2);
+}
+
+/* Floating Dock Wrap */
+.zoth-dock-wrap {
+  position: fixed;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 99995;
+  pointer-events: auto;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  user-select: none;
+}
+
+.zoth-dock-wrap.dock-hidden {
+  transform: translateX(-50%) translateY(110px);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.zoth-dock-wrap.dock-collapsed {
+  transform: translateX(-50%) translateY(80px);
+  opacity: 0.35;
+}
+
+.dock-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* Cyber Chassis Container with Chamfered Corners */
+.dock-inner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--dock-bg);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid var(--dock-border);
+  clip-path: polygon(
+    0 12px,
+    12px 0,
+    calc(100% - 12px) 0,
+    100% 12px,
+    100% calc(100% - 12px),
+    calc(100% - 12px) 100%,
+    12px 100%,
+    0 calc(100% - 12px)
+  );
+  box-shadow: 
+    0 20px 50px rgba(0, 0, 0, 0.85),
+    0 0 24px var(--dock-glow),
+    inset 0 0 16px rgba(0, 240, 255, 0.08);
+  position: relative;
+}
+
+/* Scanline and Holographic Rail Overlay */
+.dock-inner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 240, 255, 0.02) 0px,
+    rgba(0, 240, 255, 0.02) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+.dock-inner::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 20%;
+  right: 20%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--dock-cyan), var(--dock-gold), transparent);
+}
+
+/* Individual Dock Button Item */
+.dock-item {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--dock-item-bg);
+  color: var(--dock-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  outline: none;
+  transition: 
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  transform-origin: bottom center;
+}
+
+.dock-item:hover {
+  background: var(--dock-item-hover);
+  border-color: var(--dock-cyan);
+  box-shadow: 
+    0 8px 20px rgba(0, 0, 0, 0.6),
+    0 0 16px var(--dock-glow);
+  z-index: 10;
+}
+
+.dock-item.active {
+  background: rgba(0, 240, 255, 0.22) !important;
+  border-color: var(--dock-cyan) !important;
+  box-shadow: 
+    0 0 18px var(--dock-glow),
+    inset 0 0 10px rgba(0, 240, 255, 0.2) !important;
+}
+
+/* Vector SVG Icon Wrapper */
+.dock-icon-box {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.dock-item:hover .dock-icon-box {
+  transform: scale(1.1);
+}
+
+.dock-svg-icon {
+  width: 100%;
+  height: 100%;
+  display: block;
+  stroke: currentColor;
+  overflow: visible;
+  filter: drop-shadow(0 0 3px rgba(0, 240, 255, 0.3));
+}
+
+.dock-item.active .dock-svg-icon {
+  filter: drop-shadow(0 0 6px var(--dock-cyan));
+}
+
+/* Tactical Hotkey Tag */
+.dock-hotkey {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid var(--dock-border);
+  color: var(--dock-gold);
+  font-family: var(--dock-font-mono);
+  font-size: 0.58rem;
+  font-weight: 800;
+  padding: 1px 4px;
+  border-radius: 3px;
+  line-height: 1;
+  pointer-events: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+}
+
+/* Active Status Dot Indicator */
+.dock-active-dot {
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--dock-cyan);
+  box-shadow: 0 0 8px var(--dock-cyan);
+}
+
+/* Tactical Divider */
+.dock-divider {
+  width: 1px;
+  height: 28px;
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  margin: 0 4px;
+}
+
+/* High-Tech HUD Tooltip */
+.dock-tooltip {
+  position: absolute;
+  bottom: 58px;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background: rgba(5, 7, 14, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--dock-cyan);
+  border-radius: 8px;
+  padding: 6px 12px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.85), 0 0 14px var(--dock-glow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  z-index: 1000;
+}
+
+html[data-theme="light"] .dock-tooltip {
+  background: #ffffff;
+  border-color: #0284c7;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+.dock-tooltip strong {
+  font-family: var(--dock-font-display);
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.02em;
+}
+
+html[data-theme="light"] .dock-tooltip strong { color: #0f172a; }
+
+.dock-tooltip small {
+  font-family: var(--dock-font-mono);
+  font-size: 0.65rem;
+  color: var(--dock-gold);
+  font-weight: 600;
+}
+
+.dock-tooltip::after {
+  content: "";
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid var(--dock-cyan);
+}
+
+.dock-item:hover .dock-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Mobile Responsive Optimization */
+@media (max-width: 840px) {
+  .zoth-dock-wrap {
+    bottom: 8px;
+    width: calc(100vw - 16px);
+  }
+  .dock-inner {
+    padding: 6px 8px;
+    gap: 4px;
+    overflow-x: auto;
+    justify-content: flex-start;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 12px;
+    clip-path: none;
+  }
+  .dock-inner::-webkit-scrollbar { display: none; }
+  .dock-item {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+  }
+  .dock-icon-box {
+    width: 20px;
+    height: 20px;
+  }
+  .dock-hotkey { display: none; }
+  .dock-tooltip { display: none; }
+}

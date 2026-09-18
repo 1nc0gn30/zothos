@@ -1,0 +1,183 @@
+---
+// GoHighLevel inline form embed with UTM + GCLID passthrough and
+// postMessage-based submission tracking for GTM/GA4.
+//
+// Usage:
+//   <GhlForm formId="QFFPj4gAUExW0PGozOoj" formName="Poole Fencing Form contact page" height={700} />
+
+const {
+  formId = "QFFPj4gAUExW0PGozOoj",
+  formName = "Poole Fencing Form",
+  height = 700,
+} = Astro.props;
+
+const inlineId = "inline-" + formId;
+---
+
+<div class="ghl-form-wrapper">
+  <div id="ghl-form-container"></div>
+  <script is:inline data-form-id={formId} data-form-name={formName} data-height={height}>
+    (function () {
+      var config = document.currentScript.dataset;
+      var formId = config.formId;
+      var formName = config.formName;
+      var height = parseInt(config.height, 10) || 700;
+
+      var UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"];
+      var GA_COOKIE = "_ga";
+
+      function getGaClientId() {
+        var ga = getCookie(GA_COOKIE);
+        if (!ga) return "";
+        var parts = ga.split(".");
+        return parts.length >= 4 ? parts[2] + "." + parts[3] : "";
+      }
+      var GCLID_COOKIE = "_gclid";
+      var GCLID_DAYS = 90;
+
+      function setCookie(name, value, days) {
+        var expires = "";
+        if (days) {
+          var date = new Date();
+          date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+          expires = "; expires=" + date.toUTCString();
+        }
+        var host = window.location.hostname;
+        var domain = host.indexOf("www.") === 0 ? host.substring(4) : host;
+        document.cookie = name + "=" + encodeURIComponent(value || "") + expires + "; path=/; domain=." + domain + "; SameSite=Lax";
+      }
+
+      function getCookie(name) {
+        var match = document.cookie.match(new RegExp("(?:^|; )" + name.replace(/([.$?*|{}()[\]\\/+^])/g, "\\$1") + "=([^;]*)"));
+        return match ? decodeURIComponent(match[1]) : null;
+      }
+
+      function getUrlParam(name) {
+        return new URLSearchParams(window.location.search).get(name);
+      }
+
+      function injectHiddenField(value) {
+        var existing = document.getElementById("gclid_field");
+        if (existing) {
+          existing.value = value;
+          return;
+        }
+        var form = document.querySelector("form");
+        if (form) {
+          var input = document.createElement("input");
+          input.type = "hidden";
+          input.id = "gclid_field";
+          input.name = "gclid";
+          input.value = value;
+          form.appendChild(input);
+        }
+      }
+
+      function appendParamsToIframes(gclid, utms, gaClientId) {
+        var iframes = document.querySelectorAll('iframe[src*="api.leadconnectorhq.com/widget/form"]');
+        iframes.forEach(function (iframe) {
+          var src = iframe.src;
+          if (src.indexOf("gclid=") > -1) return;
+          var qs = new URLSearchParams();
+          if (gclid) qs.set("gclid", gclid);
+          if (gaClientId) qs.set("ga_client_id", gaClientId);
+          UTM_KEYS.forEach(function (k) {
+            if (utms[k]) qs.set(k, utms[k]);
+          });
+          var sep = src.indexOf("?") > -1 ? "&" : "?";
+          if (qs.toString()) iframe.src = src + sep + qs.toString();
+        });
+      }
+
+      function buildIframeSrc() {
+        var baseUrl = "https://api.leadconnectorhq.com/widget/form/" + formId;
+        var params = new URLSearchParams();
+        var urlParams = new URLSearchParams(window.location.search);
+
+        // Capture IDs before building the URL so we can pass them into the iframe.
+        var gclid = urlParams.get("gclid") || getCookie(GCLID_COOKIE);
+        var gaClientId = getGaClientId();
+        var formSource = window.location.pathname === "/" ? "homepage" : window.location.pathname.replace(/^\//, "").split("/")[0] || "other";
+
+        UTM_KEYS.forEach(function (k) {
+          var v = urlParams.get(k);
+          if (v) params.set(k, v);
+        });
+
+        if (urlParams.get("gclid")) {
+          setCookie(GCLID_COOKIE, urlParams.get("gclid"), GCLID_DAYS);
+        }
+        if (gclid) {
+          params.set("gclid", gclid);
+          injectHiddenField(gclid);
+        }
+        if (gaClientId) {
+          params.set("ga_client_id", gaClientId);
+        }
+        params.set("page_location", window.location.href);
+        if (document.referrer) {
+          params.set("page_referrer", document.referrer);
+        }
+        params.set("form_source", formSource);
+
+        window.__gclid = gclid || "";
+        window.__gaClientId = gaClientId;
+        window.__formName = formName;
+        window.__formSource = formSource;
+        window.__utmParams = {};
+        try {
+          if (formName) sessionStorage.setItem("ghl_last_form_name", formName);
+          sessionStorage.setItem("ghl_last_form_source", formSource);
+        } catch (e) { /* ignore storage errors */ }
+        UTM_KEYS.forEach(function (k) {
+          var v = urlParams.get(k);
+          if (v) window.__utmParams[k] = v;
+        });
+
+        return baseUrl + (params.toString() ? "?" + params.toString() : "");
+      }
+
+      var src = buildIframeSrc();
+      var ifrm = document.createElement("iframe");
+      ifrm.src = src;
+      ifrm.style = "width:100%;height:" + height + "px;border:none;border-radius:8px";
+      ifrm.id = "inline-" + formId;
+      ifrm.title = formName;
+      document.getElementById("ghl-form-container").appendChild(ifrm);
+
+      // Re-apply gclid/UTMs to any other GHL iframes already in the DOM.
+      appendParamsToIframes(window.__gclid, window.__utmParams || {}, window.__gaClientId || "");
+
+      // GHL form submission listener (postMessage).
+      function isGhlOrigin(origin) {
+        return /leadconnectorhq\.com$|msgsndr\.com$/i.test(origin);
+      }
+
+      window.addEventListener("message", function (event) {
+        if (!isGhlOrigin(event.origin)) return;
+        var data = event.data;
+        if (!data || typeof data !== "object") return;
+
+        var isSuccess =
+          data.event === "formSubmitted" ||
+          data.type === "formSubmitted" ||
+          data.status === "success" ||
+          data.message === "Form submitted successfully";
+
+        if (isSuccess) {
+          window.dataLayer = window.dataLayer || [];
+          window.dataLayer.push({
+            event: "ghl_form_submit",
+            form_id: data.formId || data.form_id || formId,
+            form_name: data.formName || data.form_name || formName,
+            form_source: window.__formSource || "",
+            gclid: window.__gclid || "",
+            page_location: window.location.href,
+            page_referrer: document.referrer || "",
+          });
+        }
+      }, false);
+    })();
+  </script>
+  <script is:inline src="https://link.msgsndr.com/js/form_embed.js"></script>
+</div>

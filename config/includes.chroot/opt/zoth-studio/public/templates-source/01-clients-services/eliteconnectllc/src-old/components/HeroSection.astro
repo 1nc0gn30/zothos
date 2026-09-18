@@ -1,0 +1,155 @@
+---
+interface CTA {
+  label: string;
+  href: string;
+  variant?: "primary" | "secondary" | "ghost";
+}
+
+interface Stat {
+  value: string;
+  label: string;
+}
+
+interface Props {
+  eyebrow?: string;
+  subtitle?: string;
+  title: string;
+  lead?: string;
+  ctas?: CTA[];
+  stats?: Stat[];
+  variant?: "home" | "page";
+  align?: "center" | "left";
+  showCount?: boolean;
+  countNum?: string;
+  countLabel?: string;
+  bgImage?: string;
+  class?: string;
+}
+
+const {
+  eyebrow,
+  subtitle,
+  title,
+  lead,
+  ctas = [],
+  stats = [],
+  variant = "page",
+  align = variant === "home" ? "center" : "left",
+  showCount = false,
+  countNum = "",
+  countLabel = "",
+  bgImage = "",
+  class: className = ""
+} = Astro.props;
+
+const isHome = variant === "home";
+const isCenter = align === "center";
+const hasVisual = Astro.slots.has("visual");
+---
+
+<section
+  class:list={[
+    "hero-section",
+    isHome ? "hero-section--home" : "hero-section--page",
+    isCenter ? "hero-section--center" : "hero-section--left",
+    hasVisual ? "hero-section--has-visual" : "",
+    bgImage ? "hero-section--has-bg" : "",
+    className
+  ]}
+  aria-label={isHome ? "Homepage hero" : "Page hero"}
+>
+  {/* Background image layer */}
+  {bgImage && (
+    <div class="hero-bg-image" aria-hidden="true">
+      <img src={bgImage} alt="" loading="eager" decoding="async" />
+      <div class="hero-bg-overlay" aria-hidden="true"></div>
+    </div>
+  )}
+
+  {/* Depth Layer 1: Animated gradient mesh */}
+  <div class="hero-depth-mesh" aria-hidden="true"></div>
+
+  {/* Depth Layer 2: Floating orbs */}
+  <div class="hero-depth-orb hero-depth-orb--1" aria-hidden="true"></div>
+  <div class="hero-depth-orb hero-depth-orb--2" aria-hidden="true"></div>
+  <div class="hero-depth-orb hero-depth-orb--3" aria-hidden="true"></div>
+
+  {/* Depth Layer 3: Technical grid */}
+  <div class="hero-depth-grid" aria-hidden="true"></div>
+
+  {/* Depth Layer 4: Corner brackets */}
+  <div class="hero-bracket hero-bracket--tl" aria-hidden="true"></div>
+  <div class="hero-bracket hero-bracket--tr" aria-hidden="true"></div>
+  <div class="hero-bracket hero-bracket--bl" aria-hidden="true"></div>
+  <div class="hero-bracket hero-bracket--br" aria-hidden="true"></div>
+
+  {/* Depth Layer 5: Floating data markers */}
+  <div class="hero-marker hero-marker--1" aria-hidden="true"></div>
+  <div class="hero-marker hero-marker--2" aria-hidden="true"></div>
+  <div class="hero-marker hero-marker--3" aria-hidden="true"></div>
+  <div class="hero-marker hero-marker--4" aria-hidden="true"></div>
+
+  {/* Depth Layer 6: Vignette */}
+  <div class="hero-depth-vignette" aria-hidden="true"></div>
+
+  {/* Content */}
+  <div class="hero-content">
+    {eyebrow && (
+      <p class="hero-eyebrow" set:html={eyebrow} />
+    )}
+
+    {subtitle && (
+      <p class="hero-subtitle" set:html={subtitle} />
+    )}
+
+    <h1 class="hero-title" set:html={title} />
+
+    {lead && (
+      <p class="hero-lead" set:html={lead} />
+    )}
+
+    {ctas.length > 0 && (
+      <div class="hero-ctas">
+        {ctas.map((cta, i) => (
+          <a
+            href={cta.href}
+            class:list={[
+              "button",
+              cta.variant === "secondary" && "secondary",
+              cta.variant === "ghost" && "ghost",
+            ]}
+            style={`animation-delay: ${0.65 + i * 0.1}s`}
+          >
+            {cta.label}
+          </a>
+        ))}
+      </div>
+    )}
+
+    {stats.length > 0 && (
+      <div class="hero-stats">
+        {stats.map((stat) => (
+          <div class="hero-stat">
+            <span class="hero-stat-value">{stat.value}</span>
+            <span class="hero-stat-label">{stat.label}</span>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+
+  {/* Optional visual slot */}
+  {hasVisual && (
+    <div class="hero-visual">
+      <slot name="visual" />
+    </div>
+  )}
+
+  {/* Optional count display */}
+  {showCount && (
+    <div class="hero-count" aria-hidden="true">
+      <span class="hero-count-num">{countNum}</span>
+      <span class="hero-count-label">{countLabel}</span>
+    </div>
+  )}
+</section>

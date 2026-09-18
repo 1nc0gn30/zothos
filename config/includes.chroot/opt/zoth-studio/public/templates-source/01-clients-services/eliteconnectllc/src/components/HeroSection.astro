@@ -1,0 +1,604 @@
+---
+interface Props {
+  variant?: "home" | "page";
+  eyebrow?: string;
+  title: string;
+  subtitle?: string;
+  lead?: string;
+  ctas?: { label: string; href: string; variant?: "primary" | "secondary" }[];
+  stats?: { value: string; label: string }[];
+  imageDesc: string;
+  imageSrc?: string;
+  heroImages?: string[];
+}
+
+const {
+  variant = "page",
+  eyebrow,
+  title,
+  subtitle,
+  lead,
+  ctas = [],
+  stats = [],
+  imageDesc,
+  imageSrc,
+  heroImages = [],
+} = Astro.props;
+
+const isHome = variant === "home";
+const hasCarousel = isHome && heroImages.length > 0;
+---
+
+<section class={isHome ? "hero-home" : "hero-page"} aria-label={isHome ? "Homepage hero" : "Page hero"}>
+  <div class="hero-bg" aria-hidden="true">
+    <div class="hero-watermark" aria-hidden="true">
+      <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="hero-watermark-svg">
+        <defs>
+          <filter id="heroGlow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="2" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+
+        <g class="wm-draw" filter="url(#heroGlow)">
+          <!-- Shield outline -->
+          <path class="wm-shield" d="M100 20c-44.18 0-80 35.82-80 80s35.82 80 80 80 80-35.82 80-80-35.82-80-80-80z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+          <!-- Camera body -->
+          <rect class="wm-camera" x="55" y="70" width="90" height="50" rx="8" stroke="currentColor" stroke-width="1.5" fill="none"/>
+          <!-- Camera lens rings -->
+          <circle class="wm-lens-outer" cx="100" cy="95" r="22" stroke="currentColor" stroke-width="1.5" fill="none"/>
+          <circle class="wm-lens-inner" cx="100" cy="95" r="14" stroke="currentColor" stroke-width="1" fill="none"/>
+          <circle class="wm-lens-dot" cx="100" cy="95" r="6" fill="currentColor"/>
+          <!-- Mounting arm -->
+          <path class="wm-arm" d="M145 95h25c5.52 0 10 4.48 10 10v10c0 5.52-4.48 10-10 10h-15" stroke="currentColor" stroke-width="1.5" fill="none"/>
+          <rect class="wm-connector" x="170" y="100" width="12" height="20" rx="3" stroke="currentColor" stroke-width="1" fill="none"/>
+          <!-- Stand legs -->
+          <path class="wm-stand" d="M85 140v20M115 140v20M95 155h20" stroke="currentColor" stroke-width="1.5" fill="none"/>
+          <!-- Corner sparkle lines -->
+          <path class="wm-sparkle" d="M40 60l15 15M160 60l-15 15M40 140l15-15M160 140l-15-15" stroke="currentColor" stroke-width="1" fill="none"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <div class="hero-inner">
+    <div class="hero-content">
+      {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+      {subtitle && <p class="hero-subtitle">{subtitle}</p>}
+      <h1>{title}</h1>
+      {lead && <p class="hero-lead">{lead}</p>}
+      {ctas.length > 0 && (
+        <div class="hero-actions">
+          {ctas.map((cta) => (
+            <a href={cta.href} class={`button ${cta.variant || "primary"}`}>{cta.label}</a>
+          ))}
+        </div>
+      )}
+      {stats.length > 0 && (
+        <div class="hero-stats">
+          {stats.map((s) => (
+            <div class="hero-stat">
+              <span class="hero-stat-value">{s.value}</span>
+              <span class="hero-stat-label">{s.label}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+
+    <div class="hero-visual">
+      {hasCarousel ? (
+        <div class="hero-carousel" data-carousel="true">
+          <div class="hero-carousel-track">
+            {heroImages.map((src, i) => (
+              <div class="hero-carousel-slide" data-index={i}>
+                <img
+                  src={src}
+                  alt={`${imageDesc} — ${i + 1}`}
+                  loading={i === 0 ? "eager" : "lazy"}
+                  class="hero-carousel-img"
+                />
+                <div class="hero-carousel-overlay" aria-hidden="true"></div>
+              </div>
+            ))}
+          </div>
+          <div class="hero-carousel-scanline" aria-hidden="true"></div>
+        </div>
+      ) : imageSrc ? (
+        <img
+          src={imageSrc}
+          alt={imageDesc}
+          class="hero-image"
+          loading="eager"
+        />
+      ) : (
+        <div class="media-placeholder hero-media-placeholder">
+          <div class="media-placeholder-inner">
+            <svg class="media-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+            <span class="media-placeholder-label">MEDIA PLACEHOLDER</span>
+            <span class="media-placeholder-desc">{imageDesc}</span>
+          </div>
+        </div>
+      )}
+    </div>
+  </div>
+</section>
+
+{hasCarousel && (
+  <script>
+    (function() {
+      const carousel = document.querySelector('[data-carousel="true"]');
+      if (!carousel) return;
+      const slides = carousel.querySelectorAll('.hero-carousel-slide');
+      if (slides.length <= 1) return;
+
+      let current = 0;
+      let interval;
+      const DURATION = 5000;
+      const TRANSITION_MS = 900;
+
+      function show(index) {
+        slides.forEach((slide, i) => {
+          if (i === index) {
+            slide.classList.add('is-active');
+            slide.style.zIndex = '2';
+          } else if (i === current) {
+            slide.classList.remove('is-active');
+            slide.style.zIndex = '1';
+          } else {
+            slide.classList.remove('is-active');
+            slide.style.zIndex = '0';
+          }
+        });
+        current = index;
+      }
+
+      function next() {
+        const nextIndex = (current + 1) % slides.length;
+        show(nextIndex);
+      }
+
+      // Initialize
+      slides.forEach((slide, i) => {
+        slide.style.transitionDuration = TRANSITION_MS + 'ms';
+        if (i === 0) slide.classList.add('is-active');
+      });
+
+      interval = setInterval(next, DURATION);
+
+      // Pause on hover / visibility change
+      carousel.addEventListener('mouseenter', () => clearInterval(interval));
+      carousel.addEventListener('mouseleave', () => {
+        clearInterval(interval);
+        interval = setInterval(next, DURATION);
+      });
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          clearInterval(interval);
+        } else {
+          clearInterval(interval);
+          interval = setInterval(next, DURATION);
+        }
+      });
+    })();
+  </script>
+)}
+
+<style>
+  .hero-home {
+    position: relative;
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 2rem 0;
+  }
+
+  .hero-page {
+    position: relative;
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 6rem 0 4rem;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(135deg, var(--paper) 0%, var(--surface-2) 50%, var(--panel) 100%);
+  }
+
+  .hero-home .hero-bg {
+    background:
+      linear-gradient(135deg, rgba(240,244,248,0.92) 0%, rgba(240,244,248,0.88) 50%, rgba(240,244,248,0.82) 100%),
+      url("/assets/unsplash/hero-bg.jpg");
+    background-size: cover;
+    background-position: center;
+    opacity: 0.28;
+  }
+
+  html.dark .hero-home .hero-bg {
+    background:
+      linear-gradient(135deg, rgba(10,14,20,0.92) 0%, rgba(10,14,20,0.88) 50%, rgba(10,14,20,0.82) 100%),
+      url("/assets/unsplash/hero-bg.jpg");
+    opacity: 0.22;
+  }
+
+  .hero-watermark {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--brand-blue);
+    pointer-events: none;
+  }
+
+  .hero-watermark-svg {
+    width: min(700px, 90vw);
+    height: min(700px, 90vw);
+    opacity: 0;
+    animation: wmFadeIn 0.6s ease 1.8s forwards;
+    transition: opacity 0.3s ease;
+  }
+
+  html.dark .hero-watermark-svg {
+    color: var(--brand-blue);
+  }
+
+  /* === Stroke draw animation === */
+  .wm-draw {
+    opacity: 0;
+    animation: wmFadeIn 0.4s ease 0.2s forwards;
+  }
+
+  .wm-draw path,
+  .wm-draw rect,
+  .wm-draw circle {
+    stroke-dasharray: 600;
+    stroke-dashoffset: 600;
+    animation: wmDraw 1.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .wm-shield   { animation-delay: 0.3s; }
+  .wm-camera   { animation-delay: 0.5s; }
+  .wm-lens-outer { animation-delay: 0.7s; }
+  .wm-lens-inner { animation-delay: 0.85s; }
+  .wm-lens-dot   { animation-delay: 1.0s; opacity: 0; animation-name: wmDraw, wmDotPulse; }
+  .wm-arm      { animation-delay: 0.75s; }
+  .wm-connector { animation-delay: 0.9s; }
+  .wm-stand    { animation-delay: 1.0s; }
+  .wm-sparkle  { animation-delay: 1.2s; opacity: 0; animation-name: wmDraw, wmSparkleFade; }
+
+  @keyframes wmDotPulse {
+    0%   { opacity: 0; }
+    30%  { opacity: 0.12; }
+    50%  { opacity: 0.18; }
+    70%  { opacity: 0.12; }
+    100% { opacity: 0.15; }
+  }
+
+  @keyframes wmSparkleFade {
+    0%   { opacity: 0; }
+    60%  { opacity: 0; }
+    100% { opacity: 0.06; }
+  }
+
+  @keyframes wmDraw {
+    to { stroke-dashoffset: 0; }
+  }
+
+  @keyframes wmFadeIn {
+    to { opacity: 1; }
+  }
+
+  .hero-watermark-svg {
+    animation: wmFadeIn 0.6s ease 1.8s forwards, wmAmbientPulse 6s ease-in-out 3s infinite;
+  }
+
+  @keyframes wmAmbientPulse {
+    0%, 100% { opacity: 0.22; transform: scale(1); }
+    50%      { opacity: 0.28; transform: scale(1.02); }
+  }
+
+  html.dark .hero-watermark-svg {
+    animation: wmFadeIn 0.6s ease 1.8s forwards, wmAmbientPulseDark 6s ease-in-out 3s infinite;
+  }
+
+  @keyframes wmAmbientPulseDark {
+    0%, 100% { opacity: 0.14; transform: scale(1); }
+    50%      { opacity: 0.2; transform: scale(1.02); }
+  }
+
+  .hero-inner {
+    max-width: var(--max);
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+    z-index: 1;
+  }
+
+  .hero-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .hero-home .hero-content {
+    text-align: center;
+    align-items: center;
+  }
+
+  .hero-subtitle {
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    color: var(--brand-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+  }
+
+  .hero-lead {
+    font-size: 1.1rem;
+    color: var(--muted);
+    max-width: 540px;
+    font-weight: 500;
+    line-height: 1.6;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .hero-home .hero-actions {
+    justify-content: center;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 2rem;
+    margin-top: 0.5rem;
+  }
+
+  .hero-home .hero-stats {
+    justify-content: center;
+  }
+
+  .hero-stat {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .hero-stat-value {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .hero-stat-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .hero-visual {
+    display: flex;
+    justify-content: center;
+  }
+
+  /* ===== Carousel ===== */
+  .hero-carousel {
+    position: relative;
+    width: 100%;
+    max-width: 520px;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: 0 8px 32px var(--shadow);
+  }
+
+  .hero-carousel-track {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .hero-carousel-slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: scale(1.08) translateX(24px);
+    filter: brightness(0.85) contrast(1.05);
+    transition:
+      opacity 900ms cubic-bezier(0.4, 0, 0.2, 1),
+      transform 900ms cubic-bezier(0.4, 0, 0.2, 1),
+      filter 900ms cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+  }
+
+  .hero-carousel-slide.is-active {
+    opacity: 1;
+    transform: scale(1) translateX(0);
+    filter: brightness(1) contrast(1);
+    pointer-events: auto;
+  }
+
+  .hero-carousel-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .hero-carousel-overlay,
+  .hero-carousel-slide::after {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      160deg,
+      rgba(0,0,0,0.10) 0%,
+      rgba(0,0,0,0.00) 40%,
+      rgba(0,0,0,0.00) 60%,
+      rgba(0,0,0,0.15) 100%
+    );
+    pointer-events: none;
+    mix-blend-mode: multiply;
+  }
+
+  /* Digital scanline effect */
+  .hero-carousel-scanline {
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    opacity: 0.5;
+    mix-blend-mode: overlay;
+    animation: scanlineMove 8s linear infinite;
+  }
+
+  @keyframes scanlineMove {
+    0%   { background-position: 0 0; }
+    100% { background-position: 0 100%; }
+  }
+
+  html.dark .hero-carousel-scanline {
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(255,255,255,0.02) 2px,
+      rgba(255,255,255,0.02) 4px
+    );
+  }
+
+  /* ===== Single image fallback ===== */
+  .hero-image {
+    width: 100%;
+    max-width: 520px;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 8px 32px var(--shadow);
+    filter: saturate(0.92) contrast(1.02);
+    transition: filter 0.4s ease;
+  }
+
+  .hero-visual {
+    position: relative;
+  }
+
+  .hero-visual::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-lg);
+    pointer-events: none;
+    z-index: 1;
+    background: linear-gradient(
+      160deg,
+      rgba(118,168,205,0.10) 0%,
+      transparent 35%,
+      transparent 65%,
+      rgba(15,23,42,0.08) 100%
+    );
+    mix-blend-mode: multiply;
+  }
+
+  html.dark .hero-visual::after {
+    background: linear-gradient(
+      160deg,
+      rgba(118,168,205,0.08) 0%,
+      transparent 35%,
+      transparent 65%,
+      rgba(0,0,0,0.25) 100%
+    );
+    mix-blend-mode: screen;
+  }
+
+  .hero-visual:hover .hero-image {
+    filter: saturate(1) contrast(1.05);
+  }
+
+  html.dark .hero-visual:hover .hero-image {
+    filter: saturate(0.95) contrast(1.06) brightness(1);
+  }
+
+  .hero-media-placeholder {
+    width: 100%;
+    max-width: 520px;
+    aspect-ratio: 4 / 3;
+  }
+
+  @media (max-width: 1024px) {
+    .hero-inner {
+      grid-template-columns: 1fr;
+      text-align: center;
+      gap: 2.5rem;
+    }
+    .hero-content { align-items: center; }
+    .hero-lead { text-align: center; }
+    .hero-actions { justify-content: center; }
+    .hero-stats { justify-content: center; }
+    .hero-visual { order: -1; }
+    .hero-carousel { max-width: 420px; }
+    .hero-image { max-width: 420px; }
+    .hero-media-placeholder { max-width: 420px; }
+  }
+
+  @media (max-width: 560px) {
+    .hero-home { min-height: auto; padding: 5rem 0 3rem; }
+    .hero-page { min-height: auto; padding: 5rem 0 3rem; }
+    .hero-inner { padding: 0 1rem; gap: 2rem; }
+    .hero-carousel { max-width: 100%; }
+    .hero-image { max-width: 100%; }
+    .hero-media-placeholder { max-width: 100%; }
+    .hero-watermark-svg { width: 90vw; height: 90vw; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wm-draw path,
+    .wm-draw rect,
+    .wm-draw circle {
+      animation: none;
+      stroke-dashoffset: 0;
+    }
+    .wm-draw,
+    .hero-watermark-svg,
+    .wm-lens-dot,
+    .wm-sparkle {
+      opacity: 1;
+      animation: none;
+    }
+    .hero-carousel-slide {
+      transition: none !important;
+    }
+    .hero-carousel-scanline {
+      animation: none;
+    }
+  }
+</style>

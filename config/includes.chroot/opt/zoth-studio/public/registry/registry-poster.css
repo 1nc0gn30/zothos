@@ -1,0 +1,1321 @@
+/* =============================================================================
+   ⚡ ZOTH STUDIO — Tool & Agent Registry Poster (Editorial Full-Viewport v4.0)
+   Loaded after zoth-theme.css. 4-Theme System (Dark, Light, Matrix, Gold).
+   ============================================================================= */
+
+.ambient-mesh,
+.rune-matrix-canvas,
+body::before,
+body::after {
+  display: none !important;
+}
+
+html,
+body {
+  height: auto !important;
+  min-height: 100%;
+  max-width: 100vw;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  background: var(--bg, #05060a);
+  color: var(--text-body, #f1f5f9);
+  font-family: var(--font-theme-body, "Figtree", sans-serif);
+}
+
+main#main-content {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* Hide competing WebGL wall — keeps the node for registry.js compatibility */
+#gl,
+#veil,
+canvas#gl {
+  display: none !important;
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  inset: auto !important;
+  left: -9999px !important;
+  top: 0 !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  z-index: -1 !important;
+}
+
+.mobile-desktop-insight {
+  display: none !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 1. Poster Hero (Editorial Split, Full Viewport)                             */
+/* -------------------------------------------------------------------------- */
+
+.registry-poster {
+  position: relative;
+  width: 100%;
+  min-height: calc(100svh - var(--zoth-header-h, 54px));
+  display: grid;
+  grid-template-columns: minmax(20rem, 42rem) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  background: var(--bg, #05060a);
+  box-sizing: border-box;
+}
+
+.registry-poster::before {
+  content: "";
+  position: absolute;
+  top: -20%;
+  left: -10%;
+  width: 60vw;
+  height: 60vw;
+  max-width: 700px;
+  max-height: 700px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent-glow, rgba(0, 240, 255, 0.12)) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.registry-poster-copy {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 16px;
+  max-width: 42rem;
+  padding: clamp(28px, 5vw, 64px) clamp(20px, 4vw, 48px) clamp(40px, 7vw, 80px);
+}
+
+.registry-poster .kicker {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-theme-mono, "IBM Plex Mono", monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold, #fbbf24);
+  font-weight: 700;
+  background: none;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.registry-poster .kicker::before {
+  content: "✦";
+  font-size: 0.85em;
+  color: var(--cyan, #00f0ff);
+}
+
+html .registry-poster h1,
+.registry-poster h1 {
+  font-family: var(--font-theme-heading, "Syne", sans-serif) !important;
+  font-size: clamp(2.8rem, 6.4vw, 4.8rem) !important;
+  font-weight: 800;
+  line-height: 0.94 !important;
+  letter-spacing: -0.045em !important;
+  max-width: none;
+  margin: 0;
+  background: none;
+  color: var(--text-primary, #ffffff);
+  -webkit-text-fill-color: var(--text-primary, #ffffff);
+  text-shadow: 0 4px 30px var(--shadow-color, rgba(0, 0, 0, 0.7));
+  white-space: nowrap;
+  overflow-wrap: normal !important;
+  word-break: keep-all !important;
+  text-wrap: nowrap !important;
+  hyphens: none !important;
+}
+
+.registry-poster .lede {
+  margin: 0;
+  max-width: 34rem;
+  font-size: 1.08rem;
+  line-height: 1.55;
+  color: var(--text-subhead, #cbd5e1);
+}
+
+.registry-poster-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.registry-poster-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-family: var(--font-theme-mono, "IBM Plex Mono", monospace);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+.registry-poster-actions .btn:hover {
+  text-decoration: none;
+  transform: translateY(-2px);
+}
+
+.registry-poster-actions .btn-gold {
+  background: var(--gold, #fbbf24) !important;
+  color: #050508 !important;
+  box-shadow: 0 8px 24px rgba(251, 191, 36, 0.32) !important;
+  border: 0 !important;
+}
+
+.registry-poster-actions .btn-ghost {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary, #ffffff) !important;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.18));
+  backdrop-filter: blur(8px);
+}
+
+.registry-poster-actions .btn-ghost:hover {
+  border-color: var(--cyan, #00f0ff);
+  color: var(--cyan, #00f0ff) !important;
+  background: rgba(0, 240, 255, 0.08);
+}
+
+/* Interactive Hero Capability Chips */
+.registry-poster-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.reg-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.12));
+  font-family: var(--font-theme-mono, "IBM Plex Mono", monospace);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-subhead, #cbd5e1);
+  backdrop-filter: blur(10px);
+  transition: all 0.2s ease;
+}
+
+.reg-chip:hover {
+  border-color: var(--cyan, #00f0ff);
+  color: var(--text-primary, #ffffff);
+  transform: translateY(-1px);
+}
+
+.registry-poster-visual {
+  position: relative;
+  z-index: 1;
+  min-height: calc(100svh - var(--zoth-header-h, 54px));
+  align-self: stretch;
+  overflow: hidden;
+  background: var(--bg, #05060a);
+}
+
+.registry-poster-visual img.registry-azoth {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 20px 50px rgba(0, 0, 0, 0.6));
+}
+
+.registry-poster-credit {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  z-index: 3;
+  font-family: var(--font-theme-mono, "IBM Plex Mono", monospace);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold, #fbbf24);
+  pointer-events: none;
+  background: rgba(5, 6, 10, 0.6);
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  backdrop-filter: blur(8px);
+}
+
+/* -------------------------------------------------------------------------- */
+/* 2. Tool Index & Sticky Toolbar                                             */
+/* -------------------------------------------------------------------------- */
+
+.registry-fleet.hud {
+  position: relative;
+  z-index: 5;
+  width: 100%;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 16px clamp(20px, 4vw, 48px) 96px;
+  box-sizing: border-box;
+  pointer-events: auto;
+  background: transparent;
+}
+
+.registry-fleet-kicker {
+  margin: 0 0 8px;
+  font-family: var(--font-theme-mono, "IBM Plex Mono", monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold, #fbbf24);
+  font-weight: 700;
+}
+
+.registry-fleet-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.registry-fleet-heading {
+  margin: 0;
+  font-family: var(--font-theme-heading, "Syne", sans-serif);
+  font-size: clamp(1.8rem, 3.2vw, 2.6rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text-primary, #ffffff);
+}
+
+.reg-toggle-all {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.16));
+  color: var(--text-subhead, #cbd5e1);
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-family: var(--font-theme-mono, "IBM Plex Mono", monospace);
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.reg-toggle-all:hover {
+  background: rgba(0, 240, 255, 0.1);
+  border-color: var(--cyan, #00f0ff);
+  color: var(--cyan, #00f0ff);
+}
+
+.reg-sticky {
+  position: sticky;
+  top: var(--zoth-header-h, 54px);
+  z-index: 30;
+  background: var(--glass-panel-bg, rgba(9, 13, 26, 0.88));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-card, rgba(0, 240, 255, 0.18));
+  border-radius: 16px;
+  padding: 16px 20px 10px;
+  margin-bottom: 28px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+}
+
+.registry-fleet-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 0 0 14px;
+  padding: 0 0 12px;
+  border-bottom: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+}
+
+.registry-fleet .reg-meta {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-family: var(--font-theme-mono, "IBM Plex Mono", monospace);
+  font-size: 0.76rem;
+  letter-spacing: 0.05em;
+  color: var(--muted, #94a3b8);
+}
+
+.registry-fleet .reg-meta #fleet-count {
+  color: var(--gold, #fbbf24);
+  font-weight: 700;
+}
+
+.registry-fleet .src {
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.16));
+  color: var(--text-subhead, #94a3b8);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+
+.registry-fleet .src.is-live {
+  color: #34d399;
+  border-color: rgba(52, 211, 153, 0.4);
+  background: rgba(52, 211, 153, 0.08);
+}
+
+.registry-fleet .seek {
+  position: relative;
+  min-width: 260px;
+  max-width: 420px;
+  flex: 1 1 260px;
+  display: flex;
+  align-items: center;
+}
+
+.registry-fleet .seek-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--muted, #94a3b8);
+  pointer-events: none;
+}
+
+.registry-fleet .seek input,
+.registry-fleet #q {
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 36px 8px 38px;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.14)) !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+  color: var(--text-primary, #ffffff) !important;
+  font: 500 0.88rem var(--font-theme-body, "Figtree", sans-serif);
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.registry-fleet .seek input:focus,
+.registry-fleet #q:focus {
+  border-color: var(--cyan, #00f0ff) !important;
+  background: rgba(0, 240, 255, 0.04) !important;
+  box-shadow: 0 0 16px var(--accent-glow, rgba(0, 240, 255, 0.25)) !important;
+}
+
+.registry-fleet .seek-clear {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: 0;
+  color: var(--muted, #94a3b8);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.registry-fleet .seek-clear:hover {
+  color: var(--text-primary, #ffffff);
+}
+
+.registry-fleet .seek-clear.hidden {
+  display: none;
+}
+
+/* Category Filter Tabs */
+.registry-fleet .cats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 4px 0 6px;
+  overflow-x: auto;
+}
+
+.registry-fleet .cats button {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.1)) !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+  color: var(--muted, #94a3b8) !important;
+  padding: 6px 14px !important;
+  min-height: 34px;
+  font-family: var(--font-theme-mono, "IBM Plex Mono", monospace);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.18s ease;
+}
+
+.registry-fleet .cats button:hover {
+  color: var(--text-primary, #ffffff) !important;
+  border-color: var(--cyan, #00f0ff) !important;
+  background: rgba(0, 240, 255, 0.06) !important;
+}
+
+.registry-fleet .cats button.is-on,
+.registry-fleet .cats button[aria-selected="true"] {
+  color: #05060a !important;
+  background: var(--gold, #fbbf24) !important;
+  border-color: var(--gold, #fbbf24) !important;
+  box-shadow: 0 4px 14px rgba(251, 191, 36, 0.3) !important;
+  font-weight: 700;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 3. Category Groups & Fleet Cards                                           */
+/* -------------------------------------------------------------------------- */
+
+.reg-group {
+  margin-bottom: 32px;
+  border: 1px solid var(--border-card, rgba(0, 240, 255, 0.14));
+  border-radius: 16px;
+  background: var(--panel, rgba(14, 19, 34, 0.6));
+  padding: 20px 24px 24px;
+  transition: border-color 0.2s ease;
+}
+
+.reg-group[open] {
+  border-color: var(--border-card, rgba(0, 240, 255, 0.28));
+}
+
+.reg-group summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  font-family: var(--font-theme-heading, "Syne", sans-serif);
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-primary, #ffffff);
+  padding: 4px 0;
+  outline: none;
+}
+
+.reg-group summary:focus-visible {
+  outline: 2px solid var(--border-focus, #00f0ff);
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+
+.reg-group-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-theme-mono, "IBM Plex Mono", monospace);
+  font-size: 0.76rem;
+  color: var(--muted, #94a3b8);
+}
+
+.reg-group-count {
+  background: rgba(251, 191, 36, 0.12);
+  color: var(--gold, #fbbf24);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.registry-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.fleet-card,
+.registry-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 18px 18px 16px;
+  background: var(--surface-card, rgba(16, 22, 40, 0.85)) !important;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.1)) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+}
+
+.fleet-card:hover,
+.registry-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--cyan, #00f0ff) !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45), 0 0 20px var(--accent-glow, rgba(0, 240, 255, 0.2)) !important;
+}
+
+.fleet-card-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 8px;
+}
+
+.fleet-card .fleet-card-cat,
+.fleet-card-cat-badge,
+.fleet-card-cat {
+  margin: 0;
+  font-family: var(--font-theme-mono, "IBM Plex Mono", monospace);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cyan, #00f0ff);
+  background: rgba(0, 240, 255, 0.08);
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+.fleet-card h3 {
+  margin: 0;
+  font-family: var(--font-theme-heading, "Syne", sans-serif);
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--text-primary, #ffffff);
+  text-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 6px;
+}
+
+.fleet-card-arrow {
+  color: var(--muted, #64748b);
+  transition: transform 0.18s ease, color 0.18s ease;
+  flex-shrink: 0;
+}
+
+.fleet-card:hover .fleet-card-arrow {
+  transform: translateX(3px);
+  color: var(--cyan, #00f0ff);
+}
+
+.fleet-card p {
+  margin: 0;
+  font-family: var(--font-theme-body, "Figtree", sans-serif);
+  font-size: 0.84rem;
+  font-weight: 450;
+  line-height: 1.5;
+  color: var(--text-subhead, #94a3b8);
+  flex-grow: 1;
+}
+
+.fleet-card-footer-meta {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.fleet-card-path {
+  font-family: var(--font-theme-mono, "IBM Plex Mono", monospace);
+  font-size: 0.68rem;
+  color: var(--muted-dark, #64748b);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 4. Inspector Drawer & Details Modal                                        */
+/* -------------------------------------------------------------------------- */
+
+.inspect {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(480px, 92vw);
+  background: var(--panel-solid, #0d1222);
+  border-left: 1px solid var(--border-card, rgba(0, 240, 255, 0.28));
+  box-shadow: -20px 0 60px rgba(0, 0, 0, 0.7);
+  z-index: 10000;
+  padding: 32px 28px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  color: var(--text-body, #f1f5f9);
+  animation: inspectSlide 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes inspectSlide {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.inspect h2 {
+  font-family: var(--font-theme-heading, "Syne", sans-serif);
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text-primary, #ffffff);
+  margin: 12px 0 8px;
+}
+
+.inspect p {
+  color: var(--text-subhead, #cbd5e1);
+  font-size: 0.94rem;
+  line-height: 1.6;
+}
+
+.inspect-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.16));
+  color: var(--text-primary, #ffffff);
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.inspect-close:hover {
+  background: rgba(255, 50, 50, 0.2);
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.inspect dl {
+  margin: 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.inspect dt {
+  font-family: var(--font-theme-mono, "IBM Plex Mono", monospace);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--gold, #fbbf24);
+  font-weight: 700;
+}
+
+.inspect dd {
+  margin: 4px 0 0;
+  font-family: var(--font-theme-mono, "IBM Plex Mono", monospace);
+  font-size: 0.85rem;
+  color: var(--text-body, #ffffff);
+}
+
+.inspect code {
+  background: var(--code-bg, #050811);
+  color: var(--code-text, #38bdf8);
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  font-size: 0.8rem;
+  display: inline-block;
+  word-break: break-all;
+}
+
+.inspect-tags-title {
+  font-family: var(--font-theme-mono, "IBM Plex Mono", monospace);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted, #94a3b8);
+  margin: 18px 0 8px;
+}
+
+.inspect-tags-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.inspect-tag {
+  background: rgba(0, 240, 255, 0.08);
+  border: 1px solid rgba(0, 240, 255, 0.24);
+  color: var(--cyan, #00f0ff);
+  font-family: var(--font-theme-mono, "IBM Plex Mono", monospace);
+  font-size: 0.72rem;
+  padding: 3px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.inspect-tag:hover {
+  background: var(--cyan, #00f0ff);
+  color: #05060a;
+}
+
+.inspect-note {
+  margin-top: 24px;
+  padding: 12px 14px;
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px dashed rgba(251, 191, 36, 0.35);
+  border-radius: 10px;
+  font-size: 0.8rem !important;
+  color: var(--gold, #fbbf24) !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 5. Footer                                                                  */
+/* -------------------------------------------------------------------------- */
+
+footer.site {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  box-sizing: border-box;
+  border-top: 1px solid var(--line, rgba(247, 244, 238, 0.1));
+  padding: 28px clamp(20px, 4vw, 48px);
+  background: var(--bg, #05060a);
+}
+
+/* =============================================================================
+   6. 4-THEME SYSTEM SUPPORT (Dark, Light, Matrix, Gold)
+   ============================================================================= */
+
+/* -----------------------------------------------------------------------------
+   6.1 Light Mode — Solar Paper & Crisp High Contrast
+   ----------------------------------------------------------------------------- */
+html[data-theme="light"],
+html.theme-light,
+body[data-theme="light"],
+body.theme-light {
+  --bg: #f7f9fc;
+  --bg-2: #ffffff;
+  --text-primary: #111827;
+  --text-body: #1f2937;
+  --text-subhead: #374151;
+  --muted: #6b7280;
+  --line: rgba(17, 24, 39, 0.12);
+  --border-card: rgba(17, 24, 39, 0.14);
+  --surface-card: #ffffff;
+  --panel: #f8fafc;
+  --panel-solid: #ffffff;
+  --gold: #92400e;
+  --cyan: #0284c7;
+}
+
+html[data-theme="light"] body {
+  background: #f7f9fc !important;
+  color: #1f2937 !important;
+}
+
+html[data-theme="light"] .registry-poster {
+  background: #f7f9fc;
+}
+
+html[data-theme="light"] .registry-poster::before {
+  background: radial-gradient(circle, rgba(2, 132, 199, 0.08) 0%, transparent 70%);
+}
+
+html[data-theme="light"] .registry-poster h1 {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  text-shadow: none !important;
+}
+
+html[data-theme="light"] .registry-poster .lede {
+  color: #374151 !important;
+}
+
+html[data-theme="light"] .registry-poster .kicker,
+html[data-theme="light"] .registry-fleet-kicker,
+html[data-theme="light"] .registry-poster-credit {
+  color: #92400e !important;
+}
+
+html[data-theme="light"] .reg-chip {
+  background: #ffffff;
+  border-color: rgba(17, 24, 39, 0.14);
+  color: #374151;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+html[data-theme="light"] .reg-chip:hover {
+  border-color: #0284c7;
+  color: #0284c7;
+}
+
+html[data-theme="light"] .registry-poster-visual {
+  background: #0b1220;
+}
+
+html[data-theme="light"] .registry-poster-actions .btn-ghost {
+  color: #111827 !important;
+  border-color: rgba(17, 24, 39, 0.18) !important;
+  background: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+html[data-theme="light"] .registry-poster-actions .btn-ghost:hover {
+  color: #0284c7 !important;
+  border-color: #0284c7 !important;
+}
+
+html[data-theme="light"] .registry-poster-actions .btn-gold {
+  background: #92400e !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(146, 64, 14, 0.25) !important;
+}
+
+html[data-theme="light"] .reg-sticky {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(17, 24, 39, 0.14);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+html[data-theme="light"] .registry-fleet .seek input,
+html[data-theme="light"] .registry-fleet #q {
+  background: #ffffff !important;
+  border-color: rgba(17, 24, 39, 0.18) !important;
+  color: #111827 !important;
+}
+
+html[data-theme="light"] .registry-fleet .cats button {
+  background: #ffffff !important;
+  border-color: rgba(17, 24, 39, 0.12) !important;
+  color: #4b5563 !important;
+}
+
+html[data-theme="light"] .registry-fleet .cats button.is-on,
+html[data-theme="light"] .registry-fleet .cats button[aria-selected="true"] {
+  background: #92400e !important;
+  color: #ffffff !important;
+  border-color: #92400e !important;
+}
+
+html[data-theme="light"] .reg-group {
+  background: #f8fafc;
+  border-color: rgba(17, 24, 39, 0.12);
+}
+
+html[data-theme="light"] .reg-group summary {
+  color: #111827;
+}
+
+html[data-theme="light"] .fleet-card,
+html[data-theme="light"] .registry-card {
+  background: #ffffff !important;
+  border-color: rgba(17, 24, 39, 0.12) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05) !important;
+}
+
+html[data-theme="light"] .fleet-card:hover,
+html[data-theme="light"] .registry-card:hover {
+  border-color: #0284c7 !important;
+  box-shadow: 0 10px 24px rgba(2, 132, 199, 0.15) !important;
+}
+
+html[data-theme="light"] .fleet-card h3 {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+html[data-theme="light"] .fleet-card p {
+  color: #4b5563 !important;
+}
+
+html[data-theme="light"] .inspect {
+  background: #ffffff;
+  border-left-color: rgba(17, 24, 39, 0.14);
+  color: #111827;
+  box-shadow: -18px 0 40px rgba(17, 24, 39, 0.12);
+}
+
+html[data-theme="light"] .inspect h2 {
+  color: #111827;
+}
+
+html[data-theme="light"] .inspect p,
+html[data-theme="light"] .inspect-note {
+  color: #4b5563;
+}
+
+html[data-theme="light"] .inspect-close {
+  color: #111827;
+  border-color: rgba(17, 24, 39, 0.16);
+  background: #f3f4f6;
+}
+
+html[data-theme="light"] .inspect code {
+  color: #111827;
+  background: #f3f4f6;
+  border-color: rgba(17, 24, 39, 0.14);
+}
+
+html[data-theme="light"] footer.site {
+  background: #f7f9fc;
+  color: #374151;
+  border-top-color: rgba(17, 24, 39, 0.1);
+}
+
+/* -----------------------------------------------------------------------------
+   6.2 Matrix Mode — Phosphor CRT Terminal & 90s Cyberpunk Green
+   ----------------------------------------------------------------------------- */
+html[data-theme="matrix"] {
+  --bg: #020804;
+  --bg-2: #031408;
+  --panel: rgba(3, 20, 8, 0.88);
+  --panel-solid: #031408;
+  --surface-card: rgba(3, 22, 9, 0.85);
+  --text-primary: #00ff66;
+  --text-body: #d1fae5;
+  --text-subhead: #a7f3d0;
+  --muted: #6ee7b7;
+  --line: rgba(0, 255, 102, 0.22);
+  --border-card: rgba(0, 255, 102, 0.28);
+  --border-focus: #00ff66;
+  --gold: #34d399;
+  --cyan: #00ff66;
+  --accent-glow: rgba(0, 255, 102, 0.35);
+  --font-theme-heading: "Share Tech Mono", monospace;
+  --font-theme-body: "Share Tech Mono", monospace;
+  --font-theme-mono: "Share Tech Mono", monospace;
+}
+
+html[data-theme="matrix"] body {
+  background: #020804 !important;
+  color: #d1fae5 !important;
+  font-family: "Share Tech Mono", monospace !important;
+}
+
+html[data-theme="matrix"] .registry-poster {
+  background: #020804;
+}
+
+html[data-theme="matrix"] .registry-poster h1 {
+  font-family: "Share Tech Mono", monospace !important;
+  color: #00ff66 !important;
+  -webkit-text-fill-color: #00ff66 !important;
+  text-shadow: 0 0 20px rgba(0, 255, 102, 0.6) !important;
+  letter-spacing: 0.02em !important;
+}
+
+html[data-theme="matrix"] .registry-poster .kicker,
+html[data-theme="matrix"] .registry-fleet-kicker,
+html[data-theme="matrix"] .registry-poster-credit {
+  color: #00ff66 !important;
+}
+
+html[data-theme="matrix"] .reg-chip {
+  background: rgba(0, 255, 102, 0.06);
+  border-color: rgba(0, 255, 102, 0.3);
+  color: #a7f3d0;
+}
+
+html[data-theme="matrix"] .registry-poster-actions .btn-gold {
+  background: #00ff66 !important;
+  color: #020804 !important;
+  font-weight: 800;
+  box-shadow: 0 0 24px rgba(0, 255, 102, 0.5) !important;
+}
+
+html[data-theme="matrix"] .registry-poster-actions .btn-ghost {
+  color: #00ff66 !important;
+  border-color: rgba(0, 255, 102, 0.4) !important;
+}
+
+html[data-theme="matrix"] .reg-sticky {
+  background: rgba(3, 20, 8, 0.92);
+  border-color: rgba(0, 255, 102, 0.35);
+  box-shadow: 0 0 30px rgba(0, 255, 102, 0.15);
+}
+
+html[data-theme="matrix"] .registry-fleet .cats button.is-on,
+html[data-theme="matrix"] .registry-fleet .cats button[aria-selected="true"] {
+  background: #00ff66 !important;
+  color: #020804 !important;
+  box-shadow: 0 0 16px rgba(0, 255, 102, 0.4) !important;
+}
+
+html[data-theme="matrix"] .reg-group {
+  background: rgba(3, 20, 8, 0.7);
+  border-color: rgba(0, 255, 102, 0.28);
+}
+
+html[data-theme="matrix"] .reg-group summary {
+  color: #00ff66;
+}
+
+html[data-theme="matrix"] .fleet-card,
+html[data-theme="matrix"] .registry-card {
+  background: rgba(3, 22, 9, 0.85) !important;
+  border-color: rgba(0, 255, 102, 0.25) !important;
+}
+
+html[data-theme="matrix"] .fleet-card:hover,
+html[data-theme="matrix"] .registry-card:hover {
+  border-color: #00ff66 !important;
+  box-shadow: 0 0 24px rgba(0, 255, 102, 0.25) !important;
+}
+
+html[data-theme="matrix"] .fleet-card h3 {
+  color: #00ff66 !important;
+}
+
+html[data-theme="matrix"] .inspect {
+  background: #020f06;
+  border-left-color: rgba(0, 255, 102, 0.4);
+  box-shadow: -20px 0 60px rgba(0, 255, 102, 0.15);
+}
+
+html[data-theme="matrix"] .inspect h2 {
+  color: #00ff66;
+}
+
+html[data-theme="matrix"] .inspect code {
+  background: #010803;
+  color: #00ff66;
+  border-color: rgba(0, 255, 102, 0.4);
+}
+
+html[data-theme="matrix"] footer.site {
+  background: #020804;
+  border-top-color: rgba(0, 255, 102, 0.2);
+}
+
+/* -----------------------------------------------------------------------------
+   6.3 Gold Mode — Hermetic Alchemical Amber & Celestial Obsidian
+   ----------------------------------------------------------------------------- */
+html[data-theme="gold"] {
+  --bg: #080602;
+  --bg-2: #140e04;
+  --panel: rgba(18, 14, 6, 0.88);
+  --panel-solid: #140e04;
+  --surface-card: rgba(22, 17, 8, 0.85);
+  --text-primary: #fbf5e6;
+  --text-body: #fde68a;
+  --text-subhead: #fcd34d;
+  --muted: #f59e0b;
+  --line: rgba(251, 191, 36, 0.22);
+  --border-card: rgba(251, 191, 36, 0.3);
+  --border-focus: #fbbf24;
+  --gold: #fbbf24;
+  --cyan: #e8c872;
+  --accent-glow: rgba(251, 191, 36, 0.4);
+  --font-theme-heading: "Cinzel", "Fraunces", serif;
+  --font-theme-body: "Fraunces", "Figtree", serif;
+}
+
+html[data-theme="gold"] body {
+  background: #080602 !important;
+  color: #fbf5e6 !important;
+}
+
+html[data-theme="gold"] .registry-poster {
+  background: #080602;
+}
+
+html[data-theme="gold"] .registry-poster h1 {
+  font-family: "Cinzel", "Fraunces", serif !important;
+  color: #fbbf24 !important;
+  -webkit-text-fill-color: #fbbf24 !important;
+  text-shadow: 0 0 24px rgba(251, 191, 36, 0.45) !important;
+}
+
+html[data-theme="gold"] .registry-poster .kicker,
+html[data-theme="gold"] .registry-fleet-kicker,
+html[data-theme="gold"] .registry-poster-credit {
+  color: #fbbf24 !important;
+}
+
+html[data-theme="gold"] .reg-chip {
+  background: rgba(251, 191, 36, 0.06);
+  border-color: rgba(251, 191, 36, 0.3);
+  color: #fde68a;
+}
+
+html[data-theme="gold"] .registry-poster-actions .btn-gold {
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%) !important;
+  color: #140d02 !important;
+  font-weight: 800;
+  box-shadow: 0 0 24px rgba(251, 191, 36, 0.4) !important;
+}
+
+html[data-theme="gold"] .registry-poster-actions .btn-ghost {
+  color: #fbbf24 !important;
+  border-color: rgba(251, 191, 36, 0.4) !important;
+}
+
+html[data-theme="gold"] .reg-sticky {
+  background: rgba(18, 14, 6, 0.92);
+  border-color: rgba(251, 191, 36, 0.35);
+  box-shadow: 0 0 35px rgba(251, 191, 36, 0.15);
+}
+
+html[data-theme="gold"] .registry-fleet .cats button.is-on,
+html[data-theme="gold"] .registry-fleet .cats button[aria-selected="true"] {
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%) !important;
+  color: #140d02 !important;
+  box-shadow: 0 0 18px rgba(251, 191, 36, 0.35) !important;
+}
+
+html[data-theme="gold"] .reg-group {
+  background: rgba(18, 14, 6, 0.7);
+  border-color: rgba(251, 191, 36, 0.28);
+}
+
+html[data-theme="gold"] .reg-group summary {
+  color: #fbbf24;
+}
+
+html[data-theme="gold"] .fleet-card,
+html[data-theme="gold"] .registry-card {
+  background: rgba(22, 17, 8, 0.85) !important;
+  border-color: rgba(251, 191, 36, 0.25) !important;
+}
+
+html[data-theme="gold"] .fleet-card:hover,
+html[data-theme="gold"] .registry-card:hover {
+  border-color: #fbbf24 !important;
+  box-shadow: 0 0 28px rgba(251, 191, 36, 0.25) !important;
+}
+
+html[data-theme="gold"] .fleet-card h3 {
+  color: #fbbf24 !important;
+}
+
+html[data-theme="gold"] .inspect {
+  background: #120e04;
+  border-left-color: rgba(251, 191, 36, 0.4);
+  box-shadow: -20px 0 60px rgba(251, 191, 36, 0.15);
+}
+
+html[data-theme="gold"] .inspect h2 {
+  color: #fbbf24;
+}
+
+html[data-theme="gold"] .inspect code {
+  background: #080602;
+  color: #fbbf24;
+  border-color: rgba(251, 191, 36, 0.4);
+}
+
+html[data-theme="gold"] footer.site {
+  background: #080602;
+  border-top-color: rgba(251, 191, 36, 0.2);
+}
+
+/* -------------------------------------------------------------------------- */
+/* 7. Responsive Media Queries                                                */
+/* -------------------------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .registry-poster {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    padding: 0;
+    gap: 0;
+    align-items: start;
+    align-content: start;
+  }
+
+  .registry-poster-visual {
+    order: -1;
+    min-height: 48vh;
+    height: auto;
+    margin: 0;
+  }
+
+  .registry-poster-copy {
+    padding: 24px 20px 36px;
+    gap: 12px;
+    max-width: none;
+  }
+
+  .registry-poster h1 {
+    font-size: clamp(2.4rem, 12vw, 3.4rem) !important;
+    white-space: nowrap !important;
+    text-wrap: nowrap !important;
+  }
+
+  .registry-poster .lede {
+    font-size: 0.98rem;
+  }
+
+  .registry-poster-credit {
+    display: none;
+  }
+
+  .registry-fleet.hud {
+    padding: 8px 16px 64px;
+  }
+
+  .registry-fleet-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .registry-fleet .seek {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+  }
+
+  .registry-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .registry-poster-actions .btn {
+    flex: 1 1 100%;
+  }
+
+  .registry-fleet .seek {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fleet-card,
+  .registry-card,
+  .inspect,
+  .btn {
+    transition: none !important;
+    animation: none !important;
+  }
+}

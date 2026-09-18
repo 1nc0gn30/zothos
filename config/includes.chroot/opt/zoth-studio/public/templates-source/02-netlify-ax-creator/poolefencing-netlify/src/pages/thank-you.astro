@@ -1,0 +1,103 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { businessSchema } from "../data/schema.js";
+import { site } from "../data/site.js";
+---
+
+<BaseLayout
+  title="Thank You | Poole Fencing LLC"
+  description="Your fence quote request has been received. Poole Fencing will contact you shortly."
+  path="/thank-you"
+  schema={businessSchema()}
+>
+  <section class="thank-you-hero">
+    <div class="container">
+      <div class="thank-you-card">
+        <div class="thank-you-icon" aria-hidden="true">
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+        </div>
+        <span class="eyebrow">Quote request sent</span>
+        <h1>Thank you — your quote request is on its way.</h1>
+        <p class="lead">
+          We have received your details and will follow up shortly. Most quotes
+          are reviewed the same day, and we usually schedule a free on-site
+          estimate within 48 hours.
+        </p>
+        <div class="thank-you-next">
+          <p class="thank-you-label">Need a faster answer?</p>
+          <a class="button button-primary" href={site.phoneHref}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+            Call {site.phoneDisplay}
+          </a>
+        </div>
+        <div class="thank-you-actions">
+          <a class="button button-outline" href="/services">Explore services</a>
+          <a class="button button-ghost" href="/">Back home</a>
+        </div>
+        <p class="thank-you-hours">{site.hours}</p>
+      </div>
+    </div>
+  </section>
+  <script is:inline>
+    (function () {
+      // GA4 / GTM conversion push for GHL form submissions that redirect here.
+      // GHL passes the original page_location, page_referrer, and form_source in the URL.
+      var urlParams = new URLSearchParams(window.location.search);
+      var storedFormName = "";
+      var storedFormSource = "";
+      try {
+        storedFormName = sessionStorage.getItem("ghl_last_form_name") || "";
+        storedFormSource = sessionStorage.getItem("ghl_last_form_source") || "";
+      } catch (e) { /* ignore */ }
+
+      function getGaClientId() {
+        var match = document.cookie.match(/(?:^|; )_ga=([^;]*)/);
+        if (!match) return "";
+        var parts = decodeURIComponent(match[1]).split(".");
+        return parts.length >= 4 ? parts[2] + "." + parts[3] : "";
+      }
+
+      function getGclid() {
+        var urlGclid = urlParams.get("gclid");
+        if (urlGclid) return urlGclid;
+        var match = document.cookie.match(/(?:^|; )_gclid=([^;]*)/);
+        return match ? decodeURIComponent(match[1]) : "";
+      }
+
+      var gaClientId = getGaClientId();
+      var gclid = getGclid();
+      var pageLocation = urlParams.get("page_location") || window.location.href;
+      var pageReferrer = urlParams.get("page_referrer") || document.referrer || "";
+      var formSource = urlParams.get("form_source") || storedFormSource || "thank-you";
+
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: "ghl_form_submit",
+        form_id: "QFFPj4gAUExW0PGozOoj",
+        form_name: storedFormName || "Poole Fencing Form",
+        form_source: formSource,
+        gclid: gclid,
+        ga_client_id: gaClientId,
+        page_location: pageLocation,
+        page_referrer: pageReferrer,
+      });
+
+      // Also store the gclid cookie if it came from the URL.
+      if (urlParams.get("gclid")) {
+        try {
+          var days = 90;
+          var date = new Date();
+          date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+          var host = window.location.hostname;
+          var domain = host.indexOf("www.") === 0 ? host.substring(4) : host;
+          document.cookie = "_gclid=" + encodeURIComponent(urlParams.get("gclid")) + "; expires=" + date.toUTCString() + "; path=/; domain=." + domain + "; SameSite=Lax";
+        } catch (e) { /* ignore */ }
+      }
+    })();
+  </script>
+</BaseLayout>

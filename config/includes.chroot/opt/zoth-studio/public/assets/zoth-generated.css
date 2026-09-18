@@ -1,0 +1,711 @@
+/* ============================================================
+   Zoth Generated Site Design System
+   Shared scanner-grade CSS for sites synthesized by the
+   template_site_engine and swarm_site_generator.
+   ============================================================ */
+
+/* ── Fonts ── */
+@import url("https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap");
+
+/* ── Design tokens ── */
+:root {
+  --z-primary: #00f0ff;
+  --z-accent:  #c084fc;
+  --z-bg:      #05070f;
+  --z-surface: #0a0e1c;
+  --z-surface-2: #10162e;
+  --z-border:  rgba(0, 240, 255, 0.18);
+  --z-border-strong: rgba(0, 240, 255, 0.5);
+  --z-text:    #f0f4fc;
+  --z-muted:   #8493b8;
+  --z-glow:    rgba(0, 240, 255, 0.25);
+  --z-font-display: 'Syne', sans-serif;
+  --z-font-body:    'Figtree', system-ui, sans-serif;
+  --z-font-mono:    'IBM Plex Mono', monospace;
+  --z-radius:  14px;
+  --z-radius-sm: 8px;
+}
+
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+  color-scheme: dark;
+}
+
+body {
+  background: var(--z-bg);
+  color: var(--z-text);
+  font-family: var(--z-font-body);
+  line-height: 1.6;
+  overflow-x: hidden;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Ambient background layer ── */
+.zoth-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Grid overlay */
+.zoth-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0, 240, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at 50% 30%, black 30%, transparent 80%);
+}
+
+/* Vignette + scanlines */
+.zoth-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 25%, transparent 40%, rgba(5, 7, 15, 0.7) 100%),
+    repeating-linear-gradient(0deg, transparent 0 2px, rgba(0, 0, 0, 0.18) 2px 3px);
+  pointer-events: none;
+}
+
+/* ── Glow utility ── */
+.zoth-glow {
+  box-shadow: 0 0 24px var(--z-glow), 0 0 60px color-mix(in srgb, var(--z-primary) 30%, transparent);
+}
+
+/* ── Site wrapper ── */
+.zoth-site {
+  position: relative;
+  z-index: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* ── Navbar ── */
+.zoth-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--z-border);
+  background: rgba(5, 7, 15, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.zoth-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--z-font-display);
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: var(--z-text);
+  text-decoration: none;
+  letter-spacing: -0.01em;
+}
+.zoth-brand-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--z-primary);
+  box-shadow: 0 0 12px var(--z-primary);
+  animation: zoth-pulse-dot 2.4s ease-in-out infinite;
+}
+@keyframes zoth-pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(0.85); }
+}
+.zoth-brand-name { color: var(--z-primary); }
+
+.zoth-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+  list-style: none;
+}
+.zoth-nav-link {
+  color: var(--z-muted);
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 500;
+  position: relative;
+  transition: color 0.2s;
+}
+.zoth-nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 1.5px;
+  background: var(--z-primary);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s ease;
+}
+.zoth-nav-link:hover { color: var(--z-text); }
+.zoth-nav-link:hover::after { transform: scaleX(1); }
+
+.zoth-nav-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.2rem;
+  border-radius: 999px;
+  font-family: var(--z-font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  background: var(--z-primary);
+  color: #05070f;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.zoth-nav-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 22px var(--z-primary);
+  color: #05070f;
+}
+
+/* Mobile nav sheet */
+.zoth-nav-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(5, 7, 15, 0.97);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  display: flex;
+  flex-direction: column;
+  padding: 5rem 1.5rem 2rem;
+  transform: translateY(-100%);
+  opacity: 0;
+  visibility: hidden;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.zoth-nav-sheet.open {
+  transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
+}
+.zoth-sheet-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.zoth-sheet-link {
+  display: block;
+  font-family: var(--z-font-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--z-text);
+  text-decoration: none;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--z-border);
+  transition: color 0.2s, padding-left 0.2s;
+}
+.zoth-sheet-link:hover { color: var(--z-primary); padding-left: 0.5rem; }
+.zoth-sheet-close {
+  position: absolute;
+  top: 1rem;
+  right: 1.5rem;
+  background: none;
+  border: none;
+  color: var(--z-text);
+  font-size: 1.8rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+/* ── Hero ── */
+.zoth-hero {
+  text-align: center;
+  padding: clamp(5rem, 12vw, 8rem) 0 clamp(3rem, 6vw, 5rem);
+  position: relative;
+}
+.zoth-hero::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  translate: -50% 0;
+  width: 600px;
+  height: 320px;
+  background: radial-gradient(ellipse at center, color-mix(in srgb, var(--z-primary) 22%, transparent) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.zoth-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--z-font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--z-primary);
+  background: color-mix(in srgb, var(--z-primary) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--z-primary) 30%, transparent);
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  margin-bottom: 1.4rem;
+}
+
+.zoth-title {
+  font-family: var(--z-font-display);
+  font-weight: 900;
+  font-size: clamp(2.6rem, 7vw, 4.6rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  margin-bottom: 1.2rem;
+  color: var(--z-text);
+}
+.zoth-title-accent {
+  background: linear-gradient(135deg, var(--z-primary), var(--z-accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.zoth-lead {
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  color: var(--z-muted);
+  max-width: 620px;
+  margin: 0 auto 2rem;
+  line-height: 1.65;
+}
+
+.zoth-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.zoth-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.6rem;
+  border-radius: 999px;
+  font-family: var(--z-font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1.5px solid transparent;
+  letter-spacing: 0.01em;
+}
+.zoth-btn-primary {
+  background: var(--z-primary);
+  color: #05070f;
+  box-shadow: 0 0 20px color-mix(in srgb, var(--z-primary) 35%, transparent);
+}
+.zoth-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 32px var(--z-primary);
+  color: #05070f;
+}
+.zoth-btn-ghost {
+  background: transparent;
+  color: var(--z-text);
+  border-color: var(--z-border-strong);
+}
+.zoth-btn-ghost:hover {
+  border-color: var(--z-primary);
+  color: var(--z-primary);
+  transform: translateY(-1px);
+}
+
+/* ── Section scaffolding ── */
+.zoth-section {
+  padding: clamp(3rem, 6vw, 5rem) 0;
+}
+.zoth-section-head {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+.zoth-section-eyebrow {
+  font-family: var(--z-font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--z-primary);
+  margin-bottom: 0.6rem;
+}
+.zoth-section-title {
+  font-family: var(--z-font-display);
+  font-weight: 800;
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  letter-spacing: -0.02em;
+  margin-bottom: 0.6rem;
+}
+.zoth-section-sub {
+  color: var(--z-muted);
+  font-size: 1rem;
+  max-width: 540px;
+  margin: 0 auto;
+}
+
+/* ── Feature grid ── */
+.zoth-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.25rem;
+}
+.zoth-card {
+  position: relative;
+  background: var(--z-surface);
+  border: 1px solid var(--z-border);
+  border-radius: var(--z-radius);
+  padding: 1.8rem;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  overflow: hidden;
+}
+.zoth-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 0%), color-mix(in srgb, var(--z-primary) 8%, transparent) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.zoth-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--z-border-strong);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45), 0 0 0 1px color-mix(in srgb, var(--z-primary) 25%, transparent);
+}
+.zoth-card:hover::before { opacity: 1; }
+
+.zoth-card-icon {
+  font-size: 1.9rem;
+  margin-bottom: 0.9rem;
+  display: inline-block;
+}
+.zoth-card-title {
+  font-family: var(--z-font-display);
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  color: var(--z-text);
+}
+.zoth-card-desc {
+  color: var(--z-muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+/* ── Terminal / sandbox chrome ── */
+.zoth-terminal {
+  background: #000;
+  border: 1px solid var(--z-border);
+  border-radius: var(--z-radius);
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6), 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+.zoth-term-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.65rem 1rem;
+  background: var(--z-surface);
+  border-bottom: 1px solid var(--z-border);
+  font-family: var(--z-font-mono);
+  font-size: 0.72rem;
+  color: var(--z-muted);
+}
+.zoth-term-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.zoth-term-dot.r { background: #f87171; box-shadow: 0 0 6px #f87171; }
+.zoth-term-dot.y { background: #fbbf24; box-shadow: 0 0 6px #fbbf24; }
+.zoth-term-dot.g { background: #34d399; box-shadow: 0 0 6px #34d399; }
+
+.zoth-term-body {
+  padding: 1.4rem 1.5rem;
+  font-family: var(--z-font-mono);
+  font-size: 0.84rem;
+  color: var(--z-primary);
+  min-height: 120px;
+  white-space: pre-wrap;
+  line-height: 1.6;
+  background: color-mix(in srgb, #000 60%, var(--z-surface));
+}
+.zoth-term-body .zoth-term-prompt {
+  color: var(--z-muted);
+}
+.zoth-term-body .zoth-term-ok { color: #34d399; }
+.zoth-term-body .zoth-term-info { color: var(--z-primary); }
+
+.zoth-term-input-row {
+  display: flex;
+  gap: 8px;
+  padding: 0 1.5rem 1.25rem;
+  align-items: center;
+}
+.zoth-term-input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--z-border);
+  color: var(--z-text);
+  padding: 0.55rem 0.9rem;
+  border-radius: var(--z-radius-sm);
+  font-family: var(--z-font-mono);
+  font-size: 0.84rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.zoth-term-input:focus {
+  border-color: var(--z-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--z-primary) 20%, transparent);
+}
+.zoth-term-btn {
+  background: var(--z-primary);
+  color: #05070f;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--z-radius-sm);
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--z-font-mono);
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+.zoth-term-btn:hover {
+  box-shadow: 0 0 18px var(--z-primary);
+  transform: translateY(-1px);
+}
+
+/* ── Pricing grid ── */
+.zoth-pricing {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 1.25rem;
+  align-items: stretch;
+}
+.zoth-price-card {
+  position: relative;
+  background: var(--z-surface);
+  border: 1px solid var(--z-border);
+  border-radius: var(--z-radius);
+  padding: 2rem 1.6rem;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.zoth-price-card:hover {
+  border-color: var(--z-border-strong);
+}
+.zoth-price-card.featured {
+  border-color: var(--z-primary);
+  box-shadow: 0 0 30px color-mix(in srgb, var(--z-primary) 20%, transparent),
+              0 0 0 1px color-mix(in srgb, var(--z-primary) 40%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--z-primary) 6%, transparent), var(--z-surface) 60%);
+}
+.zoth-price-badge {
+  position: absolute;
+  top: -11px;
+  right: 1.1rem;
+  background: var(--z-primary);
+  color: #05070f;
+  font-size: 0.68rem;
+  font-weight: 800;
+  font-family: var(--z-font-display);
+  padding: 3px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.04em;
+}
+.zoth-price-name {
+  font-family: var(--z-font-display);
+  font-weight: 700;
+  font-size: 1.2rem;
+  margin-bottom: 0.7rem;
+}
+.zoth-price-num {
+  font-size: 2.4rem;
+  font-weight: 900;
+  font-family: var(--z-font-display);
+  color: var(--z-text);
+  margin-bottom: 1.4rem;
+  letter-spacing: -0.02em;
+}
+.zoth-price-num small {
+  font-size: 0.85rem;
+  color: var(--z-muted);
+  font-weight: 400;
+}
+.zoth-price-perks {
+  list-style: none;
+  margin-bottom: 1.6rem;
+  flex: 1;
+}
+.zoth-price-perks li {
+  font-size: 0.88rem;
+  color: var(--z-muted);
+  margin-bottom: 0.55rem;
+  padding-left: 1.2rem;
+  position: relative;
+}
+.zoth-price-perks li::before {
+  content: "▹";
+  position: absolute;
+  left: 0;
+  color: var(--z-primary);
+}
+.zoth-price-btn {
+  background: var(--z-surface-2);
+  border: 1px solid var(--z-border);
+  color: var(--z-text);
+  padding: 0.7rem;
+  border-radius: var(--z-radius-sm);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+  font-family: var(--z-font-display);
+  font-size: 0.9rem;
+}
+.zoth-price-card.featured .zoth-price-btn {
+  background: var(--z-primary);
+  color: #05070f;
+  border-color: var(--z-primary);
+}
+.zoth-price-btn:hover {
+  border-color: var(--z-primary);
+  transform: translateY(-1px);
+}
+
+/* ── FAQ ── */
+.zoth-faq {
+  max-width: 760px;
+  margin: 0 auto;
+}
+.zoth-faq-item {
+  background: var(--z-surface);
+  border: 1px solid var(--z-border);
+  border-radius: var(--z-radius-sm);
+  margin-bottom: 0.7rem;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.zoth-faq-item[open] { border-color: var(--z-border-strong); }
+.zoth-faq-q {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 1rem 1.25rem;
+  color: var(--z-text);
+  font-weight: 600;
+  font-size: 0.98rem;
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--z-font-body);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+.zoth-faq-q::after {
+  content: "▾";
+  color: var(--z-primary);
+  transition: transform 0.2s;
+  font-size: 0.85rem;
+}
+.zoth-faq-item[open] .zoth-faq-q::after {
+  transform: rotate(180deg);
+}
+.zoth-faq-a {
+  padding: 0 1.25rem 1.1rem;
+  color: var(--z-muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* ── Footer ── */
+.zoth-footer {
+  border-top: 1px solid var(--z-border);
+  padding: 2.5rem 0 2rem;
+  text-align: center;
+  color: var(--z-muted);
+  font-size: 0.82rem;
+  margin-top: 2rem;
+}
+.zoth-footer strong { color: var(--z-text); }
+.zoth-footer .zoth-foot-meta {
+  margin-top: 0.4rem;
+  font-family: var(--z-font-mono);
+  font-size: 0.72rem;
+  color: color-mix(in srgb, var(--z-muted) 70%, transparent);
+}
+
+/* ── In-view reveal animation ── */
+.zoth-reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.zoth-reveal.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Responsive ── */
+@media (max-width: 760px) {
+  .zoth-nav-links { display: none; }
+  .zoth-nav-cta.desktop-only { display: none; }
+  .zoth-nav::after {
+    content: "";
+    flex: 1;
+  }
+  .zoth-nav-sheet-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: none;
+    border: 1px solid var(--z-border);
+    color: var(--z-text);
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    cursor: pointer;
+    font-family: var(--z-font-mono);
+  }
+  .zoth-site { padding: 0 1.1rem; }
+  .zoth-term-body { padding: 1rem; font-size: 0.8rem; }
+  .zoth-term-input-row { padding: 0 1rem 1rem; flex-wrap: wrap; }
+  .zoth-price-card { padding: 1.6rem 1.2rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  .zoth-reveal { opacity: 1; transform: none; }
+  .zoth-brand-dot { animation: none; }
+}

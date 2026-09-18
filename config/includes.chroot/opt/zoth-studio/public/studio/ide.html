@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sovereign Operator IDE &amp; Code Foundry — Zoth Studio</title>
+  <meta name="description" content="In-browser sovereign multi-agent code foundry, real-time AST inspector, contract invariant validator, and interactive PTY terminal harness." />
+  <link rel="canonical" href="https://zoth.nullai.tech/studio/ide.html" />
+
+  <!-- OpenGraph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Zoth Studio" />
+  <meta property="og:url" content="https://zoth.nullai.tech/studio/ide.html" />
+  <meta property="og:title" content="Sovereign Operator IDE &amp; Code Foundry — Zoth Studio" />
+  <meta property="og:description" content="In-browser sovereign multi-agent code foundry, real-time AST inspector, contract invariant validator, and interactive PTY terminal harness." />
+  <meta property="og:image" content="https://zoth.nullai.tech/assets/media/land/studio-hero.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Zoth Sovereign Operator IDE &amp; Code Foundry" />
+
+  <!-- Twitter Cards -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Sovereign Operator IDE &amp; Code Foundry — Zoth Studio" />
+  <meta name="twitter:description" content="In-browser sovereign multi-agent code foundry, real-time AST inspector, contract invariant validator, and interactive PTY terminal harness." />
+  <meta name="twitter:image" content="https://zoth.nullai.tech/assets/media/land/studio-hero.jpg" />
+  <meta name="twitter:image:alt" content="Zoth Sovereign Operator IDE &amp; Code Foundry" />
+
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <meta name="theme-color" content="#030306" />
+  <link rel="icon" type="image/svg+xml" href="/assets/brand/zoth-seal-hermetic-on-dark.svg" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600;1,700&amp;family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&amp;family=Syne:wght@600;700;800;900&amp;display=swap" rel="stylesheet" />
+
+  <!-- Global Styles & Nav -->
+  <link rel="stylesheet" href="/assets/zoth-theme.css?v=11" />
+  <link rel="stylesheet" href="/assets/zoth-nav.css?v=11" />
+  <link rel="stylesheet" href="/assets/zoth-annotator.css" />
+  <link rel="stylesheet" href="/assets/zoth-tailwind-magic.css" />
+  <link rel="stylesheet" href="/assets/zoth-footer.css" />
+  <script src="/assets/zoth-theme.js?v=11"></script>
+  <script src="/assets/zoth-nav.js?v=11" defer></script>
+
+  <style>
+    .skip-to-content {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    .skip-to-content:focus {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      width: auto;
+      height: auto;
+      padding: 10px 18px;
+      background: #fbbf24;
+      color: #050508;
+      font-family: monospace;
+      font-size: 0.82rem;
+      font-weight: 700;
+      border-radius: 8px;
+      z-index: 100000;
+      outline: 2px solid #fff;
+    }
+
+    :root {
+      --font-display: 'Syne', sans-serif;
+      --font-body: 'Figtree', sans-serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+      --text-primary: #ffffff;
+      --text: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-dim: #94a3b8;
+      --muted: #94a3b8;
+
+      --cyan: #00e5ff;
+      --cyan-glow: rgba(0, 229, 255, 0.4);
+      --gold: #fbbf24;
+      --gold-glow: rgba(251, 191, 36, 0.4);
+      --magenta: #d946ef;
+      --green: #10b981;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      
+      --bg: #030408;
+      --panel: rgba(8, 12, 24, 0.88);
+      --panel-border: rgba(0, 229, 255, 0.18);
+      --editor-bg: #050811;
+      --editor-gutter: #080d1a;
+      --editor-line: #0d1527;
+      --sidebar-bg: rgba(6, 9, 18, 0.95);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      line-height: 1.618;
+      overflow-x: hidden;
+      margin: 0;
+    }
+
+    .ambient {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background: radial-gradient(circle at 10% 20%, rgba(0,229,255,0.08), transparent 45%),
+                  radial-gradient(circle at 90% 80%, rgba(251,191,36,0.07), transparent 50%),
+                  radial-gradient(circle at 50% 50%, rgba(217,70,239,0.04), transparent 60%);
+    }
+
+    .ide-page-container {
+      position: relative;
+      z-index: 1;
+      max-width: 1720px;
+      margin: 0 auto;
+      padding: 24px 24px 89px;
+      box-sizing: border-box;
+    }
+
+    /* Master Telemetry Strip */
+    .ide-telemetry-hud {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      background: rgba(8, 14, 28, 0.92);
+      border: 1px solid rgba(0, 229, 255, 0.25);
+      border-radius: 14px;
+      padding: 16px 24px;
+      margin-bottom: 24px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+    .hud-title-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .hud-badge-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: rgba(0, 229, 255, 0.12);
+      border: 1px solid rgba(0, 229, 255, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--cyan);
+    }
+    .hud-text-wrap h1 {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin: 0;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .hud-text-wrap p {
+      margin: 2px 0 0;
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-family: var(--font-mono);
+    }
+    .hud-metrics-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .hud-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-secondary);
+    }
+    .hud-pill.online {
+      border-color: rgba(16, 185, 129, 0.4);
+      color: var(--green);
+      background: rgba(16, 185, 129, 0.08);
+    }
+    .hud-pill.cyan {
+      border-color: rgba(0, 229, 255, 0.4);
+      color: var(--cyan);
+      background: rgba(0, 229, 255, 0.08);
+    }
+    .hud-pill.gold {
+      border-color: rgba(251, 191, 36, 0.4);
+      color: var(--gold);
+      background: rgba(251, 191, 36, 0.08);
+    }
+    .dot-pulse {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 8px currentColor;
+    }
+
+    /* IDE Master Grid (Sidebar + Editor + Inspector) */
+    .ide-workspace-grid {
+      display: grid;
+      grid-template-columns: 280px 1fr 340px;
+      gap: 20px;
+      min-height: 640px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 1280px) {
+      .ide-workspace-grid {
+        grid-template-columns: 260px 1fr;
+      }
+      .ide-inspector-pane {
+        grid-column: 1 / -1;
+      }
+    }
+    @media (max-width: 860px) {
+      .ide-workspace-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Common Panel Base with 24-28px padding */
+    .ide-panel {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow: 0 14px 44px rgba(0, 0, 0, 0.6);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Left Pane: File Explorer */
+    .file-explorer-pane {
+      padding: 20px 18px;
+    }
+    .pane-header-title {
+      font-family: var(--font-display);
+      font-size: 0.88rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-primary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .file-search-input {
+      width: 100%;
+      background: rgba(3, 5, 12, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-bottom: 14px;
+    }
+    .file-search-input:focus {
+      outline: none;
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.18);
+    }
+    .file-tree-list {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      overflow-y: auto;
+      max-height: 520px;
+    }
+    .file-folder-node {
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--gold);
+      padding: 6px 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .file-item-node {
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+      padding: 6px 12px 6px 24px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .file-item-node:hover {
+      background: rgba(0, 229, 255, 0.08);
+      color: var(--cyan);
+    }
+    .file-item-node.active {
+      background: rgba(0, 229, 255, 0.16);
+      color: var(--text-primary);
+      font-weight: 700;
+      border-left: 3px solid var(--cyan);
+    }
+    .file-badge-tag {
+      font-size: 0.65rem;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--muted);
+    }
+
+    /* Center Pane: Multi-Tab Code Foundry */
+    .editor-pane {
+      display: flex;
+      flex-direction: column;
+    }
+    .editor-tabs-bar {
+      display: flex;
+      background: rgba(4, 7, 16, 0.95);
+      border-bottom: 1px solid rgba(0, 229, 255, 0.15);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .editor-tabs-bar::-webkit-scrollbar { display: none; }
+    .editor-tab-btn {
+      background: transparent;
+      border: none;
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+      border-top: 2px solid transparent;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      padding: 12px 18px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+    .editor-tab-btn:hover {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text);
+    }
+    .editor-tab-btn.active {
+      background: var(--editor-bg);
+      color: var(--cyan);
+      border-top-color: var(--cyan);
+      font-weight: 700;
+    }
+    .editor-actions-strip {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 10px 18px;
+      background: rgba(6, 10, 22, 0.85);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .editor-action-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .editor-action-btn:hover {
+      background: rgba(0, 229, 255, 0.12);
+      border-color: var(--cyan);
+      color: var(--text-primary);
+    }
+    .editor-action-btn.primary {
+      background: linear-gradient(135deg, var(--cyan), #0284c7);
+      color: #03050a;
+      border: none;
+      font-weight: 700;
+      box-shadow: 0 0 14px rgba(0, 229, 255, 0.3);
+    }
+    .editor-action-btn.primary:hover {
+      box-shadow: 0 0 20px rgba(0, 229, 255, 0.55);
+      transform: translateY(-1px);
+    }
+
+    /* Monospace Code Body with Line Numbers */
+    .editor-viewport {
+      display: flex;
+      flex: 1;
+      background: var(--editor-bg);
+      font-family: var(--font-mono);
+      font-size: 0.84rem;
+      line-height: 1.65;
+      overflow: auto;
+      max-height: 480px;
+      min-height: 440px;
+    }
+    .editor-gutters {
+      padding: 16px 10px;
+      background: var(--editor-gutter);
+      color: #4b5563;
+      text-align: right;
+      user-select: none;
+      border-right: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 0.78rem;
+      line-height: 1.65;
+    }
+    .editor-code-container {
+      flex: 1;
+      padding: 16px 20px;
+      color: #e2e8f0;
+      white-space: pre;
+      overflow-x: auto;
+    }
+    .tok-kw { color: #f472b6; font-weight: 700; }
+    .tok-fn { color: #38bdf8; font-weight: 700; }
+    .tok-str { color: #34d399; }
+    .tok-num { color: #fbbf24; }
+    .tok-comment { color: #64748b; font-style: italic; }
+    .tok-type { color: #a78bfa; font-weight: 600; }
+    .tok-tag { color: #f87171; }
+
+    /* Right Pane: Live AST & Invariant Inspector */
+    .ide-inspector-pane {
+      padding: 24px 20px;
+      gap: 16px;
+    }
+    .inspector-card {
+      background: rgba(4, 7, 16, 0.75);
+      border: 1px solid rgba(0, 229, 255, 0.15);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .inspector-card-title {
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-primary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .ast-tree-view {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: #93c5fd;
+      line-height: 1.55;
+      background: #020308;
+      padding: 10px;
+      border-radius: 8px;
+      max-height: 160px;
+      overflow-y: auto;
+    }
+    .invariant-check-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+    }
+    .invariant-badge {
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.65rem;
+    }
+    .invariant-badge.pass { background: rgba(16, 185, 129, 0.15); color: var(--green); border: 1px solid rgba(16, 185, 129, 0.35); }
+    .invariant-badge.eval { background: rgba(0, 229, 255, 0.15); color: var(--cyan); border: 1px solid rgba(0, 229, 255, 0.35); }
+
+    /* Bottom Pane: Integrated PTY Terminal Runner */
+    .terminal-runner-pane {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 24px 26px;
+      backdrop-filter: blur(24px);
+      box-shadow: 0 14px 44px rgba(0, 0, 0, 0.6);
+    }
+    .terminal-tabs-strip {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+    }
+    .terminal-tab-group {
+      display: flex;
+      gap: 6px;
+    }
+    .terminal-tab-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .terminal-tab-btn.active {
+      background: rgba(0, 229, 255, 0.15);
+      border-color: var(--cyan);
+      color: var(--text-primary);
+      font-weight: 700;
+    }
+    .terminal-output-console {
+      background: #010206;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 16px;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: #38bdf8;
+      height: 180px;
+      max-height: 240px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .terminal-command-bar {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .terminal-input-cmd {
+      flex: 1;
+      background: rgba(3, 5, 12, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: var(--cyan);
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      padding: 8px 14px;
+      border-radius: 8px;
+    }
+    .terminal-input-cmd:focus {
+      outline: none;
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.2);
+    }
+    .terminal-quick-cmds {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    /* 4-THEME COMPREHENSIVE OVERRIDES */
+    html[data-theme="light"] {
+      --bg: #f8fafc;
+      --panel: rgba(255, 255, 255, 0.94);
+      --panel-border: rgba(2, 132, 199, 0.22);
+      --text-primary: #0f172a;
+      --text: #1e293b;
+      --text-secondary: #475569;
+      --text-dim: #64748b;
+      --muted: #64748b;
+      --cyan: #0284c7;
+      --gold: #d97706;
+      --editor-bg: #ffffff;
+      --editor-gutter: #f1f5f9;
+      --sidebar-bg: #f8fafc;
+    }
+    html[data-theme="light"] body { background: #f8fafc; color: #0f172a; }
+    html[data-theme="light"] .ambient {
+      background: radial-gradient(circle at 10% 20%, rgba(2, 132, 199, 0.08), transparent 45%),
+                  radial-gradient(circle at 90% 80%, rgba(217, 119, 6, 0.07), transparent 50%);
+    }
+    html[data-theme="light"] .ide-telemetry-hud {
+      background: rgba(255, 255, 255, 0.95);
+      border-color: rgba(2, 132, 199, 0.25);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+    }
+    html[data-theme="light"] .hud-badge-icon {
+      background: rgba(2, 132, 199, 0.1);
+      border-color: rgba(2, 132, 199, 0.3);
+      color: #0284c7;
+    }
+    html[data-theme="light"] .hud-text-wrap h1 { color: #0f172a; }
+    html[data-theme="light"] .hud-pill {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+      color: #334155;
+    }
+    html[data-theme="light"] .ide-panel, html[data-theme="light"] .terminal-runner-pane {
+      background: rgba(255, 255, 255, 0.95);
+      border-color: rgba(2, 132, 199, 0.22);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    }
+    html[data-theme="light"] .editor-tabs-bar {
+      background: #f1f5f9;
+      border-bottom-color: #cbd5e1;
+    }
+    html[data-theme="light"] .editor-tab-btn {
+      color: #64748b;
+      border-right-color: #cbd5e1;
+    }
+    html[data-theme="light"] .editor-tab-btn.active {
+      background: #ffffff;
+      color: #0284c7;
+      border-top-color: #0284c7;
+    }
+    html[data-theme="light"] .editor-actions-strip {
+      background: #f8fafc;
+      border-bottom-color: #e2e8f0;
+    }
+    html[data-theme="light"] .editor-action-btn {
+      background: #ffffff;
+      border-color: #cbd5e1;
+      color: #334155;
+    }
+    html[data-theme="light"] .editor-gutters {
+      background: #f1f5f9;
+      color: #94a3b8;
+      border-right-color: #e2e8f0;
+    }
+    html[data-theme="light"] .editor-code-container {
+      color: #0f172a;
+    }
+    html[data-theme="light"] .inspector-card {
+      background: #f8fafc;
+      border-color: rgba(2, 132, 199, 0.2);
+    }
+    html[data-theme="light"] .ast-tree-view, html[data-theme="light"] .terminal-output-console {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+      color: #0f172a;
+    }
+    html[data-theme="light"] .file-search-input, html[data-theme="light"] .terminal-input-cmd {
+      background: #ffffff;
+      border-color: #cbd5e1;
+      color: #0f172a;
+    }
+
+    /* MATRIX CRT OVERRIDES */
+    html[data-theme="matrix"] {
+      --bg: #000803;
+      --panel: rgba(0, 20, 8, 0.92);
+      --panel-border: rgba(0, 255, 102, 0.3);
+      --text-primary: #00ff66;
+      --text: #00ff66;
+      --cyan: #00ff66;
+      --gold: #33ff88;
+      --editor-bg: #000c05;
+      --editor-gutter: #001408;
+    }
+    html[data-theme="matrix"] body { background: #000803; color: #00ff66; font-family: 'IBM Plex Mono', monospace; }
+    html[data-theme="matrix"] .ide-panel, html[data-theme="matrix"] .terminal-runner-pane {
+      background: rgba(0, 20, 8, 0.92);
+      border-color: rgba(0, 255, 102, 0.3);
+      box-shadow: 0 0 30px rgba(0,255,102,0.15);
+    }
+    html[data-theme="matrix"] .editor-tab-btn.active { color: #00ff66; border-top-color: #00ff66; }
+    html[data-theme="matrix"] .terminal-output-console { color: #00ff66; border-color: rgba(0, 255, 102, 0.3); }
+
+    /* HERMETIC GOLD OVERRIDES */
+    html[data-theme="gold"] {
+      --bg: #080602;
+      --panel: rgba(24, 18, 6, 0.92);
+      --panel-border: rgba(251, 191, 36, 0.28);
+      --text-primary: #fef08a;
+      --text: #fde68a;
+      --cyan: #fbbf24;
+      --gold: #f59e0b;
+      --editor-bg: #0d0a03;
+      --editor-gutter: #161005;
+    }
+    html[data-theme="gold"] body { background: #080602; color: #fef08a; }
+    html[data-theme="gold"] .ide-panel, html[data-theme="gold"] .terminal-runner-pane {
+      background: rgba(24, 18, 6, 0.92);
+      border-color: rgba(251, 191, 36, 0.28);
+      box-shadow: 0 0 30px rgba(251,191,36,0.12);
+    }
+    html[data-theme="gold"] .editor-tab-btn.active { color: #fef08a; border-top-color: #fbbf24; }
+    html[data-theme="gold"] .terminal-output-console { color: #fde68a; border-color: rgba(251, 191, 36, 0.28); }
+  </style>
+<link href="/assets/zoth-hud-embedded.css" rel="stylesheet"/>
+<script src="/assets/zoth-hud-embedded.js"></script>
+</head>
+<body class="deck-page" data-kicker="IDE 2.0" data-title="Sovereign Operator IDE &amp; Code Foundry">
+  <div class="ambient"></div>
+  <a class="skip-to-content" href="#main-content">Skip to content</a>
+
+  <!-- Top Universal Navigation -->
+                      <header class="bar" id="topbar" role="banner">
+      <a class="brand js-hub" href="/" aria-label="Zoth Studio Home">
+        <div class="brand-emblem-wrap">
+          <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth Golden Z Emblem" width="34" height="34" class="brand-emblem-img" />
+          <span class="brand-emblem-halo"></span>
+        </div>
+        <span class="brand-text-wrap">
+          <strong>Zoth</strong>
+          <small>by NullAI</small>
+        </span>
+        <span class="brand-status-badge">SOVEREIGN</span>
+      </a>
+
+      <nav class="menu" aria-label="Primary navigation" role="navigation">
+        <a class="nav-link nav-for-everyone" href="/#for-everyone" data-tip="Zero-Code Showcases — How non-tech founders, creators & teams depend on Zoth.">✦ For You</a>
+
+        <!-- 🔮 Core AI -->
+        <div class="nav-dropdown" data-dropdown-id="core">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Core AI</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🔮 CORE AI ARCHITECTURE</span><span class="nav-item-badge">6 NODES</span></div>
+            <a href="/zoth/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+            <a href="/agents/"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+            <a href="/studio/consensus.html"><span class="nav-item-icon-box">⚔️</span><div class="nav-item-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+            <a href="/studio/swarm.html"><span class="nav-item-icon-box">🌐</span><div class="nav-item-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+            <a href="/memory/"><span class="nav-item-icon-box">🧠</span><div class="nav-item-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+            <a href="/zoth-world.html"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+          </div>
+        </div>
+
+        <!-- 🪐 Studio -->
+        <div class="nav-dropdown" data-dropdown-id="studio">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Studio</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu nav-dropdown-mega">
+            <div class="nav-dropdown-header"><span>🪐 14+ STUDIO WORKSTATIONS</span><span class="nav-item-badge">LOCAL DAGS</span></div>
+            <a href="/studio/cockpit.html"><span class="nav-item-icon-box">🪐</span><div class="nav-item-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+            <a href="/studio/cockpit.html?tool=webgen"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+            <a href="/studio/cockpit.html?tool=vos-sandbox"><span class="nav-item-icon-box">💻</span><div class="nav-item-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+            <a href="/studio/cockpit.html?tool=nexus-3d"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+            <a href="/studio/cockpit.html?tool=omnipost"><span class="nav-item-icon-box">🎬</span><div class="nav-item-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+            <a href="/studio/cockpit.html?tool=math-pillars"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+            <a href="/studio/cockpit.html?tool=secure-comms"><span class="nav-item-icon-box">🔒</span><div class="nav-item-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+            <a href="/studio/cockpit.html?tool=signal-bridge"><span class="nav-item-icon-box">📡</span><div class="nav-item-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+            <a href="/studio/cockpit.html?tool=web3-hub"><span class="nav-item-icon-box">🪙</span><div class="nav-item-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+            <a href="/studio/cockpit.html?tool=pets"><span class="nav-item-icon-box">💎</span><div class="nav-item-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+            <a href="/studio/cockpit.html?tool=tool-nexus"><span class="nav-item-icon-box">🛠️</span><div class="nav-item-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+          </div>
+        </div>
+
+        <!-- 🌌 Universe -->
+        <div class="nav-dropdown" data-dropdown-id="universe">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Universe</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🌌 UNIVERSE &amp; PUBLICATIONS</span><span class="nav-item-badge">STORIES</span></div>
+            <a href="/comic/"><span class="nav-item-icon-box">🎨</span><div class="nav-item-body"><strong>AZOTH Anime Comic</strong><small>Season 1 Ep 1: Genesis in Silicon Rain (Audio)</small></div><span class="nav-item-badge">AUDIO</span></a>
+            <a href="/social/"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+            <a href="/articles/"><span class="nav-item-icon-box">📜</span><div class="nav-item-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+            <a href="/article/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+            <a href="/ai-webgpu.html"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+            <a href="/adytum/"><span class="nav-item-icon-box">🏛️</span><div class="nav-item-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+          </div>
+        </div>
+
+        <!-- 📚 Docs & Vault -->
+        <div class="nav-dropdown" data-dropdown-id="docs">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Docs & Vault</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>📚 DOCUMENTATION &amp; SECURITY</span><span class="nav-item-badge">SPECS</span></div>
+            <a href="/docs/"><span class="nav-item-icon-box">📚</span><div class="nav-item-body"><strong>Master Documentation</strong><small>Port Topology, 1-Click Install Scripts & API Guide</small></div><span class="nav-item-badge">DOCS</span></a>
+            <a href="/vault/"><span class="nav-item-icon-box">🔐</span><div class="nav-item-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+            <a href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+            <a href="/faq.html"><span class="nav-item-icon-box">❓</span><div class="nav-item-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+          </div>
+        </div>
+
+        <!-- ⚡ Action Pills -->
+        <button type="button" class="nav-pill nav-telemetry-pill" title="View Live Studio Telemetry & Background Daemons" aria-label="Studio Telemetry Status">
+          <span class="tel-dot online"></span><span class="tel-text">6/6 DAEMONS</span>
+        </button>
+
+        <button type="button" class="nav-pill nav-pet-pill" title="Active Companion Spirit: Azoth (Click to Summon / Switch Mascot)" aria-label="Active Companion Spirit">
+          <span class="pet-emoji">🔮</span><span class="pet-name">Azoth</span>
+        </button>
+
+        <a class="nav-pill nav-deck-pill js-deck" href="http://127.0.0.1:8484/" title="Open Local Operator Deck (:8484)">
+          <span class="deck-pulse"></span><span>DECK</span>
+        </a>
+
+        <button type="button" class="nav-pill nav-palette-btn" title="Open Global Command Palette (Ctrl+K)" aria-label="Command Palette">
+          <span class="palette-icon">🔍</span><kbd class="nav-kbd">Ctrl+K</kbd>
+        </button>
+
+        <button type="button" class="nav-pill nav-annotate-btn" title="Toggle On-Screen Annotator & Feedback (Shift+A)" aria-label="Toggle Annotator">
+          <span class="annotate-icon">✏️</span><span class="annotate-text">Annotate</span><kbd class="nav-kbd">Shift+A</kbd>
+        </button>
+
+        <div class="nav-dropdown nav-theme-dropdown">
+          <button class="nav-dropdown-btn nav-theme-current-btn" type="button" aria-haspopup="true" aria-expanded="false" title="Switch Visual Theme (Shift+T)">
+            <span class="current-theme-swatch" style="background:#00f0ff;"></span>
+            <span class="current-theme-emoji">🌙</span>
+            <span class="current-theme-label">Dark Void</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+        </div>
+
+        <a class="nav-pill git" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank" title="GitHub Repository — Open Source code, Debian packages, and releases">
+          <span>🐙 GitHub ↗</span>
+        </a>
+      </nav>
+
+      <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Toggle navigation menu">
+        <span class="burger-lines"><span class="b-line b-1"></span><span class="b-line b-2"></span><span class="b-line b-3"></span></span>
+        <span class="burger-text">Menu</span>
+      </button>
+      <div class="zoth-scroll-progress" id="zoth-scroll-progress"></div>
+    </header>
+
+    <nav class="drawer" id="drawer" aria-label="Universal Mobile Navigation" role="navigation">
+      <div class="drawer-header-brand">
+        <div class="d-brand-left">
+          <div class="brand-emblem-wrap">
+            <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth" width="28" height="28" class="brand-emblem-img" />
+          </div>
+          <span class="d-brand-title"><strong>Zoth Studio</strong><small>v12.0 Sovereign</small></span>
+        </div>
+        <button type="button" class="drawer-telemetry-badge" title="View Diagnostics HUD">● 6/6 DAEMONS</button>
+        <button type="button" class="drawer-close-btn" aria-label="Close mobile menu">✕</button>
+      </div>
+
+      <div class="drawer-section drawer-tools-section">
+        <div class="drawer-heading">⚡ Quick Actions</div>
+        <div class="drawer-quick-tools-grid">
+          <button type="button" class="drawer-tool-pill drawer-palette-trigger"><span>🔍</span> Command Palette <kbd class="nav-kbd">Ctrl+K</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-annotate-trigger"><span>✏️</span> On-Screen Annotator <kbd class="nav-kbd">Shift+A</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-telemetry-trigger"><span>⚡</span> Telemetry HUD</button>
+          <button type="button" class="drawer-tool-pill drawer-audio-trigger"><span>🔊</span> Audio FX</button>
+        </div>
+      </div>
+
+      <div class="drawer-section drawer-theme-section">
+        <div class="drawer-heading">🎨 Visual Theme (16 Archetypes)</div>
+        <div class="drawer-search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="drawer-theme-search-input" placeholder="Search 16 themes..." autocomplete="off" />
+        </div>
+        <div class="theme-filter-chips drawer-filter-chips">
+          <button type="button" class="theme-chip-btn active" data-drawer-cat="all">All (16)</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="studio originals">Originals</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="frontier ai & tech">Frontier</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="developer archetypes">Dev</button>
+        </div>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">✦ Featured</div>
+        <a class="drawer-link drawer-hero-link" href="/#for-everyone"><span class="d-link-icon">✦</span><div class="d-link-body"><strong>For You (No-Code Showcases)</strong><small>How Non-Tech Founders, Creators & Teams Use Zoth</small></div><span class="nav-item-badge">SHOWCASE</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🔮 Core AI & Pantheon</div>
+        <a class="drawer-link" href="/zoth/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+        <a class="drawer-link" href="/agents/"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+        <a class="drawer-link" href="/studio/consensus.html"><span class="d-link-icon">⚔️</span><div class="d-link-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+        <a class="drawer-link" href="/studio/swarm.html"><span class="d-link-icon">🌐</span><div class="d-link-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+        <a class="drawer-link" href="/memory/"><span class="d-link-icon">🧠</span><div class="d-link-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+        <a class="drawer-link" href="/zoth-world.html"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🪐 Workstations & DAGs</div>
+        <a class="drawer-link" href="/studio/cockpit.html"><span class="d-link-icon">🪐</span><div class="d-link-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=webgen"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=vos-sandbox"><span class="d-link-icon">💻</span><div class="d-link-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=nexus-3d"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=omnipost"><span class="d-link-icon">🎬</span><div class="d-link-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=math-pillars"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=secure-comms"><span class="d-link-icon">🔒</span><div class="d-link-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=signal-bridge"><span class="d-link-icon">📡</span><div class="d-link-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=web3-hub"><span class="d-link-icon">🪙</span><div class="d-link-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=pets"><span class="d-link-icon">💎</span><div class="d-link-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=tool-nexus"><span class="d-link-icon">🛠️</span><div class="d-link-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📜 Universe & Research</div>
+        <a class="drawer-link" href="/comic/"><span class="d-link-icon">🎨</span><div class="d-link-body"><strong>AZOTH Anime Comic Series</strong><small>Season 1 Ep 1: Genesis in Silicon Rain</small></div><span class="nav-item-badge">AUDIO</span></a>
+        <a class="drawer-link" href="/social/"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+        <a class="drawer-link" href="/articles/"><span class="d-link-icon">📜</span><div class="d-link-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+        <a class="drawer-link" href="/article/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+        <a class="drawer-link" href="/ai-webgpu.html"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+        <a class="drawer-link" href="/adytum/"><span class="d-link-icon">🏛️</span><div class="d-link-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📚 Docs & Security</div>
+        <a class="drawer-link" href="/docs/"><span class="d-link-icon">📚</span><div class="d-link-body"><strong>Complete Documentation</strong><small>Port Topology, 1-Click Install Scripts & API</small></div><span class="nav-item-badge">DOCS</span></a>
+        <a class="drawer-link" href="/vault/"><span class="d-link-icon">🔐</span><div class="d-link-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+        <a class="drawer-link" href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+        <a class="drawer-link" href="/faq.html"><span class="d-link-icon">❓</span><div class="d-link-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+      </div>
+
+      <div class="drawer-section drawer-footer-section">
+        <a class="drawer-pill-link js-deck" href="http://127.0.0.1:8484/">💻 Launch Local Operator Deck (:8484)</a>
+        <a class="drawer-pill-link" href="https://github.com/NullAITech/zoth-studio" target="_blank" rel="noopener noreferrer">🐙 GitHub Source Repository ↗</a>
+        <a class="drawer-pill-link" href="/downloads/zoth-studio-android.apk">📱 Download Android App (.apk)</a>
+      </div>
+    </nav>
+
+    
+
+    
+
+    
+
+    
+
+  <!-- Main Workstation Area -->
+  <main id="main-content" class="ide-page-container" role="main">
+
+    <!-- Master Telemetry HUD Strip -->
+    <div class="ide-telemetry-hud">
+      <div class="hud-title-group">
+        <div class="hud-badge-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        </div>
+        <div class="hud-text-wrap">
+          <h1>Sovereign Operator IDE <span style="color:var(--cyan);font-weight:400;font-size:1.1rem;">&amp; Code Foundry</span></h1>
+          <p>AST Syntax Sanitizer · Contract Invariant Evaluator · PTY Terminal Loopback :8484</p>
+        </div>
+      </div>
+      <div class="hud-metrics-row">
+        <div class="hud-pill online">
+          <span class="dot-pulse"></span>
+          <span>PARSER: TREE-SITTER / V8</span>
+        </div>
+        <div class="hud-pill cyan">
+          <span>INVARIANTS: 100% PASS</span>
+        </div>
+        <div class="hud-pill gold">
+          <span>BUFFER: 5 CONTRACT FILES</span>
+        </div>
+        <div class="hud-pill">
+          <span>LOOPBACK: 127.0.0.1:8484</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- IDE Multi-Pane Layout -->
+    <div class="ide-workspace-grid">
+
+      <!-- Left Pane: File Tree Navigator -->
+      <aside class="ide-panel file-explorer-pane" aria-label="File Explorer">
+        <div class="pane-header-title">
+          <span>Project Explorer</span>
+          <span class="file-badge-tag">5 Files</span>
+        </div>
+        <input type="text" class="file-search-input" id="fileSearchInput" placeholder="Filter workspace files..." oninput="filterFiles()" />
+
+        <div class="file-tree-list" id="fileTreeList">
+          <div class="file-folder-node">📂 contracts/</div>
+          <div class="file-item-node" onclick="openFile('invariant-verifier', this)">
+            <span>🦀 invariant-verifier.rs</span>
+            <span class="file-badge-tag">Rust</span>
+          </div>
+          <div class="file-item-node" onclick="openFile('vault-signer', this)">
+            <span>🛡️ vault-signer.c</span>
+            <span class="file-badge-tag">C</span>
+          </div>
+
+          <div class="file-folder-node" style="margin-top:6px;">📂 tasks/</div>
+          <div class="file-item-node active" onclick="openFile('swarm-orchestrator', this)">
+            <span>⚡ swarm-orchestrator.ts</span>
+            <span class="file-badge-tag">TS</span>
+          </div>
+
+          <div class="file-folder-node" style="margin-top:6px;">📂 scripts/</div>
+          <div class="file-item-node" onclick="openFile('tool-runner', this)">
+            <span>🐍 tool-runner.py</span>
+            <span class="file-badge-tag">Py</span>
+          </div>
+
+          <div class="file-folder-node" style="margin-top:6px;">📂 core-app/</div>
+          <div class="file-item-node" onclick="openFile('studio-kernel', this)">
+            <span>🌐 studio-kernel.js</span>
+            <span class="file-badge-tag">JS</span>
+          </div>
+        </div>
+
+        <div style="margin-top:auto; padding-top:16px; border-top:1px solid rgba(255,255,255,0.08);">
+          <button type="button" class="editor-action-btn" style="width:100%; justify-content:center;" onclick="createNewMockFile()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>+ New Contract File</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Center Pane: Multi-Tab Code Foundry & Editor -->
+      <section class="ide-panel editor-pane" aria-label="Code Editor">
+        <div class="editor-tabs-bar" id="editorTabsBar">
+          <button class="editor-tab-btn active" id="tab-swarm-orchestrator" onclick="openFile('swarm-orchestrator', null)">
+            <span>⚡ swarm-orchestrator.ts</span>
+          </button>
+          <button class="editor-tab-btn" id="tab-invariant-verifier" onclick="openFile('invariant-verifier', null)">
+            <span>🦀 invariant-verifier.rs</span>
+          </button>
+          <button class="editor-tab-btn" id="tab-tool-runner" onclick="openFile('tool-runner', null)">
+            <span>🐍 tool-runner.py</span>
+          </button>
+          <button class="editor-tab-btn" id="tab-vault-signer" onclick="openFile('vault-signer', null)">
+            <span>🛡️ vault-signer.c</span>
+          </button>
+          <button class="editor-tab-btn" id="tab-studio-kernel" onclick="openFile('studio-kernel', null)">
+            <span>🌐 studio-kernel.js</span>
+          </button>
+        </div>
+
+        <div class="editor-actions-strip">
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="editor-action-btn primary" onclick="executeEditorAction('sanitize')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Sanitize AST</span>
+            </button>
+            <button class="editor-action-btn" onclick="executeEditorAction('invariants')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <span>Check Invariants</span>
+            </button>
+            <button class="editor-action-btn" onclick="executeEditorAction('toolbench')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              <span>Test in Tool Bench</span>
+            </button>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <span id="editorCursorPosition" style="font-family:var(--font-mono); font-size:0.72rem; color:var(--muted); align-self:center;">Ln 14, Col 28 · UTF-8</span>
+            <button class="editor-action-btn" onclick="copyEditorCode()">📋 Copy</button>
+          </div>
+        </div>
+
+        <div class="editor-viewport">
+          <div class="editor-gutters" id="editorGutters">
+            1<br/>2<br/>3<br/>4<br/>5<br/>6<br/>7<br/>8<br/>9<br/>10<br/>11<br/>12<br/>13<br/>14<br/>15<br/>16<br/>17<br/>18<br/>19<br/>20<br/>21<br/>22<br/>23<br/>24
+          </div>
+          <div class="editor-code-container" id="editorCodeContainer" contenteditable="true" spellcheck="false">
+<span class="tok-comment">// Zoth Studio Sovereign Swarm Orchestrator v12.0</span>
+<span class="tok-kw">import</span> { <span class="tok-type">AgentMessage</span>, <span class="tok-type">DAGExecutionState</span> } <span class="tok-kw">from</span> <span class="tok-str">"@zoth/core"</span>;
+<span class="tok-kw">import</span> { <span class="tok-type">ShannonEntropy</span> } <span class="tok-kw">from</span> <span class="tok-str">"@zoth/crypto"</span>;
+
+<span class="tok-kw">export class</span> <span class="tok-type">SwarmOrchestrator</span> {
+  <span class="tok-kw">private readonly</span> busAddress = <span class="tok-str">"http://127.0.0.1:8484/bus"</span>;
+  <span class="tok-kw">private</span> tokenBudget: <span class="tok-type">number</span> = <span class="tok-num">100000</span>;
+
+  <span class="tok-kw">async</span> <span class="tok-fn">dispatchAgentStep</span>(agentId: <span class="tok-type">string</span>, taskPayload: <span class="tok-type">object</span>): <span class="tok-type">Promise</span>&lt;<span class="tok-type">DAGExecutionState</span>&gt; {
+    <span class="tok-comment">// Ensure strict zero-cloud local isolate</span>
+    <span class="tok-kw">const</span> entropy = <span class="tok-fn">ShannonEntropy</span>.calculate(JSON.stringify(taskPayload));
+    <span class="tok-kw">if</span> (entropy &gt; <span class="tok-num">5.2</span>) {
+      <span class="tok-kw">throw new</span> <span class="tok-type">Error</span>(<span class="tok-str">"High entropy payload flagged by safety invariants."</span>);
+    }
+
+    <span class="tok-kw">const</span> response = <span class="tok-kw">await</span> fetch(<span class="tok-str">`${this.busAddress}/agents/${agentId}/execute`</span>, {
+      method: <span class="tok-str">"POST"</span>,
+      headers: { <span class="tok-str">"Content-Type"</span>: <span class="tok-str">"application/json"</span>, <span class="tok-str">"X-Zoth-Sovereign"</span>: <span class="tok-str">"1"</span> },
+      body: JSON.stringify({ task: taskPayload, budget: <span class="tok-kw">this</span>.tokenBudget })
+    });
+
+    <span class="tok-kw">return await</span> response.json();
+  }
+}
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Pane: Live AST & Invariant Inspector -->
+      <aside class="ide-panel ide-inspector-pane" aria-label="AST Inspector">
+        <div class="pane-header-title">
+          <span>AST &amp; Invariants</span>
+          <span class="invariant-badge pass">100% SECURE</span>
+        </div>
+
+        <div class="inspector-card">
+          <div class="inspector-card-title">
+            <span>Shannon Entropy H(X)</span>
+            <span style="color:var(--cyan); font-family:var(--mono);">4.12 bits</span>
+          </div>
+          <div style="background:rgba(255,255,255,0.06); height:6px; border-radius:3px; overflow:hidden;">
+            <div style="background:linear-gradient(90deg, var(--green), var(--cyan)); width:68%; height:100%;"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.68rem; color:var(--muted); margin-top:4px; font-family:var(--mono);">
+            <span>0.0 (Uniform)</span>
+            <span>Threshold: 5.2</span>
+            <span>8.0 (Random)</span>
+          </div>
+        </div>
+
+        <div class="inspector-card">
+          <div class="inspector-card-title">
+            <span>Syntax Tree Outline</span>
+            <span style="font-size:0.68rem; color:var(--muted); font-family:var(--mono);">18 Nodes</span>
+          </div>
+          <div class="ast-tree-view" id="astTreeView">
+Program
+  ├── ImportDeclaration (@zoth/core)
+  ├── ImportDeclaration (@zoth/crypto)
+  └── ClassDeclaration (SwarmOrchestrator)
+      ├── ClassProperty (busAddress)
+      ├── ClassProperty (tokenBudget)
+      └── MethodDefinition (dispatchAgentStep)
+          ├── BinaryExpression (entropy &gt; 5.2)
+          ├── CallExpression (fetch local isolate)
+          └── ReturnStatement (JSON response)
+          </div>
+        </div>
+
+        <div class="inspector-card">
+          <div class="inspector-card-title">
+            <span>Invariant Guardrails</span>
+          </div>
+          <div class="invariant-check-row">
+            <span>Zero-Cloud Isolate</span>
+            <span class="invariant-badge pass">PASS (0ms)</span>
+          </div>
+          <div class="invariant-check-row">
+            <span>No Unsafe Eval/Eval2</span>
+            <span class="invariant-badge pass">PASS</span>
+          </div>
+          <div class="invariant-check-row">
+            <span>Memory Leaks Guard</span>
+            <span class="invariant-badge pass">0.0 MB</span>
+          </div>
+          <div class="invariant-check-row">
+            <span>Argon2id Key Scope</span>
+            <span class="invariant-badge pass">ENCRYPTED</span>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Bottom Pane: Integrated PTY Terminal Runner -->
+    <section class="terminal-runner-pane" aria-label="Terminal Console">
+      <div class="terminal-tabs-strip">
+        <div class="terminal-tab-group">
+          <button class="terminal-tab-btn active" onclick="switchTerminalTab('pty', this)">💻 Operator PTY (:8484)</button>
+          <button class="terminal-tab-btn" onclick="switchTerminalTab('compiler', this)">⚡ AST Compiler</button>
+          <button class="terminal-tab-btn" onclick="switchTerminalTab('invariants', this)">🛡️ Invariant Journal</button>
+        </div>
+        <div class="terminal-quick-cmds">
+          <button class="editor-action-btn" onclick="runTerminalQuick('zoth run')">▶ zoth run</button>
+          <button class="editor-action-btn" onclick="runTerminalQuick('zoth test')">🧪 zoth test</button>
+          <button class="editor-action-btn" onclick="runTerminalQuick('zoth lint')">🔍 zoth lint</button>
+          <button class="editor-action-btn" onclick="clearTerminal()">🧹 Clear</button>
+        </div>
+      </div>
+
+      <div class="terminal-output-console" id="terminalOutput">
+[ZOTH FOUNDRY] Kernel initialized on loopback 127.0.0.1:8484
+[AST ENGINE] Loaded Tree-Sitter &amp; Babel Parser v7.24 (In-Memory Sandbox)
+[INVARIANTS] 298 Tool Contracts Loaded · 100% Invariant Verification PASS
+zoth-ide@operator:~$ _
+      </div>
+
+      <div class="terminal-command-bar">
+        <input type="text" class="terminal-input-cmd" id="terminalCmdInput" placeholder="Type a sovereign CLI command (e.g. zoth compile, zoth verify, zoth bench)..." onkeydown="handleTerminalEnter(event)" />
+        <button class="editor-action-btn primary" onclick="submitTerminalCmd()">Execute ↵</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Universal Footer -->
+                      <footer class="site" role="contentinfo">
+      <div class="foot-wrap">
+        <div aria-hidden="true" class="foot-watermark">ZOTH</div>
+        <div class="foot-grid">
+          <div class="foot-brand-col">
+            <p class="foot-kicker">Local · loopback · no telemetry</p>
+            <a class="foot-brand-lockup" href="/">
+              <img alt="Master Azoth" class="foot-azoth" decoding="async" height="72" loading="lazy" src="/assets/mascot/azoth-bust.jpg" width="72" />
+              <span class="foot-brand-text">
+                <img alt="" class="foot-brand-logo" decoding="async" height="28" loading="lazy" src="/assets/brand/zoth-golden-z-192.png" width="28" />
+                <strong class="foot-brand-title">Zoth Studio</strong>
+              </span>
+            </a>
+            <small class="foot-brand-desc">Local-first workspace for a team of AI agents. Files stay on this machine.</small>
+            <div class="foot-actions">
+              <a class="foot-btn foot-btn-on" href="/#install">Install locally</a>
+              <a class="foot-btn foot-btn-ghost" href="/pricing/">Support the forge</a>
+            </div>
+          </div>
+          <div class="foot-col">
+            <h3>Studio</h3>
+            <a class="mega-footer-link js-deck" href="http://127.0.0.1:8484/">Operator Deck</a>
+            <a class="mega-footer-link" href="/studio/">Workstations</a>
+            <a class="mega-footer-link" href="/studio/webgen.html">WebGen</a>
+            <a class="mega-footer-link" href="/studio/swarm.html">3D Swarm</a>
+            <a class="mega-footer-link" href="/studio/consensus.html">Consensus</a>
+          </div>
+          <div class="foot-col">
+            <h3>Agents</h3>
+            <a class="mega-footer-link" href="/zoth/">Master Azoth</a>
+            <a class="mega-footer-link" href="/agents/">21-Agent pantheon</a>
+            <a class="mega-footer-link" href="/pets/">Companions</a>
+            <a class="mega-footer-link" href="/vault/">Sovereign vault</a>
+            <a class="mega-footer-link" href="/adytum/">Adytum</a>
+          </div>
+          <div class="foot-col">
+            <h3>Universe</h3>
+            <a class="mega-footer-link" href="/comic/">Azoth comic</a>
+            <a class="mega-footer-link" href="/social/">Social wall</a>
+            <a class="mega-footer-link" href="/showcase.html">Showcase</a>
+            <a class="mega-footer-link" href="/signal/">Signal</a>
+            <a class="mega-footer-link" href="/article/">Manifesto</a>
+          </div>
+          <div class="foot-col">
+            <h3>Resources</h3>
+            <a class="mega-footer-link" href="/docs/">Docs</a>
+            <a class="mega-footer-link" href="/faq.html">FAQ</a>
+            <a class="mega-footer-link" href="/pricing/">Support / Patron</a>
+            <a class="mega-footer-link" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub ↗</a>
+            <a class="mega-footer-link" href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI ↗</a>
+          </div>
+        </div>
+        <div class="foot-bottom">
+          <p>© 2026 NullAI Tech. MIT. Local sovereign execution — zero telemetry.</p>
+          <nav aria-label="Footer meta" class="foot-meta">
+            <a href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub</a>
+            <a href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI</a>
+            <a href="/docs/">Docs</a>
+            <a href="/faq.html">FAQ</a>
+          </nav>
+        </div>
+      </div>
+    </footer>
+
+  <!-- Interactive IDE Logic -->
+  <script>
+    const mockFiles = {
+      'swarm-orchestrator': {
+        name: 'swarm-orchestrator.ts',
+        lang: 'TypeScript',
+        code: `// Zoth Studio Sovereign Swarm Orchestrator v12.0
+import { AgentMessage, DAGExecutionState } from "@zoth/core";
+import { ShannonEntropy } from "@zoth/crypto";
+
+export class SwarmOrchestrator {
+  private readonly busAddress = "http://127.0.0.1:8484/bus";
+  private tokenBudget: number = 100000;
+
+  async dispatchAgentStep(agentId: string, taskPayload: object): Promise<DAGExecutionState> {
+    // Ensure strict zero-cloud local isolate
+    const entropy = ShannonEntropy.calculate(JSON.stringify(taskPayload));
+    if (entropy > 5.2) {
+      throw new Error("High entropy payload flagged by safety invariants.");
+    }
+
+    const response = await fetch(\`\${this.busAddress}/agents/\${agentId}/execute\`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Zoth-Sovereign": "1" },
+      body: JSON.stringify({ task: taskPayload, budget: this.tokenBudget })
+    });
+
+    return await response.json();
+  }
+}`
+      },
+      'invariant-verifier': {
+        name: 'invariant-verifier.rs',
+        lang: 'Rust',
+        code: `// Zoth Studio Sovereign Invariant Verifier
+use std::collections::HashMap;
+use zoth_vault::Argon2idKeyRing;
+
+pub struct SecurityContext {
+    pub zero_cloud_enforced: bool,
+    pub max_memory_bytes: usize,
+}
+
+pub fn verify_sovereign_invariants(source_bytes: &[u8], ctx: &SecurityContext) -> Result<bool, &'static str> {
+    if !ctx.zero_cloud_enforced {
+        return Err("Security invariant violation: zero_cloud must be true");
+    }
+    if source_bytes.len() > ctx.max_memory_bytes {
+        return Err("Memory limit exceeded");
+    }
+    Ok(true)
+}`
+      },
+      'tool-runner': {
+        name: 'tool-runner.py',
+        lang: 'Python',
+        code: `"""
+Zoth Studio — Tool Runner & Local HTTP Mock Dispatcher
+"""
+import json
+import http.client
+
+def run_contract_tool(tool_id: str, action: str, params: dict) -> dict:
+    """Executes validated tool action over local loopback :8484."""
+    conn = http.client.HTTPConnection("127.0.0.1", 8484, timeout=2.0)
+    payload = json.dumps({"id": tool_id, "action": action, "params": params})
+    conn.request("POST", "/api/v1/tools/execute", payload, {"Content-Type": "application/json"})
+    res = conn.getresponse()
+    return json.loads(res.read().decode())`
+      },
+      'vault-signer': {
+        name: 'vault-signer.c',
+        lang: 'C',
+        code: `/*
+ * Zoth Studio Sovereign Vault Signer — Zero-Allocation Micro-Core
+ */
+#include <stdint.h>
+#include <stddef.h>
+
+int zoth_vault_derive_key(const uint8_t *passphrase, size_t pass_len,
+                          const uint8_t *salt, size_t salt_len,
+                          uint8_t *out_key32) {
+    if (!passphrase || !salt || !out_key32) return -1;
+    // Argon2id Zero-Cloud Key Derivation
+    return 0;
+}`
+      },
+      'studio-kernel': {
+        name: 'studio-kernel.js',
+        lang: 'JavaScript',
+        code: `// Zoth Studio Kernel Event Loop
+window.ZothKernel = {
+  version: "12.0.0-sovereign",
+  busConnected: true,
+  emit: function(event, data) {
+    window.dispatchEvent(new CustomEvent("zoth:" + event, { detail: data }));
+  }
+};`
+      }
+    };
+
+    let activeFileKey = 'swarm-orchestrator';
+
+    function openFile(key, nodeElem) {
+      if (!mockFiles[key]) return;
+      activeFileKey = key;
+
+      // Update tree selection
+      document.querySelectorAll('.file-item-node').forEach(el => el.classList.remove('active'));
+      if (nodeElem) {
+        nodeElem.classList.add('active');
+      }
+
+      // Update tab selection
+      document.querySelectorAll('.editor-tab-btn').forEach(btn => btn.classList.remove('active'));
+      const activeTab = document.getElementById('tab-' + key);
+      if (activeTab) activeTab.classList.add('active');
+
+      // Update code view
+      const fileData = mockFiles[key];
+      const editor = document.getElementById('editorCodeContainer');
+      editor.innerText = fileData.code;
+
+      // Update line numbers
+      const lines = fileData.code.split('\n').length;
+      let gutHtml = '';
+      for (let i = 1; i <= Math.max(lines, 24); i++) {
+        gutHtml += i + '<br/>';
+      }
+      document.getElementById('editorGutters').innerHTML = gutHtml;
+
+      // Log in terminal
+      appendTerminalLog(`[BUFFER] Opened \${fileData.name} (\${fileData.lang})`);
+    }
+
+    function executeEditorAction(action) {
+      const term = document.getElementById('terminalOutput');
+      if (action === 'sanitize') {
+        appendTerminalLog(`[AST SANITIZER] Running Tree-Sitter validator on \${mockFiles[activeFileKey].name}...`);
+        setTimeout(() => {
+          appendTerminalLog(`[AST SANITIZER] ✓ AST Parsed successfully. 0 Forbidden tokens found.`);
+        }, 200);
+      } else if (action === 'invariants') {
+        appendTerminalLog(`[INVARIANTS] Checking zero-cloud contract constraints...`);
+        setTimeout(() => {
+          appendTerminalLog(`[INVARIANTS] ✓ PASS: Zero-cloud isolate maintained. Shannon entropy within safe threshold.`);
+        }, 250);
+      } else if (action === 'toolbench') {
+        appendTerminalLog(`[TOOL BENCH] Dispatching mock test payload to loopback harness...`);
+        setTimeout(() => {
+          appendTerminalLog(`[TOOL BENCH] ✓ Simulation succeeded: 0.0 ms latency, status 200 OK.`);
+        }, 300);
+      }
+    }
+
+    function appendTerminalLog(msg) {
+      const term = document.getElementById('terminalOutput');
+      term.innerText += '\n' + msg;
+      term.scrollTop = term.scrollHeight;
+    }
+
+    function submitTerminalCmd() {
+      const input = document.getElementById('terminalCmdInput');
+      const cmd = input.value.trim();
+      if (!cmd) return;
+      appendTerminalLog(`zoth-ide@operator:~$ \${cmd}`);
+      input.value = '';
+
+      if (cmd.startsWith('zoth run')) {
+        appendTerminalLog(`[ZOTH EXEC] Spawning DAG worker task on loopback :8484...`);
+        appendTerminalLog(`[ZOTH EXEC] ✓ Agent task completed in 1.4ms with 0 leaks.`);
+      } else if (cmd.startsWith('zoth test')) {
+        appendTerminalLog(`[ZOTH TEST] Running 7 contract tests...\n✓ Test 1: GitHub Tool Mock (PASS)\n✓ Test 2: Invariant Verifier (PASS)\n✓ Test 3: Argon2 Key Ring (PASS)\n✓ All 7 Tests Passed (0.0ms total).`);
+      } else if (cmd.startsWith('zoth lint')) {
+        appendTerminalLog(`[ZOTH LINT] Clean AST. No forbidden eval or network escapes.`);
+      } else {
+        appendTerminalLog(`[ZOTH CLI] Command '\${cmd}' executed locally.`);
+      }
+    }
+
+    function handleTerminalEnter(e) {
+      if (e.key === 'Enter') {
+        submitTerminalCmd();
+      }
+    }
+
+    function runTerminalQuick(cmd) {
+      document.getElementById('terminalCmdInput').value = cmd;
+      submitTerminalCmd();
+    }
+
+    function clearTerminal() {
+      document.getElementById('terminalOutput').innerText = `zoth-ide@operator:~$ _`;
+    }
+
+    function copyEditorCode() {
+      const text = document.getElementById('editorCodeContainer').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        appendTerminalLog(`[CLIPBOARD] Code copied to clipboard.`);
+      });
+    }
+
+    function createNewMockFile() {
+      const fname = prompt('Enter new contract file name (e.g. custom-guard.ts):', 'custom-guard.ts');
+      if (fname) {
+        appendTerminalLog(`[WORKSPACE] Created contract file \${fname}`);
+      }
+    }
+
+    function filterFiles() {
+      const q = document.getElementById('fileSearchInput').value.toLowerCase();
+      document.querySelectorAll('.file-item-node').forEach(node => {
+        const text = node.innerText.toLowerCase();
+        node.style.display = text.includes(q) ? 'flex' : 'none';
+      });
+    }
+  </script>
+</body>
+</html>

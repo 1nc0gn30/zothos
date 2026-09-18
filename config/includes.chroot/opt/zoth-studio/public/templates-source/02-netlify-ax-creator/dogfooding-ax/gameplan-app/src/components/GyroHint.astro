@@ -1,0 +1,36 @@
+---
+---
+
+<div class="gyro-hint" id="gyro-hint" aria-hidden="true">
+  <div class="gyro-hint-inner">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="4" width="20" height="16" rx="3" />
+      <circle cx="12" cy="12" r="3" />
+      <line x1="12" y1="8" x2="12" y2="6" />
+    </svg>
+    <span>Tilt your device for parallax</span>
+  </div>
+</div>
+
+<script>
+  const hint = document.getElementById('gyro-hint');
+  if (hint) {
+    const isTouch = window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+    if (!isTouch) {
+      hint.style.display = 'none';
+    } else {
+      const hide = () => {
+        hint.classList.add('hidden');
+      };
+
+      // Auto-hide after 6 seconds or on first scroll/touch
+      const t = setTimeout(hide, 6000);
+      const once = () => {
+        clearTimeout(t);
+        hide();
+      };
+      window.addEventListener('scroll', once, { once: true, passive: true });
+      window.addEventListener('touchstart', once, { once: true, passive: true });
+    }
+  }
+</script>

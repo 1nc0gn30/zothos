@@ -1,0 +1,60 @@
+{
+  "id": "agent-ax",
+  "name": "Agent AX - Hermes AI Agent Access Layer",
+  "version": "2.0.0",
+  "archetype": "agent-proxy-gateway",
+  "category": "02-netlify-ax-creator",
+  "description": "Lightweight Netlify serverless proxy gateway bridging browser clients to local Hermes/Ollama AI agent execution nodes.",
+  "ai_composable_modules": [
+    {
+      "name": "HermesProxyFunction",
+      "file": "netlify/functions/hermes-proxy.js",
+      "type": "service",
+      "purpose": "Streaming serverless HTTP/SSE proxy with authorization headers and rate-limiting",
+      "exports": [
+        "handler"
+      ]
+    },
+    {
+      "name": "AgentBridgeClient",
+      "file": "server.js",
+      "type": "service",
+      "purpose": "Local Node.js bridge server handling agent heartbeat and local tool execution",
+      "exports": [
+        "startBridge"
+      ]
+    },
+    {
+      "name": "AgentAXDocs",
+      "file": "README.md",
+      "type": "documentation",
+      "purpose": "Architecture blueprint and security hardening guide for local AI gateways",
+      "exports": []
+    }
+  ],
+  "technical_hooks": {
+    "audio_engine": null,
+    "rendering_engine": "Netlify Functions JSON streaming / Server-Sent Events (SSE)",
+    "state_and_offline": "In-memory token buffer / Localhost loopback binding policy",
+    "telemetry_and_events": "HTTP chunk stream events / Connection latency monitor",
+    "integrations": "Netlify Functions / Ollama API / Hermes Agent Protocol"
+  },
+  "seo_aeo_schemas": [
+    "SoftwareApplication",
+    "TechArticle",
+    "BreadcrumbList"
+  ],
+  "cli_compose_command": "zoth compose 02-netlify-ax-creator/agent-ax --preset agent-proxy",
+  "deployment": {
+    "target": "netlify",
+    "framework": "netlify-functions",
+    "output": "netlify/functions"
+  },
+  "tags": [
+    "agent-ax",
+    "hermes",
+    "proxy",
+    "netlify-functions",
+    "ai-gateway"
+  ]
+}

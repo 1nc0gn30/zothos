@@ -1,0 +1,412 @@
+/* ============================================================
+   Zoth Studio Directory — page-level design system
+   Owned by public/studio/index.html only. Complements (not
+   replaces) /studio/studio-poster.css and the shared nav/footer.
+   Uses the global theme design tokens (--bg, --panel, --surface-card,
+   --line, --text-primary, --gold, --cyan, --accent-glow, ...).
+   ============================================================ */
+
+html {
+  overflow-x: hidden !important;
+  max-width: 100% !important;
+  width: 100%;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box;
+}
+
+body {
+  overflow-x: hidden !important;
+  max-width: 100% !important;
+  width: 100%;
+  margin: 0 !important;
+  box-sizing: border-box;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* ---------- Skip-to-content link ---------- */
+.skip-to-content {
+  position: absolute;
+  left: 12px;
+  top: -100px;
+  z-index: 9999;
+  padding: 12px 18px;
+  border-radius: 10px;
+  background: var(--cyan, #00f0ff);
+  color: #050508;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-weight: 700;
+  font-size: 0.85rem;
+  line-height: 1;
+  text-decoration: none;
+  box-shadow: 0 6px 22px var(--accent-glow, rgba(0, 240, 255, 0.3));
+  transition: top 0.18s ease;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.skip-to-content:focus {
+  top: 12px;
+}
+.skip-to-content:not(:focus) {
+  position: absolute;
+}
+
+/* ---------- Keyboard focus visibility (must survive overflow:hidden) ---------- */
+.studio-poster :focus-visible,
+.studio-filter-section :focus-visible,
+.studio-main :focus-visible,
+.quick-jump-bar :focus-visible {
+  outline: 2px solid var(--cyan, #00f0ff);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* Cards are the focusable element themselves; overflow:hidden never clips
+   their own outline/box-shadow ring. */
+.ws-card:focus-visible,
+.filter-chip:focus-visible,
+.quick-jump-pill:focus-visible,
+.btn:focus-visible,
+.search-box-wrap input:focus-visible {
+  outline: 2px solid var(--cyan, #00f0ff);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 4px var(--accent-glow, rgba(0, 240, 255, 0.22));
+}
+
+/* ---------- Card glow palette (replaces inline --card-glow styles) ---------- */
+.ws-card--cyan    { --card-glow:#00f0ff; --card-tag-color:#00f0ff; }
+.ws-card--blue    { --card-glow:#7c9cff; --card-tag-color:#7c9cff; }
+.ws-card--emerald { --card-glow:#34d399; --card-tag-color:#34d399; }
+.ws-card--gold    { --card-glow:#e8c872; --card-tag-color:#e8c872; }
+.ws-card--purple  { --card-glow:#a855f7; --card-tag-color:#a855f7; }
+.ws-card--violet  { --card-glow:#c084fc; --card-tag-color:#c084fc; }
+.ws-card--sky     { --card-glow:#38bdf8; --card-tag-color:#38bdf8; }
+.ws-card--amber   { --card-glow:#fbbf24; --card-tag-color:#fbbf24; }
+.ws-card--slate   { --card-glow:#94a3b8; --card-tag-color:#94a3b8; }
+.ws-card--blue .ws-badge-cat { color:#7c9cff; }
+
+/* ---------- Grouped workstation catalogue ---------- */
+.workstations-grid {
+  gap: 18px;
+}
+.ws-group {
+  margin-bottom: 34px;
+}
+.ws-group-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-display, inherit);
+  font-size: clamp(1.15rem, 1.8vw, 1.5rem);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--text-primary, #fff);
+  margin: 0 0 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line, rgba(255,255,255,0.1));
+}
+.ws-group-title::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--line-strong, rgba(255,255,255,0.18)), transparent);
+}
+.ws-group-title .ws-group-count {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--muted, #64748b);
+  background: var(--surface-highlight, rgba(255,255,255,0.05));
+  border: 1px solid var(--line, rgba(255,255,255,0.1));
+  padding: 4px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.ws-group[data-category="nocode"] .ws-group-title { color: var(--cyan, #00f0ff); }
+.ws-group[data-category="swarm"] .ws-group-title { color: var(--violet, #a78bfa); }
+.ws-group[data-category="security"] .ws-group-title { color: var(--gold, #e8c872); }
+.ws-group[data-category="symbol"] .ws-group-title,
+.ws-group[data-category="3d"] .ws-group-title { color: var(--magenta, #e879f9); }
+.ws-group[data-category="observability"] .ws-group-title { color: var(--green, #34d399); }
+
+/* ---------- Card refit: premium anatomy ---------- */
+.ws-card {
+  position: relative;
+  border: 1px solid var(--border-card, var(--line, rgba(255,255,255,0.12)));
+  border-radius: 18px;
+  background: var(--surface-card, rgba(10, 14, 26, 0.85));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 1px 0 var(--surface-highlight, rgba(255,255,255,0.04)) inset, 0 12px 36px -16px var(--shadow-color, rgba(0,0,0,0.65));
+  will-change: transform;
+}
+.ws-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  border-radius: 18px 18px 0 0;
+  background: linear-gradient(90deg, var(--card-glow, transparent), transparent 80%);
+  opacity: 0;
+  transition: opacity 0.22s ease;
+  z-index: 2;
+  pointer-events: none;
+}
+.ws-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--card-glow, var(--gold, #e8c872));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--card-glow, #e8c872) 40%, transparent),
+              0 22px 48px -20px var(--shadow-color, rgba(0,0,0,0.75));
+}
+.ws-card:hover::before {
+  opacity: 1;
+  box-shadow: 0 0 18px var(--card-glow, transparent);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ws-card { transition: transform 0.24s cubic-bezier(0.16,1,0.3,1), border-color 0.24s ease, box-shadow 0.24s ease; }
+  .ws-card:hover { transform: translateY(-3px); }
+  .ws-thumb img { transition: transform 0.5s cubic-bezier(0.16,1,0.3,1); }
+}
+.ws-thumb {
+  height: 172px;
+  border-bottom: 1px solid var(--line, rgba(255,255,255,0.08));
+}
+/* Reserve layout space before images decode (prevents CLS) */
+.ws-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: var(--bg-3, #080c16);
+}
+.ws-badge-cat {
+  top: 14px;
+  left: 14px;
+  border-radius: 8px;
+  padding: 5px 12px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  letter-spacing: 0.06em;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--card-tag-color, var(--gold, #e8c872));
+  border-color: color-mix(in srgb, var(--card-tag-color, var(--gold, #e8c872)) 42%, transparent);
+  background: color-mix(in srgb, var(--card-tag-color, var(--gold, #e8c872)) 12%, rgba(5, 5, 8, 0.88));
+}
+.ws-body {
+  padding: 26px 26px 22px;
+  gap: 14px;
+}
+.ws-title {
+  font-size: 1.22rem;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  font-weight: 800;
+}
+.ws-desc {
+  font-size: 0.875rem;
+  line-height: 1.68;
+  color: var(--text-dim, #94a3b8);
+}
+.ws-footer {
+  border-top: 1px solid var(--line, rgba(255,255,255,0.08));
+  padding-top: 16px;
+  min-height: 48px;
+  gap: 12px;
+}
+.ws-link-launch {
+  position: relative;
+  padding-right: 24px;
+  display: inline-flex;
+  align-items: center;
+  font-weight: 700;
+  font-family: var(--font-mono, monospace);
+}
+.ws-link-launch::after {
+  content: "→";
+  position: absolute;
+  right: 2px;
+  transition: transform 0.2s ease;
+}
+.ws-card:hover .ws-link-launch::after { transform: translateX(4px); }
+.ws-link-docs {
+  font-size: 0.74rem;
+  font-family: var(--font-mono, monospace);
+  color: var(--muted, #64748b);
+  opacity: 0.9;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 50%;
+}
+
+/* ---------- Studio Master Telemetry HUD Strip ---------- */
+.studio-telemetry-hud {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin: 0 0 24px 0;
+  padding: 16px 20px;
+  border-radius: 16px;
+  background: var(--surface-card, rgba(12, 17, 32, 0.8));
+  border: 1px solid var(--border, rgba(0, 240, 255, 0.2));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+.studio-hud-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.studio-hud-label {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted, #94a3b8);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.studio-hud-value {
+  font-family: var(--font-mono, monospace);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-primary, #ffffff);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.studio-hud-value .accent-cyan { color: var(--cyan, #00f0ff); }
+.studio-hud-value .accent-gold { color: var(--gold, #fbbf24); }
+.studio-hud-value .accent-green { color: var(--green, #34d399); }
+.studio-hud-value .accent-violet { color: var(--violet, #a855f7); }
+.hud-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green, #34d399);
+  box-shadow: 0 0 10px var(--green, #34d399);
+  animation: pulseDot 2s infinite ease-in-out;
+}
+@keyframes pulseDot {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(1.3); opacity: 1; }
+}
+  opacity: 0.85;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 46%;
+}
+
+/* Light theme refinements */
+html[data-theme="light"] .ws-group-title { color: #111827; }
+html[data-theme="light"] .ws-group[data-category="nocode"] .ws-group-title { color: #0e7490; }
+html[data-theme="light"] .ws-group[data-category="swarm"] .ws-group-title { color: #7c3aed; }
+html[data-theme="light"] .ws-group[data-category="security"] .ws-group-title { color: #b45309; }
+html[data-theme="light"] .ws-group[data-category="3d"] .ws-group-title { color: #c026d3; }
+html[data-theme="light"] .ws-group[data-category="observability"] .ws-group-title { color: #047857; }
+html[data-theme="light"] .ws-group-title::after { background: linear-gradient(90deg, #e2e8f0, transparent); }
+
+/* ---------- Filter bar polish ---------- */
+.studio-filter-wrap { gap: 14px; }
+.filter-chip:focus-visible { border-color: var(--cyan, #00f0ff); }
+.search-box-wrap { flex: 1 1 260px; }
+.search-box-wrap input { font-size: 0.86rem; }
+
+/* ---------- Quick jump refinements ---------- */
+.quick-jump-bar { border-radius: 18px; padding: 26px; }
+.quick-jump-pill {
+  min-height: 44px;
+  padding-inline: 16px;
+  font-size: 0.82rem;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .quick-jump-pill { transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1); }
+}
+
+/* ---------- Progressive scroll-reveal (JS-gated: visible if JS blocked) ---------- */
+html.js .ws-group .ws-card,
+html.js .ws-group-title,
+html.js .quick-jump-bar {
+  opacity: 0;
+  transform: translateY(18px);
+}
+@media (prefers-reduced-motion: no-preference) {
+  html.js .ws-group .ws-card { animation: zothRise 0.6s cubic-bezier(0.16,1,0.3,1) forwards; }
+  html.js .ws-group-title { animation: zothRise 0.55s cubic-bezier(0.16,1,0.3,1) forwards; }
+  html.js .quick-jump-bar { animation: zothRise 0.6s 0.1s cubic-bezier(0.16,1,0.3,1) forwards; }
+  html.js .ws-group:nth-child(1) > .ws-card { animation-delay: 0.04s; }
+  html.js .ws-group:nth-child(2) > .ws-card { animation-delay: 0.10s; }
+  html.js .ws-group:nth-child(3) > .ws-card { animation-delay: 0.16s; }
+  html.js .ws-group:nth-child(4) > .ws-card { animation-delay: 0.22s; }
+  html.js .ws-group:nth-child(5) > .ws-card { animation-delay: 0.28s; }
+}
+@keyframes zothRise {
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html.js .ws-group .ws-card,
+  html.js .ws-group-title,
+  html.js .quick-jump-bar {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+  * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
+
+/* ---------- Responsive design (page-level breakpoints) ----------
+   body carries overflow-x:hidden; any element wider than the viewport
+   would be silently clipped. These keep everything within bounds AND
+   keep every tap target at least 44px tall. */
+
+/* Desktop / 1024 */
+@media (max-width: 1024px) {
+  .workstations-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+  .ws-thumb { height: 158px; }
+}
+
+/* Tablet / 880 */
+@media (max-width: 880px) {
+  .studio-poster { grid-template-columns: 1fr; }
+  .studio-poster-copy { padding-top: 5rem; }
+  .workstations-grid { grid-template-columns: 1fr 1fr; }
+  .ws-group-title { font-size: 1.25rem; }
+  .studio-filter-section { position: static; }
+  .filter-tabs { width: 100%; }
+  .search-box-wrap { flex: 1 1 100%; }
+}
+
+/* Small tablet / 640 */
+@media (max-width: 640px) {
+  .workstations-grid { grid-template-columns: 1fr; }
+  .ws-thumb { height: 180px; }
+  .ws-body { padding: 20px 18px 18px; }
+  .quick-jump-bar { padding: 20px 16px; }
+  .quick-jump-links { gap: 8px; }
+  .quick-jump-pill { flex: 1 1 45%; justify-content: center; text-align: center; }
+  .studio-main { padding: 26px 14px 70px; }
+  .section-heading { margin-bottom: 34px; }
+}
+
+/* Phone / 440 */
+@media (max-width: 440px) {
+  .studio-poster-copy { padding: 4.25rem 18px 3rem; }
+  .studio-poster h1 { font-size: clamp(2.1rem, 11vw, 3rem); }
+  .studio-poster-actions { flex-direction: column; align-items: stretch; }
+  .studio-poster-actions .btn { width: 100%; }
+  .ws-footer { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .ws-link-docs { max-width: 100%; }
+  .ws-badge-cat { font-size: 11.5px; padding: 3px 8px; }
+  .section-heading { flex-direction: column; gap: 6px; }
+}

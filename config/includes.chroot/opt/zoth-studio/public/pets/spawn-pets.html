@@ -1,0 +1,1941 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<script>
+  if (window.location.protocol === 'file:') {
+    const b = document.createElement('base');
+    b.href = window.location.pathname.replace(/\/public\/pets\/.*$/, '/public/');
+    document.head.prepend(b);
+  }
+</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" name="viewport"/>
+<title>Zoth Companion Forge — Spawn &amp; Command Desktop Spirits</title>
+<meta content="Spawn autonomous desktop companion spirits with customized AI personalities, emotional vibration meters, and local CLI task watchers." name="description"/>
+<link href="https://zoth.nullai.tech/pets/spawn-pets.html" rel="canonical"/>
+<!-- OpenGraph / Facebook -->
+<meta content="website" property="og:type"/>
+<meta content="Zoth Studio" property="og:site_name"/>
+<meta content="https://zoth.nullai.tech/pets/spawn-pets.html" property="og:url"/>
+<meta content="Zoth Companion Forge — Spawn &amp; Command Desktop Spirits" property="og:title"/>
+<meta content="Spawn autonomous desktop companion spirits with customized AI personalities, emotional vibration meters, and local CLI task watchers." property="og:description"/>
+<meta content="https://zoth.nullai.tech/assets/media/hero-pet-roster.jpg" property="og:image"/>
+<!-- Twitter Cards -->
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="Zoth Companion Forge — Spawn &amp; Command Desktop Spirits" name="twitter:title"/>
+<meta content="Spawn autonomous desktop companion spirits with customized AI personalities, emotional vibration meters, and local CLI task watchers." name="twitter:description"/>
+<meta content="https://zoth.nullai.tech/assets/media/hero-pet-roster.jpg" name="twitter:image"/>
+<!-- OpenGraph / Facebook -->
+<!-- Twitter Cards -->
+<!-- OpenGraph / Facebook -->
+<!-- Twitter Cards -->
+<meta content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" name="robots"/>
+<meta content="#030306" name="theme-color">
+<link href="/assets/brand/zoth-seal-hermetic-on-dark.svg" rel="icon" type="image/svg+xml">
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&amp;family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&amp;family=IBM+Plex+Mono:wght@400;500;600;700&amp;family=Syne:wght@600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="/assets/zoth-theme.css?v=11" rel="stylesheet"/>
+<script src="/assets/zoth-theme.js?v=11"></script>
+<link href="/assets/zoth-nav.css?v=11" rel="stylesheet"/>
+<link href="/assets/zoth-footer.css" rel="stylesheet"/>
+<link href="/pets/pets.css" rel="stylesheet"/>
+<link href="/assets/zoth-mobile.css" rel="stylesheet"/>
+<!-- Local Sovereign Vendor Three.js & Controls -->
+<script src="/assets/vendor/three.min.js"></script>
+<script src="/assets/vendor/OrbitControls.js"></script>
+<style>
+        .skip-to-content, .skip-link, .skip {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    .skip-to-content:focus, .skip-link:focus, .skip:focus {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      width: auto;
+      height: auto;
+      padding: 10px 18px;
+      margin: 0;
+      overflow: visible;
+      clip: auto;
+      white-space: normal;
+      background: #fbbf24;
+      color: #050508;
+      font-family: monospace;
+      font-size: 0.82rem;
+      font-weight: 700;
+      border-radius: 8px;
+      z-index: 100000;
+      outline: 2px solid #fff;
+    }
+
+      :root {
+        --cyan: #00f0ff;
+        --purple: #a855f7;
+        --gold: #fbbf24;
+        --emerald: #34d399;
+        --magenta: #ff007a;
+        --bg-deep: #030408;
+        --text: #f8fafc;
+        --text-bright: #ffffff;
+        --text-body: #f1f5f9;
+        --text-dossier: #e2e8f0;
+        --text-specs: #cbd5e1;
+        --muted: #94a3b8;
+        --axiom-quote: #fef08a;
+        --font-display: 'Syne', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        --font-serif: 'Fraunces', Georgia, serif;
+        --font-axiom: 'Fraunces', Georgia, serif;
+        --font-body: 'Figtree', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        --font-mono: 'IBM Plex Mono', monospace;
+
+        /* Sacred Geometry & Fibonacci Scale Tokens */
+        --phi: 1.6180339887;
+        --fib-1: 1px;
+        --fib-2: 2px;
+        --fib-3: 3px;
+        --fib-5: 5px;
+        --fib-8: 8px;
+        --fib-13: 13px;
+        --fib-21: 21px;
+        --fib-34: 34px;
+        --fib-55: 55px;
+        --fib-89: 89px;
+        --fib-144: 144px;
+        --fib-233: 233px;
+        --fib-377: 377px;
+        --fib-610: 610px;
+
+        /* Fibonacci Radii Scale */
+        --radius-fib-xs: 5px;
+        --radius-fib-sm: 8px;
+        --radius-fib-md: 13px;
+        --radius-fib-lg: 21px;
+        --radius-fib-xl: 34px;
+        --radius-fib-2xl: 55px;
+
+        /* Legacy Aliases */
+        --rad-xs: var(--radius-fib-xs);
+        --rad-sm: var(--radius-fib-sm);
+        --rad-md: var(--radius-fib-md);
+        --rad-lg: var(--radius-fib-lg);
+        --rad-xl: var(--radius-fib-xl);
+        --rad-2xl: var(--radius-fib-2xl);
+
+        /* Fibonacci Spacing & Padding Mappings */
+        --space-fib-xs: var(--fib-8);
+        --space-fib-sm: var(--fib-13);
+        --space-fib-md: var(--fib-21);
+        --space-fib-lg: var(--fib-34);
+        --space-fib-xl: var(--fib-55);
+
+        --golden-split: 1.618fr 1fr;
+      }
+
+      *, *::before, *::after {
+        box-sizing: border-box;
+      }
+
+      html, body {
+        max-width: 100vw;
+        overflow-x: hidden;
+        width: 100%;
+        touch-action: manipulation;
+      }
+
+      .btn-nexus-export {
+        background: linear-gradient(135deg, #00e5ff 0%, #7c3aed 100%);
+        color: #030408;
+        font-weight: 800;
+        border: none;
+        padding: var(--fib-8) var(--fib-13);
+        border-radius: var(--rad-sm);
+        cursor: pointer;
+        font-size: 0.76rem;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--fib-5);
+        transition: all 0.2s ease;
+        text-decoration: none;
+        min-height: 44px;
+        touch-action: manipulation;
+      }
+      .btn-nexus-export:hover {
+        box-shadow: 0 0 var(--fib-21) rgba(0, 229, 255, 0.6);
+        transform: translateY(-2px);
+      }
+      .interaction-bar {
+        display: flex;
+        gap: var(--fib-8);
+        margin-top: var(--fib-8);
+        flex-wrap: wrap;
+      }
+      .btn-interact {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(0, 240, 255, 0.25);
+        color: #fff;
+        font-family: var(--font-mono);
+        font-size: 0.78rem;
+        padding: var(--fib-8) var(--fib-13);
+        border-radius: var(--rad-sm);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--fib-5);
+        min-height: 44px;
+        touch-action: manipulation;
+      }
+      .btn-interact:hover {
+        background: rgba(0, 240, 255, 0.15);
+        border-color: var(--cyan);
+        transform: translateY(-1px);
+      }
+      .stat-meter {
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: var(--rad-sm);
+        padding: var(--fib-8) var(--fib-13);
+        display: flex;
+        flex-direction: column;
+        gap: var(--fib-5);
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+      }
+      .stat-bar {
+        height: 6px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 3px;
+        overflow: hidden;
+      }
+      .stat-fill {
+        height: 100%;
+        background: var(--cyan);
+        transition: width 0.3s ease;
+      }
+      
+      /* 3D WebGL Canvas Touch Polish */
+      .sanctuary-stage, #canvas-host, #three-stage {
+        touch-action: pan-y;
+      }
+      #three-stage canvas {
+        width: 100% !important;
+        height: 100% !important;
+        display: block;
+        touch-action: pan-y;
+      }
+      .roster-card {
+        display: flex;
+        align-items: center;
+        gap: var(--fib-8);
+        padding: var(--fib-8);
+        border-radius: var(--rad-sm);
+        background: rgba(14, 20, 36, 0.75);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        touch-action: manipulation;
+      }
+      .roster-card:hover, .roster-card.active {
+        border-color: var(--cyan);
+        background: rgba(0, 240, 255, 0.12);
+        box-shadow: 0 0 var(--fib-13) rgba(0, 240, 255, 0.3);
+      }
+      .roster-card img {
+        width: 40px;
+        height: 40px;
+        border-radius: var(--rad-xs);
+        object-fit: cover;
+        flex-shrink: 0;
+        border: 1px solid rgba(0, 240, 255, 0.3);
+      }
+    
+    /* Top Navigation Bar */
+    header.bar {
+      position: fixed; inset: 0 0 auto; z-index: 40;
+      display: flex; align-items: center; gap: var(--fib-21);
+      padding: var(--fib-13) var(--fib-21);
+      background: rgba(5, 5, 8, 0.88);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      max-width: 100vw;
+    }
+    .brand { display: flex; align-items: center; gap: var(--fib-13); text-decoration: none; flex-shrink: 0; }
+    .brand img {
+      width: 36px; height: 36px; border-radius: 50%; object-fit: cover;
+      border: 1px solid rgba(232, 200, 114, 0.45);
+    }
+    .brand strong {
+      display: block; font-family: var(--font-display); font-size: 1.18rem;
+      letter-spacing: -0.03em; font-weight: 600; color: #fff;
+    }
+    .brand small {
+      display: block; color: var(--gold); font-family: var(--font-mono);
+      font-size: 0.58rem; letter-spacing: 0.16em; text-transform: uppercase;
+    }
+    nav.menu { display: flex; flex-wrap: wrap; gap: 2px var(--fib-21); margin-left: auto; align-items: center; }
+    
+    
+    
+    
+    
+    .progress {
+      position: fixed; inset: 0 auto auto 0; z-index: 50;
+      height: 2px; width: 100%; background: var(--gold); pointer-events: none;
+    }
+    .burger {
+      display: none; margin-left: auto;
+      background: none; border: 1px solid rgba(255, 255, 255, 0.08); color: #fff;
+      font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.14em;
+      text-transform: uppercase; padding: var(--fib-8) var(--fib-13); border-radius: 999px; cursor: pointer;
+      min-height: 44px; min-width: 44px;
+      touch-action: manipulation;
+    }
+    .drawer {
+      display: none; position: fixed; inset: 0; z-index: 38;
+      background: #050508;
+      padding: var(--fib-89) var(--fib-21) var(--fib-34);
+      flex-direction: column; gap: var(--fib-8);
+      overflow-y: auto;
+      max-width: 100vw;
+    }
+    body.menu-open .drawer { display: flex; }
+    .drawer a {
+      text-decoration: none; font-family: var(--font-display);
+      font-size: clamp(1.4rem, 6vw, 2.2rem); letter-spacing: -0.03em;
+      padding: var(--fib-8) 0; border-bottom: 1px solid rgba(255, 255, 255, 0.08); color: #fff;
+      min-height: 44px; display: flex; align-items: center;
+    }
+    .drawer a:hover, .drawer a.on { color: var(--gold); }
+    .drawer .sub {
+      font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted); border: 0; margin-top: var(--fib-21);
+    }
+    /* Mobile-Only Desktop Insight Component */
+    .mobile-desktop-insight {
+      display: flex;
+      align-items: center;
+      gap: var(--fib-13);
+      background: rgba(10, 16, 32, 0.94);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      border-radius: var(--radius-fib-md);
+      padding: var(--fib-13) var(--fib-21);
+      margin: 0 auto var(--fib-21);
+      max-width: min(1200px, 100%);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 4px var(--fib-21) rgba(0, 240, 255, 0.08);
+      position: relative;
+      z-index: 25;
+    }
+    .mobile-desktop-insight .insight-icon {
+      font-size: 1.35rem;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .mobile-desktop-insight .insight-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+      text-align: left;
+    }
+    .mobile-desktop-insight .insight-text strong {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--cyan);
+      letter-spacing: -0.01em;
+    }
+    .mobile-desktop-insight .insight-text span {
+      font-family: var(--font-body);
+      font-size: 0.76rem;
+      color: #94a3b8;
+      line-height: 1.4;
+    }
+    .mobile-desktop-insight .insight-close {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #94a3b8;
+      font-size: 0.85rem;
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      min-height: 44px;
+      border-radius: var(--radius-fib-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+      touch-action: manipulation;
+    }
+    .mobile-desktop-insight .insight-close:hover {
+      background: rgba(255, 0, 122, 0.2);
+      border-color: var(--magenta);
+      color: #fff;
+    }
+
+    @media (min-width: 881px) {
+      .mobile-desktop-insight {
+        display: none !important;
+      }
+    }
+
+    @media (max-width: 880px) {
+      nav.menu { display: none; }
+      .burger { display: inline-flex; min-height: 44px; min-width: 44px; }
+      .hud-pill-btn, .btn-nexus-export {
+        min-height: 44px;
+        padding: 8px 14px;
+        display: inline-flex;
+        align-items: center;
+      }
+      .btn-interact {
+        min-height: 44px;
+      }
+      .roster-card {
+        min-height: 44px;
+      }
+    }
+
+    .btn-glow {
+      background: linear-gradient(135deg, var(--cyan) 0%, #0891b2 100%);
+      color: #030408;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 0.84rem;
+      border: none;
+      border-radius: var(--rad-sm);
+      cursor: pointer;
+      min-height: 44px;
+      padding: var(--fib-8) var(--fib-21);
+      touch-action: manipulation;
+      transition: all 0.2s ease;
+    }
+    .btn-glow:hover {
+      box-shadow: 0 0 var(--fib-13) rgba(0, 240, 255, 0.5);
+    }
+
+    @media (max-width: 640px) {
+      header.bar {
+        padding: var(--fib-8) var(--fib-13);
+      }
+      .pets-main-container {
+        padding: 72px var(--fib-8) var(--fib-21) !important;
+      }
+      .sanctuary-stage {
+        min-height: 300px !important;
+        height: 42vh !important;
+      }
+      .stage-top-hud {
+        top: var(--fib-8);
+        left: var(--fib-8);
+        right: var(--fib-8);
+      }
+      .hud-pill-row {
+        gap: var(--fib-5);
+      }
+      .hud-pill, .hud-pill-btn, .btn-nexus-export {
+        font-size: 0.72rem;
+        padding: 6px var(--fib-8);
+        min-height: 44px;
+      }
+      .mobile-desktop-insight {
+        padding: var(--fib-8) var(--fib-13);
+      }
+    }
+    </style>
+<!-- Schema.org JSON-LD Structured Data for SEO & AEO Voice Search -->
+<!-- Schema.org JSON-LD Structured Data for SEO & AEO Voice Search -->
+<!-- Schema.org JSON-LD Structured Data for SEO & AEO Voice Search -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://zoth.nullai.tech/#organization",
+      "name": "NullAI Tech",
+      "url": "https://nullai.tech/",
+      "logo": "https://zoth.nullai.tech/assets/brand/zoth-seal-hermetic-on-dark.svg",
+      "sameAs": [
+        "https://github.com/NullAITech/zoth-studio"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://zoth.nullai.tech/#website",
+      "url": "https://zoth.nullai.tech/",
+      "name": "Zoth Studio",
+      "description": "Local-first autonomous AI multi-agent workstation, 3D swarm arena, and privacy-first application foundry.",
+      "publisher": {
+        "@id": "https://zoth.nullai.tech/#organization"
+      }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://zoth.nullai.tech/pets/spawn-pets.html#softwareapplication",
+      "name": "Zoth Companion Forge \u2014 Spawn & Command Desktop Spirits",
+      "description": "Spawn autonomous desktop companion spirits with customized AI personalities, emotional vibration meters, and local CLI task watchers.",
+      "url": "https://zoth.nullai.tech/pets/spawn-pets.html",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Linux, macOS, Windows",
+      "inLanguage": "en-US",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://zoth.nullai.tech/pets/spawn-pets.html",
+      "url": "https://zoth.nullai.tech/pets/spawn-pets.html",
+      "name": "Zoth Companion Forge \u2014 Spawn & Command Desktop Spirits",
+      "description": "Spawn autonomous desktop companion spirits with customized AI personalities, emotional vibration meters, and local CLI task watchers.",
+      "inLanguage": "en-US",
+      "isPartOf": {
+        "@id": "https://zoth.nullai.tech/#website"
+      },
+      "speakable": {
+        "@type": "SpeakableSpecification",
+        "cssSelector": [
+          "h1",
+          ".kicker",
+          ".spawn-title",
+          ".meter-label",
+          ".status-text"
+        ]
+      },
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://zoth.nullai.tech/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Pets",
+            "item": "https://zoth.nullai.tech/pets"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Spawn Pets",
+            "item": "https://zoth.nullai.tech/pets/spawn-pets.html"
+          }
+        ]
+      }
+    }
+  ]
+}
+  </script>
+<link href="/assets/zoth-nav.css?v=11" rel="stylesheet"/>
+</link></meta><meta content="1200" property="og:image:width"/><meta content="630" property="og:image:height"/><meta content="Zoth Studio Companion Spirits Spawn Arena" property="og:image:alt"/><meta content="Zoth Studio Companion Spirits Spawn Arena" name="twitter:image:alt"/><meta content="US-VA" name="geo.region"/><meta content="Virginia Beach, Virginia" name="geo.placename"/><meta content="36.8529;-75.9780" name="geo.position"/><meta content="36.8529, -75.9780" name="ICBM"/><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://zoth.nullai.tech/pets/spawn-pets.html#webpage",
+      "url": "https://zoth.nullai.tech/pets/spawn-pets.html",
+      "name": "Zoth Companion Forge \u2014 Spawn & Command Desktop Spirits",
+      "description": "Spawn autonomous desktop companion spirits with customized AI personalities, emotional vibration meters, and local CLI task watchers.",
+      "isPartOf": {
+        "@type": "WebSite",
+        "@id": "https://zoth.nullai.tech/#website",
+        "url": "https://zoth.nullai.tech/",
+        "name": "Zoth Studio",
+        "publisher": {
+          "@type": "Organization",
+          "name": "757tech / NullAI",
+          "url": "https://757tech.pro"
+        }
+      },
+      "primaryImageOfPage": {
+        "@type": "ImageObject",
+        "url": "https://zoth.nullai.tech/assets/media/hero-pet-roster.jpg",
+        "caption": "Zoth Studio Companion Spirits Spawn Arena"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://zoth.nullai.tech/pets/spawn-pets.html#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://zoth.nullai.tech/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Pets",
+          "item": "https://zoth.nullai.tech/pets/spawn-pets.html"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://zoth.nullai.tech/pets/spawn-pets.html#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is Zoth Studio?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Zoth Studio is a sovereign, local-first control surface for multi-agent AI orchestration, featuring a 298+ verified tool registry, 23+ modular studio suites, a 21-node sovereign agent pantheon, and an encrypted BYOK vault."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Where are my API keys stored?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "API keys are stored strictly in local operator memory or an encrypted local Rust daemon using Argon2id and XChaCha20-Poly1305. Plaintext keys are never sent to external servers."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does Zoth Studio require a cloud subscription?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Zoth Studio is fully sovereign and free to run on your local hardware or private network over Tailscale."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What are Zoth Companion Spirits (Pets)?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Companion Spirits are liquid-neon 3D mascots with kinetic WebGL animations that represent specialized subsystem daemons, providing visual telemetry and real-time status feedback."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can Companion Spirits be rendered in 3D?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, all companion spirits feature real-time Three.js 3D models with interactive mouse, touch, and spatial hand-tracking reactions."
+          }
+        }
+      ]
+    }
+  ]
+}</script><link href="/assets/zoth-theme.css?v=11" rel="stylesheet"/>
+<script src="/assets/zoth-theme.js?v=11"></script>
+<link href="/assets/zoth-nav.css?v=11" rel="stylesheet"/>
+<link href="/assets/zoth-workbench.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/assets/zoth-footer.css" />
+<link href="/assets/zoth-hud-embedded.css" rel="stylesheet"/>
+<script src="/assets/zoth-hud-embedded.js"></script>
+</head>
+<body class="deck-page">
+<a class="skip-link" href="#main" style="position:fixed;top:-60px;left:16px;z-index:100;background:var(--gold);color:#050508;padding:8px 16px;border-radius:6px;transition:top 0.2s;">Skip to main content</a>
+                                                                    <header class="bar" id="topbar" role="banner">
+      <a class="brand js-hub" href="/" aria-label="Zoth Studio Home">
+        <div class="brand-emblem-wrap">
+          <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth Golden Z Emblem" width="34" height="34" class="brand-emblem-img" />
+          <span class="brand-emblem-halo"></span>
+        </div>
+        <span class="brand-text-wrap">
+          <strong>Zoth</strong>
+          <small>by NullAI</small>
+        </span>
+        <span class="brand-status-badge">SOVEREIGN</span>
+      </a>
+
+      <nav class="menu" aria-label="Primary navigation" role="navigation">
+        <a class="nav-link nav-for-everyone" href="/#for-everyone" data-tip="Zero-Code Showcases — How non-tech founders, creators & teams depend on Zoth.">✦ For You</a>
+
+        <!-- 🔮 Core AI -->
+        <div class="nav-dropdown" data-dropdown-id="core">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Core AI</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🔮 CORE AI ARCHITECTURE</span><span class="nav-item-badge">6 NODES</span></div>
+            <a href="/zoth/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+            <a href="/agents/"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+            <a href="/studio/consensus.html"><span class="nav-item-icon-box">⚔️</span><div class="nav-item-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+            <a href="/studio/swarm.html"><span class="nav-item-icon-box">🌐</span><div class="nav-item-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+            <a href="/memory/"><span class="nav-item-icon-box">🧠</span><div class="nav-item-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+            <a href="/zoth-world.html"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+          </div>
+        </div>
+
+        <!-- 🪐 Studio -->
+        <div class="nav-dropdown" data-dropdown-id="studio">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Studio</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu nav-dropdown-mega">
+            <div class="nav-dropdown-header"><span>🪐 14+ STUDIO WORKSTATIONS</span><span class="nav-item-badge">LOCAL DAGS</span></div>
+            <a href="/studio/cockpit.html"><span class="nav-item-icon-box">🪐</span><div class="nav-item-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+            <a href="/studio/cockpit.html?tool=webgen"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+            <a href="/studio/cockpit.html?tool=vos-sandbox"><span class="nav-item-icon-box">💻</span><div class="nav-item-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+            <a href="/studio/cockpit.html?tool=nexus-3d"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+            <a href="/studio/cockpit.html?tool=omnipost"><span class="nav-item-icon-box">🎬</span><div class="nav-item-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+            <a href="/studio/cockpit.html?tool=math-pillars"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+            <a href="/studio/cockpit.html?tool=secure-comms"><span class="nav-item-icon-box">🔒</span><div class="nav-item-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+            <a href="/studio/cockpit.html?tool=signal-bridge"><span class="nav-item-icon-box">📡</span><div class="nav-item-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+            <a href="/studio/cockpit.html?tool=web3-hub"><span class="nav-item-icon-box">🪙</span><div class="nav-item-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+            <a href="/studio/cockpit.html?tool=pets"><span class="nav-item-icon-box">💎</span><div class="nav-item-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+            <a href="/studio/cockpit.html?tool=tool-nexus"><span class="nav-item-icon-box">🛠️</span><div class="nav-item-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+          </div>
+        </div>
+
+        <!-- 🌌 Universe -->
+        <div class="nav-dropdown" data-dropdown-id="universe">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Universe</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🌌 UNIVERSE &amp; PUBLICATIONS</span><span class="nav-item-badge">STORIES</span></div>
+            <a href="/comic/"><span class="nav-item-icon-box">🎨</span><div class="nav-item-body"><strong>AZOTH Anime Comic</strong><small>Season 1 Ep 1: Genesis in Silicon Rain (Audio)</small></div><span class="nav-item-badge">AUDIO</span></a>
+            <a href="/social/"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+            <a href="/articles/"><span class="nav-item-icon-box">📜</span><div class="nav-item-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+            <a href="/article/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+            <a href="/ai-webgpu.html"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+            <a href="/adytum/"><span class="nav-item-icon-box">🏛️</span><div class="nav-item-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+          </div>
+        </div>
+
+        <!-- 📚 Docs & Vault -->
+        <div class="nav-dropdown" data-dropdown-id="docs">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Docs & Vault</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>📚 DOCUMENTATION &amp; SECURITY</span><span class="nav-item-badge">SPECS</span></div>
+            <a href="/docs/"><span class="nav-item-icon-box">📚</span><div class="nav-item-body"><strong>Master Documentation</strong><small>Port Topology, 1-Click Install Scripts & API Guide</small></div><span class="nav-item-badge">DOCS</span></a>
+            <a href="/vault/"><span class="nav-item-icon-box">🔐</span><div class="nav-item-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+            <a href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+            <a href="/faq.html"><span class="nav-item-icon-box">❓</span><div class="nav-item-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+          </div>
+        </div>
+
+        <!-- ⚡ Action Pills -->
+        <button type="button" class="nav-pill nav-telemetry-pill" title="View Live Studio Telemetry & Background Daemons" aria-label="Studio Telemetry Status">
+          <span class="tel-dot online"></span><span class="tel-text">6/6 DAEMONS</span>
+        </button>
+
+        <button type="button" class="nav-pill nav-pet-pill" title="Active Companion Spirit: Azoth (Click to Summon / Switch Mascot)" aria-label="Active Companion Spirit">
+          <span class="pet-emoji">🔮</span><span class="pet-name">Azoth</span>
+        </button>
+
+        <a class="nav-pill nav-deck-pill js-deck" href="http://127.0.0.1:8484/" title="Open Local Operator Deck (:8484)">
+          <span class="deck-pulse"></span><span>DECK</span>
+        </a>
+
+        <button type="button" class="nav-pill nav-palette-btn" title="Open Global Command Palette (Ctrl+K)" aria-label="Command Palette">
+          <span class="palette-icon">🔍</span><kbd class="nav-kbd">Ctrl+K</kbd>
+        </button>
+
+        <button type="button" class="nav-pill nav-annotate-btn" title="Toggle On-Screen Annotator & Feedback (Shift+A)" aria-label="Toggle Annotator">
+          <span class="annotate-icon">✏️</span><span class="annotate-text">Annotate</span><kbd class="nav-kbd">Shift+A</kbd>
+        </button>
+
+        <div class="nav-dropdown nav-theme-dropdown">
+          <button class="nav-dropdown-btn nav-theme-current-btn" type="button" aria-haspopup="true" aria-expanded="false" title="Switch Visual Theme (Shift+T)">
+            <span class="current-theme-swatch" style="background:#00f0ff;"></span>
+            <span class="current-theme-emoji">🌙</span>
+            <span class="current-theme-label">Dark Void</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+        </div>
+
+        <a class="nav-pill git" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank" title="GitHub Repository — Open Source code, Debian packages, and releases">
+          <span>🐙 GitHub ↗</span>
+        </a>
+      </nav>
+
+      <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Toggle navigation menu">
+        <span class="burger-lines"><span class="b-line b-1"></span><span class="b-line b-2"></span><span class="b-line b-3"></span></span>
+        <span class="burger-text">Menu</span>
+      </button>
+      <div class="zoth-scroll-progress" id="zoth-scroll-progress"></div>
+    </header>
+
+    <nav class="drawer" id="drawer" aria-label="Universal Mobile Navigation" role="navigation">
+      <div class="drawer-header-brand">
+        <div class="d-brand-left">
+          <div class="brand-emblem-wrap">
+            <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth" width="28" height="28" class="brand-emblem-img" />
+          </div>
+          <span class="d-brand-title"><strong>Zoth Studio</strong><small>v12.0 Sovereign</small></span>
+        </div>
+        <button type="button" class="drawer-telemetry-badge" title="View Diagnostics HUD">● 6/6 DAEMONS</button>
+        <button type="button" class="drawer-close-btn" aria-label="Close mobile menu">✕</button>
+      </div>
+
+      <div class="drawer-section drawer-tools-section">
+        <div class="drawer-heading">⚡ Quick Actions</div>
+        <div class="drawer-quick-tools-grid">
+          <button type="button" class="drawer-tool-pill drawer-palette-trigger"><span>🔍</span> Command Palette <kbd class="nav-kbd">Ctrl+K</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-annotate-trigger"><span>✏️</span> On-Screen Annotator <kbd class="nav-kbd">Shift+A</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-telemetry-trigger"><span>⚡</span> Telemetry HUD</button>
+          <button type="button" class="drawer-tool-pill drawer-audio-trigger"><span>🔊</span> Audio FX</button>
+        </div>
+      </div>
+
+      <div class="drawer-section drawer-theme-section">
+        <div class="drawer-heading">🎨 Visual Theme (16 Archetypes)</div>
+        <div class="drawer-search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="drawer-theme-search-input" placeholder="Search 16 themes..." autocomplete="off" />
+        </div>
+        <div class="theme-filter-chips drawer-filter-chips">
+          <button type="button" class="theme-chip-btn active" data-drawer-cat="all">All (16)</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="studio originals">Originals</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="frontier ai & tech">Frontier</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="developer archetypes">Dev</button>
+        </div>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">✦ Featured</div>
+        <a class="drawer-link drawer-hero-link" href="/#for-everyone"><span class="d-link-icon">✦</span><div class="d-link-body"><strong>For You (No-Code Showcases)</strong><small>How Non-Tech Founders, Creators & Teams Use Zoth</small></div><span class="nav-item-badge">SHOWCASE</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🔮 Core AI & Pantheon</div>
+        <a class="drawer-link" href="/zoth/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+        <a class="drawer-link" href="/agents/"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+        <a class="drawer-link" href="/studio/consensus.html"><span class="d-link-icon">⚔️</span><div class="d-link-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+        <a class="drawer-link" href="/studio/swarm.html"><span class="d-link-icon">🌐</span><div class="d-link-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+        <a class="drawer-link" href="/memory/"><span class="d-link-icon">🧠</span><div class="d-link-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+        <a class="drawer-link" href="/zoth-world.html"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🪐 Workstations & DAGs</div>
+        <a class="drawer-link" href="/studio/cockpit.html"><span class="d-link-icon">🪐</span><div class="d-link-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=webgen"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=vos-sandbox"><span class="d-link-icon">💻</span><div class="d-link-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=nexus-3d"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=omnipost"><span class="d-link-icon">🎬</span><div class="d-link-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=math-pillars"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=secure-comms"><span class="d-link-icon">🔒</span><div class="d-link-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=signal-bridge"><span class="d-link-icon">📡</span><div class="d-link-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=web3-hub"><span class="d-link-icon">🪙</span><div class="d-link-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=pets"><span class="d-link-icon">💎</span><div class="d-link-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=tool-nexus"><span class="d-link-icon">🛠️</span><div class="d-link-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📜 Universe & Research</div>
+        <a class="drawer-link" href="/comic/"><span class="d-link-icon">🎨</span><div class="d-link-body"><strong>AZOTH Anime Comic Series</strong><small>Season 1 Ep 1: Genesis in Silicon Rain</small></div><span class="nav-item-badge">AUDIO</span></a>
+        <a class="drawer-link" href="/social/"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+        <a class="drawer-link" href="/articles/"><span class="d-link-icon">📜</span><div class="d-link-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+        <a class="drawer-link" href="/article/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+        <a class="drawer-link" href="/ai-webgpu.html"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+        <a class="drawer-link" href="/adytum/"><span class="d-link-icon">🏛️</span><div class="d-link-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📚 Docs & Security</div>
+        <a class="drawer-link" href="/docs/"><span class="d-link-icon">📚</span><div class="d-link-body"><strong>Complete Documentation</strong><small>Port Topology, 1-Click Install Scripts & API</small></div><span class="nav-item-badge">DOCS</span></a>
+        <a class="drawer-link" href="/vault/"><span class="d-link-icon">🔐</span><div class="d-link-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+        <a class="drawer-link" href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+        <a class="drawer-link" href="/faq.html"><span class="d-link-icon">❓</span><div class="d-link-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+      </div>
+
+      <div class="drawer-section drawer-footer-section">
+        <a class="drawer-pill-link js-deck" href="http://127.0.0.1:8484/">💻 Launch Local Operator Deck (:8484)</a>
+        <a class="drawer-pill-link" href="https://github.com/NullAITech/zoth-studio" target="_blank" rel="noopener noreferrer">🐙 GitHub Source Repository ↗</a>
+        <a class="drawer-pill-link" href="/downloads/zoth-studio-android.apk">📱 Download Android App (.apk)</a>
+      </div>
+    </nav>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<div aria-hidden="true" class="progress" id="progress"></div>
+<main class="pets-main-container" id="main" role="main" style="padding-top: 80px;">
+<h1 class="sr-only" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">Companion Forge — Spawn Desktop AI Spirits</h1>
+<!-- Mobile-Only Desktop Insight Banner -->
+<div class="mobile-desktop-insight" role="note">
+<span class="insight-icon">💡</span>
+<div class="insight-text">
+<strong>Mobile Focused Mode Active</strong>
+<span>Optimized for touch &amp; speed. Want full PBR volumetric shaders &amp; 3D OBJ export? Open this studio on desktop.</span>
+</div>
+<button aria-label="Dismiss insight" class="insight-close" onclick="this.parentElement.style.display='none'" type="button">✕</button>
+</div>
+<div class="sanctuary-layout">
+<!-- Center 3D Stage -->
+<section class="sanctuary-stage" id="canvas-host">
+<div class="stage-top-hud">
+<div class="hud-pill-row">
+<span class="hud-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;margin-right:5px;vertical-align:-2px;"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>3D Companion Figurine</span>
+<span class="hud-pill" id="active-pet-name"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;margin-right:5px;vertical-align:-2px;"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span id="txt-active-pet-title">Kai · Holographic Cat</span></span>
+</div>
+<div class="hud-pill-row">
+<button class="hud-pill-btn active" id="btn-formation-toggle" onclick="toggleFormation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><circle cx="12" cy="2" r="2"/><circle cx="12" cy="22" r="2"/><circle cx="20" cy="12" r="2"/><circle cx="4" cy="12" r="2"/></svg><span id="txt-formation">Formation: Solo</span></button>
+<button class="hud-pill-btn" id="btn-env-toggle" onclick="cycleEnvironment()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg><span id="txt-env">Atmosphere: Cyber</span></button>
+<button class="hud-pill-btn active" id="btn-audio-toggle" onclick="toggleAudioSynth()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg><span id="txt-audio">Audio: Active</span></button>
+<button class="hud-pill-btn" onclick="triggerHarmonicChirp()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><span>Chirp</span></button>
+<button class="hud-pill-btn" onclick="openCustomPetForge()" style="background:linear-gradient(135deg,rgba(251,191,36,0.25),rgba(0,240,255,0.25));border-color:var(--gold);color:var(--gold);font-weight:700;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg><span>Forge Spirit</span></button>
+<a class="btn-nexus-export" href="/pets/studio.html?pet=kai" id="btn-open-studio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg><span>3D Studio</span></a>
+<a class="btn-nexus-export" href="/studio/nexus-3d.html?pet=kai" id="btn-open-nexus" style="background: linear-gradient(135deg, #7c3aed 0%, #0891b2 100%);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/></svg><span>Nexus 3D</span></a>
+</div>
+</div>
+<div id="three-stage"></div>
+</section>
+<!-- Right Side: Operator Chat, Petting Controls & Roster -->
+<aside class="sanctuary-sidebar">
+<div class="sidebar-header">
+  <div style="display:flex; justify-content:space-between; align-items:center; width:100%; gap:8px;">
+    <span class="hud-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;margin-right:4px;vertical-align:-1px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>COMPANION LINK</span>
+    <span class="hud-pill" id="sidebar-archetype-badge" style="background:rgba(251,191,36,0.15); border-color:var(--gold); color:var(--gold); font-size:0.65rem;">FELINE-CANINE</span>
+  </div>
+  <h3 id="sidebar-pet-title" style="margin: 4px 0 2px; font-family: var(--font-display); font-size: 1.18rem; color: #fff;">Kai · Holographic Cat</h3>
+  <div class="summon-chip-wrap" style="display:inline-flex; align-items:center; gap:6px; background:rgba(0,0,0,0.6); border:1px solid rgba(0,240,255,0.3); border-radius:6px; padding:3px 8px; margin-top:2px; cursor:pointer;" onclick="copyActiveSummonCmd()" title="Click to copy CLI summon command">
+    <span style="font-family:var(--font-mono); font-size:0.68rem; color:var(--cyan);" id="sidebar-summon-cmd">zoth summon kai</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px; height:11px; color:var(--muted);"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+  </div>
+</div>
+<!-- Pet Interaction Controls & Energy Meter -->
+<div class="stat-meter">
+<div style="display: flex; justify-content: space-between; align-items:center;">
+<span style="color: var(--muted); font-size:0.75rem;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;margin-right:4px;vertical-align:-1px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Energy Resonance:</span>
+<span id="energy-val" style="color: var(--cyan); font-weight:700;">88%</span>
+</div>
+<div class="stat-bar"><div class="stat-fill" id="energy-fill" style="width: 88%;"></div></div>
+<div class="interaction-bar">
+<button class="btn-interact" onclick="petCompanion()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><path d="M9 10a5 5 0 0 1 5 5v3a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-3a5 5 0 0 1 5-5z"/></svg><span>Pet</span></button>
+<button class="btn-interact" onclick="feedCompanionEnergy()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg><span>Charge</span></button>
+<button class="btn-interact" onclick="meditateCompanion()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/></svg><span>Meditate</span></button>
+</div>
+<div class="interaction-bar" style="margin-top: 6px;">
+<button class="btn-interact" onclick="inspectPetSoul()" style="background: rgba(0, 240, 255, 0.12); border-color: var(--cyan); color: var(--cyan);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg><span>Soul Contract</span></button>
+<button class="btn-interact" onclick="downloadPetSoul()" style="background: rgba(251, 191, 36, 0.12); border-color: var(--gold); color: var(--gold);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>Download Soul</span></button>
+</div>
+</div>
+
+<!-- Custom Pet Forge & Spirit Creator Modal -->
+<div id="custom-pet-forge-modal" class="pet-modal-overlay" style="display:none; position:fixed; inset:0; z-index:100001; background:rgba(5,5,8,0.92); align-items:center; justify-content:center; backdrop-filter:blur(14px);">
+  <div class="pet-modal-dialog" style="background:#090d1a; border:1px solid rgba(251,191,36,0.35); border-radius:16px; max-width:920px; width:95vw; max-height:90vh; padding:24px; display:flex; flex-direction:column; box-shadow:0 24px 70px rgba(0,0,0,0.85); overflow-y:auto;">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:14px;">
+      <div>
+        <div style="font-family:var(--font-mono); font-size:0.7rem; color:var(--gold); letter-spacing:0.14em; text-transform:uppercase;">ALCHEMY SPIRIT FOUNDRY</div>
+        <h2 style="font-family:var(--font-display); font-size:1.45rem; color:#fff; margin:2px 0;">✨ Custom Pet Forge & Spirit Creator</h2>
+      </div>
+      <button type="button" onclick="closeCustomPetForge()" style="background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer;" aria-label="Close forge">✕</button>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:18px; margin-top:16px;">
+      <!-- Left Column: Identity, Emoji, Element & Harness -->
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div>
+          <label style="font-size:0.74rem; color:var(--muted); font-family:var(--font-mono); text-transform:uppercase;">1. Mascot Name & Symbol</label>
+          <div style="display:flex; gap:10px; margin-top:4px;">
+            <input type="text" id="forge-pet-emoji" value="🦊" maxlength="4" style="width:58px; text-align:center; font-size:1.4rem; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.15); border-radius:8px; color:#fff;" title="Mascot Emoji" oninput="updateForgePreview()" />
+            <input type="text" id="forge-pet-name" value="Solus" placeholder="Mascot Name (e.g. Solus)" style="flex:1; padding:8px 12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.15); border-radius:8px; color:#fff; font-family:var(--font-display); font-weight:700;" oninput="updateForgePreview()" />
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:0.74rem; color:var(--muted); font-family:var(--font-mono); text-transform:uppercase;">2. Elemental Aspect</label>
+          <select id="forge-pet-element" onchange="onForgeElementChange()" style="width:100%; margin-top:4px; padding:9px; background:rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.15); border-radius:8px; color:#38bdf8; font-family:var(--font-mono); font-size:0.82rem;">
+            <option value="quintessence">🔮 Quintessence / Aether (Sovereign Magus)</option>
+            <option value="lightning">⚡ Solar Lightning / Core Prana (Loopback Velocity)</option>
+            <option value="fire">🔥 Calcinatio / Phoenix Fire (Refactoring Flame)</option>
+            <option value="iron">🛡️ Bastion Iron / Mars Shield (AST Sentinel)</option>
+            <option value="wisdom">🦉 Pallas Wisdom / Sacred Geometry (Hypergraph AEO)</option>
+            <option value="shadow">🐆 Obsidian Void / Night Stalker (Stealth Recon)</option>
+            <option value="mercury">🌙 Lunar Mercury / Fluid Flux (DOM Inspector)</option>
+            <option value="sound">📡 Harmonic Resonance / Audio DSP (Swarm Stream)</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="font-size:0.74rem; color:var(--muted); font-family:var(--font-mono); text-transform:uppercase;">3. Domain & Ethical Alignment</label>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:4px;">
+            <select id="forge-pet-domain" style="padding:8px; background:rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.15); border-radius:8px; color:#fbbf24; font-family:var(--font-mono); font-size:0.8rem;" onchange="updateForgePreview()">
+              <option value="autonomy">AUTONOMY</option>
+              <option value="build" selected>BUILD & CODE</option>
+              <option value="security">SECURITY</option>
+              <option value="knowledge">KNOWLEDGE</option>
+              <option value="creative">CREATIVE</option>
+              <option value="ops">OPS & TOOLS</option>
+            </select>
+            <input type="text" id="forge-pet-alignment" value="True Sovereign Alchemical" placeholder="Alignment" style="padding:8px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.15); border-radius:8px; color:#fff; font-family:var(--font-mono); font-size:0.8rem;" oninput="updateForgePreview()" />
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:0.74rem; color:var(--muted); font-family:var(--font-mono); text-transform:uppercase;">4. Agent Model Harness</label>
+          <select id="forge-pet-harness" onchange="onForgeHarnessChange()" style="width:100%; margin-top:4px; padding:9px; background:rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.15); border-radius:8px; color:#a855f7; font-family:var(--font-mono); font-size:0.82rem;">
+            <option value="antigravity">🔮 Google Antigravity (@azoth agy CLI)</option>
+            <option value="hermes">🤖 Hermes Agent CLI (@hermes Autonomous)</option>
+            <option value="ollama">⚡ Ollama Local Weights (:11434 - Qwen/DeepSeek)</option>
+            <option value="grok">🚀 xAI Grok CLI (@grok High-Throughput)</option>
+            <option value="claude">🎭 Anthropic Claude Code CLI (@claude AST)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Right Column: 3D Aura, Colors, Voice & SOUL.md -->
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div>
+            <label style="font-size:0.74rem; color:var(--muted); font-family:var(--font-mono); text-transform:uppercase;">5. 3D Aura Shape</label>
+            <select id="forge-pet-aura" style="width:100%; margin-top:4px; padding:8px; background:rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.15); border-radius:8px; color:#fff; font-family:var(--font-mono); font-size:0.8rem;" onchange="updateForgePreview()">
+              <option value="neon-rings">Dual Celestial Rings</option>
+              <option value="sacred-halo">Sacred Geometry Halo</option>
+              <option value="quantum-vortex">Quantum Vortex</option>
+              <option value="pulsar-grid">Pulsar Grid Matrix</option>
+              <option value="minimal-orbit">Minimalist Horizon</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:0.74rem; color:var(--muted); font-family:var(--font-mono); text-transform:uppercase;">6. Aura Color</label>
+            <div style="display:flex; gap:8px; margin-top:4px; align-items:center;">
+              <input type="color" id="forge-pet-color" value="#00f0ff" style="width:38px; height:34px; border:none; background:none; cursor:pointer;" oninput="onForgeColorPicker(this.value)" />
+              <input type="text" id="forge-pet-color-text" value="#00f0ff" style="flex:1; padding:7px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.15); border-radius:8px; color:#fff; font-family:var(--font-mono); font-size:0.8rem;" oninput="onForgeColorText(this.value)" />
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:0.74rem; color:var(--muted); font-family:var(--font-mono); text-transform:uppercase;">7. Role & Autonomous Directive</label>
+          <input type="text" id="forge-pet-role" value="Lead Workspace Inspector & Guardian" placeholder="Role (e.g. Lead Workspace Inspector)" style="width:100%; margin-top:4px; padding:8px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.15); border-radius:8px; color:#38bdf8; font-size:0.82rem;" oninput="updateForgePreview()" />
+          <textarea id="forge-pet-lore" rows="2" placeholder="Primary mission (e.g. Inspects code for zero-trust compliance, validates schemas, and coordinates multi-agent synthesis)." style="width:100%; margin-top:6px; padding:8px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.15); border-radius:8px; color:#fff; font-size:0.8rem; line-height:1.4;" oninput="updateForgePreview()">Inspects code for zero-trust compliance, validates JSON schemas, and coordinates multi-agent synthesis on local loopback.</textarea>
+        </div>
+
+        <div>
+          <label style="font-size:0.74rem; color:var(--muted); font-family:var(--font-mono); text-transform:uppercase;">8. Spoken Voice Prompt</label>
+          <input type="text" id="forge-pet-quote" value="Sovereign companion online. Terminal nodes and AST boundaries secured." placeholder="Spoken greeting..." style="width:100%; margin-top:4px; padding:8px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.15); border-radius:8px; color:#fbbf24; font-style:italic; font-size:0.8rem;" oninput="updateForgePreview()" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Contract Preview Accordion -->
+    <div style="margin-top:14px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:10px 14px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-family:var(--font-mono); font-size:0.72rem; color:var(--cyan); text-transform:uppercase; letter-spacing:0.08em;">📜 Auto-Generated SOUL.md Preview</span>
+        <button type="button" onclick="autoGenerateSoulContract()" style="background:rgba(0,240,255,0.12); border:1px solid var(--cyan); color:var(--cyan); border-radius:6px; padding:4px 10px; font-size:0.7rem; font-family:var(--font-mono); cursor:pointer;">⚡ Regenerate Soul</button>
+      </div>
+      <pre id="forge-soul-preview" style="font-family:var(--font-mono); font-size:0.72rem; color:#94a3b8; max-height:100px; overflow-y:auto; margin-top:8px; white-space:pre-wrap; word-break:break-all;"></pre>
+    </div>
+
+    <!-- Action Toolbar -->
+    <div style="margin-top:16px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.1); display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+      <button type="button" class="btn-glow" onclick="previewForgePetVoice()" style="background:rgba(56,189,248,0.15); border:1px solid var(--cyan); color:var(--cyan); display:inline-flex; align-items:center; gap:6px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg><span>Test Voice & Aura</span></button>
+      <button type="button" class="btn-glow" onclick="saveAndSummonForgedPet()" style="background:linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color:#050508; font-weight:800; flex:1; display:inline-flex; align-items:center; justify-content:center; gap:6px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg><span>Forge & Summon Companion</span></button>
+      <button type="button" class="btn-glow" onclick="exportForgedPetToHermes()" style="background:rgba(168,85,247,0.18); border:1px solid var(--purple); color:#c084fc; display:inline-flex; align-items:center; gap:6px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8.01" y2="16"/><line x1="16" y1="16" x2="16.01" y2="16"/></svg><span>Export to Hermes</span></button>
+      <button type="button" class="btn-glow" onclick="downloadForgedSoulMd()" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.2); color:#fff; display:inline-flex; align-items:center; gap:6px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>Download SOUL.md</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- Soul Contract Inspector Modal in spawn-pets -->
+<div aria-labelledby="spawn-soul-title" aria-modal="true" class="pet-modal-overlay" id="spawn-soul-modal" role="dialog" style="display:none; position:fixed; inset:0; z-index:100000; background:rgba(5,5,8,0.88); align-items:center; justify-content:center; backdrop-filter:blur(10px);">
+<div class="pet-modal-dialog" style="background:#0a0e1c; border:1px solid rgba(0,240,255,0.3); border-radius:12px; max-width:680px; width:92vw; max-height:86vh; padding:20px; display:flex; flex-direction:column; box-shadow:0 20px 60px rgba(0,0,0,0.8);">
+<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
+<div>
+<div style="font-family:var(--font-mono); font-size:0.68rem; color:var(--gold); letter-spacing:0.12em; text-transform:uppercase;">SOVEREIGN CONTRACT SPEC</div>
+<h3 id="spawn-soul-title" style="font-family:var(--font-display); font-size:1.25rem; color:#fff; margin:2px 0;">SOUL.md Contract</h3>
+</div>
+<button aria-label="Close dialog" onclick="document.getElementById('spawn-soul-modal').style.display='none'" style="background:none; border:none; color:#fff; font-size:1.4rem; cursor:pointer;" type="button">✕</button>
+</div>
+<div style="overflow-y:auto; flex:1; padding:14px 0;">
+<pre id="spawn-soul-code" style="background:rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:12px; font-family:var(--font-mono); font-size:0.78rem; color:#38bdf8; line-height:1.45; white-space:pre-wrap; word-break:break-all; max-height:360px; overflow-y:auto; user-select:all;"></pre>
+<div style="display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;">
+<button class="btn-glow" id="btn-spawn-copy-soul" onclick="copySpawnSoulMd()" style="flex:1; display:inline-flex; align-items:center; justify-content:center; gap:6px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span id="txt-copy-soul">Copy SOUL.md</span></button>
+<button class="btn-glow" onclick="downloadSpawnSoulMd()" style="flex:1; background:rgba(251,191,36,0.15); border-color:var(--gold); color:var(--gold); display:inline-flex; align-items:center; justify-content:center; gap:6px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>Download SOUL.md</span></button>
+</div>
+</div>
+</div>
+</div>
+<div class="chat-feed" id="pet-chat-feed">
+<div class="chat-msg system">
+<strong>[SYSTEM]</strong> 3D Companion Sanctuary synchronized. Select a companion pet to interact.
+            </div>
+<div class="chat-msg pet" id="pet-intro-msg">
+<strong>Kai:</strong> "Meow! Ready to inspect your code, verify schemas, and explore the Nexus 3D engine!"
+            </div>
+</div>
+<div class="chat-input-row">
+<input aria-label="Chat with active companion" class="chat-input-box" id="chat-input" onkeydown="if(event.key==='Enter') sendPetChat()" placeholder="Ask Kai anything..." type="text"/>
+<button class="btn-glow" onclick="sendPetChat()" style="display:inline-flex; align-items:center; gap:6px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg><span>Send</span></button>
+</div>
+<!-- Pet Selector Strip -->
+<div class="roster-section">
+<label style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em;">Companion Roster (24 Sovereign Pets)</label>
+<div class="roster-grid" id="roster-list" style="max-height: 240px; overflow-y: auto;"></div>
+</div>
+</aside>
+</div>
+</main>
+                                                            <footer class="site" role="contentinfo">
+      <div class="foot-wrap">
+        <div aria-hidden="true" class="foot-watermark">ZOTH</div>
+        <div class="foot-grid">
+          <div class="foot-brand-col">
+            <p class="foot-kicker">Local · loopback · no telemetry</p>
+            <a class="foot-brand-lockup" href="/">
+              <img alt="Master Azoth" class="foot-azoth" decoding="async" height="72" loading="lazy" src="/assets/mascot/azoth-bust.jpg" width="72" />
+              <span class="foot-brand-text">
+                <img alt="" class="foot-brand-logo" decoding="async" height="28" loading="lazy" src="/assets/brand/zoth-golden-z-192.png" width="28" />
+                <strong class="foot-brand-title">Zoth Studio</strong>
+              </span>
+            </a>
+            <small class="foot-brand-desc">Local-first workspace for a team of AI agents. Files stay on this machine.</small>
+            <div class="foot-actions">
+              <a class="foot-btn foot-btn-on" href="/#install">Install locally</a>
+              <a class="foot-btn foot-btn-ghost" href="/pricing/">Support the forge</a>
+            </div>
+          </div>
+          <div class="foot-col">
+            <h3>Studio</h3>
+            <a class="mega-footer-link js-deck" href="http://127.0.0.1:8484/">Operator Deck</a>
+            <a class="mega-footer-link" href="/studio/">Workstations</a>
+            <a class="mega-footer-link" href="/studio/webgen.html">WebGen</a>
+            <a class="mega-footer-link" href="/studio/swarm.html">3D Swarm</a>
+            <a class="mega-footer-link" href="/studio/consensus.html">Consensus</a>
+          </div>
+          <div class="foot-col">
+            <h3>Agents</h3>
+            <a class="mega-footer-link" href="/zoth/">Master Azoth</a>
+            <a class="mega-footer-link" href="/agents/">21-Agent pantheon</a>
+            <a class="mega-footer-link" href="/pets/">Companions</a>
+            <a class="mega-footer-link" href="/vault/">Sovereign vault</a>
+            <a class="mega-footer-link" href="/adytum/">Adytum</a>
+          </div>
+          <div class="foot-col">
+            <h3>Universe</h3>
+            <a class="mega-footer-link" href="/comic/">Azoth comic</a>
+            <a class="mega-footer-link" href="/social/">Social wall</a>
+            <a class="mega-footer-link" href="/showcase.html">Showcase</a>
+            <a class="mega-footer-link" href="/signal/">Signal</a>
+            <a class="mega-footer-link" href="/article/">Manifesto</a>
+          </div>
+          <div class="foot-col">
+            <h3>Resources</h3>
+            <a class="mega-footer-link" href="/docs/">Docs</a>
+            <a class="mega-footer-link" href="/faq.html">FAQ</a>
+            <a class="mega-footer-link" href="/pricing/">Support / Patron</a>
+            <a class="mega-footer-link" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub ↗</a>
+            <a class="mega-footer-link" href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI ↗</a>
+          </div>
+        </div>
+        <div class="foot-bottom">
+          <p>© 2026 NullAI Tech. MIT. Local sovereign execution — zero telemetry.</p>
+          <nav aria-label="Footer meta" class="foot-meta">
+            <a href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub</a>
+            <a href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI</a>
+            <a href="/docs/">Docs</a>
+            <a href="/faq.html">FAQ</a>
+          </nav>
+        </div>
+      </div>
+    </footer>
+<script type="module">
+      const THREE = window.THREE;
+      const OrbitControls = THREE.OrbitControls;
+      import {
+        createPetFigure,
+        petPortrait,
+        loadPetTexture,
+        fallbackPetTexture,
+        createEmojiPetTexture,
+        PET_SPECIES,
+        TASK_VIBES,
+        ELEMENT_PRESETS,
+        HARNESS_PRESETS,
+        AURA_PRESETS,
+        getCustomPets,
+        saveCustomPet,
+        setActivePet,
+        getActivePet,
+        generateSoulContractMarkdown
+      } from './pet-models.js';
+
+      let scene, camera, renderer, controls;
+      let activePetFigure = null;
+      let currentPetId = 'kai';
+      let audioCtx = null, soundEnabled = true;
+      let energyLevel = 88;
+
+      const ROSTER = [
+        { id: "azoth", name: "Azoth", species: "Hermetic Sovereign Core", color: 0xe8c872, prompt: "Azoth is synthesizing autonomous codebase directives and hermetic alchemical plans." },
+        { id: "zoth", name: "Zoth", species: "Loopback Operator Core", color: 0xfbbf24, prompt: "Zoth is coordinating local multi-agent sessions with zero cloud telemetry." },
+        { id: "kai", name: "Kai", species: "Holographic Cat", color: 0x00e5ff, prompt: "Kai is ready to inspect your workspace, verify schemas, and hunt syntax anomalies!" },
+        { id: "draco", name: "Draco", species: "Cyber Dragon", color: 0xffaa00, prompt: "Draco is compiling multi-agent fusion pipelines and breathing plasma shaders!" },
+        { id: "ignis", name: "Ignis", species: "Neon Phoenix", color: 0xff007a, prompt: "Ignis is ready to resurrect stalled pipelines and illuminate dark code paths!" },
+        { id: "lycan", name: "Lycan", species: "Cybernetic Wolf", color: 0x10b981, prompt: "Lycan is threat-modeling security endpoints and guarding loopback ports!" },
+        { id: "athena", name: "Athena", species: "Mecha Owl", color: 0xa855f7, prompt: "Athena is mapping knowledge graphs, AEO entity schemas, and architectural briefs!" },
+        { id: "kitsune", name: "Kitsune", species: "Cyber Fox", color: 0xff7700, prompt: "Kitsune is polishing UI hierarchy, micro-interactions, and visual harmony!" },
+        { id: "pixel-neko", name: "Pixel-Neko", species: "16-Bit Retro Cat", color: 0x00f0ff, prompt: "Pixel-Neko is indexing local project folders and tools!" },
+        { id: "pixel-shiba", name: "Pixel-Shiba", species: "16-Bit Cyber Doge", color: 0xffcc00, prompt: "Pixel-Shiba is guarding vault keys and storage boundaries!" },
+        { id: "radical-minion", name: "Radical Minion", species: "Hermes Partner", color: 0x00d4aa, prompt: "Radical Minion is ready to run Hermes autonomous playbooks!" },
+        { id: "ai-workbot", name: "Workbot", species: "Task Robot", color: 0x6366f1, prompt: "Workbot is executing local Ollama neural weights and background task lists." },
+        { id: "aquila", name: "Aquila", species: "Cyber Eagle", color: 0x00f0ff, prompt: "Aquila delivers sub-millisecond API routing and edge dispatch." },
+        { id: "leviathan", name: "Leviathan", species: "Cyber Whale", color: 0x06b6d4, prompt: "Leviathan indexes dense vector embeddings and long-context RAG memory." },
+        { id: "onyx", name: "Onyx", species: "Shadow Panther", color: 0xff007a, prompt: "Onyx runs stealth penetration audits and SubSweep recon." },
+        { id: "chronos", name: "Chronos", species: "Cyber Stag", color: 0x38bdf8, prompt: "Chronos traverses DAG execution graphs and git rollback checkpoints." },
+        { id: "aether", name: "Aether", species: "Cyber Griffin", color: 0xfbbf24, prompt: "Aether orchestrates real-time pub/sub swarm event streams." },
+        { id: "scorpius", name: "Scorpius", species: "Cyber Scorpion", color: 0xef4444, prompt: "Scorpius delivers precision boundary security audits." },
+        { id: "kraken", name: "Kraken", species: "Thread Leviathan", color: 0x8b5cf6, prompt: "Kraken balances multi-threaded parallel subagent execution pools." },
+        { id: "ghostbyte", name: "Ghostbyte", species: "Phosphor Daemon", color: 0x00e5ff, prompt: "Ghostbyte is inspecting live telemetry feeds and terminal processes." },
+        { id: "glitchcat", name: "Glitchcat", species: "RGB Glitch Cat", color: 0xff0055, prompt: "Glitchcat breaks stale chrome so the composition can land." },
+        { id: "circuit-pup", name: "Circuit Pup", species: "LED Circuit Dog", color: 0x00ffff, prompt: "Circuit Pup sniffs live ports, local daemons, and missing CLIs." },
+        { id: "terminal-ghost", name: "Terminal Ghost", species: "Phosphor Spirit", color: 0x38bdf8, prompt: "Terminal Ghost haunts agent feeds until the logs are verified." },
+        { id: "savage-codex", name: "Savage Codex", species: "Hacker Familiar", color: 0xeab308, prompt: "Savage Codex reads diffs like a threat model for security gaps." },
+        { id: "binary", name: "Binary", species: "Byte Sentinel", color: 0x22c55e, prompt: "Binary keeps schema, ELF bytecode, and connector bits honest." }
+      ];
+
+      function getAudioContext() {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        return audioCtx;
+      }
+
+      function playSound(type) {
+        if (!soundEnabled) return;
+        try {
+          const ctx = getAudioContext();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          const now = ctx.currentTime;
+
+          if (type === 'purr') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(120, now);
+            osc.frequency.linearRampToValueAtTime(180, now + 0.1);
+            osc.frequency.linearRampToValueAtTime(120, now + 0.25);
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+            osc.start(now);
+            osc.stop(now + 0.25);
+          } else if (type === 'charge') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(220, now);
+            osc.frequency.exponentialRampToValueAtTime(880, now + 0.35);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+            osc.start(now);
+            osc.stop(now + 0.35);
+          } else if (type === 'meditate') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(432, now);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+            osc.start(now);
+            osc.stop(now + 0.8);
+          } else {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(587.33, now);
+            osc.frequency.exponentialRampToValueAtTime(880.00, now + 0.15);
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+            osc.start(now);
+            osc.stop(now + 0.25);
+          }
+        } catch(e) {}
+      }
+
+      const texCache = new Map();
+      async function resolveTex(id) {
+        if (texCache.has(id)) return texCache.get(id);
+        const spec = (PET_SPECIES && PET_SPECIES[id]) || ROSTER.find(r => r.id === id);
+        let tex = null;
+        if (spec && spec.isCustom) {
+          tex = createEmojiPetTexture(THREE, spec.emoji || "✨", spec.name || id, "#0a0f24", spec.vibeColor || spec.color || "#00f0ff");
+        } else {
+          const url = petPortrait(id);
+          tex = (await loadPetTexture(THREE, url)) || fallbackPetTexture(THREE);
+        }
+        texCache.set(id, tex);
+        return tex;
+      }
+
+      let amb, dir, rim;
+      const ENV_PRESETS = [
+        { name: 'Cyber Neon', amb: 0x7888b8, dir: 0xffffff, rim: 0x00f0ff, fog: 0x020306, exposure: 1.1 },
+        { name: 'Solar Day', amb: 0xffe8d6, dir: 0xfff4e6, rim: 0xffaa00, fog: 0x100804, exposure: 1.25 },
+        { name: 'Void Twilight', amb: 0x3b1d60, dir: 0xa855f7, rim: 0x00f0ff, fog: 0x05020c, exposure: 1.3 }
+      ];
+      let envPresetIdx = 0;
+      let formationMode = 'solo';
+      let orbitalFigures = [];
+
+      function renderRoster() {
+        const list = document.getElementById('roster-list');
+        list.innerHTML = '';
+        ROSTER.forEach(pet => {
+          const card = document.createElement('div');
+          card.className = 'roster-card' + (pet.id === currentPetId ? ' active' : '');
+          const spec = (PET_SPECIES && PET_SPECIES[pet.id]) || {};
+          const isCustom = pet.isCustom || spec.isCustom;
+          const archetype = (spec.archetype || 'FAMILIAR').toUpperCase();
+          
+          if (isCustom) {
+            card.innerHTML = `
+              <div style="width:38px; height:38px; border-radius:8px; background:rgba(0,0,0,0.6); border:1px solid ${pet.color || 'var(--gold)'}; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;">
+                ${pet.emoji || '✨'}
+              </div>
+              <div style="min-width:0; overflow:hidden; flex:1;">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:4px;">
+                  <strong style="color:#fff;">${pet.name}</strong>
+                  <span style="font-size:0.54rem; background:rgba(251,191,36,0.2); color:var(--gold); border:1px solid var(--gold); border-radius:3px; padding:1px 3px; font-family:var(--font-mono); font-weight:700;">SPIRIT</span>
+                </div>
+                <small style="color:var(--cyan);font-family:var(--font-mono);font-size:0.65rem;">${pet.species}</small>
+              </div>
+            `;
+          } else {
+            card.innerHTML = `
+              <img src="${petPortrait(pet.id)}" alt="${pet.name}" loading="lazy" decoding="async" onerror="this.src='/assets/mascot/azoth-mask.jpg'">
+              <div style="min-width:0; overflow:hidden; flex:1;">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:4px;">
+                  <strong style="color:#fff;">${pet.name}</strong>
+                  <span style="font-size:0.54rem; background:rgba(0,240,255,0.12); color:var(--cyan); border-radius:3px; padding:1px 3px; font-family:var(--font-mono); font-weight:600;">${archetype}</span>
+                </div>
+                <small style="color:var(--cyan);font-family:var(--font-mono);font-size:0.65rem;">${pet.species}</small>
+              </div>
+            `;
+          }
+          card.onclick = () => loadSelectedPet(pet);
+          list.appendChild(card);
+        });
+      }
+
+      function initStage() {
+        const container = document.getElementById('three-stage');
+        scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x020306, 0.03);
+
+        const w = container.clientWidth || window.innerWidth;
+        const h = container.clientHeight || 480;
+
+        camera = new THREE.PerspectiveCamera(40, w / h, 0.1, 100);
+        camera.position.set(0, 1.45, 5.2);
+
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(w, h);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.1;
+        renderer.domElement.style.touchAction = 'pan-y';
+        container.style.touchAction = 'pan-y';
+        container.appendChild(renderer.domElement);
+
+        controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.maxDistance = 12;
+        controls.minDistance = 2.0;
+        controls.maxPolarAngle = Math.PI / 2 + 0.1;
+        controls.target.set(0, 0.9, 0);
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 0.6;
+        controls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
+
+        amb = new THREE.AmbientLight(ENV_PRESETS[0].amb, 1.6);
+        scene.add(amb);
+
+        dir = new THREE.DirectionalLight(ENV_PRESETS[0].dir, 2.4);
+        dir.position.set(4, 8, 5);
+        scene.add(dir);
+
+        rim = new THREE.PointLight(ENV_PRESETS[0].rim, 4.0, 15);
+        rim.position.set(-3, 2, -3);
+        scene.add(rim);
+
+        // Ground Pedestal Ring
+        const ringGeo = new THREE.RingGeometry(1.6, 2.2, 64);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, side: THREE.DoubleSide, transparent: true, opacity: 0.35 });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.rotation.x = Math.PI / 2;
+        ring.position.y = -0.02;
+        scene.add(ring);
+
+        // Grid Floor
+        const grid = new THREE.GridHelper(20, 20, 0x00f0ff, 0x141b30);
+        grid.position.y = -0.03;
+        scene.add(grid);
+
+        renderRoster();
+        loadSelectedPet(ROSTER[2] || ROSTER[0]); // Default to Kai
+
+        function onResize() {
+          const nw = container.clientWidth || window.innerWidth;
+          const nh = container.clientHeight || 480;
+          camera.aspect = nw / nh;
+          camera.updateProjectionMatrix();
+          renderer.setSize(nw, nh);
+        }
+        window.addEventListener('resize', onResize, { passive: true });
+        if (window.ResizeObserver) {
+          new ResizeObserver(onResize).observe(container);
+        }
+
+        window.addEventListener('pointermove', (e) => {
+          const nx = (e.clientX / window.innerWidth - 0.5) * 2;
+          const ny = (e.clientY / window.innerHeight - 0.5) * 2;
+          if (activePetFigure && activePetFigure.setGaze) {
+            activePetFigure.setGaze(nx, ny);
+          }
+        }, { passive: true });
+
+        const clock = new THREE.Clock();
+        function animate() {
+          requestAnimationFrame(animate);
+          const t = clock.getElapsedTime();
+          const delta = clock.getDelta();
+          controls.update();
+
+          if (activePetFigure && activePetFigure.tick) {
+            activePetFigure.tick(t, delta);
+          }
+
+          // Tick Tri-Orbit multi-pet formation
+          orbitalFigures.forEach((fig, idx) => {
+            if (fig && fig.group) {
+              const u = fig.group.userData;
+              const angle = u.angle + t * 0.8;
+              fig.group.position.x = Math.cos(angle) * u.radius;
+              fig.group.position.z = Math.sin(angle) * u.radius;
+              fig.group.position.y = 0.98 + Math.sin(t * 2 + idx) * 0.2;
+              fig.group.rotation.y = -angle + Math.PI / 2;
+              if (fig.tick) fig.tick(t, delta);
+            }
+          });
+
+          renderer.render(scene, camera);
+        }
+        // Dynamic 16-Brand Theme Synchronization
+        window.addEventListener('zoth-theme-change', (e) => {
+          const themeId = (e && e.detail && e.detail.theme) ? e.detail.theme : (window.getZothTheme ? window.getZothTheme() : 'dark');
+          applySpawnPetTheme(themeId);
+        });
+
+        function applySpawnPetTheme(themeId) {
+          const t = String(themeId).toLowerCase();
+          if (t.includes('gold') || t.includes('hermetic') || t.includes('alchemy')) {
+            if (amb) amb.color.setHex(0x2a2414);
+            if (dir) dir.color.setHex(0xfbbf24);
+            if (rim) rim.color.setHex(0xf59e0b);
+            if (scene && scene.fog) scene.fog.color.setHex(0x060502);
+          } else if (t.includes('matrix') || t.includes('terminal') || t.includes('emerald')) {
+            if (amb) amb.color.setHex(0x082612);
+            if (dir) dir.color.setHex(0x00ff66);
+            if (rim) rim.color.setHex(0x10b981);
+            if (scene && scene.fog) scene.fog.color.setHex(0x010803);
+          } else if (t.includes('synthwave') || t.includes('cyberpunk') || t.includes('neon')) {
+            if (amb) amb.color.setHex(0x2a082a);
+            if (dir) dir.color.setHex(0xff007a);
+            if (rim) rim.color.setHex(0x00f0ff);
+            if (scene && scene.fog) scene.fog.color.setHex(0x08020b);
+          } else if (t.includes('light')) {
+            if (amb) amb.color.setHex(0xf1f5f9);
+            if (dir) dir.color.setHex(0x0284c7);
+            if (rim) rim.color.setHex(0x7c3aed);
+            if (scene && scene.fog) scene.fog.color.setHex(0xe2e8f0);
+          }
+        }
+        applySpawnPetTheme(window.getZothTheme ? window.getZothTheme() : 'dark');
+
+        animate();
+      }
+
+      window.cycleEnvironment = function() {
+        if (!amb || !dir || !rim) return;
+        envPresetIdx = (envPresetIdx + 1) % ENV_PRESETS.length;
+        const p = ENV_PRESETS[envPresetIdx];
+        amb.color.setHex(p.amb);
+        dir.color.setHex(p.dir);
+        rim.color.setHex(p.rim);
+        if (scene.fog) scene.fog.color.setHex(p.fog);
+        renderer.toneMappingExposure = p.exposure;
+        const txtEl = document.getElementById('txt-env');
+        if (txtEl) txtEl.textContent = `Atmosphere: ${p.name}`;
+        playSound('charge');
+      };
+
+      window.toggleFormation = async function() {
+        formationMode = formationMode === 'solo' ? 'tri' : 'solo';
+        const txtEl = document.getElementById('txt-formation');
+        if (txtEl) txtEl.textContent = formationMode === 'solo' ? 'Formation: Solo' : 'Formation: Tri-Orbit';
+        
+        orbitalFigures.forEach(fig => {
+          scene.remove(fig.group);
+          if (fig.dispose) fig.dispose();
+        });
+        orbitalFigures = [];
+
+        if (formationMode === 'tri') {
+          const petIds = [currentPetId === 'draco' ? 'kai' : 'draco', currentPetId === 'athena' ? 'lycan' : 'athena'];
+          for (let i = 0; i < petIds.length; i++) {
+            const pid = petIds[i];
+            const pData = ROSTER.find(r => r.id === pid) || ROSTER[0];
+            const tex = await resolveTex(pid);
+            const fig = createPetFigure(THREE, {
+              id: pid,
+              color: pData.color,
+              texture: tex,
+              style: 'realistic',
+              initialVibe: 'fusion',
+              withAura: true
+            });
+            fig.group.scale.setScalar(0.65);
+            fig.group.userData = { angle: ((i + 1) / 3) * Math.PI * 2, radius: 3.2 };
+            scene.add(fig.group);
+            orbitalFigures.push(fig);
+          }
+          playSound('charge');
+        }
+      };
+
+      let loadGen = 0;
+      async function loadSelectedPet(pet) {
+        const gen = ++loadGen;
+        currentPetId = pet.id;
+        const spec = (PET_SPECIES && PET_SPECIES[pet.id]) || {};
+        const arche = (spec.archetype || (pet.isCustom ? 'CUSTOM SPIRIT' : 'AUTONOMOUS FAMILIAR')).toUpperCase();
+        
+        const activeTitleEl = document.getElementById('txt-active-pet-title');
+        if (activeTitleEl) activeTitleEl.textContent = `${pet.name} · ${pet.species}`;
+        
+        const sideTitleEl = document.getElementById('sidebar-pet-title');
+        if (sideTitleEl) sideTitleEl.textContent = `${pet.name} · ${pet.species}`;
+        
+        const sideBadgeEl = document.getElementById('sidebar-archetype-badge');
+        if (sideBadgeEl) sideBadgeEl.textContent = arche;
+        
+        const sideSummonEl = document.getElementById('sidebar-summon-cmd');
+        if (sideSummonEl) sideSummonEl.textContent = `zoth summon ${pet.id}`;
+
+        document.getElementById('pet-intro-msg').innerHTML = `<strong>${pet.name}:</strong> "${pet.prompt || spec.voicePrompt || 'Ready for directive.'}"`;
+        document.getElementById('chat-input').placeholder = `Ask ${pet.name} anything...`;
+        
+        document.getElementById('btn-open-studio').href = `/pets/studio.html?pet=${pet.id}`;
+        document.getElementById('btn-open-nexus').href = `/studio/nexus-3d.html?pet=${pet.id}`;
+
+        if (activePetFigure) {
+          scene.remove(activePetFigure.group);
+          if (activePetFigure.dispose) activePetFigure.dispose();
+          activePetFigure = null;
+        }
+
+        const tex = await resolveTex(pet.id);
+        if (gen !== loadGen) return;
+
+        activePetFigure = createPetFigure(THREE, {
+          id: pet.id,
+          color: pet.color,
+          texture: tex,
+          style: "realistic",
+          initialVibe: "idle",
+          withAura: true,
+        });
+
+        scene.add(activePetFigure.group);
+        renderRoster();
+        playSound('chirp');
+      }
+
+      window.copyActiveSummonCmd = function() {
+        const cmd = `zoth summon ${currentPetId}`;
+        navigator.clipboard.writeText(cmd);
+        const el = document.getElementById('sidebar-summon-cmd');
+        if (el) {
+          el.textContent = 'COPIED TO CLIPBOARD!';
+          setTimeout(() => {
+            el.textContent = `zoth summon ${currentPetId}`;
+          }, 1500);
+        }
+      };
+
+      window.petCompanion = function() {
+        if (activePetFigure) {
+          activePetFigure.group.position.y += 0.35;
+          setTimeout(() => { if (activePetFigure) activePetFigure.group.position.y -= 0.35; }, 220);
+        }
+        playSound('purr');
+        energyLevel = Math.min(100, energyLevel + 4);
+        updateEnergyDisplay();
+      };
+
+      window.feedCompanionEnergy = function() {
+        playSound('charge');
+        energyLevel = 100;
+        updateEnergyDisplay();
+      };
+
+      window.meditateCompanion = function() {
+        controls.autoRotateSpeed = 0.4;
+        setTimeout(() => { controls.autoRotateSpeed = 1.0; }, 3000);
+        playSound('meditate');
+      };
+
+      function updateEnergyDisplay() {
+        document.getElementById('energy-val').textContent = `${energyLevel}%`;
+        document.getElementById('energy-fill').style.width = `${energyLevel}%`;
+      }
+
+      window.triggerHarmonicChirp = function() {
+        playSound('chirp');
+      };
+
+      window.toggleAudioSynth = function() {
+        soundEnabled = !soundEnabled;
+        const btn = document.getElementById('btn-audio-toggle');
+        const txtEl = document.getElementById('txt-audio');
+        if (txtEl) txtEl.textContent = soundEnabled ? 'Audio: Active' : 'Audio: Muted';
+        btn.classList.toggle('active', soundEnabled);
+      };
+
+      window.sendPetChat = function() {
+        const input = document.getElementById('chat-input');
+        const text = input.value.trim();
+        if (!text) return;
+        
+        const feed = document.getElementById('pet-chat-feed');
+        const userDiv = document.createElement('div');
+        userDiv.className = 'chat-msg user';
+        userDiv.innerHTML = `<strong>Operator:</strong> ${text}`;
+        feed.appendChild(userDiv);
+        input.value = '';
+
+        setTimeout(() => {
+          const pet = ROSTER.find(p => p.id === currentPetId) || ROSTER[0];
+          const petDiv = document.createElement('div');
+          petDiv.className = 'chat-msg pet';
+          petDiv.innerHTML = `<strong>${pet.name}:</strong> Synthesizing neural advice for "${text}"... Executing Swarm directive!`;
+          feed.appendChild(petDiv);
+          feed.scrollTop = feed.scrollHeight;
+          playSound('chirp');
+          if ("speechSynthesis" in window) {
+            window.speechSynthesis.cancel();
+            const spec = (PET_SPECIES && PET_SPECIES[currentPetId]) || {};
+            const utter = new SpeechSynthesisUtterance(`${pet.name} responding: Executing directive.`);
+            utter.rate = 1.1;
+            window.speechSynthesis.speak(utter);
+          }
+        }, 400);
+      };
+
+      function getSoulMarkdown(id) {
+        if (typeof generateSoulContractMarkdown === 'function') {
+          return generateSoulContractMarkdown(id);
+        }
+        const p = (PET_SPECIES && PET_SPECIES[id]) || {};
+        return `# SOUL CONTRACT: ${p.name || id}
+<!-- Target: Hermes Agent / OpenClaw / Google Antigravity Workspaces -->
+- **Identifier**: \`${id}\`
+- **Role**: ${p.role || "Autonomous Familiar"}
+- **Element**: ${p.element || "Sovereign"}
+- **Vector Memory**: ${p.vectorMemory || "64k Tensor"}
+- **Directive**: ${p.desc || "Autonomous executor"}
+`;
+      }
+
+      function downloadMdFile(filename, text) {
+        const blob = new Blob([text], { type: "text/markdown;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+      }
+
+      
+      // Live Forge Handlers & Sync
+      window.onForgeElementChange = function() {
+        const sel = document.getElementById('forge-pet-element')?.value;
+        const preset = ELEMENT_PRESETS && ELEMENT_PRESETS[sel];
+        if (preset) {
+          const colorInput = document.getElementById('forge-pet-color');
+          const colorText = document.getElementById('forge-pet-color-text');
+          if (colorInput) colorInput.value = preset.color;
+          if (colorText) colorText.value = preset.color;
+        }
+        updateForgePreview();
+      };
+
+      window.onForgeHarnessChange = function() {
+        const sel = document.getElementById('forge-pet-harness')?.value;
+        const preset = HARNESS_PRESETS && HARNESS_PRESETS[sel];
+        if (preset) {
+          const roleInput = document.getElementById('forge-pet-role');
+          if (roleInput && (!roleInput.value || roleInput.value.includes('Inspector') || roleInput.value.includes('Partner'))) {
+            roleInput.value = preset.name;
+          }
+        }
+        updateForgePreview();
+      };
+
+      window.onForgeColorPicker = function(val) {
+        const colorText = document.getElementById('forge-pet-color-text');
+        if (colorText) colorText.value = val;
+        updateForgePreview();
+      };
+
+      window.onForgeColorText = function(val) {
+        const colorPicker = document.getElementById('forge-pet-color');
+        if (colorPicker && /^#[0-9A-Fa-f]{6}$/.test(val)) colorPicker.value = val;
+        updateForgePreview();
+      };
+
+      function buildCurrentForgePetObject() {
+        const name = document.getElementById('forge-pet-name')?.value.trim() || "Solus";
+        const emoji = document.getElementById('forge-pet-emoji')?.value.trim() || "🦊";
+        const id = name.toLowerCase().replace(/[^a-z0-9_-]/g, '-') || "custom-spirit";
+        const elementKey = document.getElementById('forge-pet-element')?.value || "quintessence";
+        const elemPreset = (ELEMENT_PRESETS && ELEMENT_PRESETS[elementKey]) || { name: "Quintessence", color: "#00f0ff" };
+        const domain = document.getElementById('forge-pet-domain')?.value || "build";
+        const alignment = document.getElementById('forge-pet-alignment')?.value.trim() || "True Sovereign Alchemical";
+        const harnessKey = document.getElementById('forge-pet-harness')?.value || "antigravity";
+        const harnessPreset = (HARNESS_PRESETS && HARNESS_PRESETS[harnessKey]) || { prefix: "@antigravity", protocol: "antigravity" };
+        const auraType = document.getElementById('forge-pet-aura')?.value || "neon-rings";
+        const color = document.getElementById('forge-pet-color')?.value || elemPreset.color || "#00f0ff";
+        const role = document.getElementById('forge-pet-role')?.value.trim() || "Autonomous Sovereign Companion";
+        const lore = document.getElementById('forge-pet-lore')?.value.trim() || "Autonomous custom-forged companion spirit.";
+        const quote = document.getElementById('forge-pet-quote')?.value.trim() || "Sovereign bounds verified. Ready for directive.";
+
+        return {
+          id: id,
+          name: name,
+          species: `${role} (${elemPreset.name.split('/')[0].trim()})`,
+          emoji: emoji,
+          role: role,
+          domain: domain,
+          element: elemPreset.name,
+          elementKey: elementKey,
+          alignment: alignment,
+          harness: harnessPreset.prefix || `@${harnessKey}`,
+          harnessType: harnessPreset.protocol || harnessKey,
+          vibeColor: color,
+          color: color,
+          auraType: auraType,
+          vectorMemory: "64k Ephemeral Multi-Turn Trie",
+          desc: lore,
+          blurb: lore,
+          voicePrompt: quote,
+          prompt: quote,
+          isCustom: true
+        };
+      }
+
+      window.autoGenerateSoulContract = function() {
+        const pet = buildCurrentForgePetObject();
+        const md = generateSoulContractMarkdown(pet.id, pet);
+        const preview = document.getElementById('forge-soul-preview');
+        if (preview) preview.textContent = md;
+        return md;
+      };
+
+      window.updateForgePreview = function() {
+        window.autoGenerateSoulContract();
+      };
+
+      window.openCustomPetForge = function() {
+        const modal = document.getElementById('custom-pet-forge-modal');
+        if (modal) {
+          modal.style.display = 'flex';
+          updateForgePreview();
+        }
+      };
+
+      window.closeCustomPetForge = function() {
+        const modal = document.getElementById('custom-pet-forge-modal');
+        if (modal) modal.style.display = 'none';
+      };
+
+      window.previewForgePetVoice = function() {
+        const pet = buildCurrentForgePetObject();
+        const quote = pet.voicePrompt || "Sovereign spirit online and awaiting directives.";
+        
+        // Trigger Web Audio harmonic resonance based on element
+        const elemPreset = ELEMENT_PRESETS && ELEMENT_PRESETS[pet.elementKey];
+        const freq = (elemPreset && elemPreset.soundFreq) || 528;
+        try {
+          const ctx = getAudioContext();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(freq * 1.5, ctx.currentTime + 0.35);
+          gain.gain.setValueAtTime(0.2, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.5);
+        } catch(e) {}
+
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+          const utter = new SpeechSynthesisUtterance(quote);
+          utter.pitch = 1.05;
+          utter.rate = 1.0;
+          window.speechSynthesis.speak(utter);
+        }
+      };
+
+      window.saveAndSummonForgedPet = function() {
+        const pet = buildCurrentForgePetObject();
+
+        // 1. Save through PetModels helper (persists to localStorage + PET_SPECIES)
+        saveCustomPet(pet);
+
+        // 2. Add to active ROSTER if not present
+        const existingIdx = ROSTER.findIndex(r => r.id === pet.id);
+        if (existingIdx !== -1) {
+          ROSTER[existingIdx] = pet;
+        } else {
+          ROSTER.unshift(pet);
+        }
+
+        // Close modal
+        closeCustomPetForge();
+
+        // Refresh Roster list
+        renderRoster();
+
+        // Summon as active pet
+        loadSelectedPet(pet);
+
+        // Post chat confirmation
+        const feed = document.getElementById('pet-chat-feed');
+        if (feed) {
+          const msg = document.createElement('div');
+          msg.className = 'chat-msg system';
+          msg.innerHTML = `<strong>[FORGE FOUNDRY]</strong> ✨ Sovereign Spirit <strong>${pet.name}</strong> (${pet.emoji}) has been forged and summoned to the Sanctuary stage.`;
+          feed.appendChild(msg);
+          feed.scrollTop = feed.scrollHeight;
+        }
+      };
+
+      window.exportForgedPetToHermes = function() {
+        const pet = buildCurrentForgePetObject();
+        const md = generateSoulContractMarkdown(pet.id, pet);
+        downloadMdFile(`${pet.id}-hermes-soul.md`, md);
+      };
+
+      window.downloadForgedSoulMd = function() {
+        const pet = buildCurrentForgePetObject();
+        const md = generateSoulContractMarkdown(pet.id, pet);
+        downloadMdFile(`${pet.id}-SOUL.md`, md);
+      };
+
+      window.inspectPetSoul = function() {
+        const p = (PET_SPECIES && PET_SPECIES[currentPetId]) || { id: currentPetId, name: currentPetId };
+        const md = generateSoulContractMarkdown(currentPetId, p.isCustom ? p : null);
+        const codeEl = document.getElementById('spawn-soul-code');
+        if (codeEl) codeEl.textContent = md;
+        const titleEl = document.getElementById('spawn-soul-title');
+        if (titleEl) titleEl.textContent = `${p.name} — SOUL.md Contract`;
+        const modal = document.getElementById('spawn-soul-modal');
+        if (modal) modal.style.display = 'flex';
+      };
+
+      window.downloadPetSoul = function() {
+        const p = (PET_SPECIES && PET_SPECIES[currentPetId]) || { id: currentPetId, name: currentPetId };
+        const md = generateSoulContractMarkdown(currentPetId, p.isCustom ? p : null);
+        downloadMdFile(`${currentPetId}-SOUL.md`, md);
+      };
+
+      window.copySpawnSoulMd = function() {
+        const codeEl = document.getElementById('spawn-soul-code');
+        if (codeEl && codeEl.textContent) {
+          navigator.clipboard.writeText(codeEl.textContent);
+          const btn = document.getElementById('btn-spawn-copy-soul');
+          if (btn) {
+            btn.textContent = '📋 Copied!';
+            setTimeout(() => { btn.textContent = '📋 Copy SOUL.md'; }, 1800);
+          }
+        }
+      };
+
+      window.downloadSpawnSoulMd = function() {
+        const codeEl = document.getElementById('spawn-soul-code');
+        if (codeEl && codeEl.textContent) {
+          downloadMdFile(`${currentPetId}-SOUL.md`, codeEl.textContent);
+        }
+      };
+
+      // Ensure custom pets are loaded into ROSTER on startup
+      try {
+        const customList = getCustomPets();
+        customList.forEach(cp => {
+          if (!ROSTER.some(r => r.id === cp.id)) {
+            ROSTER.unshift({
+              id: cp.id,
+              name: cp.name,
+              species: cp.species || "Custom Spirit",
+              color: cp.vibeColor || cp.color || 0x00f0ff,
+              prompt: cp.voicePrompt || cp.prompt || "Ready for directives.",
+              emoji: cp.emoji || "✨",
+              isCustom: true
+            });
+          }
+        });
+      } catch(e) {}
+      </script>
+<script defer="" src="/assets/zoth-tip.js"></script>
+<script defer="" src="/assets/zoth-annotator.js"></script>
+<script defer="" src="/assets/zoth-nav.js?v=11"></script>
+</body>
+</html>

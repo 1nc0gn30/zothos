@@ -1,0 +1,87 @@
+---
+import { site } from "../data/site.js";
+
+const { redirectTo } = Astro.props;
+---
+
+<form
+  class="quote-form"
+  action={site.formEndpoint}
+  method="POST"
+  data-redirect={redirectTo || ""}
+>
+  <input type="hidden" name="source" value="poolefencingllc.com" />
+  <label>
+    Full Name
+    <input name="full_name" autocomplete="name" required />
+  </label>
+  <label>
+    Email
+    <input type="email" name="email" autocomplete="email" required />
+  </label>
+  <label>
+    Phone
+    <input type="tel" name="phone" autocomplete="tel" required />
+  </label>
+  <label>
+    Zip Code
+    <input name="zip_code" inputmode="numeric" autocomplete="postal-code" required />
+  </label>
+  <label>
+    Project Type
+    <select name="project_type" required>
+      <option value="">Select one</option>
+      <option>Vinyl</option>
+      <option>Wood</option>
+      <option>Chain Link Residential</option>
+      <option>Chain Link Commercial</option>
+      <option>Ornamental</option>
+      <option>Farm Fence</option>
+      <option>Custom Gate</option>
+      <option>Not Sure</option>
+    </select>
+  </label>
+  <label>
+    How many feet? <span class="form-note">Approximate is fine.</span>
+    <input name="approximate_feet" inputmode="numeric" />
+  </label>
+  <label>
+    Tell us about your project
+    <textarea name="message" required></textarea>
+  </label>
+  <label class="check-label">
+    <input type="checkbox" name="consent" value="yes" required />
+    <span>I agree to receive text messages and calls about my quote from Poole Fencing.</span>
+  </label>
+  <button class="button button-primary" type="submit">Request Quote</button>
+  <p class="form-note">Prefer to call? <a href={site.phoneHref}>{site.phoneDisplay}</a> — {site.hours}</p>
+</form>
+
+{redirectTo && (
+  <script is:inline>
+    (function () {
+      var form = document.querySelector('form[data-redirect]');
+      if (!form) return;
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var btn = form.querySelector('button[type="submit"]');
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = 'Sending...';
+        }
+        var data = new FormData(form);
+        fetch(form.action, { method: 'POST', body: data })
+          .then(function () {
+            window.location.href = form.dataset.redirect;
+          })
+          .catch(function () {
+            if (btn) {
+              btn.disabled = false;
+              btn.textContent = 'Request Quote';
+            }
+            form.submit();
+          });
+      });
+    })();
+  </script>
+)}

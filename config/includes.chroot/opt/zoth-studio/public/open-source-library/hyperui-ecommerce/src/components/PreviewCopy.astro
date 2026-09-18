@@ -1,0 +1,101 @@
+---
+import { Clipboard } from '@lucide/astro'
+
+interface Props {
+  src: string
+}
+
+const { src } = Astro.props
+---
+
+<preview-copy data-src={src}>
+  <button
+    type="button"
+    aria-label="Copy HTML"
+    aria-pressed="false"
+    class="inline-flex items-center justify-center gap-2 rounded-md bg-black px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-gray-800 disabled:pointer-events-none disabled:opacity-50"
+  >
+    <Clipboard class="size-4" />
+
+    <span data-text>Copy</span>
+  </button>
+
+  <span data-polite aria-live="polite" class="sr-only"> </span>
+</preview-copy>
+
+<script>
+  import { applyCopiedButtonState } from '../lib/clipboard.js'
+
+  class PreviewCopy extends HTMLElement {
+    private isProcessing = false
+    private contentSrc: string | null = null
+    private timeoutId: ReturnType<typeof setTimeout> | null = null
+
+    private clickHandler: (() => void) | null = null
+
+    connectedCallback() {
+      this.contentSrc = this.dataset.src || null
+
+      if (!this.contentSrc) {
+        return
+      }
+
+      const buttonEl = this.querySelector('button')
+      const politeEl = this.querySelector('span[data-polite]')
+
+      if (!buttonEl || !politeEl) {
+        return
+      }
+
+      const buttonText = buttonEl.querySelector('span[data-text]')
+
+      if (!buttonText) {
+        return
+      }
+
+      this.clickHandler = () => {
+        if (this.isProcessing) {
+          return
+        }
+
+        this.isProcessing = true
+
+        document.dispatchEvent(
+          new CustomEvent(`preview:copy:${this.contentSrc}`, {
+            bubbles: true,
+          }),
+        )
+
+        this.timeoutId = applyCopiedButtonState({
+          buttonTextElement: buttonText as HTMLElement,
+          liveRegionElement: politeEl as HTMLElement,
+          buttonElement: buttonEl,
+          existingTimerId: this.timeoutId,
+          onReset: () => {
+            this.isProcessing = false
+          },
+        })
+      }
+
+      buttonEl.addEventListener('click', this.clickHandler)
+    }
+
+    disconnectedCallback() {
+      const buttonEl = this.querySelector('button')
+
+      if (buttonEl && this.clickHandler) {
+        buttonEl.removeEventListener('click', this.clickHandler)
+
+        this.clickHandler = null
+      }
+
+      if (this.timeoutId !== null) {
+        clearTimeout(this.timeoutId)
+
+        this.timeoutId = null
+      }
+    }
+  }
+
+  customElements.define('preview-copy', PreviewCopy)
+</script>

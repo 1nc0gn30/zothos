@@ -1,0 +1,108 @@
+---
+interface Breakpoint {
+  name: string
+  width: string
+}
+
+interface Props {
+  breakpoints: Breakpoint[]
+  src: string
+}
+
+const { breakpoints, src } = Astro.props
+---
+
+<preview-breakpoints data-src={src} class="flex gap-1">
+  {
+    breakpoints.map(({ name, width }) => (
+      <button
+        data-breakpoint={width}
+        aria-pressed={width === '100%' ? 'true' : 'false'}
+        type="button"
+        class="inline-flex items-center justify-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 disabled:pointer-events-none disabled:opacity-50 aria-pressed:bg-black aria-pressed:text-white"
+      >
+        {name}
+      </button>
+    ))
+  }
+</preview-breakpoints>
+
+<script>
+  class PreviewBreakpoints extends HTMLElement {
+    private contentSrc: string | null = null
+    private isProcessing = false
+
+    private activeButton: HTMLButtonElement | null = null
+
+    private clickHandler: ((clickEvent: Event) => void) | null = null
+
+    connectedCallback() {
+      this.contentSrc = this.dataset.src || null
+
+      if (!this.contentSrc) {
+        return
+      }
+
+      const buttonEls = [...this.querySelectorAll<HTMLButtonElement>('button[data-breakpoint]')]
+
+      if (buttonEls.length === 0) {
+        return
+      }
+
+      this.activeButton =
+        buttonEls.find((buttonEl) => buttonEl.getAttribute('aria-pressed') === 'true') ??
+        buttonEls[buttonEls.length - 1] ??
+        null
+
+      this.clickHandler = (clickEvent) => this.handleButtonClick(clickEvent)
+
+      this.addEventListener('click', this.clickHandler)
+    }
+
+    private handleButtonClick(clickEvent: Event) {
+      if (this.isProcessing) {
+        return
+      }
+
+      const targetEl = clickEvent.target as HTMLElement
+      const buttonEl = targetEl.closest<HTMLButtonElement>('button[data-breakpoint]')
+
+      if (!buttonEl) {
+        return
+      }
+
+      this.isProcessing = true
+
+      const width = buttonEl.getAttribute('data-breakpoint')!
+
+      if (this.activeButton && this.activeButton !== buttonEl) {
+        this.activeButton.setAttribute('aria-pressed', 'false')
+      }
+
+      buttonEl.setAttribute('aria-pressed', 'true')
+
+      this.activeButton = buttonEl
+
+      document.dispatchEvent(
+        new CustomEvent(`breakpoint:change:${this.contentSrc}`, {
+          bubbles: true,
+          detail: { width },
+        }),
+      )
+
+      this.isProcessing = false
+    }
+
+    disconnectedCallback() {
+      if (this.clickHandler) {
+        this.removeEventListener('click', this.clickHandler)
+
+        this.clickHandler = null
+      }
+
+      this.activeButton = null
+    }
+  }
+
+  customElements.define('preview-breakpoints', PreviewBreakpoints)
+</script>

@@ -1,0 +1,712 @@
+/* ==============================================================================
+   ⚡ ZOTH STUDIO — Visual Annotator & Agent Feedback System
+   ============================================================================== */
+
+:root {
+  --za-gold: #e8c872;
+  --za-cyan: #00f0ff;
+  --za-pink: #ff007a;
+  --za-purple: #c084fc;
+  --za-green: #34d399;
+  --za-amber: #f59e0b;
+  --za-bg: rgba(7, 10, 18, 0.95);
+  --za-card-bg: rgba(14, 20, 34, 0.92);
+  --za-border: rgba(0, 240, 255, 0.28);
+  --za-border-gold: rgba(232, 200, 114, 0.4);
+  --za-text: #f7f4ee;
+  --za-text-dim: #94a3b8;
+  --za-shadow: 0 12px 36px rgba(0, 0, 0, 0.65), 0 0 24px rgba(0, 240, 255, 0.15);
+  --za-font-mono: 'IBM Plex Mono', 'JetBrains Mono', monospace;
+  --za-font-sans: 'Figtree', 'Inter', system-ui, sans-serif;
+}
+
+/* Floating Launch HUD Pill (Hidden from bottom right of pages) */
+#zoth-annotator-pill {
+  display: none !important;
+}
+
+.za-pill-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(0, 240, 255, 0.15);
+  color: var(--za-cyan);
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+#zoth-annotator-pill.active .za-pill-icon {
+  background: var(--za-gold);
+  color: #050508;
+}
+
+.za-pill-badge {
+  background: var(--za-pink);
+  color: #fff;
+  font-family: var(--za-font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  margin-left: 2px;
+}
+
+.za-pill-keybind {
+  font-family: var(--za-font-mono);
+  font-size: 10px;
+  color: var(--za-text-dim);
+  background: rgba(255, 255, 255, 0.08);
+  padding: 2px 5px;
+  border-radius: 4px;
+  margin-left: 4px;
+}
+
+/* Master Overlay HUD Toolbar */
+#zoth-annotator-toolbar {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100px);
+  z-index: 2147483645;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--za-bg);
+  border: 1px solid var(--za-border);
+  box-shadow: var(--za-shadow);
+  border-radius: 14px;
+  padding: 8px 12px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  opacity: 0;
+  pointer-events: none;
+  font-family: var(--za-font-sans);
+}
+
+#zoth-annotator-toolbar.visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.za-tool-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--za-text);
+  font-family: var(--za-font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.za-tool-btn:hover {
+  background: rgba(0, 240, 255, 0.12);
+  border-color: var(--za-cyan);
+  color: #fff;
+}
+
+.za-tool-btn.active {
+  background: var(--za-cyan);
+  border-color: var(--za-cyan);
+  color: #05070d;
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.4);
+}
+
+.za-tool-btn.gold.active {
+  background: var(--za-gold);
+  border-color: var(--za-gold);
+  color: #05070d;
+  box-shadow: 0 0 16px rgba(232, 200, 114, 0.4);
+}
+
+.za-tool-divider {
+  width: 1px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.12);
+  margin: 0 4px;
+}
+
+.za-color-picker {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0 4px;
+}
+
+.za-color-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.za-color-dot:hover {
+  transform: scale(1.2);
+}
+
+.za-color-dot.active {
+  border-color: #fff;
+  transform: scale(1.25);
+  box-shadow: 0 0 10px currentColor;
+}
+
+/* Fullscreen Drawing Canvas Overlay */
+#zoth-annotator-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2147483638;
+  pointer-events: none;
+  touch-action: none;
+}
+
+#zoth-annotator-canvas.drawing-active {
+  pointer-events: auto;
+  cursor: crosshair;
+}
+
+/* Element Inspector Box */
+#zoth-annotator-inspector {
+  position: absolute;
+  pointer-events: none;
+  z-index: 2147483639;
+  border: 2px solid var(--za-cyan);
+  background: rgba(0, 240, 255, 0.08);
+  border-radius: 4px;
+  transition: all 0.08s ease-out;
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.35);
+  display: none;
+}
+
+.za-inspector-tag {
+  position: absolute;
+  top: -24px;
+  left: -2px;
+  background: var(--za-cyan);
+  color: #05070d;
+  font-family: var(--za-font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px 4px 0 0;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* On-Screen Pin Markers */
+.za-marker-pin {
+  position: absolute;
+  z-index: 2147483635;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--za-gold);
+  color: #050508;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--za-font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 16px rgba(232, 200, 114, 0.6), 0 4px 12px rgba(0, 0, 0, 0.5);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+  border: 2px solid #fff;
+  user-select: none;
+}
+
+.za-marker-pin:hover {
+  transform: translate(-50%, -50%) scale(1.3);
+  box-shadow: 0 0 24px rgba(232, 200, 114, 0.9), 0 6px 16px rgba(0, 0, 0, 0.6);
+  z-index: 2147483637;
+}
+
+.za-marker-pin.resolved {
+  background: var(--za-green);
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 12px rgba(52, 211, 153, 0.5);
+  opacity: 0.75;
+}
+
+.za-marker-pin.urgent {
+  background: var(--za-pink);
+  box-shadow: 0 0 20px rgba(255, 0, 122, 0.8);
+  animation: za-pulse 1.8s infinite;
+}
+
+@keyframes za-pulse {
+  0% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.18); box-shadow: 0 0 28px rgba(255, 0, 122, 1); }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+/* Note Creation / Editing Modal Popover */
+#zoth-annotator-modal {
+  position: fixed;
+  z-index: 2147483647;
+  background: var(--za-bg);
+  border: 1px solid var(--za-border-gold);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), 0 0 30px rgba(232, 200, 114, 0.2);
+  width: 420px;
+  max-width: calc(100vw - 32px);
+  padding: 16px 20px;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  font-family: var(--za-font-sans);
+  color: var(--za-text);
+  display: none;
+  animation: za-modal-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes za-modal-in {
+  from { opacity: 0; transform: scale(0.94) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.za-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.za-modal-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--za-gold);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.za-modal-target {
+  font-family: var(--za-font-mono);
+  font-size: 11px;
+  color: var(--za-cyan);
+  background: rgba(0, 240, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.za-modal-close {
+  background: transparent;
+  border: none;
+  color: var(--za-text-dim);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  border-radius: 4px;
+  /* Measured 21x44px: below the 44px comfortable-tap minimum for a control
+     that appears in the annotator drawer on every page. */
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.za-modal-close:hover { color: #fff; background: rgba(255, 255, 255, 0.1); }
+
+/* Quick Agent Mention Chips */
+.za-agent-chips-wrap {
+  margin-bottom: 10px;
+}
+.za-chips-label {
+  font-size: 11px;
+  color: var(--za-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.za-agent-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.za-agent-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--za-text);
+  font-family: var(--za-font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+.za-agent-chip:hover {
+  background: rgba(0, 240, 255, 0.15);
+  border-color: var(--za-cyan);
+  color: #fff;
+}
+.za-agent-chip.selected {
+  background: rgba(0, 240, 255, 0.25);
+  border-color: var(--za-cyan);
+  color: var(--za-cyan);
+  font-weight: 700;
+}
+.za-agent-chip.grok.selected {
+  background: rgba(52, 211, 153, 0.25);
+  border-color: var(--za-green);
+  color: var(--za-green);
+}
+.za-agent-chip.hermes.selected {
+  background: rgba(245, 158, 11, 0.25);
+  border-color: var(--za-amber);
+  color: var(--za-amber);
+}
+
+/* Textarea & Autocomplete */
+.za-textarea-wrap {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.za-textarea {
+  width: 100%;
+  height: 90px;
+  background: rgba(5, 7, 13, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #fff;
+  font-family: var(--za-font-sans);
+  font-size: 13px;
+  line-height: 1.45;
+  padding: 10px;
+  resize: vertical;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.za-textarea:focus {
+  border-color: var(--za-gold);
+  box-shadow: 0 0 12px rgba(232, 200, 114, 0.25);
+}
+
+/* Mention Autocomplete Dropdown */
+.za-mention-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background: var(--za-bg);
+  border: 1px solid var(--za-border);
+  box-shadow: var(--za-shadow);
+  border-radius: 8px;
+  z-index: 2147483647;
+  max-height: 160px;
+  overflow-y: auto;
+  display: none;
+}
+
+.za-mention-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-family: var(--za-font-mono);
+  color: var(--za-text);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.za-mention-item:hover, .za-mention-item.active {
+  background: rgba(0, 240, 255, 0.15);
+  color: #fff;
+}
+
+.za-mention-role {
+  font-size: 10px;
+  color: var(--za-text-dim);
+  margin-left: auto;
+}
+
+/* Options Bar: Category & Priority */
+.za-modal-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.za-select-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.za-select-label {
+  font-size: 10px;
+  color: var(--za-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.za-select {
+  background: rgba(5, 7, 13, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--za-text);
+  font-family: var(--za-font-sans);
+  font-size: 11px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  outline: none;
+}
+
+.za-select:focus {
+  border-color: var(--za-cyan);
+}
+
+/* Modal Actions */
+.za-modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.za-btn {
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-family: var(--za-font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.za-btn-ghost {
+  background: transparent;
+  color: var(--za-text-dim);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+.za-btn-ghost:hover { color: #fff; background: rgba(255, 255, 255, 0.05); }
+
+.za-btn-primary {
+  background: var(--za-gold);
+  color: #050508;
+  font-weight: 700;
+  box-shadow: 0 0 14px rgba(232, 200, 114, 0.35);
+}
+.za-btn-primary:hover {
+  background: #f3d78c;
+  box-shadow: 0 0 20px rgba(232, 200, 114, 0.6);
+  transform: translateY(-1px);
+}
+
+/* All Notes Drawer */
+#zoth-annotator-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  transform: translateX(100%);
+  visibility: hidden;
+  pointer-events: none;
+  width: 460px;
+  max-width: 90vw;
+  height: 100vh;
+  background: var(--za-bg);
+  border-left: 1px solid var(--za-border);
+  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.7);
+  z-index: 2147483646;
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s ease;
+  font-family: var(--za-font-sans);
+  color: var(--za-text);
+}
+
+#zoth-annotator-drawer.open {
+  transform: translateX(0);
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.za-drawer-header {
+  padding: 18px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.za-drawer-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.za-drawer-filters {
+  padding: 12px 20px;
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.za-drawer-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.za-note-card {
+  background: var(--za-card-bg);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 14px;
+  transition: all 0.2s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.za-note-card:hover {
+  border-color: var(--za-cyan);
+  box-shadow: 0 4px 16px rgba(0, 240, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+.za-note-card.resolved {
+  opacity: 0.6;
+  border-color: rgba(52, 211, 153, 0.3);
+}
+
+.za-note-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.za-note-card-id {
+  font-family: var(--za-font-mono);
+  font-size: 11px;
+  color: var(--za-gold);
+  font-weight: 700;
+}
+
+.za-note-card-page {
+  font-family: var(--za-font-mono);
+  font-size: 10px;
+  color: var(--za-text-dim);
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.za-note-card-text {
+  font-size: 13px;
+  line-height: 1.45;
+  color: #fff;
+  margin-bottom: 10px;
+  word-break: break-word;
+}
+
+.za-note-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.za-note-tag-agent {
+  font-family: var(--za-font-mono);
+  font-size: 10px;
+  background: rgba(0, 240, 255, 0.15);
+  color: var(--za-cyan);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.za-note-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.za-card-time {
+  font-size: 10px;
+  color: var(--za-text-dim);
+  font-family: var(--za-font-mono);
+}
+
+.za-drawer-footer {
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  gap: 8px;
+}
+
+/* Mobile & Touch Viewport Rules */
+@media (max-width: 768px) {
+  #zoth-annotator-pill {
+    bottom: 16px;
+    right: 16px;
+    padding: 8px 14px 8px 10px;
+    font-size: 12px;
+  }
+  #zoth-annotator-toolbar {
+    top: 10px;
+    width: calc(100vw - 20px);
+    max-width: 440px;
+    padding: 6px 8px;
+    gap: 4px;
+    overflow-x: auto;
+    justify-content: flex-start;
+  }
+  .za-tool-btn {
+    padding: 6px 9px;
+    font-size: 11px;
+    gap: 4px;
+  }
+  #zoth-annotator-drawer {
+    width: 100vw;
+    max-width: 100vw;
+  }
+}

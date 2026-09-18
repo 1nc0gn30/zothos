@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="keywords" content="simplex chat bridge, matrix e2ee gateway, zero metadata messaging, sovereign ai comms"/>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SimpleX & Matrix Sovereign Bridge — Zero-Metadata E2EE Communications</title>
+  
+  <meta name="description" content="End-to-end encrypted zero-metadata communications gateway connecting local AI agents directly to mobile devices via SimpleX and Matrix protocol."/>
+  <meta name="theme-color" content="#060913">
+  
+  <link rel="stylesheet" href="/assets/zoth-nav.css?v=11">
+  <link rel="stylesheet" href="/assets/zoth-pet-hud.css">
+  
+  <!-- Tailwind CDN for rapid zero-knowledge cyber aesthetic -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            zoth: {
+              bg: '#040711',
+              panel: 'rgba(10, 15, 30, 0.88)',
+              border: 'rgba(0, 240, 255, 0.25)',
+              cyan: '#00f0ff',
+              emerald: '#10b981',
+              gold: '#fbbf24',
+              purple: '#a855f7',
+            }
+          },
+          fontFamily: {
+            mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+            sans: ['system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #040711;
+      color: #f8fafc;
+      font-family: system-ui, sans-serif;
+    }
+    .grid-bg {
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(0, 240, 255, 0.12) 0%, transparent 60%),
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 100% 100%, 36px 36px, 36px 36px;
+    }
+    .neon-border {
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.12);
+    }
+    .qr-scanner-line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #00f0ff;
+      box-shadow: 0 0 12px #00f0ff;
+      animation: scanAnim 2.5s infinite linear;
+    }
+    @keyframes scanAnim {
+      0% { top: 0; opacity: 0; }
+      15% { opacity: 1; }
+      85% { opacity: 1; }
+      100% { top: 100%; opacity: 0; }
+    }
+  </style>
+  <link rel="stylesheet" href="/assets/zoth-footer.css" />
+</head>
+<body class="grid-bg min-h-screen flex flex-col">
+
+  <!-- Header -->
+                                                                      <header class="bar" id="topbar" role="banner">
+      <a class="brand js-hub" href="/" aria-label="Zoth Studio Home">
+        <div class="brand-emblem-wrap">
+          <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth Golden Z Emblem" width="34" height="34" class="brand-emblem-img" />
+          <span class="brand-emblem-halo"></span>
+        </div>
+        <span class="brand-text-wrap">
+          <strong>Zoth</strong>
+          <small>by NullAI</small>
+        </span>
+        <span class="brand-status-badge">SOVEREIGN</span>
+      </a>
+
+      <nav class="menu" aria-label="Primary navigation" role="navigation">
+        <a class="nav-link nav-for-everyone" href="/#for-everyone" data-tip="Zero-Code Showcases — How non-tech founders, creators & teams depend on Zoth.">✦ For You</a>
+
+        <!-- 🔮 Core AI -->
+        <div class="nav-dropdown" data-dropdown-id="core">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Core AI</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🔮 CORE AI ARCHITECTURE</span><span class="nav-item-badge">6 NODES</span></div>
+            <a href="/zoth/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+            <a href="/agents/"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+            <a href="/studio/consensus.html"><span class="nav-item-icon-box">⚔️</span><div class="nav-item-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+            <a href="/studio/swarm.html"><span class="nav-item-icon-box">🌐</span><div class="nav-item-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+            <a href="/memory/"><span class="nav-item-icon-box">🧠</span><div class="nav-item-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+            <a href="/zoth-world.html"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+          </div>
+        </div>
+
+        <!-- 🪐 Studio -->
+        <div class="nav-dropdown" data-dropdown-id="studio">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Studio</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu nav-dropdown-mega">
+            <div class="nav-dropdown-header"><span>🪐 14+ STUDIO WORKSTATIONS</span><span class="nav-item-badge">LOCAL DAGS</span></div>
+            <a href="/studio/cockpit.html"><span class="nav-item-icon-box">🪐</span><div class="nav-item-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+            <a href="/studio/cockpit.html?tool=webgen"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+            <a href="/studio/cockpit.html?tool=vos-sandbox"><span class="nav-item-icon-box">💻</span><div class="nav-item-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+            <a href="/studio/cockpit.html?tool=nexus-3d"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+            <a href="/studio/cockpit.html?tool=omnipost"><span class="nav-item-icon-box">🎬</span><div class="nav-item-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+            <a href="/studio/cockpit.html?tool=math-pillars"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+            <a href="/studio/cockpit.html?tool=secure-comms"><span class="nav-item-icon-box">🔒</span><div class="nav-item-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+            <a href="/studio/cockpit.html?tool=signal-bridge"><span class="nav-item-icon-box">📡</span><div class="nav-item-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+            <a href="/studio/cockpit.html?tool=web3-hub"><span class="nav-item-icon-box">🪙</span><div class="nav-item-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+            <a href="/studio/cockpit.html?tool=pets"><span class="nav-item-icon-box">💎</span><div class="nav-item-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+            <a href="/studio/cockpit.html?tool=tool-nexus"><span class="nav-item-icon-box">🛠️</span><div class="nav-item-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+          </div>
+        </div>
+
+        <!-- 🌌 Universe -->
+        <div class="nav-dropdown" data-dropdown-id="universe">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Universe</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🌌 UNIVERSE &amp; PUBLICATIONS</span><span class="nav-item-badge">STORIES</span></div>
+            <a href="/comic/"><span class="nav-item-icon-box">🎨</span><div class="nav-item-body"><strong>AZOTH Anime Comic</strong><small>Season 1 Ep 1: Genesis in Silicon Rain (Audio)</small></div><span class="nav-item-badge">AUDIO</span></a>
+            <a href="/social/"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+            <a href="/articles/"><span class="nav-item-icon-box">📜</span><div class="nav-item-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+            <a href="/article/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+            <a href="/ai-webgpu.html"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+            <a href="/adytum/"><span class="nav-item-icon-box">🏛️</span><div class="nav-item-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+          </div>
+        </div>
+
+        <!-- 📚 Docs & Vault -->
+        <div class="nav-dropdown" data-dropdown-id="docs">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Docs & Vault</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>📚 DOCUMENTATION &amp; SECURITY</span><span class="nav-item-badge">SPECS</span></div>
+            <a href="/docs/"><span class="nav-item-icon-box">📚</span><div class="nav-item-body"><strong>Master Documentation</strong><small>Port Topology, 1-Click Install Scripts & API Guide</small></div><span class="nav-item-badge">DOCS</span></a>
+            <a href="/vault/"><span class="nav-item-icon-box">🔐</span><div class="nav-item-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+            <a href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+            <a href="/faq.html"><span class="nav-item-icon-box">❓</span><div class="nav-item-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+          </div>
+        </div>
+
+        <!-- ⚡ Action Pills -->
+        <button type="button" class="nav-pill nav-telemetry-pill" title="View Live Studio Telemetry & Background Daemons" aria-label="Studio Telemetry Status">
+          <span class="tel-dot online"></span><span class="tel-text">6/6 DAEMONS</span>
+        </button>
+
+        <button type="button" class="nav-pill nav-pet-pill" title="Active Companion Spirit: Azoth (Click to Summon / Switch Mascot)" aria-label="Active Companion Spirit">
+          <span class="pet-emoji">🔮</span><span class="pet-name">Azoth</span>
+        </button>
+
+        <a class="nav-pill nav-deck-pill js-deck" href="http://127.0.0.1:8484/" title="Open Local Operator Deck (:8484)">
+          <span class="deck-pulse"></span><span>DECK</span>
+        </a>
+
+        <button type="button" class="nav-pill nav-palette-btn" title="Open Global Command Palette (Ctrl+K)" aria-label="Command Palette">
+          <span class="palette-icon">🔍</span><kbd class="nav-kbd">Ctrl+K</kbd>
+        </button>
+
+        <button type="button" class="nav-pill nav-annotate-btn" title="Toggle On-Screen Annotator & Feedback (Shift+A)" aria-label="Toggle Annotator">
+          <span class="annotate-icon">✏️</span><span class="annotate-text">Annotate</span><kbd class="nav-kbd">Shift+A</kbd>
+        </button>
+
+        <div class="nav-dropdown nav-theme-dropdown">
+          <button class="nav-dropdown-btn nav-theme-current-btn" type="button" aria-haspopup="true" aria-expanded="false" title="Switch Visual Theme (Shift+T)">
+            <span class="current-theme-swatch" style="background:#00f0ff;"></span>
+            <span class="current-theme-emoji">🌙</span>
+            <span class="current-theme-label">Dark Void</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+        </div>
+
+        <a class="nav-pill git" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank" title="GitHub Repository — Open Source code, Debian packages, and releases">
+          <span>🐙 GitHub ↗</span>
+        </a>
+      </nav>
+
+      <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Toggle navigation menu">
+        <span class="burger-lines"><span class="b-line b-1"></span><span class="b-line b-2"></span><span class="b-line b-3"></span></span>
+        <span class="burger-text">Menu</span>
+      </button>
+      <div class="zoth-scroll-progress" id="zoth-scroll-progress"></div>
+    </header>
+
+    <nav class="drawer" id="drawer" aria-label="Universal Mobile Navigation" role="navigation">
+      <div class="drawer-header-brand">
+        <div class="d-brand-left">
+          <div class="brand-emblem-wrap">
+            <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth" width="28" height="28" class="brand-emblem-img" />
+          </div>
+          <span class="d-brand-title"><strong>Zoth Studio</strong><small>v12.0 Sovereign</small></span>
+        </div>
+        <button type="button" class="drawer-telemetry-badge" title="View Diagnostics HUD">● 6/6 DAEMONS</button>
+        <button type="button" class="drawer-close-btn" aria-label="Close mobile menu">✕</button>
+      </div>
+
+      <div class="drawer-section drawer-tools-section">
+        <div class="drawer-heading">⚡ Quick Actions</div>
+        <div class="drawer-quick-tools-grid">
+          <button type="button" class="drawer-tool-pill drawer-palette-trigger"><span>🔍</span> Command Palette <kbd class="nav-kbd">Ctrl+K</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-annotate-trigger"><span>✏️</span> On-Screen Annotator <kbd class="nav-kbd">Shift+A</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-telemetry-trigger"><span>⚡</span> Telemetry HUD</button>
+          <button type="button" class="drawer-tool-pill drawer-audio-trigger"><span>🔊</span> Audio FX</button>
+        </div>
+      </div>
+
+      <div class="drawer-section drawer-theme-section">
+        <div class="drawer-heading">🎨 Visual Theme (16 Archetypes)</div>
+        <div class="drawer-search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="drawer-theme-search-input" placeholder="Search 16 themes..." autocomplete="off" />
+        </div>
+        <div class="theme-filter-chips drawer-filter-chips">
+          <button type="button" class="theme-chip-btn active" data-drawer-cat="all">All (16)</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="studio originals">Originals</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="frontier ai & tech">Frontier</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="developer archetypes">Dev</button>
+        </div>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">✦ Featured</div>
+        <a class="drawer-link drawer-hero-link" href="/#for-everyone"><span class="d-link-icon">✦</span><div class="d-link-body"><strong>For You (No-Code Showcases)</strong><small>How Non-Tech Founders, Creators & Teams Use Zoth</small></div><span class="nav-item-badge">SHOWCASE</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🔮 Core AI & Pantheon</div>
+        <a class="drawer-link" href="/zoth/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+        <a class="drawer-link" href="/agents/"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+        <a class="drawer-link" href="/studio/consensus.html"><span class="d-link-icon">⚔️</span><div class="d-link-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+        <a class="drawer-link" href="/studio/swarm.html"><span class="d-link-icon">🌐</span><div class="d-link-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+        <a class="drawer-link" href="/memory/"><span class="d-link-icon">🧠</span><div class="d-link-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+        <a class="drawer-link" href="/zoth-world.html"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🪐 Workstations & DAGs</div>
+        <a class="drawer-link" href="/studio/cockpit.html"><span class="d-link-icon">🪐</span><div class="d-link-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=webgen"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=vos-sandbox"><span class="d-link-icon">💻</span><div class="d-link-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=nexus-3d"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=omnipost"><span class="d-link-icon">🎬</span><div class="d-link-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=math-pillars"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=secure-comms"><span class="d-link-icon">🔒</span><div class="d-link-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=signal-bridge"><span class="d-link-icon">📡</span><div class="d-link-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=web3-hub"><span class="d-link-icon">🪙</span><div class="d-link-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=pets"><span class="d-link-icon">💎</span><div class="d-link-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=tool-nexus"><span class="d-link-icon">🛠️</span><div class="d-link-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📜 Universe & Research</div>
+        <a class="drawer-link" href="/comic/"><span class="d-link-icon">🎨</span><div class="d-link-body"><strong>AZOTH Anime Comic Series</strong><small>Season 1 Ep 1: Genesis in Silicon Rain</small></div><span class="nav-item-badge">AUDIO</span></a>
+        <a class="drawer-link" href="/social/"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+        <a class="drawer-link" href="/articles/"><span class="d-link-icon">📜</span><div class="d-link-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+        <a class="drawer-link" href="/article/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+        <a class="drawer-link" href="/ai-webgpu.html"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+        <a class="drawer-link" href="/adytum/"><span class="d-link-icon">🏛️</span><div class="d-link-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📚 Docs & Security</div>
+        <a class="drawer-link" href="/docs/"><span class="d-link-icon">📚</span><div class="d-link-body"><strong>Complete Documentation</strong><small>Port Topology, 1-Click Install Scripts & API</small></div><span class="nav-item-badge">DOCS</span></a>
+        <a class="drawer-link" href="/vault/"><span class="d-link-icon">🔐</span><div class="d-link-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+        <a class="drawer-link" href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+        <a class="drawer-link" href="/faq.html"><span class="d-link-icon">❓</span><div class="d-link-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+      </div>
+
+      <div class="drawer-section drawer-footer-section">
+        <a class="drawer-pill-link js-deck" href="http://127.0.0.1:8484/">💻 Launch Local Operator Deck (:8484)</a>
+        <a class="drawer-pill-link" href="https://github.com/NullAITech/zoth-studio" target="_blank" rel="noopener noreferrer">🐙 GitHub Source Repository ↗</a>
+        <a class="drawer-pill-link" href="/downloads/zoth-studio-android.apk">📱 Download Android App (.apk)</a>
+      </div>
+    </nav>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+  <!-- Main Content Container -->
+  <main class="max-w-7xl mx-auto px-6 pt-28 pb-20 flex-1 w-full">
+    
+    <!-- Hero Section -->
+    <div class="text-center max-w-4xl mx-auto mb-16">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-950/60 border border-cyan-500/40 text-cyan-400 font-mono text-xs uppercase tracking-widest mb-6">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse"></span>
+        Zero-Knowledge Architecture // Non-Custodial
+      </div>
+      <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-cyan-400 bg-clip-text text-transparent mb-6">
+        Zoth Studio: Zero-Knowledge Sovereign Communications
+      </h1>
+      <p class="text-lg md:text-xl text-slate-400 leading-relaxed">
+        A custom-built, headless <strong class="text-slate-200">SimpleX-to-Matrix bridge</strong> ensuring absolute metadata privacy, zero user identifiers, and local-first cryptographic keys. Intercepts outgoing matrix messages and bridges them seamlessly through isolated SimpleX WebSocket channels.
+      </p>
+    </div>
+
+    <!-- The Onboarding Gateway & Live QR Code Card -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch mb-16">
+      
+      <!-- Left: Sovereign QR Code Scanner Component -->
+      <div class="lg:col-span-5 bg-slate-900/80 backdrop-blur-xl rounded-2xl p-8 neon-border flex flex-col items-center justify-between text-center relative overflow-hidden">
+        <div class="w-full flex justify-between items-center pb-4 border-b border-slate-800">
+          <div class="flex items-center gap-2 text-xs font-mono text-amber-400 uppercase font-bold">
+            <span>⚡</span> SimpleX Static Link / QR Gateway
+          </div>
+          <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-mono text-[10px] font-bold">DAEMON :5225</span>
+        </div>
+
+        <!-- QR Display Canvas Box (Real High-Res Scannable QR) -->
+        <div class="my-6 relative p-3 bg-white rounded-2xl shadow-[0_0_40px_rgba(0,240,255,0.25)] flex flex-col items-center justify-center">
+          <div class="qr-scanner-line"></div>
+          <img src="/assets/media/simplex_sovereign_qr.png" alt="SimpleX Sovereign QR Code" class="w-56 h-56 block rounded-lg cursor-zoom-in" id="simplex-qr-img" title="Click to expand QR code" />
+          <span class="text-[11px] font-mono text-slate-600 font-bold mt-1">100% Scannable with SimpleX Chat App</span>
+          <button type="button" id="btn-expand-qr" class="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-cyan-500/40 text-cyan-300 font-mono text-[11px] font-bold transition-colors">
+            <span>🔍</span> Expand QR
+          </button>
+        </div>
+
+        <div class="w-full space-y-3">
+          <div id="simplex-uri-box" class="bg-black/80 border border-cyan-500/40 rounded-xl p-3 font-mono text-xs text-cyan-300 break-all select-all cursor-pointer transition-colors hover:border-cyan-400" title="Click to copy URI">
+            https://smp5.simplex.im/i#P3-IWUiQi_4TEsLEV-69s5WXA8XO80uy/f8pIDmy7eh2tNrPR1WskgErjWE_4MN1hfLs_qEBFHKA
+          </div>
+          
+          <button type="button" id="btn-copy-simplex" class="w-full py-3.5 bg-gradient-to-r from-cyan-400 via-blue-500 to-cyan-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-extrabold font-mono text-sm rounded-xl transition-all hover:shadow-[0_0_25px_rgba(0,240,255,0.5)] active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer">
+            <span id="copy-btn-icon">🔗</span>
+            <span id="copy-btn-text">Copy SimpleX Invitation Link</span>
+          </button>
+          
+          <div id="copy-toast" class="hidden py-2 px-3 bg-emerald-500/20 border border-emerald-500 text-emerald-400 text-xs font-mono rounded-lg text-center transition-all">
+            ✔ Copied to clipboard! Ready to paste into SimpleX Chat.
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Step-by-Step Client Onboarding Instructions -->
+      <div class="lg:col-span-7 bg-slate-900/60 backdrop-blur-xl rounded-2xl p-8 border border-slate-800 flex flex-col justify-between">
+        <div>
+          <h2 class="text-2xl font-extrabold text-white mb-4 flex items-center gap-3">
+            <span>🛡️</span> Zero-Knowledge Onboarding Guide
+          </h2>
+          <p class="text-slate-400 text-sm mb-6 leading-relaxed">
+            Follow these 3 simple steps to pair your client device directly with the local Zoth Studio swarm via SimpleX Chat without exposing phone numbers, emails, DNS identities, or centralized metadata.
+          </p>
+
+          <div class="space-y-4">
+            <!-- Step 1 -->
+            <div class="flex items-start gap-4 p-4 rounded-xl bg-black/40 border border-slate-800/80">
+              <span class="flex-shrink-0 w-8 h-8 rounded-lg bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 font-mono font-bold flex items-center justify-center text-sm">1</span>
+              <div>
+                <strong class="text-white text-sm block mb-0.5">Download SimpleX Chat</strong>
+                <p class="text-xs text-slate-400">Install the privacy-focused SimpleX app on iOS, Android, or desktop (simplex.chat). No identifiers or phone numbers required.</p>
+              </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="flex items-start gap-4 p-4 rounded-xl bg-black/40 border border-slate-800/80">
+              <span class="flex-shrink-0 w-8 h-8 rounded-lg bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 font-mono font-bold flex items-center justify-center text-sm">2</span>
+              <div>
+                <strong class="text-white text-sm block mb-0.5">Scan QR or Paste Contact Link</strong>
+                <p class="text-xs text-slate-400">Scan the Sovereign QR code on the left or paste the contact URI. SimpleX will negotiate a single-use pairwise unidirectional queue.</p>
+              </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="flex items-start gap-4 p-4 rounded-xl bg-black/40 border border-slate-800/80">
+              <span class="flex-shrink-0 w-8 h-8 rounded-lg bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 font-mono font-bold flex items-center justify-center text-sm">3</span>
+              <div>
+                <strong class="text-white text-sm block mb-0.5">Automatic E2EE Megolm Bridge Provisioning</strong>
+                <p class="text-xs text-slate-400">The Rust Bridge dynamically spawns a ghost user in the Matrix Application Service, establishing a 100% end-to-end encrypted Megolm channel.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between font-mono text-xs text-slate-500">
+          <span>Bridge Daemon Port: <strong class="text-cyan-400">:8766</strong></span>
+          <span>SimpleX WebSocket: <strong class="text-emerald-400">:5225</strong></span>
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- Live SimpleX ↔ Matrix Swarm Terminal & Real-Time Message Console -->
+    <div class="bg-slate-900/80 backdrop-blur-xl rounded-2xl p-8 neon-border mb-16">
+      <div class="flex flex-wrap justify-between items-center pb-4 border-b border-slate-800 gap-4 mb-6">
+        <div>
+          <h2 class="text-2xl font-extrabold text-white flex items-center gap-3">
+            <span>💬</span> Live Sovereign Bridge Console
+          </h2>
+          <p class="text-slate-400 text-xs mt-1">Real-time incoming &amp; outgoing messages between your SimpleX phone app and the local Zoth laptop server.</p>
+        </div>
+        <div class="flex items-center gap-3 font-mono text-xs">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 font-bold">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            SimpleX Stream Active
+          </span>
+          <button type="button" onclick="clearLiveChat()" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors">Clear</button>
+        </div>
+      </div>
+
+      <!-- Live Terminal Output Area -->
+      <div id="live-simplex-terminal" class="bg-black/90 border border-cyan-500/30 rounded-xl p-5 h-80 overflow-y-auto font-mono text-xs flex flex-col gap-3 mb-4 shadow-inner">
+        
+        <div class="p-3 rounded-lg bg-cyan-950/40 border border-cyan-500/20 text-cyan-300">
+          <div class="flex justify-between text-[10px] text-slate-500 mb-1">
+            <span>⚡ SYSTEM DAEMON</span>
+            <span id="init-time">Ready</span>
+          </div>
+          <div>[⚡ Sovereign Bridge] Connected to local SimpleX WebSocket stream on <code>ws://127.0.0.1:5225</code>. All pairwise E2EE messages will stream here live.</div>
+        </div>
+
+        <div class="p-3 rounded-lg bg-emerald-950/40 border border-emerald-500/20 text-emerald-300">
+          <div class="flex justify-between text-[10px] text-slate-500 mb-1">
+            <span>📱 SimpleX Android Client (Pairwise Queue)</span>
+            <span>Connected</span>
+          </div>
+          <div>[Handshake Verified] Client paired via SMP relay <code>smp6.simplex.im</code>. E2EE session ratchet established.</div>
+        </div>
+
+      </div>
+
+      <!-- Outbound Message Input Box (Send from Laptop to Phone) -->
+      <div class="flex gap-3">
+        <input type="text" id="live-chat-input" placeholder="Type a message or command to send back to your SimpleX phone app..." class="flex-1 bg-black/60 border border-slate-700 focus:border-cyan-400 rounded-xl px-4 py-3 text-sm text-white font-mono outline-none transition-colors" />
+        <button type="button" id="btn-send-live-chat" class="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold font-mono text-sm rounded-xl transition-transform hover:-translate-y-0.5 shadow-lg shadow-cyan-500/20 flex items-center gap-2">
+          <span>Send to Phone</span> <span>↗</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Deep Technical Architecture Breakdown -->
+    <div class="bg-slate-900/60 backdrop-blur-xl rounded-2xl p-8 border border-slate-800 mb-12">
+      <h2 class="text-2xl font-extrabold text-white mb-2 flex items-center gap-3">
+        <span>⚙️</span> Technical Cryptographic Pipeline
+      </h2>
+      <p class="text-slate-400 text-sm mb-8">
+        How the custom Zoth Studio Rust middleware translates messages between isolated SimpleX queues and Matrix Application Services without breaking end-to-end encryption.
+      </p>
+
+      <!-- 5-Node Pipeline Flowchart -->
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-4 text-center font-mono text-xs mb-8">
+        
+        <div class="p-4 rounded-xl bg-black/50 border border-cyan-500/30 flex flex-col items-center justify-center gap-2">
+          <span class="text-2xl">📱</span>
+          <strong class="text-white">SimpleX Client</strong>
+          <span class="text-[10px] text-slate-400">Headless WS (:5225)</span>
+        </div>
+
+        <div class="p-4 rounded-xl bg-black/50 border border-cyan-500/30 flex flex-col items-center justify-center gap-2">
+          <span class="text-2xl">🦀</span>
+          <strong class="text-white">Rust Middleware</strong>
+          <span class="text-[10px] text-cyan-300">tokio-tungstenite</span>
+        </div>
+
+        <div class="p-4 rounded-xl bg-black/50 border border-purple-500/30 flex flex-col items-center justify-center gap-2">
+          <span class="text-2xl">🗄️</span>
+          <strong class="text-white">Multiplexed SQLite</strong>
+          <span class="text-[10px] text-purple-300">bridge.db &amp; Keys</span>
+        </div>
+
+        <div class="p-4 rounded-xl bg-black/50 border border-emerald-500/30 flex flex-col items-center justify-center gap-2">
+          <span class="text-2xl">🛡️</span>
+          <strong class="text-white">Matrix Appservice</strong>
+          <span class="text-[10px] text-emerald-300">AS Push API (:8766)</span>
+        </div>
+
+        <div class="p-4 rounded-xl bg-black/50 border border-blue-500/30 flex flex-col items-center justify-center gap-2">
+          <span class="text-2xl">🔒</span>
+          <strong class="text-white">E2EE Megolm Room</strong>
+          <span class="text-[10px] text-blue-300">Zero-Knowledge Mesh</span>
+        </div>
+
+      </div>
+
+      <div class="bg-black/80 rounded-xl p-5 border border-slate-800 font-mono text-xs text-slate-300 overflow-x-auto" style="max-width:100%;">
+        <div class="text-slate-500 mb-2">// Rust Bridge Mapping Event Handler (src/main.rs &amp; src/simplex/client.rs)</div>
+        <pre style="white-space:pre-wrap; word-break:break-word; margin:0;"><code class="text-cyan-400" style="white-space:pre-wrap; word-break:break-word;">pub async fn handle_simplex_inbound(event: SimpleXEvent, store: &amp;BridgeStore, router: &amp;BridgeRouter) -&gt; Result&lt;()&gt; {
+    match event {
+        SimpleXEvent::NewChatItems { chat, items } =&gt; {
+            if let (Some(contact_id), Some(item)) = (chat.contact_id, items.first()) {
+                if let Some(matrix_room) = store.get_matrix_room(&amp;contact_id)? {
+                    let ghost = GhostUserClient::new(&amp;contact_id, &amp;chat.name.unwrap_or_default());
+                    ghost.push_to_matrix_room(&amp;matrix_room, item.text.as_deref().unwrap_or("")).await?;
+                }
+            }
+        }
+        _ =&gt; {}
+    }
+    Ok(())
+}</code></pre>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Zero-Knowledge QR Code Gateway Modal -->
+  <dialog id="qr-expand-modal" class="rounded-2xl p-0 border border-cyan-500/30 bg-transparent max-w-[92vw] backdrop:bg-black/80">
+    <div class="bg-slate-900/95 backdrop-blur-xl rounded-2xl p-6 md:p-8 w-full max-w-md text-center relative neon-border">
+      <button type="button" id="btn-close-qr-modal" aria-label="Close" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition-colors">✕</button>
+
+      <div class="flex items-center justify-center gap-2 text-xs font-mono text-amber-400 uppercase font-bold mb-4">
+        <span>⚡</span> Sovereign QR Gateway
+      </div>
+
+      <div class="mx-auto mb-5 relative p-3 bg-white rounded-2xl shadow-[0_0_40px_rgba(0,240,255,0.25)] flex items-center justify-center w-fit">
+        <div class="qr-scanner-line"></div>
+        <img src="/assets/media/simplex_sovereign_qr.png" alt="SimpleX Sovereign QR Code (expanded)" class="w-72 h-72 block rounded-lg" id="simplex-qr-img-large" />
+      </div>
+
+      <p class="text-slate-400 text-xs leading-relaxed mb-4">
+        This link is generated locally. Zoth never transmits your contact identity to any server.
+      </p>
+
+      <div id="qr-modal-uri-box" class="bg-black/80 border border-cyan-500/40 rounded-xl p-3 font-mono text-[11px] text-cyan-300 break-all select-all mb-4">
+        https://smp5.simplex.im/i#P3-IWUiQi_4TEsLEV-69s5WXA8XO80uy/f8pIDmy7eh2tNrPR1WskgErjWE_4MN1hfLs_qEBFHKA
+      </div>
+
+      <div class="flex gap-3">
+        <button type="button" id="btn-copy-qr-modal" class="flex-1 py-3 bg-gradient-to-r from-cyan-400 via-blue-500 to-cyan-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-extrabold font-mono text-xs rounded-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+          <span id="qr-modal-copy-icon">🔗</span>
+          <span id="qr-modal-copy-text">Copy Contact URI</span>
+        </button>
+        <button type="button" id="btn-close-qr-modal-secondary" class="px-5 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs rounded-xl transition-colors">Close</button>
+      </div>
+    </div>
+  </dialog>
+
+
+  <!-- Footer -->
+                                                              <footer class="site" role="contentinfo">
+      <div class="foot-wrap">
+        <div aria-hidden="true" class="foot-watermark">ZOTH</div>
+        <div class="foot-grid">
+          <div class="foot-brand-col">
+            <p class="foot-kicker">Local · loopback · no telemetry</p>
+            <a class="foot-brand-lockup" href="/">
+              <img alt="Master Azoth" class="foot-azoth" decoding="async" height="72" loading="lazy" src="/assets/mascot/azoth-bust.jpg" width="72" />
+              <span class="foot-brand-text">
+                <img alt="" class="foot-brand-logo" decoding="async" height="28" loading="lazy" src="/assets/brand/zoth-golden-z-192.png" width="28" />
+                <strong class="foot-brand-title">Zoth Studio</strong>
+              </span>
+            </a>
+            <small class="foot-brand-desc">Local-first workspace for a team of AI agents. Files stay on this machine.</small>
+            <div class="foot-actions">
+              <a class="foot-btn foot-btn-on" href="/#install">Install locally</a>
+              <a class="foot-btn foot-btn-ghost" href="/pricing/">Support the forge</a>
+            </div>
+          </div>
+          <div class="foot-col">
+            <h3>Studio</h3>
+            <a class="mega-footer-link js-deck" href="http://127.0.0.1:8484/">Operator Deck</a>
+            <a class="mega-footer-link" href="/studio/">Workstations</a>
+            <a class="mega-footer-link" href="/studio/webgen.html">WebGen</a>
+            <a class="mega-footer-link" href="/studio/swarm.html">3D Swarm</a>
+            <a class="mega-footer-link" href="/studio/consensus.html">Consensus</a>
+          </div>
+          <div class="foot-col">
+            <h3>Agents</h3>
+            <a class="mega-footer-link" href="/zoth/">Master Azoth</a>
+            <a class="mega-footer-link" href="/agents/">21-Agent pantheon</a>
+            <a class="mega-footer-link" href="/pets/">Companions</a>
+            <a class="mega-footer-link" href="/vault/">Sovereign vault</a>
+            <a class="mega-footer-link" href="/adytum/">Adytum</a>
+          </div>
+          <div class="foot-col">
+            <h3>Universe</h3>
+            <a class="mega-footer-link" href="/comic/">Azoth comic</a>
+            <a class="mega-footer-link" href="/social/">Social wall</a>
+            <a class="mega-footer-link" href="/showcase.html">Showcase</a>
+            <a class="mega-footer-link" href="/signal/">Signal</a>
+            <a class="mega-footer-link" href="/article/">Manifesto</a>
+          </div>
+          <div class="foot-col">
+            <h3>Resources</h3>
+            <a class="mega-footer-link" href="/docs/">Docs</a>
+            <a class="mega-footer-link" href="/faq.html">FAQ</a>
+            <a class="mega-footer-link" href="/pricing/">Support / Patron</a>
+            <a class="mega-footer-link" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub ↗</a>
+            <a class="mega-footer-link" href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI ↗</a>
+          </div>
+        </div>
+        <div class="foot-bottom">
+          <p>© 2026 NullAI Tech. MIT. Local sovereign execution — zero telemetry.</p>
+          <nav aria-label="Footer meta" class="foot-meta">
+            <a href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub</a>
+            <a href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI</a>
+            <a href="/docs/">Docs</a>
+            <a href="/faq.html">FAQ</a>
+          </nav>
+        </div>
+      </div>
+    </footer>
+
+  <script src="/assets/zoth-nav.js?v=11"></script>
+  <script src="/assets/zoth-pet-hud.js"></script>
+
+  <script>
+    function copySimpleXLink() {
+      const uri = "https://smp5.simplex.im/i#P3-IWUiQi_4TEsLEV-69s5WXA8XO80uy/f8pIDmy7eh2tNrPR1WskgErjWE_4MN1hfLs_qEBFHKA";
+      const toast = document.getElementById("copy-toast");
+      const btnText = document.getElementById("copy-btn-text");
+      const btnIcon = document.getElementById("copy-btn-icon");
+
+      // Robust clipboard write with fallback
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(uri).then(onSuccess, fallbackCopy);
+      } else {
+        fallbackCopy();
+      }
+
+      function fallbackCopy() {
+        const tempInput = document.createElement("textarea");
+        tempInput.value = uri;
+        tempInput.style.position = "fixed";
+        tempInput.style.left = "-9999px";
+        document.body.appendChild(tempInput);
+        tempInput.focus();
+        tempInput.select();
+        try {
+          document.execCommand("copy");
+          onSuccess();
+        } catch (err) {
+          console.error("Copy error:", err);
+        }
+        document.body.removeChild(tempInput);
+      }
+
+      function onSuccess() {
+        if (toast) toast.classList.remove("hidden");
+        if (btnText) btnText.textContent = "Copied to Clipboard! ✓";
+        if (btnIcon) btnIcon.textContent = "✅";
+        if (window.ZothPetHUD && window.ZothPetHUD.say) {
+          window.ZothPetHUD.say("Copied sovereign SimpleX contact URI to clipboard!");
+        }
+        setTimeout(() => {
+          if (toast) toast.classList.add("hidden");
+          if (btnText) btnText.textContent = "Copy SimpleX Invitation Link";
+          if (btnIcon) btnIcon.textContent = "🔗";
+        }, 3000);
+      }
+    }
+
+    document.getElementById("btn-copy-simplex").addEventListener("click", copySimpleXLink);
+    document.getElementById("simplex-uri-box").addEventListener("click", copySimpleXLink);
+  </script>
+
+
+  <script>
+    document.getElementById("init-time").textContent = new Date().toLocaleTimeString();
+    const liveTerminal = document.getElementById("live-simplex-terminal");
+    const liveInput = document.getElementById("live-chat-input");
+    const btnSendLive = document.getElementById("btn-send-live-chat");
+
+    function appendLiveMessage(sender, text, isOutbound = false) {
+      const bubble = document.createElement("div");
+      bubble.className = isOutbound 
+        ? "p-3 rounded-lg bg-cyan-950/50 border border-cyan-500/30 text-cyan-200 self-end max-w-[85%]"
+        : "p-3 rounded-lg bg-slate-800/70 border border-slate-700 text-slate-200 self-start max-w-[85%]";
+      
+      bubble.innerHTML = `
+        <div class="flex justify-between text-[10px] text-slate-400 mb-1 gap-4">
+          <span class="font-bold">${sender}</span>
+          <span>${new Date().toLocaleTimeString()}</span>
+        </div>
+        <div class="text-xs leading-relaxed">${text.replace(/</g, '&lt;')}</div>
+      `;
+      liveTerminal.appendChild(bubble);
+      liveTerminal.scrollTop = liveTerminal.scrollHeight;
+    }
+
+        // Live Polling & Outbound Dispatcher via Port 8767 (Direct SQLite Sync)
+    let renderedMsgIds = new Set();
+    let hasLoadedFirstBatch = false;
+    const bridgeHost = window.location.hostname || "127.0.0.1";
+    const BRIDGE_API = "http://" + bridgeHost + ":8767";
+
+    async function pollLiveMessages() {
+      try {
+        const res = await fetch(`${BRIDGE_API}/api/simplex/messages`, { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.messages && data.messages.length > 0) {
+            // On first successful load, clear initial static placeholders
+            if (!hasLoadedFirstBatch) {
+              liveTerminal.innerHTML = "";
+              hasLoadedFirstBatch = true;
+            }
+            data.messages.forEach(m => {
+              if (!renderedMsgIds.has(m.id)) {
+                renderedMsgIds.add(m.id);
+                if (m.text && !m.text.startsWith("chat banner") && !m.text.includes("Disappearing messages:")) {
+                  appendLiveMessage(m.sender, m.text, m.isOutbound);
+                  if (!m.isOutbound && window.ZothPetHUD && window.ZothPetHUD.say) {
+                    window.ZothPetHUD.say(`Inbound from SimpleX phone: "${m.text.slice(0, 30)}"`);
+                  }
+                }
+              }
+            });
+          }
+        }
+      } catch (err) {
+        console.warn("Bridge poll warning:", err);
+      }
+    }
+    setInterval(pollLiveMessages, 800);
+    pollLiveMessages();
+
+    btnSendLive.onclick = async function() {
+      const txt = liveInput.value.trim();
+      if (!txt) return;
+
+      liveInput.value = "";
+      try {
+        await fetch(`${BRIDGE_API}/api/simplex/send`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: txt })
+        });
+      } catch (e) {
+        appendLiveMessage("💻 Laptop Server (Operator)", txt, true);
+      }
+
+      if (window.ZothPetHUD && window.ZothPetHUD.say) {
+        window.ZothPetHUD.say("Sent encrypted message to SimpleX client!");
+      }
+    };
+
+    liveInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") btnSendLive.click();
+    });
+
+    window.clearLiveChat = function() {
+      liveTerminal.innerHTML = '<div class="text-slate-500 text-center py-4 font-mono text-xs">Live console cleared. Waiting for new SimpleX messages...</div>';
+    };
+  </script>
+
+  <!-- Zero-Knowledge QR Gateway Modal wiring -->
+  <script>
+    (function () {
+      const modal = document.getElementById("qr-expand-modal");
+      const openTriggers = [
+        document.getElementById("btn-expand-qr"),
+        document.getElementById("simplex-qr-img")
+      ].filter(Boolean);
+      const closeBtns = [
+        document.getElementById("btn-close-qr-modal"),
+        document.getElementById("btn-close-qr-modal-secondary")
+      ].filter(Boolean);
+      const copyBtn = document.getElementById("btn-copy-qr-modal");
+      const copyIcon = document.getElementById("qr-modal-copy-icon");
+      const copyText = document.getElementById("qr-modal-copy-text");
+      const uriBox = document.getElementById("qr-modal-uri-box");
+
+      function openModal() {
+        if (modal && typeof modal.showModal === "function") {
+          modal.showModal();
+        } else if (modal) {
+          modal.setAttribute("open", "");
+        }
+      }
+      function closeModal() {
+        if (modal && typeof modal.close === "function") {
+          modal.close();
+        } else if (modal) {
+          modal.removeAttribute("open");
+        }
+      }
+
+      openTriggers.forEach((el) => el.addEventListener("click", openModal));
+      closeBtns.forEach((el) => el.addEventListener("click", closeModal));
+
+      // Backdrop click-to-close: clicking the <dialog> element itself (outside
+      // the inner card) counts as a backdrop click.
+      if (modal) {
+        modal.addEventListener("click", (e) => {
+          if (e.target === modal) closeModal();
+        });
+      }
+
+      if (copyBtn && uriBox) {
+        copyBtn.addEventListener("click", () => {
+          const uri = uriBox.textContent.trim();
+          function done() {
+            if (copyText) copyText.textContent = "Copied! ✓";
+            if (copyIcon) copyIcon.textContent = "✅";
+            setTimeout(() => {
+              if (copyText) copyText.textContent = "Copy Contact URI";
+              if (copyIcon) copyIcon.textContent = "🔗";
+            }, 2500);
+          }
+          if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(uri).then(done, () => {});
+          } else {
+            const tmp = document.createElement("textarea");
+            tmp.value = uri;
+            tmp.style.position = "fixed";
+            tmp.style.left = "-9999px";
+            document.body.appendChild(tmp);
+            tmp.focus();
+            tmp.select();
+            try { document.execCommand("copy"); done(); } catch (e) {}
+            document.body.removeChild(tmp);
+          }
+        });
+      }
+    })();
+  </script>
+
+</body>
+</html>

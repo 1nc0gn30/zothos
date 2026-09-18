@@ -1,0 +1,73 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import CtaBand from "../../components/CtaBand.astro";
+import ServiceRows from "../../components/ServiceRows.astro";
+import { businessSchema } from "../../data/schema.js";
+import { serviceAreas } from "../../data/site.js";
+
+export function getStaticPaths() {
+  return serviceAreas.map((area) => ({
+    params: { slug: area.slug },
+    props: { area }
+  }));
+}
+
+const { area } = Astro.props;
+const cityName = area.h1.replace("Fence Installation in ", "").replace("Fence Installation Serving the ", "");
+---
+
+<BaseLayout
+  title={area.title}
+  description={area.description}
+  path={`/service-areas/${area.slug}`}
+  schema={businessSchema()}
+>
+  <section class="page-hero">
+    <div class="container page-hero-grid">
+      <div>
+        <span class="eyebrow">Service area</span>
+        <h1>{area.h1}</h1>
+        <p>{area.summary}</p>
+        <div class="button-row">
+          <a class="button button-primary" href="/contact-us">Get a Local Quote &rarr;</a>
+          <a class="button button-outline" href="/services">Compare Services</a>
+        </div>
+      </div>
+      <figure class="page-hero-media">
+        <img
+          src="/images/fences/farm-barbwire.webp"
+          alt={`Fence installation work serving ${cityName} and nearby North Florida properties`}
+          width="2048"
+          height="1536"
+        />
+        <figcaption>Local estimates, local crews, local soil knowledge</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container split">
+      <div>
+        <h2>Local fence work, not cloned location copy.</h2>
+      </div>
+      <article class="article">
+        <p>{area.body}</p>
+
+        <h2>Why Poole Fencing in {cityName}</h2>
+        <ul class="feature-list">
+          {area.highlights.map((item) => <li>{item}</li>)}
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section class="section-tight">
+    <div class="container">
+      <span class="eyebrow">Available here</span>
+      <h2>Fence types we quote in {cityName}.</h2>
+      <ServiceRows />
+    </div>
+  </section>
+
+  <CtaBand heading={`Get a free fence quote for ${cityName}.`} />
+</BaseLayout>

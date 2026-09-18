@@ -1,0 +1,771 @@
+/* =============================================================================
+   🐾 ZOTH STUDIO — 2026 AAA CYBERPUNK COMPANION PET HUD & NARRATOR (v2.0 ULTRA)
+   Ergonomic Floating Dock Anti-Collision · Spring Physics · 100% Vector Glyphs
+   ============================================================================= */
+
+:root {
+  --pet-hud-bg: rgba(7, 10, 22, 0.94);
+  --pet-hud-border: rgba(0, 240, 255, 0.35);
+  --pet-hud-glow: rgba(0, 240, 255, 0.25);
+  --pet-hud-gold: #fbbf24;
+  --pet-hud-gold-glow: rgba(251, 191, 36, 0.35);
+  --pet-hud-cyan: #00f0ff;
+  --pet-hud-text: #f8fafc;
+  --pet-hud-muted: #94a3b8;
+  --pet-hud-card-bg: rgba(9, 13, 28, 0.97);
+}
+
+html[data-theme="light"] {
+  --pet-hud-bg: rgba(255, 255, 255, 0.95);
+  --pet-hud-border: rgba(2, 132, 199, 0.35);
+  --pet-hud-glow: rgba(2, 132, 199, 0.18);
+  --pet-hud-gold: #d97706;
+  --pet-hud-gold-glow: rgba(217, 119, 6, 0.25);
+  --pet-hud-cyan: #0284c7;
+  --pet-hud-text: #0f172a;
+  --pet-hud-muted: #64748b;
+  --pet-hud-card-bg: rgba(255, 255, 255, 0.98);
+}
+
+html[data-theme="matrix"] {
+  --pet-hud-bg: rgba(2, 14, 6, 0.94);
+  --pet-hud-border: rgba(0, 255, 65, 0.4);
+  --pet-hud-glow: rgba(0, 255, 65, 0.3);
+  --pet-hud-gold: #00ff41;
+  --pet-hud-gold-glow: rgba(0, 255, 65, 0.4);
+  --pet-hud-cyan: #55ff77;
+  --pet-hud-text: #86efac;
+  --pet-hud-muted: #4ade80;
+  --pet-hud-card-bg: rgba(3, 20, 8, 0.97);
+}
+
+html[data-theme="gold"] {
+  --pet-hud-bg: rgba(14, 10, 3, 0.94);
+  --pet-hud-border: rgba(251, 191, 36, 0.45);
+  --pet-hud-glow: rgba(251, 191, 36, 0.35);
+  --pet-hud-gold: #fbbf24;
+  --pet-hud-gold-glow: rgba(251, 191, 36, 0.4);
+  --pet-hud-cyan: #f59e0b;
+  --pet-hud-text: #fef3c7;
+  --pet-hud-muted: #d97706;
+  --pet-hud-card-bg: rgba(22, 16, 5, 0.97);
+}
+
+/* =============================================================================
+   1. Master Floating Container (Bottom-Right Anchor)
+   Never obstructs the center bottom floating dock on desktop or mobile
+   ============================================================================= */
+#zoth-pet-hud {
+  position: fixed;
+  bottom: 22px;
+  right: 24px;
+  left: auto;
+  top: auto;
+  z-index: 99990;
+  font-family: var(--font-theme-body, system-ui, -apple-system, BlinkMacSystemFont, sans-serif);
+  user-select: none;
+  -webkit-user-select: none;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-end;
+  gap: 10px;
+  pointer-events: none;
+  touch-action: none;
+  transition: bottom 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              right 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.2s ease;
+}
+
+#zoth-pet-hud * {
+  box-sizing: border-box;
+}
+
+#zoth-pet-hud button,
+#zoth-pet-hud a,
+#zoth-pet-hud select,
+#zoth-pet-hud input,
+#zoth-pet-hud .pet-hud-trigger,
+#zoth-pet-hud .pet-hud-card,
+#zoth-pet-hud .pet-hud-speech-bubble {
+  pointer-events: auto;
+}
+
+/* Orientation Modifiers when dragged to other quadrants */
+#zoth-pet-hud.orient-left {
+  right: auto;
+  left: 24px;
+  align-items: flex-start;
+}
+
+#zoth-pet-hud.orient-down {
+  bottom: auto;
+  top: 70px;
+  flex-direction: column;
+}
+
+/* =============================================================================
+   2. Floating Avatar Trigger Button (Cyber Capsule / Orb)
+   ============================================================================= */
+.pet-hud-trigger {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 14px 4px 4px;
+  border-radius: 9999px;
+  background: var(--pet-hud-bg);
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  border: 1px solid var(--pet-hud-border);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.75),
+              0 0 20px var(--pet-hud-glow);
+  cursor: pointer;
+  outline: none;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.28s ease,
+              border-color 0.25s ease;
+  z-index: 2;
+}
+
+.pet-hud-trigger:hover {
+  transform: translateY(-2px) scale(1.03);
+  border-color: var(--pet-hud-gold);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.85),
+              0 0 28px var(--pet-hud-gold-glow);
+}
+
+.pet-hud-trigger:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+/* Avatar Orb */
+.pet-hud-orb {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--pet-hud-gold);
+  background: #04060d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 0 16px var(--pet-hud-gold-glow);
+}
+
+.pet-hud-orb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pet-hud-trigger:hover .pet-hud-orb img {
+  transform: scale(1.12);
+}
+
+/* Concentric Pulse Ring */
+.pet-hud-pulse-ring {
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 1.5px solid var(--pet-hud-gold);
+  opacity: 0.6;
+  animation: petHudPulse 3s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes petHudPulse {
+  0% { transform: scale(0.92); opacity: 0.85; }
+  50% { transform: scale(1.24); opacity: 0.12; }
+  100% { transform: scale(1.36); opacity: 0; }
+}
+
+/* Active Status Beacon Dot */
+.pet-hud-orb-status {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #10b981;
+  border: 2px solid #050711;
+  box-shadow: 0 0 8px #10b981;
+  animation: petStatusBlink 2.4s infinite ease-in-out;
+}
+
+@keyframes petStatusBlink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.85); }
+}
+
+/* Text Pill Info */
+.pet-hud-trigger-info {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  padding-right: 4px;
+}
+
+.pet-hud-trigger-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-family: var(--font-theme-mono, monospace);
+  color: var(--pet-hud-text);
+  line-height: 1.2;
+}
+
+.pet-hud-trigger-state {
+  font-size: 0.66rem;
+  font-family: var(--font-theme-mono, monospace);
+  color: var(--pet-hud-gold);
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* =============================================================================
+   3. Speech Bubble (Snugly Above Trigger, Right Aligned)
+   ============================================================================= */
+.pet-hud-speech-bubble {
+  position: relative;
+  background: var(--pet-hud-bg);
+  backdrop-filter: blur(28px) saturate(200%);
+  -webkit-backdrop-filter: blur(28px) saturate(200%);
+  color: var(--pet-hud-text);
+  border: 1px solid var(--pet-hud-border);
+  border-radius: 14px;
+  padding: 10px 32px 10px 14px;
+  min-width: 14rem;
+  max-width: min(340px, calc(100vw - 48px));
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.85),
+              0 0 24px var(--pet-hud-glow);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px) scale(0.96);
+  transform-origin: bottom right;
+  transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              visibility 0.25s;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Downward speech notch pointing to the right avatar orb */
+.pet-hud-speech-bubble::before {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  right: 22px;
+  width: 10px;
+  height: 10px;
+  background: var(--pet-hud-bg);
+  border-right: 1px solid var(--pet-hud-border);
+  border-bottom: 1px solid var(--pet-hud-border);
+  transform: rotate(45deg);
+}
+
+#zoth-pet-hud.orient-left .pet-hud-speech-bubble {
+  transform-origin: bottom left;
+}
+
+#zoth-pet-hud.orient-left .pet-hud-speech-bubble::before {
+  right: auto;
+  left: 22px;
+}
+
+#zoth-pet-hud.orient-down .pet-hud-speech-bubble {
+  transform-origin: top right;
+}
+
+#zoth-pet-hud.orient-down .pet-hud-speech-bubble::before {
+  bottom: auto;
+  top: -6px;
+  border-right: none;
+  border-bottom: none;
+  border-left: 1px solid var(--pet-hud-border);
+  border-top: 1px solid var(--pet-hud-border);
+}
+
+.pet-hud-speech-bubble.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.pet-hud-speech-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 4px;
+  padding: 0;
+}
+
+.pet-hud-speech-title {
+  font-family: var(--font-theme-mono, "IBM Plex Mono", monospace);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--pet-hud-gold);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pet-hud-speech-close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  border: 0;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 50%;
+  color: var(--pet-hud-muted);
+  font-size: 0.9rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.pet-hud-speech-close:hover {
+  background: var(--pet-hud-gold);
+  color: #05060b;
+  transform: scale(1.1);
+}
+
+.pet-hud-speech-text {
+  font-family: var(--font-display, 'Syne', system-ui, sans-serif);
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--pet-hud-text);
+  display: block;
+}
+
+.pet-hud-speech-list {
+  margin: 0;
+  padding: 0 0 0 16px;
+  list-style: disc;
+}
+
+.pet-hud-speech-list li {
+  font-family: var(--font-display, 'Syne', system-ui, sans-serif);
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--pet-hud-text);
+  margin-bottom: 4px;
+}
+
+/* =============================================================================
+   4. Expanded Capability Dossier Card (Opens Above Button)
+   ============================================================================= */
+.pet-hud-card {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  right: 0;
+  left: auto;
+  width: 350px;
+  max-width: calc(100vw - 32px);
+  background: var(--pet-hud-card-bg);
+  backdrop-filter: blur(32px) saturate(200%);
+  -webkit-backdrop-filter: blur(32px) saturate(200%);
+  border: 1px solid var(--pet-hud-border);
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.88),
+              0 0 32px var(--pet-hud-glow);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transform-origin: bottom right;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(12px) scale(0.96);
+  transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              visibility 0.28s;
+  pointer-events: none;
+  z-index: 4;
+}
+
+#zoth-pet-hud.orient-left .pet-hud-card {
+  right: auto;
+  left: 0;
+  transform-origin: bottom left;
+}
+
+#zoth-pet-hud.open .pet-hud-card {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+/* Dossier Header */
+.pet-hud-header {
+  padding: 12px 16px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, transparent 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pet-hud-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pet-hud-badge-icon {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pet-hud-badge-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.pet-hud-title {
+  font-family: var(--font-theme-mono, "IBM Plex Mono", monospace);
+  font-weight: 700;
+  font-size: 0.78rem;
+  color: var(--pet-hud-text);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pet-hud-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pet-hud-icon-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--pet-hud-muted);
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.18s ease;
+}
+
+.pet-hud-icon-btn:hover {
+  background: var(--pet-hud-cyan);
+  color: #05060b;
+  border-color: var(--pet-hud-cyan);
+  transform: scale(1.08);
+}
+
+/* Dossier Body */
+.pet-hud-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: min(72vh, 480px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+/* Hero Showcase */
+.pet-hud-hero-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 10px 12px;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.pet-hud-hero-img-wrap {
+  width: 58px;
+  height: 58px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid var(--pet-hud-gold);
+  background: #04060d;
+  flex-shrink: 0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+.pet-hud-hero-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pet-hud-hero-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pet-hud-hero-name {
+  font-family: var(--font-theme-mono, monospace);
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--pet-hud-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pet-hud-hero-archetype {
+  font-size: 0.72rem;
+  color: var(--pet-hud-cyan);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.pet-hud-hero-element {
+  font-size: 0.65rem;
+  font-family: var(--font-theme-mono, monospace);
+  color: var(--pet-hud-muted);
+}
+
+/* Telemetry Box */
+.pet-hud-telemetry {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 10px 12px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pet-hud-telemetry-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.70rem;
+}
+
+.pet-hud-label {
+  color: var(--pet-hud-muted);
+  font-weight: 500;
+}
+
+.pet-hud-val {
+  font-family: var(--font-theme-mono, monospace);
+  font-weight: 700;
+  color: var(--pet-hud-gold);
+}
+
+.pet-hud-vibe-bar {
+  width: 100%;
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.pet-hud-vibe-fill {
+  height: 100%;
+  width: 92%;
+  background: linear-gradient(90deg, var(--pet-hud-cyan), var(--pet-hud-gold));
+  border-radius: 3px;
+  box-shadow: 0 0 8px var(--pet-hud-glow);
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Field styling */
+.pet-hud-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pet-hud-field-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  font-family: var(--font-theme-mono, monospace);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--pet-hud-muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pet-hud-select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  color: var(--pet-hud-text);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  font-size: 0.76rem;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pet-hud-select:focus {
+  border-color: var(--pet-hud-cyan);
+  box-shadow: 0 0 10px var(--pet-hud-glow);
+}
+
+/* Command Box */
+.pet-hud-cmd-box {
+  background: #04060d;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.pet-hud-cmd-text {
+  font-family: var(--font-theme-mono, monospace);
+  font-size: 0.68rem;
+  color: var(--pet-hud-cyan);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pet-hud-copy-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--pet-hud-text);
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-size: 0.66rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.18s ease;
+  flex-shrink: 0;
+}
+
+.pet-hud-copy-btn:hover {
+  background: var(--pet-hud-gold);
+  color: #05060b;
+  border-color: var(--pet-hud-gold);
+}
+
+/* Footer Link */
+.pet-hud-footer {
+  padding: 10px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.70rem;
+}
+
+.pet-hud-footer-link {
+  color: var(--pet-hud-cyan);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600;
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.pet-hud-footer-link:hover {
+  color: var(--pet-hud-gold);
+  text-decoration: underline;
+}
+
+/* =============================================================================
+   5. Compact / Docked Mode
+   ============================================================================= */
+#zoth-pet-hud.docked .pet-hud-trigger {
+  padding: 4px;
+}
+
+#zoth-pet-hud.docked .pet-hud-trigger-info {
+  display: none;
+}
+
+#zoth-pet-hud.docked .pet-hud-orb {
+  width: 38px;
+  height: 38px;
+}
+
+/* =============================================================================
+   6. Mobile & Small Screen Responsiveness (Zero Dock Collision)
+   Elevates cleanly above bottom floating dock (bottom: 12px)
+   ============================================================================= */
+@media (max-width: 768px) {
+  #zoth-pet-hud {
+    bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+    right: 14px !important;
+    left: auto !important;
+    top: auto !important;
+    align-items: flex-end !important;
+    flex-direction: column-reverse !important;
+    gap: 8px !important;
+    z-index: 99990 !important;
+  }
+
+  .pet-hud-trigger-info {
+    display: none !important;
+  }
+
+  .pet-hud-trigger {
+    padding: 3px !important;
+    border-radius: 50% !important;
+  }
+
+  .pet-hud-orb {
+    width: 44px !important;
+    height: 44px !important;
+  }
+
+  .pet-hud-speech-bubble {
+    max-width: min(290px, calc(100vw - 28px)) !important;
+    min-width: 190px !important;
+    right: 0 !important;
+    left: auto !important;
+    bottom: calc(100% + 8px) !important;
+    padding: 8px 28px 8px 12px !important;
+  }
+
+  .pet-hud-speech-text {
+    font-size: 0.78rem !important;
+  }
+
+  .pet-hud-card {
+    position: fixed !important;
+    bottom: calc(74px + env(safe-area-inset-bottom, 0px)) !important;
+    right: 10px !important;
+    left: 10px !important;
+    width: auto !important;
+    max-width: 440px !important;
+    margin: 0 auto !important;
+    max-height: min(74vh, 560px) !important;
+  }
+}

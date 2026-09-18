@@ -1,0 +1,89 @@
+---
+import { nav, site } from "../data/site.js";
+---
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" href="/" aria-label="Poole Fencing LLC — Homepage">
+      <img
+        src="/images/brand/logo.webp"
+        alt="Poole Fencing LLC"
+        width="180"
+        height="52"
+        style="border-radius:3px;object-fit:contain;height:52px;width:auto;"
+      />
+    </a>
+    <nav class="nav-links" aria-label="Main navigation">
+      {nav.map((item) => <a href={item.href}>{item.label}</a>)}
+      <a class="nav-call" href={site.phoneHref}>&#9742; {site.phoneDisplay}</a>
+    </nav>
+    <button class="mobile-menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+      <span class="mobile-menu-bar"></span>
+      <span class="mobile-menu-bar"></span>
+      <span class="mobile-menu-bar"></span>
+    </button>
+  </div>
+  <div class="mobile-menu" id="mobile-menu" hidden>
+    <div class="container mobile-menu-panel">
+      <nav class="mobile-menu-links" aria-label="Mobile navigation">
+        {nav.map((item) => <a href={item.href}>{item.label}</a>)}
+      </nav>
+      <div class="mobile-menu-actions">
+        <a class="button button-primary" href="/contact-us">Get a Free Quote &rarr;</a>
+        <a class="mobile-menu-call" href={site.phoneHref}>Call {site.phoneDisplay}</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<script is:inline>
+  (function () {
+    const header = document.querySelector(".site-header");
+    const toggle = document.querySelector(".mobile-menu-toggle");
+    const menu = document.querySelector("#mobile-menu");
+    if (!header || !toggle || !menu) return;
+
+    function setOpen(isOpen) {
+      header.classList.toggle("is-menu-open", isOpen);
+      toggle.setAttribute("aria-expanded", String(isOpen));
+      toggle.setAttribute("aria-label", isOpen ? "Close menu" : "Open menu");
+      menu.hidden = !isOpen;
+    }
+
+    toggle.addEventListener("click", () => {
+      setOpen(toggle.getAttribute("aria-expanded") !== "true");
+    });
+
+    menu.addEventListener("click", (event) => {
+      if (event.target.closest("a")) setOpen(false);
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") setOpen(false);
+    });
+
+    /* Hide header on scroll down, show on scroll up */
+    let lastScroll = window.scrollY;
+    let ticking = false;
+
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () {
+        var current = window.scrollY;
+        /* Don't hide if mobile menu is open */
+        if (menu.hidden !== false) {
+          if (current > lastScroll && current > 120) {
+            header.classList.add("is-hidden");
+          } else if (current < lastScroll) {
+            header.classList.remove("is-hidden");
+          }
+        }
+        lastScroll = current;
+        ticking = false;
+      });
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+  })();
+</script>

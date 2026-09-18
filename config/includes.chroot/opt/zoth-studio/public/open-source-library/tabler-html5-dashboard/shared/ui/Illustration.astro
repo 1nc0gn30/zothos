@@ -1,0 +1,22 @@
+---
+import freeIllustrations from '@data/free-illustrations.json'
+import { illustrationSvg } from '@shared/lib/svg'
+
+interface Props {
+  /** file name of the illustration, e.g. "boy-girl.svg" (the ".svg" suffix is stripped) */
+  image: string
+  height?: number | string
+  class?: string
+}
+
+const { image, height = 128, class: className } = Astro.props
+
+const key = image.replaceAll('.svg', '')
+const source = (freeIllustrations as { autodark: Record<string, string> }).autodark[key] ?? ''
+
+const illustration = illustrationSvg(source, { classes: `img${className ? ` ${className}` : ''}`, height })
+---
+
+<!-- BEGIN ILLUSTRATION -->
+<Fragment set:html={illustration} />
+<!-- END ILLUSTRATION -->

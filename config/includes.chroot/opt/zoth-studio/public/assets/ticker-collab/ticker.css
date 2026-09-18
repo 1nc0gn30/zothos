@@ -1,0 +1,373 @@
+/* ============================================================
+   "Constellation Ledger" — Sovereign Stack ticker
+   Class contract owner (design-spec.md, tk- prefix).
+   Motion: CSS marquee + one staggered fade-in. GPU-only props
+   only (transform / opacity / filter). No layout animations.
+
+   SECTIONS
+     1. Tokens & frame (.tk-stack)
+     2. Label row (.tk-head / .tk-label / .tk-rule)
+     3. Marquee & track
+     4. Logos (resting state, ignition, hover)
+     5. Per-logo optical normalization
+     6. Breakpoints (≤720px, ≤480px)
+     7. Reduced motion (static wrapped grid)
+     8. Light-context guard (prefers-color-scheme)
+     9. Print (static one-row fallback)
+   ============================================================ */
+
+/* ---------- 1. Tokens & frame ---------- */
+/* Self-containment contract (P28): every SITE token consumed below
+   (--line, --fib-*, --font-mono, --mute, --gold, --cyan) is referenced
+   with an inline fallback, so the component renders correctly pasted
+   into ANY page without these :root definitions. The bare var() refs
+   (--tk-line/--tk-gap/--tk-logo-h/--tk-ease) are COMPONENT tokens
+   defined here on .tk-stack and inherited by every descendant — do not
+   move them off the root class or the fallback audit breaks. */
+.tk-stack {
+  --tk-gap: 88px;
+  --tk-logo-h: 24px;
+  --tk-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --tk-line: var(--line, rgba(255,255,255,.12));
+  margin-top: var(--fib-21, 34px);
+  border-top: 1px solid var(--tk-line);
+  border-bottom: 1px solid var(--tk-line);
+  padding-top: var(--fib-13, 13px);
+  padding-bottom: var(--fib-13, 13px);
+}
+
+/* ---------- 2. Label row ---------- */
+.tk-head {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-bottom: var(--fib-13, 13px);
+}
+.tk-label {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--mute, rgba(255,255,255,.55));
+  white-space: nowrap;
+}
+.tk-label::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background: var(--gold, #d4af37);
+  margin-right: 10px;
+}
+.tk-rule {
+  flex: 1;
+  height: 1px;
+  background: var(--tk-line);
+}
+
+/* ---------- 3. Marquee & track ---------- */
+/* Per-item right margin instead of flex `gap`: makes track width exactly
+   2 × one-set width, so translateX(-50%) loops with zero seam.
+
+   SEAM CONSTRAINT (P29): translateX(-50%) is only seamless because the
+   duplicated half of .tk-track is byte-identical in content, ORDER, and
+   modifier classes (.tk-logo--grok etc.) to the original half — including
+   per-item margins. Duplicate count MUST equal original count; dropping,
+   reordering, or reclassifying a duplicate desynchronizes the halves and
+   produces a visible jump every loop. Item COUNT and NAME LENGTH are free
+   variables: 4, 8, or longer names ("Mistral AI", "Cohere") merely widen
+   one set; the -50% translation always equals exactly one set width.
+   (Fixed 46s duration means px/s rises with set width — at 8 items that's
+   ~74px/s, still well inside marquee norms.) The --i stagger ignition is
+   capped at 600ms, so extra items never stretch the reveal. */
+.tk-marquee {
+  overflow: hidden;
+  min-width: 0;
+  max-width: 100%;
+  -webkit-tap-highlight-color: transparent;
+  /* Focus-ring room (P33): the cyan :focus-visible outline sits 6px outside
+     each logo (1px line + 6px offset = 7px). Symmetric top/bottom padding
+     keeps the ring from clipping against this overflow:hidden box. Left/
+     right clipping remains inherent to a marquee viewport — acceptable,
+     masked edges fade there anyway (judged P33). */
+  padding-top: 8px;
+  /* room below the baseline so the underline accent never clips */
+  padding-bottom: 9px;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+.tk-track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  /* force a compositing layer: prevents Safari repaint flicker of the
+     masked track each loop, and keeps Firefox on one smooth timer */
+  transform: translateZ(0);
+  will-change: transform;
+  animation: tk-scroll 46s linear infinite;
+  animation-timing-function: linear; /* explicit: never inherit an ease */
+}
+@keyframes tk-scroll {
+  from { transform: translateZ(0) translateX(0); }
+  to   { transform: translateZ(0) translateX(-50%); }
+}
+.tk-marquee.tk-paused .tk-track { animation-play-state: paused; }
+
+/* ---------- 4. Logos ---------- */
+/* Resting state is monochrome, muted. */
+.tk-logo {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 38px;
+  padding: 6px 14px;
+  background: var(--surface-card, rgba(15, 23, 42, 0.7));
+  border: 1px solid var(--border-card, rgba(255, 255, 255, 0.12));
+  border-radius: 9999px;
+  margin-right: var(--tk-gap);
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  opacity: 0.92;
+  transition: all 250ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 2px 8px var(--shadow-color, rgba(0,0,0,0.25));
+}
+.tk-logo img {
+  height: 20px;
+  width: 20px;
+  max-width: 20px;
+  max-height: 20px;
+  object-fit: contain;
+  display: block;
+  flex-shrink: 0;
+}
+.tk-logo:focus-visible {
+  outline: 1px solid var(--cyan, #00f0ff);
+  outline-offset: 4px;
+  border-radius: 9999px;
+}
+.tk-name {
+  font-family: var(--font-theme-mono, monospace);
+  font-size: 0.76rem;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  color: var(--text-primary, #ffffff);
+  transition: color 250ms ease;
+}
+.tk-logo:hover .tk-name,
+.tk-logo:focus-visible .tk-name {
+  color: var(--accent, #00f0ff);
+}
+/* gold→cyan underline accent */
+.tk-logo::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -8px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--gold, #d4af37), var(--cyan, #00f0ff));
+  opacity: 0;
+  transform: scaleX(0.6);
+  transform-origin: left center;
+  transition: opacity 300ms var(--tk-ease), transform 300ms var(--tk-ease);
+}
+
+/* Pre-ignition: hidden, offset down (GPU-only props). Once .tk-inview
+   lands on the root, items transition to resting with stagger.
+   The hide is gated on .tk-armed — added by ticker.js as its first act.
+   No JS (blocked, failed load) ⇒ never armed ⇒ logos simply visible.
+   Progressive enhancement: ignition can only enhance a visible state. */
+.tk-stack.tk-armed:not(.tk-inview) .tk-logo {
+  opacity: 0;
+  transform: translateY(6px);
+}
+.tk-stack.tk-inview .tk-logo {
+  transition-duration: 600ms, 600ms, 600ms;
+  transition-delay: calc(min(var(--i, 0) * 55ms, 600ms));
+}
+
+/* Hover on a logo — no scale, at most -1px. Specificity matches the
+   .tk-inview rule above so hover never inherits the stagger delay.
+
+   ANIMATION COMPOSITION (audited P32): the only two transitions that can
+   overlap are the ignition reveal and the hover state, both on
+   filter/opacity/transform of .tk-logo.
+   • Mid-ignition hover: equal specificity, hover is later in source ⇒ it
+     wins; duration drops to 300ms and delay to 0ms, so the logo snaps to
+     full color immediately — no jank.
+   • Un-hover mid-ignition: control returns to the .tk-inview rule, which
+     re-applies duration 600ms + the item's stagger delay. Worst case the
+     logo holds its pre-ignition values for up to 600ms before finishing
+     the wave. Judged acceptable (P32): it happens at most once per page
+     load, only under the cursor that just left, and preserves the wave's
+     ordering semantics — a "fix" would need JS-driven phases, breaking
+     the CSS-only motion contract.
+   • Pre-ignition (.tk-armed:not(.tk-inview)) has higher specificity than
+     hover, so hover cannot leak color into hidden logos; opacity:0 items
+     aren't perceivable targets anyway.
+   • Track keyframes animate transform on .tk-track only — disjoint from
+     every logo-level transition; no property is fought over. */
+.tk-stack .tk-logo:hover,
+.tk-stack .tk-logo:focus-visible {
+  filter: none;
+  opacity: 1;
+  transform: translateY(-1px);
+  transition-duration: 300ms, 300ms, 300ms;
+  transition-delay: 0ms;
+}
+.tk-logo:hover .tk-name,
+.tk-logo:focus-visible .tk-name { color: #fff; }
+.tk-logo:hover::after,
+.tk-logo:focus-visible::after { opacity: 1; transform: scaleX(1); }
+
+/* ---------- 5. Per-logo optical normalization ----------
+   All six SVGs share a 100×100 viewBox, but their glyphs fill it very
+   differently (Claude/Gemini bleed to ~15–85; Grok's X sits at 25–75,
+   Cerebras' wafer even tighter). At equal rendered height the tight ones
+   read visibly smaller. Nudge each mark toward equal *optical* weight —
+   applied to the img so the hover transform on the link is untouched. */
+.tk-logo--grok img      { height: calc(var(--tk-logo-h) + 2px); }
+.tk-logo--cerebras img  { height: calc(var(--tk-logo-h) + 3px); }
+.tk-logo--deepseek img  { height: calc(var(--tk-logo-h) + 1px); }
+/* Claude, Gemini, Nous fill their box; no nudge needed. */
+
+/* ---------- 6. Breakpoints ---------- */
+@media (max-width: 720px) {
+  .tk-stack { --tk-gap: 48px; }
+  .tk-track { animation-duration: 60s; }
+  /* taps pause the strip; vertical page scroll stays native */
+  .tk-marquee { touch-action: pan-y; }
+  /* tighter tracking reads better at small mono sizes */
+  .tk-name { letter-spacing: 0.06em; }
+}
+
+@media (max-width: 480px) {
+  /* wrap to centered grid, drop edge-fade masks (CSS-only) */
+  .tk-marquee {
+    overflow: visible;
+    padding-top: 0;
+    padding-bottom: 0;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  .tk-track {
+    width: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    column-gap: var(--tk-gap);
+    row-gap: 21px;
+    animation: none;
+    transform: none;
+    will-change: auto;
+  }
+  /* one set only in the wrapped grid */
+  .tk-logo {
+    margin-right: 0;
+    height: var(--tk-logo-h);
+  }
+  .tk-logo--dup { display: none; }
+  .tk-name { letter-spacing: 0.05em; }
+}
+
+/* ---------- 7. Reduced motion: static wrapped grid ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .tk-marquee {
+    overflow: visible;
+    padding-top: 0;
+    padding-bottom: 0;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  .tk-track {
+    animation: none;
+    width: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 100%;
+    column-gap: var(--tk-gap);
+    row-gap: 21px;
+    transform: none;
+    will-change: auto;
+  }
+  .tk-logo { margin-right: 0; }
+  .tk-logo--dup { display: none; }
+  .tk-logo,
+  .tk-stack.tk-armed:not(.tk-inview) .tk-logo,
+  .tk-name,
+  .tk-logo::after {
+    opacity: 0.45;
+    filter: grayscale(1) brightness(1.6);
+    transform: none;
+    transition: none;
+    animation: none;
+  }
+  .tk-logo img { transform: none; } /* keep the optical lift: it's alignment, not motion */
+  .tk-name { color: var(--mute, rgba(255,255,255,.62)); letter-spacing: 0.05em; }
+  .tk-logo::after { content: none; }
+  .tk-logo:hover,
+  .tk-logo:focus-visible,
+  .tk-stack.tk-inview .tk-logo:hover,
+  .tk-logo:hover .tk-name,
+  .tk-logo:focus-visible .tk-name {
+    opacity: 1;
+    filter: none;
+    transform: none;
+    color: #fff;
+    transition: none;
+  }
+}
+
+/* ---------- 8. Light-context guard (P30) ----------
+   The site is permanently dark; this component was tuned for it. If the
+   snippet is pasted into a LIGHT page, exactly two things become
+   unreadable: the hairline rules (white at .12 alpha ≈ invisible on
+   white) and the muted mono label (white-tinted on white). This guard
+   re-inks ONLY those two — deliberately not the logos/names/accents,
+   which keep enough contrast either way. Component tokens only; no
+   site token is assumed. */
+@media (prefers-color-scheme: light) {
+  .tk-stack { --tk-line: rgba(10, 12, 20, 0.18); }
+  .tk-label { color: rgba(10, 12, 20, 0.62); }
+}
+
+/* ---------- 9. Print (P36) ----------
+   A printed page can't marquee or hover. Collapse to ONE static row of
+   logos + names: kill the animation/masks/padding, neutralize the JS
+   ignition states (.tk-armed hides pre-inview; print may fire before
+   the observer does), drop duplicates, and let links print as plain
+   text+glyphs (no underline accent, no color filters that vanish on
+   B&W printers). Independent of the reduced-motion block by design. */
+@media print {
+  .tk-marquee {
+    overflow: visible;
+    padding-top: 0;
+    padding-bottom: 0;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  .tk-track {
+    animation: none;
+    transform: none;
+    will-change: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    column-gap: var(--tk-gap);
+    row-gap: 13px;
+  }
+  .tk-logo--dup { display: none; }
+  .tk-logo,
+  .tk-stack.tk-armed:not(.tk-inview) .tk-logo {
+    opacity: 1;
+    filter: none;
+    transform: none;
+    transition: none;
+    animation: none;
+    margin-right: 0;
+  }
+  .tk-logo img { transform: translateY(-0.5px); } /* keep optical axis */
+  .tk-name { color: #000; transition: none; }
+  .tk-stack { break-inside: avoid; }
+}

@@ -1,0 +1,181 @@
+---
+import type { CollectionEntry } from 'astro:content'
+import type { ComponentPreview } from '../types/component'
+
+import BaseLayout from './BaseLayout.astro'
+import PreviewWrapper from '../components/PreviewWrapper.astro'
+import RelatedComponents from '../components/RelatedComponents.astro'
+import TooltipWrapper from '../components/TooltipWrapper.astro'
+
+type Props =
+  | CollectionEntry<'application'>['data']
+  | CollectionEntry<'marketing'>['data']
+  | CollectionEntry<'neobrutalism'>['data']
+  | CollectionEntry<'templates'>['data']
+
+const {
+  //
+  title,
+  category,
+  components,
+  description,
+  slug,
+  terms,
+  wrapper,
+  pattern,
+  updated,
+} = Astro.props
+
+const darkCount = components.filter(({ dark }) => !!dark).length
+const totalCount = components.length
+
+const pageTitle = `Free Tailwind CSS ${title}`
+
+const formattedComponents: ComponentPreview[] = components
+  .map((component, index) => {
+    const { dark, ...rest } = component
+
+    const baseComponent = {
+      ...rest,
+      dark: false,
+      id: `component-${index + 1}`,
+      index: index + 1,
+    }
+
+    if (!dark) {
+      return [baseComponent]
+    }
+
+    const contributors =
+      Object.prototype.toString.call(dark) === '[object Object]'
+        ? // @ts-expect-error We know dark is an object at this point.
+          dark.contributors
+        : component.contributors
+
+    return [
+      baseComponent,
+      {
+        ...rest,
+        contributors,
+        dark: true,
+        id: `component-${index + 1}-dark`,
+        index: index + 1,
+        title: `${component.title} (Dark)`,
+      },
+    ]
+  })
+  .flat()
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site)
+
+const componentPageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: pageTitle,
+  description,
+  url: canonicalURL,
+  isPartOf: {
+    '@type': 'WebSite',
+    name: 'HyperUI',
+    url: Astro.site,
+  },
+  mainEntity: {
+    '@type': 'ItemList',
+    itemListElement: formattedComponents.map((component, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: component.title,
+      url: `${canonicalURL}#${component.id}`,
+    })),
+  },
+}
+---
+
+<BaseLayout title={pageTitle} {description}>
+  <script
+    type="application/ld+json"
+    slot="head"
+    is:inline
+    set:html={JSON.stringify(componentPageSchema)}
+  />
+
+  <main id="main-content">
+    <slot />
+
+    <div class="mx-auto max-w-7xl space-y-8 px-4">
+      <div class="flex flex-wrap items-center gap-2 text-sm text-gray-600">
+        <span>
+          {darkCount}/{totalCount} Dark Mode{' '}
+          {
+            darkCount !== totalCount && (
+              <a
+                href="https://github.com/markmead/hyperui/issues/new"
+                target="_blank"
+                rel="noreferrer"
+                class="text-gray-500 transition-colors hover:text-gray-700"
+              >
+                (Request)
+              </a>
+            )
+          }
+        </span>
+
+        <span class="size-1 rounded-full bg-gray-400" aria-hidden="true"></span>
+
+        {
+          pattern && (
+            <>
+              <TooltipWrapper text="View related HyperUX pattern documentation">
+                <a
+                  href={pattern}
+                  target="_blank"
+                  rel="noreferrer"
+                  class="transition-colors hover:text-gray-900"
+                >
+                  HyperUX Pattern Available
+                </a>
+              </TooltipWrapper>
+
+              <span class="size-1 rounded-full bg-gray-400" aria-hidden="true" />
+            </>
+          )
+        }
+
+        <span>
+          Updated:{' '}
+          {
+            updated?.commit ? (
+              <a
+                href={`https://github.com/markmead/hyperui/commit/${updated.commit}`}
+                target="_blank"
+                rel="noreferrer"
+                class="transition-colors hover:text-gray-900"
+              >
+                {updated.date.toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                  timeZone: 'UTC',
+                })}
+              </a>
+            ) : (
+              <>
+                <TooltipWrapper text="No commit information available">N/A</TooltipWrapper>
+
+                <span class="sr-only">No commit information available.</span>
+              </>
+            )
+          }
+        </span>
+      </div>
+
+      {
+        formattedComponents.map((component) => (
+          <PreviewWrapper {component} {category} {slug} {wrapper} />
+        ))
+      }
+
+      <RelatedComponents {slug} {terms} {category} />
+    </div>
+  </main>
+</BaseLayout>

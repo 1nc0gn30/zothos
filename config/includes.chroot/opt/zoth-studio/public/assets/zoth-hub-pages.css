@@ -1,0 +1,62 @@
+/* ============================================================
+   Zoth hub page-scoped shared CSS — /pets/ index + /studio/ index
+   Owned by this subagent. Linked from BOTH hub pages only.
+   Complements (never replaces) the shared theme/nav/footer sheets.
+   Uses global theme tokens only; safe in every data-theme.
+
+   Contains two concerns:
+     1. Mobile footer-link hit areas (<44px wide tap targets).
+     2. Shared mobile robustness for the hub content sections.
+   ============================================================ */
+
+/* ---------- 1. Footer link hit areas (width < 44px on phones) ----------
+   .mega-footer-link is `width: fit-content` (label = its own width), and
+   the bare .foot-meta links are inline-flex at text width — so width hits
+   22-30px at 390px while height is already 44px+ from zoth-footer.css.
+   Recipe: min 44x44 with symmetric padding-inline plus a matching negative
+   margin-inline so the label does not slide in layout. Bumped only at the
+   phone/tablet breakpoint where the columns stack. */
+@media (max-width: 640px) {
+  .mega-footer-link,
+  footer.site .foot-meta a {
+    min-width: 44px;
+    min-height: 44px;
+    padding-inline: 8px;
+    margin-inline: -8px;
+    box-sizing: border-box;
+  }
+}
+
+/* ---------- 2. Shared hub robustness ---------- */
+
+/* Never let an unbreakable token (pet id, port, CLI path) widen a column
+   past its cell — same protection both hubs already apply to inner cards. */
+.pets-hub .controls-bar,
+.studio-hub .studio-filter-section {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Cheap static guarantee against stray absolute/oversized children pushing
+   the document wider than the viewport at any breakpoint. The poster layers
+   are the only elements that intentionally overflow, and their parents are
+   `overflow: hidden`, so nothing visible is clipped. */
+@supports (overflow: clip) {
+  .pets-hub,
+  .studio-hub {
+    overflow-x: clip;
+  }
+}
+
+/* Respect reduced-motion on any hub-level transition not already covered
+   by the page sheets. */
+@media (prefers-reduced-motion: reduce) {
+  .pets-hub,
+  .studio-hub {
+    scroll-behavior: auto !important;
+  }
+  .pets-hub *,
+  .studio-hub * {
+    scroll-margin-top: 0;
+  }
+}

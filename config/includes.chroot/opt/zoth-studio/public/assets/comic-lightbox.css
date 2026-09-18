@@ -1,0 +1,987 @@
+/* ==========================================================================
+   AZOTH: The Zero-Leakage Saga — Manga & Comic High-Res Lightbox Inspector
+   Cyberpunk Alchemical HUD · Zoom & Pan · Dialogue Magnifier · Keyboard Engine
+   ========================================================================== */
+
+:root {
+  --clb-gold: #fbbf24;
+  --clb-gold-glow: rgba(251, 191, 36, 0.45);
+  --clb-cyan: #00f0ff;
+  --clb-cyan-glow: rgba(0, 240, 255, 0.4);
+  --clb-purple: #a855f7;
+  --clb-rose: #ff007a;
+  --clb-emerald: #10b981;
+  --clb-bg: rgba(3, 5, 12, 0.96);
+  --clb-surface: rgba(11, 16, 32, 0.85);
+  --clb-surface-solid: #0d1224;
+  --clb-surface-hover: rgba(20, 29, 56, 0.9);
+  --clb-border: rgba(0, 240, 255, 0.22);
+  --clb-border-gold: rgba(251, 191, 36, 0.35);
+  --clb-text: #f8fafc;
+  --clb-text-dim: #94a3b8;
+  --clb-radius: 12px;
+  --clb-font-display: 'Syne', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --clb-font-mono: 'IBM Plex Mono', monospace, Consolas, Monaco, monospace;
+}
+
+/* ==========================================================================
+   1. Lightbox Root Overlay
+   ========================================================================== */
+
+.comic-lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  background: var(--clb-bg);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  z-index: 999999;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.32s;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--clb-text);
+  overflow: hidden;
+  outline: none;
+}
+
+.comic-lightbox-overlay.clb-active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* Ambient Edge Vignette & Cyber Grid */
+.comic-lightbox-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 50%, transparent 60%, rgba(0, 0, 0, 0.85) 100%),
+    linear-gradient(rgba(0, 240, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.02) 1px, transparent 1px);
+  background-size: 100% 100%, 48px 48px, 48px 48px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ==========================================================================
+   2. Top Header HUD Bar
+   ========================================================================== */
+
+.clb-header {
+  position: relative;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(12px + env(safe-area-inset-top, 0px)) 20px 12px;
+  background: linear-gradient(180deg, rgba(5, 7, 16, 0.95) 0%, rgba(5, 7, 16, 0.6) 80%, transparent 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.clb-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.clb-logo-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid var(--clb-border-gold);
+  color: var(--clb-gold);
+  font-family: var(--clb-font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 4px 10px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.15);
+}
+
+.clb-title-wrap {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.clb-page-title {
+  font-family: var(--clb-font-display);
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.01em;
+}
+
+.clb-meta-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--clb-font-mono);
+  font-size: 0.72rem;
+  color: var(--clb-text-dim);
+}
+
+.clb-meta-res {
+  color: var(--clb-cyan);
+  font-weight: 600;
+}
+
+.clb-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Header & Toolbar Buttons */
+.clb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--clb-surface);
+  border: 1px solid var(--clb-border);
+  color: var(--clb-text);
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-family: var(--clb-font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.clb-btn:hover {
+  background: var(--clb-surface-hover);
+  border-color: var(--clb-cyan);
+  color: var(--clb-cyan);
+  transform: translateY(-1px);
+  box-shadow: 0 0 16px var(--clb-cyan-glow);
+}
+
+.clb-btn:active {
+  transform: translateY(0);
+}
+
+.clb-btn.clb-active {
+  background: rgba(0, 240, 255, 0.18);
+  border-color: var(--clb-cyan);
+  color: var(--clb-cyan);
+  box-shadow: 0 0 14px var(--clb-cyan-glow);
+}
+
+.clb-btn-gold {
+  border-color: var(--clb-border-gold);
+  color: var(--clb-gold);
+}
+
+.clb-btn-gold:hover,
+.clb-btn-gold.clb-active {
+  border-color: var(--clb-gold);
+  color: var(--clb-gold);
+  box-shadow: 0 0 16px var(--clb-gold-glow);
+  background: rgba(251, 191, 36, 0.18);
+}
+
+.clb-btn-icon {
+  padding: 8px;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+}
+
+.clb-btn-close {
+  background: rgba(255, 0, 122, 0.12);
+  border-color: rgba(255, 0, 122, 0.35);
+  color: #ff3388;
+  font-size: 1.1rem;
+}
+
+.clb-btn-close:hover {
+  background: rgba(255, 0, 122, 0.25);
+  border-color: #ff007a;
+  color: #ffffff;
+  box-shadow: 0 0 16px rgba(255, 0, 122, 0.45);
+}
+
+/* ==========================================================================
+   3. Main Viewport & Stage
+   ========================================================================== */
+
+.clb-viewport {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  z-index: 10;
+}
+
+.clb-viewport.clb-panning {
+  cursor: grabbing;
+}
+
+.clb-viewport.clb-mode-magnify {
+  cursor: crosshair;
+}
+
+.clb-stage {
+  position: absolute;
+  transform-origin: 0 0;
+  will-change: transform;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+.clb-img {
+  max-width: none;
+  max-height: none;
+  display: block;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+  filter: drop-shadow(0 15px 45px rgba(0, 0, 0, 0.85));
+  transition: filter 0.25s ease;
+  image-rendering: auto;
+  border-radius: 4px;
+}
+
+/* Image Contrast Boost & B&W Modes */
+.clb-filter-contrast .clb-img {
+  filter: contrast(135%) brightness(105%) drop-shadow(0 15px 45px rgba(0, 0, 0, 0.9));
+}
+
+.clb-filter-ink .clb-img {
+  filter: grayscale(100%) contrast(150%) brightness(108%) drop-shadow(0 15px 45px rgba(0, 0, 0, 0.9));
+}
+
+.clb-filter-sharp .clb-img {
+  filter: contrast(120%) saturate(115%) drop-shadow(0 15px 45px rgba(0, 0, 0, 0.9));
+}
+
+/* Loading Spinner & Shimmer */
+.clb-loader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: var(--clb-bg);
+  z-index: 25;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.clb-loader.clb-loading {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.clb-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(0, 240, 255, 0.15);
+  border-top-color: var(--clb-cyan);
+  border-right-color: var(--clb-gold);
+  border-radius: 50%;
+  animation: clb-spin 0.8s linear infinite;
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+}
+
+@keyframes clb-spin {
+  to { transform: rotate(360deg); }
+}
+
+.clb-loader-text {
+  font-family: var(--clb-font-mono);
+  font-size: 0.8rem;
+  color: var(--clb-cyan);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   4. Side Navigation Chevrons
+   ========================================================================== */
+
+.clb-nav-prev,
+.clb-nav-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 25;
+  width: 52px;
+  height: 90px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: rgba(11, 16, 32, 0.75);
+  border: 1px solid var(--clb-border);
+  color: var(--clb-text);
+  cursor: pointer;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+.clb-nav-prev {
+  left: 16px;
+  border-radius: 12px 6px 6px 12px;
+}
+
+.clb-nav-next {
+  right: 16px;
+  border-radius: 6px 12px 12px 6px;
+}
+
+.clb-nav-prev:hover,
+.clb-nav-next:hover {
+  background: rgba(20, 29, 56, 0.95);
+  border-color: var(--clb-cyan);
+  color: var(--clb-cyan);
+  box-shadow: 0 0 24px var(--clb-cyan-glow);
+  width: 58px;
+}
+
+.clb-nav-prev:disabled,
+.clb-nav-next:disabled {
+  opacity: 0.2;
+  cursor: not-allowed;
+  pointer-events: none;
+  border-color: transparent;
+}
+
+.clb-nav-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.clb-nav-label {
+  font-family: var(--clb-font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--clb-text-dim);
+}
+
+/* ==========================================================================
+   5. Interactive Dialogue Magnifier Loupe Lens
+   ========================================================================== */
+
+.clb-loupe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  border: 2px solid var(--clb-cyan);
+  box-shadow:
+    0 0 0 4px rgba(0, 240, 255, 0.2),
+    0 20px 50px rgba(0, 0, 0, 0.85),
+    inset 0 0 35px rgba(0, 240, 255, 0.25);
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 40;
+  display: none;
+  transform: translate(-50%, -50%);
+  background-repeat: no-repeat;
+  background-color: #030408;
+  backdrop-filter: contrast(130%) brightness(110%);
+}
+
+.clb-loupe.clb-loupe-visible {
+  display: block;
+}
+
+.clb-loupe-reticle {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Reticle Crosshairs */
+.clb-loupe-reticle::before,
+.clb-loupe-reticle::after {
+  content: '';
+  position: absolute;
+  background: rgba(0, 240, 255, 0.45);
+}
+
+.clb-loupe-reticle::before {
+  width: 20px;
+  height: 1px;
+}
+
+.clb-loupe-reticle::after {
+  width: 1px;
+  height: 20px;
+}
+
+.clb-loupe-hud-tag {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(5, 7, 16, 0.88);
+  border: 1px solid var(--clb-cyan);
+  color: var(--clb-cyan);
+  font-family: var(--clb-font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+}
+
+/* ==========================================================================
+   6. Minimap Radar Viewfinder
+   ========================================================================== */
+
+.clb-minimap {
+  position: absolute;
+  bottom: 84px;
+  right: 20px;
+  width: 140px;
+  height: 180px;
+  background: rgba(5, 8, 18, 0.9);
+  border: 1px solid var(--clb-border);
+  border-radius: 8px;
+  overflow: hidden;
+  z-index: 25;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  backdrop-filter: blur(12px);
+}
+
+.clb-minimap.clb-minimap-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.9) translateY(10px);
+}
+
+.clb-minimap-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+.clb-minimap-viewport {
+  position: absolute;
+  border: 2px solid var(--clb-gold);
+  background: rgba(251, 191, 36, 0.2);
+  box-shadow: 0 0 8px var(--clb-gold-glow);
+  pointer-events: none;
+  transition: top 0.05s ease-out, left 0.05s ease-out, width 0.05s ease-out, height 0.05s ease-out;
+}
+
+.clb-minimap-label {
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  font-family: var(--clb-font-mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--clb-gold);
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 6px rgba(0,0,0,0.9);
+}
+
+/* ==========================================================================
+   7. Dialogue Script & Caption Drawer
+   ========================================================================== */
+
+.clb-dialogue-card {
+  position: absolute;
+  bottom: 84px;
+  left: 20px;
+  max-width: 440px;
+  background: rgba(11, 16, 32, 0.92);
+  border: 1px solid var(--clb-border);
+  border-left: 3px solid var(--clb-gold);
+  border-radius: var(--clb-radius);
+  padding: 14px 18px;
+  z-index: 25;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.75);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.clb-dialogue-card.clb-dialogue-collapsed {
+  max-width: 210px;
+  padding: 8px 12px;
+}
+
+.clb-dialogue-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.clb-dialogue-tag {
+  font-family: var(--clb-font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--clb-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.clb-dialogue-text {
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: #e2e8f0;
+  margin: 0;
+  font-style: italic;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.clb-dialogue-collapsed .clb-dialogue-text {
+  display: none;
+}
+
+.clb-dialogue-toggle {
+  background: transparent;
+  border: none;
+  color: var(--clb-cyan);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+/* ==========================================================================
+   8. Bottom Floating Toolbar HUD
+   ========================================================================== */
+
+.clb-toolbar-wrap {
+  position: relative;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 20px calc(14px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(0deg, rgba(5, 7, 16, 0.96) 0%, rgba(5, 7, 16, 0.75) 80%, transparent 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+}
+
+.clb-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  background: rgba(11, 16, 32, 0.85);
+  border: 1px solid var(--clb-border);
+  padding: 6px 12px;
+  border-radius: 30px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.65);
+}
+
+.clb-zoom-readout {
+  font-family: var(--clb-font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--clb-cyan);
+  min-width: 52px;
+  text-align: center;
+  padding: 2px 6px;
+  background: rgba(0, 240, 255, 0.1);
+  border-radius: 6px;
+  border: 1px solid rgba(0, 240, 255, 0.2);
+}
+
+.clb-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 5px;
+  outline: none;
+}
+
+.clb-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--clb-cyan);
+  cursor: pointer;
+  box-shadow: 0 0 8px var(--clb-cyan-glow);
+  border: 2px solid #ffffff;
+}
+
+.clb-slider::-moz-range-thumb {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--clb-cyan);
+  cursor: pointer;
+  box-shadow: 0 0 8px var(--clb-cyan-glow);
+  border: 2px solid #ffffff;
+}
+
+.clb-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.12);
+  margin: 0 2px;
+}
+
+/* Thumbnail Scrubber Rail */
+.clb-thumbnail-rail {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow-x: auto;
+  max-width: 100%;
+  padding: 4px 6px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--clb-cyan) transparent;
+}
+
+.clb-thumbnail-rail::-webkit-scrollbar {
+  height: 4px;
+}
+
+.clb-thumbnail-rail::-webkit-scrollbar-thumb {
+  background: var(--clb-cyan);
+  border-radius: 4px;
+}
+
+.clb-thumb-item {
+  position: relative;
+  flex: 0 0 auto;
+  width: 50px;
+  height: 72px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  background: rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 0.6;
+}
+
+.clb-thumb-item:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+  border-color: rgba(0, 240, 255, 0.4);
+}
+
+.clb-thumb-item.clb-thumb-active {
+  opacity: 1;
+  border-color: var(--clb-gold);
+  transform: scale(1.08) translateY(-2px);
+  box-shadow: 0 0 16px var(--clb-gold-glow);
+}
+
+.clb-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.clb-thumb-badge {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  background: rgba(0, 0, 0, 0.85);
+  color: var(--clb-gold);
+  font-family: var(--clb-font-mono);
+  font-size: 0.55rem;
+  font-weight: 700;
+  padding: 1px 3px;
+  border-radius: 3px;
+}
+
+/* ==========================================================================
+   9. Keyboard Shortcuts & Help Modal
+   ========================================================================== */
+
+.clb-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  padding: 20px;
+}
+
+.clb-modal-backdrop.clb-modal-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.clb-modal-box {
+  background: var(--clb-surface-solid);
+  border: 1px solid var(--clb-border);
+  border-top: 3px solid var(--clb-cyan);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 520px;
+  padding: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 30px var(--clb-cyan-glow);
+  transform: translateY(15px);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.clb-modal-open .clb-modal-box {
+  transform: translateY(0);
+}
+
+.clb-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.clb-modal-title {
+  font-family: var(--clb-font-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+}
+
+.clb-shortcuts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.clb-shortcut-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.clb-shortcut-desc {
+  font-size: 0.8rem;
+  color: #cbd5e1;
+}
+
+.clb-kbd-group {
+  display: flex;
+  gap: 4px;
+}
+
+.clb-kbd {
+  display: inline-block;
+  background: rgba(0, 240, 255, 0.12);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  color: var(--clb-cyan);
+  font-family: var(--clb-font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.4);
+}
+
+/* ==========================================================================
+   10. Comic Artwork Hover / Tap Inspect Badge
+   ========================================================================== */
+
+.comic-inspect-badge-wrap {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.comic-inspect-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(5, 7, 16, 0.85);
+  border: 1px solid var(--clb-cyan);
+  color: var(--clb-cyan);
+  font-family: var(--clb-font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 20px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6), 0 0 12px var(--clb-cyan-glow);
+  opacity: 0;
+  transform: translateY(-4px) scale(0.95);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.comic-page-wrapper:hover .comic-inspect-badge,
+.panel-card:hover .comic-inspect-badge,
+.comic-inspect-badge-wrap:hover .comic-inspect-badge {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Hint Toast Notification */
+.clb-toast {
+  position: absolute;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  background: rgba(11, 16, 32, 0.95);
+  border: 1px solid var(--clb-cyan);
+  color: #ffffff;
+  font-family: var(--clb-font-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7), 0 0 16px var(--clb-cyan-glow);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.25s ease;
+  z-index: 60;
+  white-space: nowrap;
+}
+
+.clb-toast.clb-toast-show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ==========================================================================
+   11. Responsive Breakpoints
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .clb-header {
+    padding: calc(8px + env(safe-area-inset-top, 0px)) 12px 8px;
+    gap: 8px;
+  }
+
+  .clb-logo-tag {
+    display: none;
+  }
+
+  .clb-page-title {
+    font-size: 0.9rem;
+  }
+
+  .clb-btn-text-hide {
+    display: none;
+  }
+
+  .clb-btn {
+    padding: 6px 9px;
+    font-size: 0.74rem;
+  }
+
+  .clb-nav-prev,
+  .clb-nav-next {
+    width: 40px;
+    height: 70px;
+  }
+
+  .clb-nav-prev { left: 8px; }
+  .clb-nav-next { right: 8px; }
+
+  .clb-minimap {
+    display: none; /* Conserve screen real estate on mobile */
+  }
+
+  .clb-dialogue-card {
+    left: 12px;
+    right: 12px;
+    bottom: 74px;
+    max-width: none;
+  }
+
+  .clb-toolbar {
+    padding: 4px 8px;
+    gap: 6px;
+  }
+
+  .clb-slider {
+    width: 70px;
+  }
+
+  .clb-shortcuts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .clb-thumb-item {
+    width: 42px;
+    height: 60px;
+  }
+
+  .clb-toolbar-wrap {
+    padding: 6px 10px calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+}

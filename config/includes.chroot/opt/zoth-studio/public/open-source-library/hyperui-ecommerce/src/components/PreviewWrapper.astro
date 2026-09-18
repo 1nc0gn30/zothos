@@ -1,0 +1,64 @@
+---
+import { Hash } from '@lucide/astro'
+import type { ComponentPreview as ComponentPreviewType } from '../types/component'
+
+import ComponentPreview from './ComponentPreview.astro'
+import PreviewBreakpoints from './PreviewBreakpoints.astro'
+import PreviewCopy from './PreviewCopy.astro'
+import PreviewDetails from './PreviewDetails.astro'
+import PreviewDirection from './PreviewDirection.astro'
+import PreviewRefs from './PreviewRefs.astro'
+import PreviewView from './PreviewView.astro'
+
+const breakpoints = [
+  { name: 'Mobile', width: '340px' },
+  { name: 'SM', width: '640px' },
+  { name: 'MD', width: '768px' },
+  { name: 'LG', width: '1024px' },
+  { name: 'Full', width: '100%' },
+]
+
+interface Props {
+  component: ComponentPreviewType
+  category: string
+  slug: string
+  wrapper: string
+}
+
+const { component, category, slug, wrapper } = Astro.props
+
+const { contributors, dark, id, index, title, description = '', plugins = [] } = component
+
+const src = dark
+  ? `/examples/${category}/${slug}/${index}-dark.html`
+  : `/examples/${category}/${slug}/${index}.html`
+---
+
+<div id={id} class="overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
+  <div class="border-b border-gray-200 p-4">
+    <div class="flex items-center justify-between gap-4">
+      <div class="space-y-1">
+        <a href={`#${id}`} class="group flex items-center gap-2">
+          <h2 class="text-lg font-medium text-gray-900">{title}</h2>
+
+          <Hash
+            class="size-4 text-gray-400 opacity-0 transition-opacity group-hover:opacity-100 hover:text-gray-900"
+          />
+        </a>
+
+        <PreviewRefs url="https://github.com/" refs={contributors} />
+      </div>
+
+      <div class="hidden shrink-0 items-center gap-2 md:flex">
+        <PreviewBreakpoints {src} {breakpoints} />
+        <PreviewDirection {src} />
+        <PreviewView {src} />
+        <PreviewCopy {src} />
+      </div>
+    </div>
+  </div>
+
+  <ComponentPreview {src} {index} {title} {wrapper} {dark} />
+
+  <PreviewDetails {description} {plugins} />
+</div>

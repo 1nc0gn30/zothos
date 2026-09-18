@@ -1,0 +1,36 @@
+---
+import { type CollectionEntry } from 'astro:content'
+
+import { ArrowRight } from '@lucide/astro'
+
+import ComponentCard from './ComponentCard.astro'
+
+interface Props {
+  title: string
+  description: string
+  slug: string
+  components: (
+    | CollectionEntry<'application'>['data']
+    | CollectionEntry<'marketing'>['data']
+    | CollectionEntry<'neobrutalism'>['data']
+  )[]
+}
+
+const { title, description, slug, components } = Astro.props
+---
+
+<section class="py-16">
+  <h2 class="text-3xl font-medium">{title}</h2>
+
+  <p class="mt-2 text-gray-600">{description}</p>
+
+  <ul class="mt-12 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+    {components.map((component) => <ComponentCard {component} />)}
+  </ul>
+
+  <a href={`/components/${slug}`} class="group mt-8 inline-flex items-center gap-2 text-gray-700">
+    <span>View all {slug} components</span>
+
+    <ArrowRight class="size-5 transition-transform group-hover:translate-x-1" />
+  </a>
+</section>

@@ -1,0 +1,58 @@
+{
+  "id": "github-tool",
+  "name": "Zoth GitHub Tool — Schema-Validated Agent Connector",
+  "version": "2026-08-17",
+  "archetype": "validated-agent-tool",
+  "category": "12-autonomous-tooling",
+  "owner": "hermes",
+  "lane": "planner/tool-schemas",
+  "description": "Strict contract-validated GitHub connector for Zoth Studio agents. Validates every request against a JSON-Schema contract before any network call. Supports issues, PRs, and repos (list + create) in simulated or live mode. Token held in memory only.",
+  "ai_composable_modules": [
+    {
+      "name": "GitHubToolContract",
+      "file": "/tools/github-tool.schema.json",
+      "type": "schema",
+      "purpose": "Single source of truth contract (2020-12 JSON Schema, root if/then discrimination).",
+      "exports": ["validate"]
+    },
+    {
+      "name": "GitHubToolRuntime",
+      "file": "/tools/github-tool.js",
+      "type": "engine",
+      "purpose": "Runnable tool: validate, buildRequest, run (simulated + live GitHub REST).",
+      "exports": ["validate", "buildRequest", "run", "meta"]
+    },
+    {
+      "name": "GitHubToolUI",
+      "file": "/studio/github-tool.html",
+      "type": "view",
+      "purpose": "High-contrast responsive console: builder, request envelope, response, bus telemetry.",
+      "exports": ["render"]
+    }
+  ],
+  "contract": {
+    "schema_version": "2026-08-17",
+    "actions": ["issues.list", "issues.create", "prs.list", "prs.create", "repos.list"],
+    "envelope": "{ action, params, meta:{request_id, ts, token_ref?} }",
+    "error_envelope": "{ ok:false, error:{ code, message, request_id?, retryable?, details? } }"
+  },
+  "technical_hooks": {
+    "audio_engine": null,
+    "rendering_engine": "Vanilla DOM / Web Fetch / CustomEvent bus telemetry",
+    "state_and_offline": "100% client-side; simulated mode with zero credentials; live mode uses in-memory token only",
+    "telemetry_and_events": "CustomEvent zoth:github-tool { event, mode, action, request_id, ts }",
+    "integrations": "GitHub REST API v2022-11-28; agent-comms file bus (non-authoritative mirror)"
+  },
+  "seo_aeo_schemas": ["WebApplication", "SoftwareSourceCode", "HowTo"],
+  "tests": {
+    "command": "node /tools/github-tool.test.js",
+    "assertions": 16,
+    "status": "passing"
+  },
+  "deployment": {
+    "target": "netlify",
+    "framework": "vanilla",
+    "output": "public"
+  },
+  "tags": ["github", "connector", "agent-tool", "schema-validation", "hermes", "bus-telemetry"]
+}

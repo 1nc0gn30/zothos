@@ -1,0 +1,157 @@
+---
+/* Lead capture modal — lightweight, CSS-animated, session-once */
+---
+
+<div id="lead-modal" class="lead-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="lead-modal-title">
+  <div class="lead-modal-backdrop" data-close-modal aria-hidden="true"></div>
+
+  <div class="lead-modal-panel">
+    <button class="lead-modal-close" data-close-modal aria-label="Close">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+
+    <div class="lead-modal-visual" aria-hidden="true">
+      <div class="lead-modal-orb"></div>
+      <div class="lead-modal-grid"></div>
+    </div>
+
+    <div class="lead-modal-body">
+      <p class="lead-modal-eyebrow" id="lead-modal-title">Get connected</p>
+      <h2 class="lead-modal-headline">Tell us what the property needs.</h2>
+      <p class="lead-modal-sub">Join the contact list for updates, quotes, and priority scheduling in Virginia Beach and Hampton Roads.</p>
+
+      <form
+        name="lead-capture"
+        method="POST"
+        data-netlify="true"
+        netlify-honeypot="bot-field"
+        action="/thank-you/"
+        class="lead-modal-form"
+      >
+        <input type="hidden" name="form-name" value="lead-capture" />
+        <p hidden><label>Do not fill this out: <input name="bot-field" /></label></p>
+
+        <div class="lead-modal-row">
+          <label class="lead-modal-field">
+            <span>Name</span>
+            <input name="name" autocomplete="name" placeholder="Your name" required />
+          </label>
+          <label class="lead-modal-field">
+            <span>Phone</span>
+            <input name="phone" autocomplete="tel" type="tel" placeholder="804-000-0000" required />
+          </label>
+        </div>
+
+        <label class="lead-modal-field">
+          <span>Email</span>
+          <input name="email" autocomplete="email" type="email" placeholder="you@email.com" required />
+        </label>
+
+        <div class="lead-modal-row">
+          <label class="lead-modal-field">
+            <span>I am a</span>
+            <select name="customer-type" required>
+              <option value="" disabled selected>Select audience</option>
+              <option value="Homeowner">Homeowner</option>
+              <option value="Business">Business owner / manager</option>
+              <option value="Contractor">Contractor / builder</option>
+              <option value="Property Manager">Property manager</option>
+              <option value="Other">Other</option>
+            </select>
+          </label>
+          <label class="lead-modal-field">
+            <span>Service need</span>
+            <select name="service" required>
+              <option value="" disabled selected>Select service</option>
+              <option>CCTV / Video Monitoring</option>
+              <option>Alarm Systems</option>
+              <option>Access Control</option>
+              <option>Structured Cabling</option>
+              <option>Audio / Visual</option>
+              <option>MSP / Managed IT</option>
+              <option>VoIP / Communications</option>
+              <option>Multiple services</option>
+              <option>Not sure yet</option>
+            </select>
+          </label>
+        </div>
+
+        <button type="submit" class="lead-modal-submit">
+          <span class="submit-text">Request contact</span>
+          <span class="submit-spinner" hidden>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" opacity="0.3"/>
+              <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/>
+            </svg>
+            Sending...
+          </span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </button>
+
+        <p class="lead-modal-footnote">No spam. Unsubscribe anytime. Response within 1 business day.</p>
+      </form>
+    </div>
+
+    <div class="form-success-overlay lead-modal-success" id="lead-success">
+      <div class="form-success-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <p class="form-success-title">You are on the list!</p>
+      <p class="form-success-text">Elite Connect will reach out within one business day to discuss your project.</p>
+      <div class="form-success-actions">
+        <a href="/" class="button secondary">Back to home</a>
+        <a href="/contact/" class="button primary">Full consultation</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+(function() {
+  var modal = document.getElementById('lead-modal');
+  if (!modal) return;
+
+  var STORAGE_KEY = 'eliteconnect-lead-modal';
+  var alreadyShown = false;
+  try {
+    alreadyShown = sessionStorage.getItem(STORAGE_KEY) === '1';
+  } catch(e) {}
+
+  function openModal() {
+    if (!modal) return;
+    modal.classList.add('lead-modal--open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    try { sessionStorage.setItem(STORAGE_KEY, '1'); } catch(e) {}
+  }
+
+  function closeModal() {
+    if (!modal) return;
+    modal.classList.remove('lead-modal--open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  if (!alreadyShown) {
+    setTimeout(openModal, 2200);
+  }
+
+  modal.addEventListener('click', function(e) {
+    if (e.target.hasAttribute('data-close-modal')) {
+      closeModal();
+    }
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && modal.classList.contains('lead-modal--open')) {
+      closeModal();
+    }
+  });
+})();
+</script>

@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Zoth Visual Notes &amp; Swarm Agent Reviewer</title>
+<meta content="Collaborative canvas for reviewing visual feedback notes, AST diff approvals, and agent work orders." name="description"/>
+<link href="https://zoth.nullai.tech/studio/notes-reviewer.html" rel="canonical"/>
+<!-- OpenGraph / Facebook -->
+<meta content="website" property="og:type"/>
+<meta content="Zoth Studio" property="og:site_name"/>
+<meta content="https://zoth.nullai.tech/studio/notes-reviewer.html" property="og:url"/>
+<meta content="Zoth Visual Notes &amp; Swarm Agent Reviewer" property="og:title"/>
+<meta content="Collaborative canvas for reviewing visual feedback notes, AST diff approvals, and agent work orders." property="og:description"/>
+<meta content="https://zoth.nullai.tech/assets/media/land/studio-hero.jpg" property="og:image"/>
+<meta content="1200" property="og:image:width"/><meta content="630" property="og:image:height"/><meta content="Zoth Studio Sovereign AI Workstation" property="og:image:alt"/>
+<!-- Twitter Cards -->
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="Zoth Visual Notes &amp; Swarm Agent Reviewer" name="twitter:title"/>
+<meta content="Collaborative canvas for reviewing visual feedback notes, AST diff approvals, and agent work orders." name="twitter:description"/>
+<meta content="https://zoth.nullai.tech/assets/media/land/studio-hero.jpg" name="twitter:image"/>
+<meta content="Zoth Studio Sovereign AI Workstation" name="twitter:image:alt"/>
+<meta content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" name="robots"/>
+<meta content="#030306" name="theme-color"/>
+<meta content="US-VA" name="geo.region"/><meta content="Virginia Beach, Virginia" name="geo.placename"/><meta content="36.8529;-75.9780" name="geo.position"/><meta content="36.8529, -75.9780" name="ICBM"/>
+<link href="/assets/brand/zoth-seal-hermetic-on-dark.svg" rel="icon" type="image/svg+xml"/>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&amp;family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&amp;family=Syne:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<link href="/assets/zoth-theme.css?v=11" rel="stylesheet"/>
+<link href="/assets/zoth-tailwind-magic.css" rel="stylesheet"/>
+<script src="/assets/zoth-theme.js?v=11"></script>
+<link href="/assets/zoth-nav.css?v=11" rel="stylesheet">
+<link href="/assets/zoth-tip.css" rel="stylesheet"/>
+<link href="/assets/zoth-guide.css" rel="stylesheet"/>
+<link href="/assets/zoth-annotator.css" rel="stylesheet"/>
+<link href="/assets/zoth-mobile.css" rel="stylesheet"/>
+<link href="/assets/zoth-footer.css" rel="stylesheet"/>
+
+<style>
+  /* ----------------------------------------------------
+     ZOTH NOTES REVIEWER — ELEVATED DESIGN SYSTEM
+     ---------------------------------------------------- */
+  :root {
+    --cyan: #00f0ff;
+    --cyan-dim: rgba(0, 240, 255, 0.15);
+    --gold: #fbbf24;
+    --gold-dim: rgba(251, 191, 36, 0.15);
+    --green: #10b981;
+    --green-dim: rgba(16, 185, 129, 0.15);
+    --amber: #f59e0b;
+    --pink: #ff007a;
+    --pink-dim: rgba(255, 0, 122, 0.15);
+    --purple: #c084fc;
+    --purple-dim: rgba(192, 132, 252, 0.15);
+    
+    --bg-page: #030408;
+    --bg-card: rgba(12, 18, 34, 0.88);
+    --bg-card-hover: rgba(18, 26, 48, 0.98);
+    --bg-input: rgba(5, 8, 18, 0.85);
+    --card-border: rgba(0, 240, 255, 0.18);
+    --card-border-hover: rgba(0, 240, 255, 0.5);
+    --card-delimiter: 1px solid rgba(255, 255, 255, 0.08);
+    
+    --text-primary: #f0f6fc;
+    --text-secondary: #cbd5e1;
+    --text-muted: #8b949e;
+    
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'Figtree', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+
+    --space-xs: 8px;
+    --space-sm: 14px;
+    --space-md: 22px;
+    --space-lg: 30px;
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-pill: 9999px;
+  }
+
+  /* 4-Theme Support */
+  html[data-theme="light"], body.light {
+    --bg-page: #f8fafc;
+    --bg-card: rgba(255, 255, 255, 0.96);
+    --bg-card-hover: #ffffff;
+    --bg-input: #ffffff;
+    --card-border: rgba(2, 132, 199, 0.25);
+    --card-border-hover: rgba(2, 132, 199, 0.6);
+    --card-delimiter: 1px solid rgba(0, 0, 0, 0.08);
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    --cyan: #0284c7;
+    --cyan-dim: rgba(2, 132, 199, 0.12);
+    --gold: #d97706;
+    --gold-dim: rgba(217, 119, 6, 0.12);
+  }
+
+  html[data-theme="matrix"] {
+    --bg-page: #000803;
+    --bg-card: rgba(0, 22, 9, 0.92);
+    --bg-input: #000e05;
+    --card-border: rgba(0, 255, 102, 0.28);
+    --card-border-hover: rgba(0, 255, 102, 0.7);
+    --cyan: #00ff66;
+    --text-primary: #a7f3d0;
+    --text-secondary: #6ee7b7;
+    --text-muted: #059669;
+  }
+
+  html[data-theme="gold"] {
+    --bg-page: #080602;
+    --bg-card: rgba(24, 18, 6, 0.92);
+    --bg-input: #0e0a03;
+    --card-border: rgba(251, 191, 36, 0.3);
+    --card-border-hover: rgba(251, 191, 36, 0.7);
+    --cyan: #fbbf24;
+    --text-primary: #fef08a;
+    --text-secondary: #fde047;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg-page);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  .ambient-mesh {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: radial-gradient(circle at 15% 15%, rgba(0, 240, 255, 0.07), transparent 45%),
+                radial-gradient(circle at 85% 80%, rgba(255, 0, 122, 0.06), transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(251, 191, 36, 0.03), transparent 60%);
+  }
+
+  .skip-to-content {
+    position: absolute;
+    top: -100px;
+    left: 16px;
+    padding: 10px 18px;
+    background: var(--gold);
+    color: #050508;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    border-radius: var(--radius-sm);
+    z-index: 999999;
+    text-decoration: none;
+    transition: top 0.2s;
+  }
+  .skip-to-content:focus { top: 16px; }
+
+  .container {
+    max-width: 1440px;
+    width: 100%;
+    margin: 0 auto;
+    padding: var(--space-lg) var(--space-md) var(--space-lg);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header Banner */
+  .reviewer-hero {
+    background: var(--bg-card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .hero-kicker-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  .kicker-chip {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--cyan);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .pulse-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 10px var(--green);
+    animation: pulseAnim 2s infinite ease-in-out;
+  }
+  @keyframes pulseAnim {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.85); }
+  }
+
+  .reviewer-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: var(--text-primary);
+  }
+  .reviewer-title .accent {
+    color: var(--cyan);
+    text-shadow: 0 0 24px var(--cyan-dim);
+  }
+
+  .reviewer-lede {
+    font-size: 0.98rem;
+    color: var(--text-secondary);
+    max-width: 90ch;
+    line-height: 1.6;
+  }
+
+  /* Telemetry Stats Bar */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-sm);
+  }
+
+  .stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-sm) var(--space-md);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    backdrop-filter: blur(14px);
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .stat-card:hover {
+    border-color: var(--cyan);
+    transform: translateY(-2px);
+  }
+  .stat-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .stat-val {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--cyan);
+    line-height: 1.2;
+  }
+  .stat-icon-box {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-sm);
+    background: var(--cyan-dim);
+    color: var(--cyan);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .stat-icon-box svg { width: 20px; height: 20px; }
+
+  /* Interactive Controls & Filters Bar */
+  .controls-bar {
+    background: var(--bg-card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    backdrop-filter: blur(16px);
+  }
+
+  .filter-group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+  }
+
+  .filter-label {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  .filter-select {
+    background: var(--bg-input);
+    border: 1px solid var(--card-border);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    outline: none;
+    min-height: 42px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .filter-select:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 3px var(--cyan-dim);
+  }
+
+  .search-input {
+    background: var(--bg-input);
+    border: 1px solid var(--card-border);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 0.84rem;
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
+    outline: none;
+    min-height: 42px;
+    min-width: 260px;
+    transition: border-color 0.15s;
+  }
+  .search-input:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 3px var(--cyan-dim);
+  }
+
+  /* Status Chips Bar */
+  .status-chips-bar {
+    display: flex;
+    gap: var(--space-xs);
+    flex-wrap: wrap;
+  }
+
+  .status-chip-btn {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+  }
+  .status-chip-btn:hover {
+    background: var(--cyan-dim);
+    border-color: var(--cyan);
+    color: var(--cyan);
+  }
+  .status-chip-btn.active {
+    background: var(--cyan-dim);
+    border-color: var(--cyan);
+    color: var(--cyan);
+    box-shadow: 0 0 16px var(--cyan-dim);
+  }
+  .status-chip-btn svg { width: 14px; height: 14px; }
+
+  /* Buttons */
+  .btn {
+    font-family: var(--font-display);
+    font-size: 0.84rem;
+    font-weight: 700;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    text-decoration: none;
+    min-height: 42px;
+  }
+  .btn svg { width: 15px; height: 15px; }
+
+  .btn-gold {
+    background: var(--gold);
+    color: #050508;
+    box-shadow: 0 0 14px var(--gold-dim);
+  }
+  .btn-gold:hover {
+    background: #fde047;
+    transform: translateY(-1px);
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+  }
+
+  .btn-ghost {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: var(--text-primary);
+  }
+  .btn-ghost:hover {
+    background: var(--cyan-dim);
+    border-color: var(--cyan);
+    color: var(--cyan);
+    transform: translateY(-1px);
+  }
+
+  /* Notes Grid Layout (24-32px Breathing Room) */
+  .notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: var(--space-md);
+  }
+  @media (max-width: 600px) {
+    .notes-grid { grid-template-columns: 1fr; }
+  }
+
+  .note-box {
+    background: var(--bg-card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    position: relative;
+    transition: all 0.2s ease;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
+  }
+  .note-box:hover {
+    border-color: var(--card-border-hover);
+    box-shadow: 0 10px 30px rgba(0, 240, 255, 0.15);
+    transform: translateY(-2px);
+  }
+  .note-box.resolved {
+    opacity: 0.7;
+    border-color: rgba(16, 185, 129, 0.35);
+    background: rgba(10, 16, 28, 0.7);
+  }
+
+  .note-box-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-xs);
+    flex-wrap: wrap;
+  }
+
+  .note-tags-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .note-category-badge {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--gold);
+    background: var(--gold-dim);
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+  }
+
+  .note-priority-badge {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .note-priority-badge.Urgent {
+    background: var(--pink-dim);
+    color: var(--pink);
+    border: 1px solid var(--pink);
+  }
+  .note-priority-badge.High {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+    border: 1px solid #f59e0b;
+  }
+  .note-priority-badge.Normal {
+    background: var(--cyan-dim);
+    color: var(--cyan);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+  }
+  .note-priority-badge.Low {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-muted);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .note-status-chip {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: var(--radius-pill);
+  }
+  .note-status-chip.open { background: var(--gold-dim); color: var(--gold); }
+  .note-status-chip.resolved { background: var(--green-dim); color: var(--green); }
+
+  .note-text-body {
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-weight: 500;
+  }
+
+  .note-agents-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .note-agent-pill {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    background: var(--cyan-dim);
+    color: var(--cyan);
+    padding: 2px 8px;
+    border-radius: var(--radius-pill);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .note-agent-pill svg { width: 12px; height: 12px; }
+
+  .note-meta-table {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: var(--text-muted);
+    border: var(--card-delimiter);
+  }
+
+  .note-meta-row {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-xs);
+    align-items: center;
+  }
+
+  .note-meta-val {
+    color: var(--cyan);
+    max-width: 240px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .note-meta-val:hover { text-decoration: underline; }
+
+  .note-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: var(--space-xs);
+    border-top: var(--card-delimiter);
+    gap: var(--space-xs);
+    flex-wrap: wrap;
+  }
+
+  .note-id-tag {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+  }
+
+  .note-actions-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--bg-card);
+    border: 1px dashed var(--card-border);
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  /* Note Inspection Bottom Sheet / Modal */
+  dialog.note-inspect-sheet {
+    border: 1px solid var(--card-border-hover);
+    border-radius: 20px;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    width: 90%;
+    max-width: 640px;
+    margin: auto;
+    padding: var(--space-lg);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), 0 0 40px var(--cyan-dim);
+    backdrop-filter: blur(24px);
+  }
+  dialog.note-inspect-sheet::backdrop {
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(6px);
+  }
+</style>
+<link href="/assets/zoth-hud-embedded.css" rel="stylesheet"/>
+<script src="/assets/zoth-hud-embedded.js"></script>
+</head>
+<body class="deck-page">
+<a class="skip-to-content" href="#main-content">Skip to content</a>
+<div class="ambient-mesh" aria-hidden="true"></div>
+
+<!-- Master Top Navigation -->
+                    <header class="bar" id="topbar" role="banner">
+      <a class="brand js-hub" href="/" aria-label="Zoth Studio Home">
+        <div class="brand-emblem-wrap">
+          <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth Golden Z Emblem" width="34" height="34" class="brand-emblem-img" />
+          <span class="brand-emblem-halo"></span>
+        </div>
+        <span class="brand-text-wrap">
+          <strong>Zoth</strong>
+          <small>by NullAI</small>
+        </span>
+        <span class="brand-status-badge">SOVEREIGN</span>
+      </a>
+
+      <nav class="menu" aria-label="Primary navigation" role="navigation">
+        <a class="nav-link nav-for-everyone" href="/#for-everyone" data-tip="Zero-Code Showcases — How non-tech founders, creators & teams depend on Zoth.">✦ For You</a>
+
+        <!-- 🔮 Core AI -->
+        <div class="nav-dropdown" data-dropdown-id="core">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Core AI</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🔮 CORE AI ARCHITECTURE</span><span class="nav-item-badge">6 NODES</span></div>
+            <a href="/zoth/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+            <a href="/agents/"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+            <a href="/studio/consensus.html"><span class="nav-item-icon-box">⚔️</span><div class="nav-item-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+            <a href="/studio/swarm.html"><span class="nav-item-icon-box">🌐</span><div class="nav-item-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+            <a href="/memory/"><span class="nav-item-icon-box">🧠</span><div class="nav-item-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+            <a href="/zoth-world.html"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+          </div>
+        </div>
+
+        <!-- 🪐 Studio -->
+        <div class="nav-dropdown" data-dropdown-id="studio">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Studio</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu nav-dropdown-mega">
+            <div class="nav-dropdown-header"><span>🪐 14+ STUDIO WORKSTATIONS</span><span class="nav-item-badge">LOCAL DAGS</span></div>
+            <a href="/studio/cockpit.html"><span class="nav-item-icon-box">🪐</span><div class="nav-item-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+            <a href="/studio/cockpit.html?tool=webgen"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+            <a href="/studio/cockpit.html?tool=vos-sandbox"><span class="nav-item-icon-box">💻</span><div class="nav-item-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+            <a href="/studio/cockpit.html?tool=nexus-3d"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+            <a href="/studio/cockpit.html?tool=omnipost"><span class="nav-item-icon-box">🎬</span><div class="nav-item-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+            <a href="/studio/cockpit.html?tool=math-pillars"><span class="nav-item-icon-box">📐</span><div class="nav-item-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+            <a href="/studio/cockpit.html?tool=secure-comms"><span class="nav-item-icon-box">🔒</span><div class="nav-item-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+            <a href="/studio/cockpit.html?tool=signal-bridge"><span class="nav-item-icon-box">📡</span><div class="nav-item-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+            <a href="/studio/cockpit.html?tool=web3-hub"><span class="nav-item-icon-box">🪙</span><div class="nav-item-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+            <a href="/studio/cockpit.html?tool=pets"><span class="nav-item-icon-box">💎</span><div class="nav-item-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+            <a href="/studio/cockpit.html?tool=tool-nexus"><span class="nav-item-icon-box">🛠️</span><div class="nav-item-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+          </div>
+        </div>
+
+        <!-- 🌌 Universe -->
+        <div class="nav-dropdown" data-dropdown-id="universe">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Universe</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>🌌 UNIVERSE &amp; PUBLICATIONS</span><span class="nav-item-badge">STORIES</span></div>
+            <a href="/comic/"><span class="nav-item-icon-box">🎨</span><div class="nav-item-body"><strong>AZOTH Anime Comic</strong><small>Season 1 Ep 1: Genesis in Silicon Rain (Audio)</small></div><span class="nav-item-badge">AUDIO</span></a>
+            <a href="/social/"><span class="nav-item-icon-box">🌌</span><div class="nav-item-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+            <a href="/articles/"><span class="nav-item-icon-box">📜</span><div class="nav-item-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+            <a href="/article/"><span class="nav-item-icon-box">🔮</span><div class="nav-item-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+            <a href="/ai-webgpu.html"><span class="nav-item-icon-box">⚡</span><div class="nav-item-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+            <a href="/adytum/"><span class="nav-item-icon-box">🏛️</span><div class="nav-item-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+          </div>
+        </div>
+
+        <!-- 📚 Docs & Vault -->
+        <div class="nav-dropdown" data-dropdown-id="docs">
+          <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Docs & Vault</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-header"><span>📚 DOCUMENTATION &amp; SECURITY</span><span class="nav-item-badge">SPECS</span></div>
+            <a href="/docs/"><span class="nav-item-icon-box">📚</span><div class="nav-item-body"><strong>Master Documentation</strong><small>Port Topology, 1-Click Install Scripts & API Guide</small></div><span class="nav-item-badge">DOCS</span></a>
+            <a href="/vault/"><span class="nav-item-icon-box">🔐</span><div class="nav-item-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+            <a href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+            <a href="/faq.html"><span class="nav-item-icon-box">❓</span><div class="nav-item-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+          </div>
+        </div>
+
+        <!-- ⚡ Action Pills -->
+        <button type="button" class="nav-pill nav-telemetry-pill" title="View Live Studio Telemetry & Background Daemons" aria-label="Studio Telemetry Status">
+          <span class="tel-dot online"></span><span class="tel-text">6/6 DAEMONS</span>
+        </button>
+
+        <button type="button" class="nav-pill nav-pet-pill" title="Active Companion Spirit: Azoth (Click to Summon / Switch Mascot)" aria-label="Active Companion Spirit">
+          <span class="pet-emoji">🔮</span><span class="pet-name">Azoth</span>
+        </button>
+
+        <a class="nav-pill nav-deck-pill js-deck" href="http://127.0.0.1:8484/" title="Open Local Operator Deck (:8484)">
+          <span class="deck-pulse"></span><span>DECK</span>
+        </a>
+
+        <button type="button" class="nav-pill nav-palette-btn" title="Open Global Command Palette (Ctrl+K)" aria-label="Command Palette">
+          <span class="palette-icon">🔍</span><kbd class="nav-kbd">Ctrl+K</kbd>
+        </button>
+
+        <button type="button" class="nav-pill nav-annotate-btn" title="Toggle On-Screen Annotator & Feedback (Shift+A)" aria-label="Toggle Annotator">
+          <span class="annotate-icon">✏️</span><span class="annotate-text">Annotate</span><kbd class="nav-kbd">Shift+A</kbd>
+        </button>
+
+        <div class="nav-dropdown nav-theme-dropdown">
+          <button class="nav-dropdown-btn nav-theme-current-btn" type="button" aria-haspopup="true" aria-expanded="false" title="Switch Visual Theme (Shift+T)">
+            <span class="current-theme-swatch" style="background:#00f0ff;"></span>
+            <span class="current-theme-emoji">🌙</span>
+            <span class="current-theme-label">Dark Void</span>
+            <svg class="dropdown-chevron" fill="none" height="6" viewBox="0 0 10 6" width="10"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+          </button>
+        </div>
+
+        <a class="nav-pill git" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank" title="GitHub Repository — Open Source code, Debian packages, and releases">
+          <span>🐙 GitHub ↗</span>
+        </a>
+      </nav>
+
+      <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Toggle navigation menu">
+        <span class="burger-lines"><span class="b-line b-1"></span><span class="b-line b-2"></span><span class="b-line b-3"></span></span>
+        <span class="burger-text">Menu</span>
+      </button>
+      <div class="zoth-scroll-progress" id="zoth-scroll-progress"></div>
+    </header>
+
+    <nav class="drawer" id="drawer" aria-label="Universal Mobile Navigation" role="navigation">
+      <div class="drawer-header-brand">
+        <div class="d-brand-left">
+          <div class="brand-emblem-wrap">
+            <img src="/assets/brand/zoth-golden-z-192.png" alt="Zoth" width="28" height="28" class="brand-emblem-img" />
+          </div>
+          <span class="d-brand-title"><strong>Zoth Studio</strong><small>v12.0 Sovereign</small></span>
+        </div>
+        <button type="button" class="drawer-telemetry-badge" title="View Diagnostics HUD">● 6/6 DAEMONS</button>
+        <button type="button" class="drawer-close-btn" aria-label="Close mobile menu">✕</button>
+      </div>
+
+      <div class="drawer-section drawer-tools-section">
+        <div class="drawer-heading">⚡ Quick Actions</div>
+        <div class="drawer-quick-tools-grid">
+          <button type="button" class="drawer-tool-pill drawer-palette-trigger"><span>🔍</span> Command Palette <kbd class="nav-kbd">Ctrl+K</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-annotate-trigger"><span>✏️</span> On-Screen Annotator <kbd class="nav-kbd">Shift+A</kbd></button>
+          <button type="button" class="drawer-tool-pill drawer-telemetry-trigger"><span>⚡</span> Telemetry HUD</button>
+          <button type="button" class="drawer-tool-pill drawer-audio-trigger"><span>🔊</span> Audio FX</button>
+        </div>
+      </div>
+
+      <div class="drawer-section drawer-theme-section">
+        <div class="drawer-heading">🎨 Visual Theme (16 Archetypes)</div>
+        <div class="drawer-search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="drawer-theme-search-input" placeholder="Search 16 themes..." autocomplete="off" />
+        </div>
+        <div class="theme-filter-chips drawer-filter-chips">
+          <button type="button" class="theme-chip-btn active" data-drawer-cat="all">All (16)</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="studio originals">Originals</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="frontier ai & tech">Frontier</button>
+          <button type="button" class="theme-chip-btn" data-drawer-cat="developer archetypes">Dev</button>
+        </div>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">✦ Featured</div>
+        <a class="drawer-link drawer-hero-link" href="/#for-everyone"><span class="d-link-icon">✦</span><div class="d-link-body"><strong>For You (No-Code Showcases)</strong><small>How Non-Tech Founders, Creators & Teams Use Zoth</small></div><span class="nav-item-badge">SHOWCASE</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🔮 Core AI & Pantheon</div>
+        <a class="drawer-link" href="/zoth/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Master Azoth Core</strong><small>Sovereign Alchemical AI Core & Synthesis</small></div><span class="nav-item-badge">CORE</span></a>
+        <a class="drawer-link" href="/agents/"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>21-Agent Pantheon</strong><small>Autonomous Model Archetypes & Sandboxes</small></div><span class="nav-item-badge">21 AGENTS</span></a>
+        <a class="drawer-link" href="/studio/consensus.html"><span class="d-link-icon">⚔️</span><div class="d-link-body"><strong>Consensus Battle Arena</strong><small>3-Agent Triangulation & AST Synthesis</small></div><span class="nav-item-badge">AST</span></a>
+        <a class="drawer-link" href="/studio/swarm.html"><span class="d-link-icon">🌐</span><div class="d-link-body"><strong>3D Swarm Arena</strong><small>Real-time WebGL Kinetic Battle Arena</small></div><span class="nav-item-badge">3D GPU</span></a>
+        <a class="drawer-link" href="/memory/"><span class="d-link-icon">🧠</span><div class="d-link-body"><strong>Memory Whitespace</strong><small>Biomorphic Associative Graph & Lucy Oracle</small></div><span class="nav-item-badge">VECTOR</span></a>
+        <a class="drawer-link" href="/zoth-world.html"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Zoth World 3D Sanctum</strong><small>Living Hermetic Swarm & Multiverse</small></div><span class="nav-item-badge">3D</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">🪐 Workstations & DAGs</div>
+        <a class="drawer-link" href="/studio/cockpit.html"><span class="d-link-icon">🪐</span><div class="d-link-body"><strong>The Cockpit</strong><small>21-Agent Autonomous Swarm Command Deck</small></div><span class="nav-item-badge">SWARM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=webgen"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGen Studio</strong><small>Universal Interactive PTY Terminal & Foundry</small></div><span class="nav-item-badge">FOUNDRY</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=vos-sandbox"><span class="d-link-icon">💻</span><div class="d-link-body"><strong>vOS Wasm Sandbox</strong><small>In-Browser WebContainer & Terminal IDE</small></div><span class="nav-item-badge">WASM</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=nexus-3d"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>Nexus 3D Omniverse</strong><small>CAD Modeling, AI Meshes & Motion</small></div><span class="nav-item-badge">CAD</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=omnipost"><span class="d-link-icon">🎬</span><div class="d-link-body"><strong>OmniPost 2.0 Video</strong><small>60 FPS Video Studio & Social Motion</small></div><span class="nav-item-badge">60 FPS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=math-pillars"><span class="d-link-icon">📐</span><div class="d-link-body"><strong>AI Math Pillars</strong><small>Linear Algebra, STDP, Manifolds & Entropy</small></div><span class="nav-item-badge">MATH</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=secure-comms"><span class="d-link-icon">🔒</span><div class="d-link-body"><strong>SimpleX ↔ Matrix Bridge</strong><small>Zero-Knowledge E2EE Gateway</small></div><span class="nav-item-badge">E2EE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=signal-bridge"><span class="d-link-icon">📡</span><div class="d-link-body"><strong>Signal Swarm Bridge</strong><small>Mobile Phone Command Deck & Voice SSE</small></div><span class="nav-item-badge">MOBILE</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=web3-hub"><span class="d-link-icon">🪙</span><div class="d-link-body"><strong>Web3 & Solana DeFi Hub</strong><small>Multi-Chain Wallets & Live SOL Matrix</small></div><span class="nav-item-badge">WEB3</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=pets"><span class="d-link-icon">💎</span><div class="d-link-body"><strong>Companion Pets 3D</strong><small>Volumetric Mascot Spirits & Soundboards</small></div><span class="nav-item-badge">MASCOTS</span></a>
+        <a class="drawer-link" href="/studio/cockpit.html?tool=tool-nexus"><span class="d-link-icon">🛠️</span><div class="d-link-body"><strong>Studio Directory</strong><small>Master Workstation & Toolchain Catalog</small></div><span class="nav-item-badge">INDEX</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📜 Universe & Research</div>
+        <a class="drawer-link" href="/comic/"><span class="d-link-icon">🎨</span><div class="d-link-body"><strong>AZOTH Anime Comic Series</strong><small>Season 1 Ep 1: Genesis in Silicon Rain</small></div><span class="nav-item-badge">AUDIO</span></a>
+        <a class="drawer-link" href="/social/"><span class="d-link-icon">🌌</span><div class="d-link-body"><strong>Community Social Wall</strong><small>Builder Dispatches & Showcase Transmissions</small></div><span class="nav-item-badge">LIVE</span></a>
+        <a class="drawer-link" href="/articles/"><span class="d-link-icon">📜</span><div class="d-link-body"><strong>Engineering Whitepapers</strong><small>Architectural Deep-Dives & Benchmarks</small></div><span class="nav-item-badge">RESEARCH</span></a>
+        <a class="drawer-link" href="/article/"><span class="d-link-icon">🔮</span><div class="d-link-body"><strong>Sovereign AI Manifesto</strong><small>Multi-Agent Consensus & Philosophical Vision</small></div><span class="nav-item-badge">VISION</span></a>
+        <a class="drawer-link" href="/ai-webgpu.html"><span class="d-link-icon">⚡</span><div class="d-link-body"><strong>WebGPU Local AI</strong><small>Browser Neural Transformers (360M Micro)</small></div><span class="nav-item-badge">WEBGPU</span></a>
+        <a class="drawer-link" href="/adytum/"><span class="d-link-icon">🏛️</span><div class="d-link-body"><strong>Adytum Sanctum</strong><small>Offline Hardware Gateway & Cryptography</small></div><span class="nav-item-badge">SANCTUM</span></a>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-heading">📚 Docs & Security</div>
+        <a class="drawer-link" href="/docs/"><span class="d-link-icon">📚</span><div class="d-link-body"><strong>Complete Documentation</strong><small>Port Topology, 1-Click Install Scripts & API</small></div><span class="nav-item-badge">DOCS</span></a>
+        <a class="drawer-link" href="/vault/"><span class="d-link-icon">🔐</span><div class="d-link-body"><strong>Sovereign Vault</strong><small>Argon2id Secrets, Tokens & Keyrings</small></div><span class="nav-item-badge">ARGON2</span></a>
+        <a class="drawer-link" href="/pricing/"><span class="nav-item-icon-box">💛</span><div class="nav-item-body"><strong>Support / Patron</strong><small>Keep Zoth Free, Open Source & Sovereign</small></div><span class="nav-item-badge">PATRON</span></a>
+        <a class="drawer-link" href="/faq.html"><span class="d-link-icon">❓</span><div class="d-link-body"><strong>FAQ & Troubleshooting</strong><small>Hardware Requirements, Ports & Diagnostics</small></div><span class="nav-item-badge">FAQ</span></a>
+      </div>
+
+      <div class="drawer-section drawer-footer-section">
+        <a class="drawer-pill-link js-deck" href="http://127.0.0.1:8484/">💻 Launch Local Operator Deck (:8484)</a>
+        <a class="drawer-pill-link" href="https://github.com/NullAITech/zoth-studio" target="_blank" rel="noopener noreferrer">🐙 GitHub Source Repository ↗</a>
+        <a class="drawer-pill-link" href="/downloads/zoth-studio-android.apk">📱 Download Android App (.apk)</a>
+      </div>
+    </nav>
+
+    
+
+    
+
+    
+
+    
+
+<main class="container" id="main-content" role="main">
+  <!-- Hero Section -->
+  <section class="reviewer-hero" aria-labelledby="reviewer-title">
+    <div class="hero-kicker-row">
+      <div class="kicker-chip">
+        <span class="pulse-dot"></span>
+        <span>Visual Annotations &amp; Swarm Work Order Reviewer</span>
+      </div>
+      <div class="note-tags-wrap">
+        <span class="note-category-badge">Zoth Annotator v2.4</span>
+        <span class="note-priority-badge Normal">Loopback Sync (:8484)</span>
+      </div>
+    </div>
+    <h1 class="reviewer-title" id="reviewer-title">Visual Notes &amp; <span class="accent">Swarm Agent Reviewer</span></h1>
+    <p class="reviewer-lede">
+      Sovereign review surface for visual page annotations, DOM element selectors, UI change orders, and autonomous agent tasks. Tag agents (@antigravity, @grok, @hermes) on any page with <code>Ctrl+Alt+A</code> or <code>Shift+A</code> to dispatch structured work orders.
+    </p>
+  </section>
+
+  <!-- Telemetry Stats Bar -->
+  <section class="stats-bar" aria-label="Annotation Stats Matrix">
+    <div class="stat-card">
+      <div>
+        <div class="stat-label">Total Notes</div>
+        <div class="stat-val" id="stat-total">0</div>
+      </div>
+      <div class="stat-icon-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div>
+        <div class="stat-label">Open Work Orders</div>
+        <div class="stat-val" id="stat-open" style="color:var(--gold)">0</div>
+      </div>
+      <div class="stat-icon-box" style="background:var(--gold-dim); color:var(--gold);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div>
+        <div class="stat-label">Assigned to @antigravity</div>
+        <div class="stat-val" id="stat-agy" style="color:#38bdf8">0</div>
+      </div>
+      <div class="stat-icon-box" style="background:rgba(56, 189, 248, 0.15); color:#38bdf8;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div>
+        <div class="stat-label">Resolved &amp; Closed</div>
+        <div class="stat-val" id="stat-resolved" style="color:var(--green)">0</div>
+      </div>
+      <div class="stat-icon-box" style="background:var(--green-dim); color:var(--green);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Controls Bar -->
+  <section class="controls-bar" aria-label="Note Filters and Search">
+    <div class="status-chips-bar" role="tablist">
+      <button class="status-chip-btn active" data-status="open" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="6"/></svg>
+        Open Notes
+      </button>
+      <button class="status-chip-btn" data-status="resolved" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Resolved
+      </button>
+      <button class="status-chip-btn" data-status="all" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        All Notes
+      </button>
+    </div>
+
+    <div class="filter-group">
+      <span class="filter-label">Agent:</span>
+      <select class="filter-select" id="filter-agent">
+        <option value="all">All Agents</option>
+        <option value="antigravity">@antigravity (Google Lead)</option>
+        <option value="grok">@grok (xAI Verification)</option>
+        <option value="hermes">@hermes (Logic / Tools)</option>
+        <option value="ui-designer">@ui-designer</option>
+        <option value="ax-specialist">@ax-specialist</option>
+      </select>
+
+      <span class="filter-label">Category:</span>
+      <select class="filter-select" id="filter-category">
+        <option value="all">All Categories</option>
+        <option value="UI / Visual">UI / Visual</option>
+        <option value="Bug / Broken">Bug / Broken</option>
+        <option value="Copy / Content">Copy / Content</option>
+        <option value="UX / Flow">UX / Flow</option>
+        <option value="AX (Accessibility)">AX (Accessibility)</option>
+        <option value="SEO / Metadata">SEO / Metadata</option>
+      </select>
+
+      <input class="search-input" id="search-input" placeholder="Search note text, selector, path..." type="search"/>
+    </div>
+
+    <div style="display:flex; gap: var(--space-xs); flex-wrap:wrap;">
+      <button class="btn btn-gold" id="btn-export-prompt" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Export Swarm Prompt XML
+      </button>
+      <button class="btn btn-ghost" id="btn-refresh" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Refresh
+      </button>
+    </div>
+  </section>
+
+  <!-- Notes Grid -->
+  <section class="notes-grid" id="notes-container" aria-label="Visual Notes List"></section>
+</main>
+
+<!-- Note Inspection Dialog Modal -->
+<dialog class="note-inspect-sheet" id="note-inspect-dialog">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; border-bottom:var(--card-delimiter); padding-bottom:10px;">
+    <h3 style="font-family:var(--font-display); font-size:1.2rem; color:var(--text-primary);">Visual Note &amp; AST Work Order</h3>
+    <button class="btn btn-ghost" id="btn-close-inspect" style="min-height:36px; padding:4px 12px;" type="button">✕ Close</button>
+  </div>
+  <div id="note-inspect-body" style="display:flex; flex-direction:column; gap:14px;"></div>
+</dialog>
+
+<!-- Master Footer -->
+                    <footer class="site" role="contentinfo">
+      <div class="foot-wrap">
+        <div aria-hidden="true" class="foot-watermark">ZOTH</div>
+        <div class="foot-grid">
+          <div class="foot-brand-col">
+            <p class="foot-kicker">Local · loopback · no telemetry</p>
+            <a class="foot-brand-lockup" href="/">
+              <img alt="Master Azoth" class="foot-azoth" decoding="async" height="72" loading="lazy" src="/assets/mascot/azoth-bust.jpg" width="72" />
+              <span class="foot-brand-text">
+                <img alt="" class="foot-brand-logo" decoding="async" height="28" loading="lazy" src="/assets/brand/zoth-golden-z-192.png" width="28" />
+                <strong class="foot-brand-title">Zoth Studio</strong>
+              </span>
+            </a>
+            <small class="foot-brand-desc">Local-first workspace for a team of AI agents. Files stay on this machine.</small>
+            <div class="foot-actions">
+              <a class="foot-btn foot-btn-on" href="/#install">Install locally</a>
+              <a class="foot-btn foot-btn-ghost" href="/pricing/">Support the forge</a>
+            </div>
+          </div>
+          <div class="foot-col">
+            <h3>Studio</h3>
+            <a class="mega-footer-link js-deck" href="http://127.0.0.1:8484/">Operator Deck</a>
+            <a class="mega-footer-link" href="/studio/">Workstations</a>
+            <a class="mega-footer-link" href="/studio/webgen.html">WebGen</a>
+            <a class="mega-footer-link" href="/studio/swarm.html">3D Swarm</a>
+            <a class="mega-footer-link" href="/studio/consensus.html">Consensus</a>
+          </div>
+          <div class="foot-col">
+            <h3>Agents</h3>
+            <a class="mega-footer-link" href="/zoth/">Master Azoth</a>
+            <a class="mega-footer-link" href="/agents/">21-Agent pantheon</a>
+            <a class="mega-footer-link" href="/pets/">Companions</a>
+            <a class="mega-footer-link" href="/vault/">Sovereign vault</a>
+            <a class="mega-footer-link" href="/adytum/">Adytum</a>
+          </div>
+          <div class="foot-col">
+            <h3>Universe</h3>
+            <a class="mega-footer-link" href="/comic/">Azoth comic</a>
+            <a class="mega-footer-link" href="/social/">Social wall</a>
+            <a class="mega-footer-link" href="/showcase.html">Showcase</a>
+            <a class="mega-footer-link" href="/signal/">Signal</a>
+            <a class="mega-footer-link" href="/article/">Manifesto</a>
+          </div>
+          <div class="foot-col">
+            <h3>Resources</h3>
+            <a class="mega-footer-link" href="/docs/">Docs</a>
+            <a class="mega-footer-link" href="/faq.html">FAQ</a>
+            <a class="mega-footer-link" href="/pricing/">Support / Patron</a>
+            <a class="mega-footer-link" href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub ↗</a>
+            <a class="mega-footer-link" href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI ↗</a>
+          </div>
+        </div>
+        <div class="foot-bottom">
+          <p>© 2026 NullAI Tech. MIT. Local sovereign execution — zero telemetry.</p>
+          <nav aria-label="Footer meta" class="foot-meta">
+            <a href="https://github.com/NullAITech/zoth-studio" rel="noopener noreferrer" target="_blank">GitHub</a>
+            <a href="https://nullai.tech/" rel="noopener noreferrer" target="_blank">NullAI</a>
+            <a href="/docs/">Docs</a>
+            <a href="/faq.html">FAQ</a>
+          </nav>
+        </div>
+      </div>
+    </footer>
+
+<script>
+  (function () {
+    "use strict";
+
+    const STORAGE_KEY = 'zoth_visual_annotations_v2';
+    const API_ENDPOINT = '/api/annotations';
+    const inspectDialog = document.getElementById('note-inspect-dialog');
+
+    // Default Seed Annotations if none exist
+    const DEFAULT_NOTES = [
+      {
+        id: "note_agy_01",
+        text: "Refine GitHub Tool, Notes Reviewer, Build Chronicle, and Brand Workstation layouts with 24px-32px breathing room, distinct card delimiters, and 100% pure vector SVG icons across all 4 themes.",
+        category: "UI / Visual",
+        priority: "Urgent",
+        status: "open",
+        pathname: "/studio/notes-reviewer.html",
+        selector: "main.container > section.notes-grid",
+        tagged_agents: ["antigravity", "hermes"],
+        created_local: "2026-09-15 04:10:00"
+      },
+      {
+        id: "note_hermes_02",
+        text: "Ensure schema contract validation in GitHub tool runs in simulated mode when no token is provided, maintaining memory-only token safety.",
+        category: "Bug / Broken",
+        priority: "High",
+        status: "open",
+        pathname: "/studio/github-tool.html",
+        selector: "section.panel-box select#action",
+        tagged_agents: ["hermes"],
+        created_local: "2026-09-15 03:45:00"
+      },
+      {
+        id: "note_grok_03",
+        text: "Verify light theme color tokens on Chronicle timeline milestone cards to ensure high text contrast and zero blend mode artifacts.",
+        category: "AX (Accessibility)",
+        priority: "Normal",
+        status: "open",
+        pathname: "/studio/chronicle.html",
+        selector: "div.timeline-wrap article.milestone-card",
+        tagged_agents: ["grok", "antigravity"],
+        created_local: "2026-09-15 02:20:00"
+      },
+      {
+        id: "note_brand_04",
+        text: "Add 1-click Hex/RGB/CSS-var copy triggers and backdrop theme switchers for all SVG Alchemical Seals in Brand Workstation.",
+        category: "Feature Request",
+        priority: "Normal",
+        status: "resolved",
+        pathname: "/studio/brand.html",
+        selector: "section.seals-grid .seal-card",
+        tagged_agents: ["ui-designer", "antigravity"],
+        created_local: "2026-09-14 21:10:00"
+      }
+    ];
+
+    let notes = [];
+    let currentStatus = 'open';
+
+    async function loadNotes() {
+      try {
+        const res = await fetch(API_ENDPOINT);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.annotations) && data.annotations.length > 0) {
+            notes = data.annotations;
+          } else {
+            fallbackLocal();
+          }
+        } else {
+          fallbackLocal();
+        }
+      } catch (e) {
+        fallbackLocal();
+      }
+      render();
+    }
+
+    function fallbackLocal() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        try {
+          notes = JSON.parse(raw);
+        } catch (err) {
+          notes = [...DEFAULT_NOTES];
+        }
+      } else {
+        notes = [...DEFAULT_NOTES];
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+      }
+    }
+
+    function updateStats() {
+      document.getElementById('stat-total').textContent = notes.length;
+      document.getElementById('stat-open').textContent = notes.filter(n => n.status !== 'resolved').length;
+      document.getElementById('stat-agy').textContent = notes.filter(n => (n.tagged_agents || []).includes('antigravity') && n.status !== 'resolved').length;
+      document.getElementById('stat-resolved').textContent = notes.filter(n => n.status === 'resolved').length;
+    }
+
+    function setStatusFilter(statusVal) {
+      currentStatus = statusVal;
+      document.querySelectorAll('.status-chip-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-status') === statusVal);
+      });
+      render();
+    }
+
+    function openNoteInspection(note) {
+      if (!inspectDialog || !note) return;
+      const body = document.getElementById('note-inspect-body');
+      
+      body.innerHTML = `
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <span class="note-category-badge">${escapeHtml(note.category || 'General')}</span>
+          <span class="note-priority-badge ${note.priority || 'Normal'}">${escapeHtml(note.priority || 'Normal')}</span>
+          <span class="note-status-chip ${note.status === 'resolved' ? 'resolved' : 'open'}">
+            ${note.status === 'resolved' ? '✓ Resolved' : '● Open Task'}
+          </span>
+          <span style="font-family:var(--font-mono); font-size:11px; color:var(--text-muted); margin-left:auto;">${note.id || ''}</span>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:16px; color:var(--text-primary); font-size:15px; line-height:1.6; white-space:pre-wrap; word-break:break-word;">
+          ${escapeHtml(note.text || '')}
+        </div>
+
+        <div class="note-agents-row">
+          <span style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-mono);">Assigned:</span>
+          ${(note.tagged_agents || []).map(a => `
+            <span class="note-agent-pill">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+              @${escapeHtml(a)}
+            </span>
+          `).join('')}
+        </div>
+
+        <div class="note-meta-table">
+          <div class="note-meta-row">
+            <span>Target Page:</span>
+            <a href="${escapeHtml(note.pathname || note.page_url || '/')}" target="_blank" class="note-meta-val">
+              ${escapeHtml(note.pathname || '/')} ↗
+            </a>
+          </div>
+          ${note.selector ? `
+            <div class="note-meta-row">
+              <span>DOM Selector:</span>
+              <span class="note-meta-val" title="${escapeHtml(note.selector)}">${escapeHtml(note.selector)}</span>
+            </div>
+          ` : ''}
+          <div class="note-meta-row">
+            <span>Created Timestamp:</span>
+            <span style="color:var(--text-muted)">${escapeHtml(note.created_local || note.created_at || 'Recent')}</span>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:8px; flex-wrap:wrap;">
+          <button class="btn btn-gold inspect-resolve-btn" style="flex:1" data-id="${note.id}">
+            ${note.status === 'resolved' ? '↩ Reopen Note' : '✓ Mark as Resolved'}
+          </button>
+          <button class="btn btn-ghost inspect-delete-btn" style="color:var(--pink)" data-id="${note.id}">
+            ✕ Delete Note
+          </button>
+        </div>
+      `;
+
+      body.querySelector('.inspect-resolve-btn')?.addEventListener('click', async () => {
+        note.status = note.status === 'resolved' ? 'open' : 'resolved';
+        saveNotes();
+        inspectDialog.close();
+        render();
+      });
+
+      body.querySelector('.inspect-delete-btn')?.addEventListener('click', async () => {
+        if (confirm('Delete this annotation work order?')) {
+          notes = notes.filter(n => n.id !== note.id);
+          saveNotes();
+          inspectDialog.close();
+          render();
+        }
+      });
+
+      if (typeof inspectDialog.showModal === 'function') {
+        inspectDialog.showModal();
+      } else {
+        inspectDialog.setAttribute('open', '');
+      }
+    }
+
+    function saveNotes() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+    }
+
+    function render() {
+      updateStats();
+      const container = document.getElementById('notes-container');
+      const filterAgent = document.getElementById('filter-agent').value;
+      const filterCategory = document.getElementById('filter-category').value;
+      const search = document.getElementById('search-input').value.toLowerCase().trim();
+
+      let filtered = notes;
+
+      if (currentStatus === 'open') {
+        filtered = filtered.filter(n => n.status !== 'resolved');
+      } else if (currentStatus === 'resolved') {
+        filtered = filtered.filter(n => n.status === 'resolved');
+      }
+
+      if (filterAgent !== 'all') {
+        filtered = filtered.filter(n => (n.tagged_agents || []).includes(filterAgent));
+      }
+
+      if (filterCategory !== 'all') {
+        filtered = filtered.filter(n => n.category === filterCategory);
+      }
+
+      if (search) {
+        filtered = filtered.filter(n =>
+          (n.text && n.text.toLowerCase().includes(search)) ||
+          (n.selector && n.selector.toLowerCase().includes(search)) ||
+          (n.pathname && n.pathname.toLowerCase().includes(search))
+        );
+      }
+
+      if (!filtered.length) {
+        container.innerHTML = `
+          <div class="empty-state" style="grid-column: 1 / -1;">
+            <div class="stat-icon-box" style="width:54px; height:54px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <h3 style="font-family:var(--font-display); font-size:1.2rem; color:var(--text-primary)">No Notes Matching Filter</h3>
+            <p style="color:var(--text-muted); font-size:0.88rem; max-width:440px;">All clear or no work orders match your search criteria. Tag any DOM element on Zoth Studio pages with Shift+A to dispatch new tasks.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(n => `
+        <article class="note-box ${n.status === 'resolved' ? 'resolved' : ''}">
+          <div class="note-box-header">
+            <div class="note-tags-wrap">
+              <span class="note-category-badge">${escapeHtml(n.category || 'General')}</span>
+              <span class="note-priority-badge ${n.priority || 'Normal'}">${escapeHtml(n.priority || 'Normal')}</span>
+            </div>
+            <span class="note-status-chip ${n.status === 'resolved' ? 'resolved' : 'open'}">
+              ${n.status === 'resolved' ? '✓ Resolved' : '● Open'}
+            </span>
+          </div>
+
+          <div class="note-text-body">${escapeHtml(n.text)}</div>
+
+          <div class="note-agents-row">
+            ${(n.tagged_agents || []).map(a => `
+              <span class="note-agent-pill">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+                @${escapeHtml(a)}
+              </span>
+            `).join('')}
+          </div>
+
+          <div class="note-meta-table">
+            <div class="note-meta-row">
+              <span>Target Page:</span>
+              <a href="${escapeHtml(n.pathname || n.page_url || '/')}" target="_blank" class="note-meta-val">
+                ${escapeHtml(n.pathname || '/')}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              </a>
+            </div>
+            ${n.selector ? `
+              <div class="note-meta-row">
+                <span>Selector:</span>
+                <span class="note-meta-val" title="${escapeHtml(n.selector)}">${escapeHtml(n.selector)}</span>
+              </div>
+            ` : ''}
+            <div class="note-meta-row">
+              <span>Created:</span>
+              <span>${escapeHtml(n.created_local || n.created_at || 'Recent')}</span>
+            </div>
+          </div>
+
+          <div class="note-footer">
+            <span class="note-id-tag">${escapeHtml(n.id)}</span>
+            <div class="note-actions-row">
+              <button class="btn btn-ghost btn-inspect" data-id="${n.id}" type="button" style="min-height:36px; padding:4px 10px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                Inspect
+              </button>
+              <button class="btn btn-ghost btn-resolve" data-id="${n.id}" type="button" style="min-height:36px; padding:4px 10px;">
+                ${n.status === 'resolved' ? '↩ Reopen' : '✓ Resolve'}
+              </button>
+              <button class="btn btn-ghost btn-delete" data-id="${n.id}" type="button" style="min-height:36px; padding:4px 10px; color:var(--pink);">
+                ✕
+              </button>
+            </div>
+          </div>
+        </article>
+      `).join('');
+
+      // Attach handlers
+      container.querySelectorAll('.btn-inspect').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-id');
+          const note = notes.find(n => n.id === id);
+          if (note) openNoteInspection(note);
+        });
+      });
+
+      container.querySelectorAll('.btn-resolve').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-id');
+          const note = notes.find(n => n.id === id);
+          if (note) {
+            note.status = note.status === 'resolved' ? 'open' : 'resolved';
+            saveNotes();
+            render();
+          }
+        });
+      });
+
+      container.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-id');
+          if (confirm('Delete this annotation work order?')) {
+            notes = notes.filter(n => n.id !== id);
+            saveNotes();
+            render();
+          }
+        });
+      });
+    }
+
+    function escapeHtml(str) {
+      return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // Export XML Prompt Briefing
+    document.getElementById('btn-export-prompt')?.addEventListener('click', () => {
+      const openNotes = notes.filter(n => n.status !== 'resolved');
+      let xml = `<zoth_visual_work_orders count="${openNotes.length}" timestamp="${new Date().toISOString()}">\n`;
+      openNotes.forEach(n => {
+        xml += `  <task id="${n.id}" priority="${n.priority || 'Normal'}" category="${n.category || 'General'}">\n`;
+        xml += `    <page>${n.pathname || '/'}</page>\n`;
+        xml += `    <selector>${n.selector || 'body'}</selector>\n`;
+        xml += `    <assigned_agents>${(n.tagged_agents || []).join(', ')}</assigned_agents>\n`;
+        xml += `    <directive>${n.text}</directive>\n`;
+        xml += `  </task>\n`;
+      });
+      xml += `</zoth_visual_work_orders>`;
+
+      navigator.clipboard.writeText(xml).then(() => {
+        alert('Copied Swarm Prompt XML (' + openNotes.length + ' open tasks) to clipboard!');
+      });
+    });
+
+    document.getElementById('btn-refresh')?.addEventListener('click', loadNotes);
+    document.getElementById('filter-agent')?.addEventListener('change', render);
+    document.getElementById('filter-category')?.addEventListener('change', render);
+    document.getElementById('search-input')?.addEventListener('input', render);
+
+    document.querySelectorAll('.status-chip-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        setStatusFilter(btn.getAttribute('data-status'));
+      });
+    });
+
+    document.getElementById('btn-close-inspect')?.addEventListener('click', () => {
+      inspectDialog?.close();
+    });
+
+    loadNotes();
+  })();
+</script>
+<script defer="" src="/assets/zoth-tip.js"></script>
+<script defer="" src="/assets/zoth-annotator.js"></script>
+<script defer="" src="/assets/zoth-nav.js?v=11"></script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import HeroSection from "../components/HeroSection.astro";
+import { gallery } from "../data/site";
+
+const title = "Project Gallery | Elite Connect Virginia Beach";
+const description = "View Elite Connect installations: cameras, cabling, server racks, AV, alarms, and access control projects across Virginia Beach and Hampton Roads.";
+---
+
+<BaseLayout title={title} description={description} canonical="/gallery/">
+  <HeroSection
+    variant="page"
+    eyebrow="Our work"
+    title="Projects that speak for themselves."
+    lead="Real installations, clean cable runs, and documented work across Virginia Beach and Hampton Roads."
+    imageDesc="Gallery hero: collage of completed projects across Virginia Beach and Hampton Roads"
+    imageSrc="/assets/gallery/audio-mixer-setup.jpg"
+  />
+
+  <section class="section">
+    <div class="gallery-grid">
+      {gallery.map((item) => (
+        <figure class="gallery-item">
+          <div class="gallery-img">
+            <img
+              src={item.src}
+              alt={item.alt}
+              loading="lazy"
+              class="gallery-photo"
+            />
+          </div>
+          <figcaption>{item.caption || item.alt}</figcaption>
+        </figure>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+  .gallery-item {
+    margin: 0;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: 0 4px 12px var(--shadow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .gallery-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px var(--shadow);
+  }
+  .gallery-img {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: var(--panel);
+  }
+
+  .gallery-img::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background: linear-gradient(
+      160deg,
+      rgba(118, 168, 205, 0.10) 0%,
+      transparent 35%,
+      transparent 65%,
+      rgba(15, 23, 42, 0.08) 100%
+    );
+    mix-blend-mode: multiply;
+    transition: opacity 0.3s ease;
+  }
+
+  html.dark .gallery-img::after {
+    background: linear-gradient(
+      160deg,
+      rgba(118, 168, 205, 0.08) 0%,
+      transparent 35%,
+      transparent 65%,
+      rgba(0, 0, 0, 0.25) 100%
+    );
+    mix-blend-mode: screen;
+  }
+
+  .gallery-item:hover .gallery-img::after {
+    opacity: 0.6;
+  }
+
+  html.dark .gallery-item:hover .gallery-img::after {
+    opacity: 0.5;
+  }
+
+  .gallery-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease, filter 0.4s ease;
+    filter: saturate(0.92) contrast(1.02);
+  }
+
+  .gallery-item:hover .gallery-photo {
+    transform: scale(1.04);
+    filter: saturate(1) contrast(1.05);
+  }
+
+  html.dark .gallery-photo {
+    filter: saturate(0.85) contrast(1.04) brightness(0.95);
+  }
+
+  html.dark .gallery-item:hover .gallery-photo {
+    filter: saturate(0.95) contrast(1.06) brightness(1);
+  }
+
+  .gallery-item figcaption {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  @media (max-width: 1024px) {
+    .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 560px) {
+    .gallery-grid { grid-template-columns: 1fr; }
+  }
+</style>

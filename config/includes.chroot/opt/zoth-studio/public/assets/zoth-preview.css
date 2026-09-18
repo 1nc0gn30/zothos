@@ -1,0 +1,165 @@
+/* Preview door — same gold/void poster language as the hub hero. */
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap");
+@import url("./zoth-guide.css");
+
+html.zoth-film-on,
+html.zoth-film-on body {
+  background: #050508;
+  color: #f7f4ee;
+}
+html.zoth-film-on body {
+  overflow-x: hidden;
+}
+
+.zoth-film {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  margin: 0;
+  border: 0;
+}
+.zoth-film video,
+.zoth-film img.zoth-film-still {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: contrast(1.1) saturate(0.82);
+}
+.zoth-film .zoth-film-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background:
+    linear-gradient(90deg, rgba(5,5,8,0.9) 0%, rgba(5,5,8,0.5) 42%, rgba(5,5,8,0.08) 74%),
+    linear-gradient(180deg, rgba(5,5,8,0.28) 0%, rgba(5,5,8,0.08) 40%, #050508 100%);
+}
+.zoth-film .zoth-film-copy {
+  position: relative;
+  z-index: 3;
+  padding: 0 clamp(20px, 4vw, 48px) 168px;
+  width: min(36rem, calc(100% - 28px));
+}
+.zoth-film .hair {
+  width: 42px;
+  height: 1px;
+  background: #e8c872;
+  margin-bottom: 16px;
+  opacity: 0.85;
+}
+.zoth-film .kicker {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #e8c872;
+  margin-bottom: 12px;
+}
+.zoth-film h1,
+.zoth-film .zoth-film-title {
+  font-family: Fraunces, "Iowan Old Style", Palatino, serif;
+  font-weight: 600;
+  font-size: clamp(2.8rem, 8vw, 5.4rem);
+  letter-spacing: -0.045em;
+  line-height: 0.9;
+  color: #f7f4ee;
+  margin: 0;
+}
+.zoth-film p {
+  margin: 16px 0 0;
+  color: #a8a4c2;
+  line-height: 1.6;
+  max-width: 24rem;
+  font-family: Inter, system-ui, sans-serif;
+}
+.zoth-film .go {
+  display: inline-block;
+  margin-top: 22px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #e8c872;
+  text-decoration: none;
+}
+.zoth-film .go:hover { color: #f7f4ee; }
+
+.zoth-film .stage-tv,
+.zoth-film::before,
+.zoth-film::after {
+  pointer-events: none;
+}
+.zoth-film::before,
+.zoth-film::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+}
+.zoth-film::before {
+  left: 0; right: 0;
+  height: 20%;
+  top: -22%;
+  background: linear-gradient(180deg, transparent, rgba(247,244,238,0.07) 42%, rgba(5,5,8,0.22) 50%, rgba(247,244,238,0.05) 58%, transparent);
+  mix-blend-mode: screen;
+  opacity: 0.5;
+  animation: zoth-tv-roll 8.6s linear infinite;
+}
+.zoth-film::after {
+  inset: 0;
+  opacity: 0.16;
+  mix-blend-mode: screen;
+  background-image:
+    repeating-linear-gradient(to bottom, rgba(247,244,238,0.14) 0, transparent 1px, transparent 3px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 100% 100%, 120px 120px;
+  animation: zoth-tv-snow 0.16s steps(4) infinite, zoth-tv-breathe 5.8s ease-in-out infinite;
+}
+
+@keyframes zoth-tv-snow { to { background-position: 0 0, 72px -56px; } }
+@keyframes zoth-tv-breathe {
+  0%, 62%, 100% { opacity: 0.14; }
+  70% { opacity: 0.28; }
+  76% { opacity: 0.09; }
+  84% { opacity: 0.2; }
+}
+@keyframes zoth-tv-roll { to { transform: translateY(560%); } }
+
+.zoth-film-banner {
+  min-height: 32svh;
+  max-height: 38svh;
+}
+.zoth-film-banner .zoth-film-title {
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
+}
+.zoth-film-banner .zoth-film-copy {
+  padding: 28px clamp(20px, 4vw, 48px) 32px;
+}
+.zoth-film-under {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  min-height: 100svh;
+}
+.zoth-film-under .zoth-film-copy { display: none; }
+.zoth-film-under .zoth-film-shade {
+  background:
+    linear-gradient(90deg, rgba(5,5,8,0.55) 0%, rgba(5,5,8,0.12) 55%, transparent 100%);
+}
+
+@media (max-width: 760px) {
+  .zoth-film { min-height: 100svh; }
+  .zoth-film-banner { min-height: 42svh; max-height: none; }
+  .zoth-film .zoth-film-copy { padding: 0 18px 148px; width: calc(100% - 16px); }
+  .zoth-film-banner .zoth-film-copy { padding: 20px 18px 24px; }
+  .zoth-film .zoth-film-shade {
+    background: linear-gradient(180deg, rgba(5,5,8,0.28) 0%, rgba(5,5,8,0.08) 32%, rgba(5,5,8,0.8) 70%, #050508 100%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .zoth-film video { display: none; }
+  .zoth-film::before, .zoth-film::after { animation: none; }
+}
