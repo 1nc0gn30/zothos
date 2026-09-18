@@ -1,23 +1,36 @@
 #!/usr/bin/env bash
 # ==============================================================================
-#  ZOTH STUDIO LAUNCHER FOR ZOTHOS
+#  ZOTH STUDIO — Master Workspace Launcher
 # ==============================================================================
+set -euo pipefail
 
-set -e
+ROOT="/opt/zoth-studio"
+PUBLIC="$ROOT/public"
+PORT=8088
 
-# Start Zoth background services if not running
-if command -v zoth >/dev/null 2>&1; then
-    zoth start 2>/dev/null || true
+if [[ ! -d "$PUBLIC" ]]; then
+    PUBLIC="/media/neo/f2fdda77-178b-4603-ae80-c7aa4cd97908/zoth-studio/core-app/public"
 fi
 
-# If break screen / web hub is available, open it
-if [[ -f "/opt/zoth-studio/index.html" ]]; then
-    x-www-browser "/opt/zoth-studio/index.html" 2>/dev/null || true
-elif ss -tuln | grep -q ":8199 "; then
-    x-www-browser "http://localhost:8199" 2>/dev/null || true
-elif ss -tuln | grep -q ":8989 "; then
-    x-www-browser "http://localhost:8989" 2>/dev/null || true
+echo -e "\e[1;32m[⚡] Starting ZOTH STUDIO Powerhouse Hub on port $PORT...\e[0m"
+
+# Start background web hub if not already running
+if ! lsof -i :$PORT >/dev/null 2>&1; then
+    python3 -m http.server $PORT --bind 127.0.0.1 --directory "$PUBLIC" >/dev/null 2>&1 &
+    sleep 1
+fi
+
+URL="http://127.0.0.1:$PORT"
+
+echo -e "\e[1;36m[🌐] Zoth Studio Hub live at: $URL\e[0m"
+
+# Launch in application mode
+if command -v chromium >/dev/null 2>&1; then
+    exec chromium --app="$URL" --start-maximized >/dev/null 2>&1 &
+elif command -v firefox-esr >/dev/null 2>&1; then
+    exec firefox-esr "$URL" >/dev/null 2>&1 &
+elif command -v firefox >/dev/null 2>&1; then
+    exec firefox "$URL" >/dev/null 2>&1 &
 else
-    # Launch interactive Zoth TUI in terminal
-    xfce4-terminal -T "Zoth Studio Sovereign Cockpit" -e "zoth tui"
+    xdg-open "$URL" 2>/dev/null || true
 fi
