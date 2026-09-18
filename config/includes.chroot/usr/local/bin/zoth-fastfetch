@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#  ZOTHOS SYSTEM STATUS & HERMETIC FASTFETCH
+# ==============================================================================
+
+GREEN="\e[38;5;48m"
+EMERALD="\e[38;5;42m"
+GOLD="\e[38;5;214m"
+DARK="\e[38;5;238m"
+WHITE="\e[1;37m"
+CYAN="\e[38;5;51m"
+RESET="\e[0m"
+
+# Current mode
+MODE="Hermetic Matrix"
+if [[ -f "$HOME/.config/zothos/current_mode" ]]; then
+    m=$(cat "$HOME/.config/zothos/current_mode")
+    [[ "$m" == "ghost" ]] && MODE="Ghostmode [nullai.tech]"
+    [[ "$m" == "incognito" ]] && MODE="Incognito [Win11 Chameleon]"
+fi
+
+# Tor status
+TOR_STATUS="Direct Connection"
+if systemctl is-active --quiet tor 2>/dev/null; then
+    TOR_STATUS="Torified [Active]"
+fi
+
+# AI status
+AI_STATUS="Ollama Standby"
+if pgrep -x "ollama" >/dev/null; then
+    AI_STATUS="Ollama Engine Online"
+fi
+
+UPTIME=$(uptime -p 2>/dev/null | sed 's/up //' || uptime | awk -F',' '{print $1}')
+KERNEL=$(uname -r)
+SHELL_NAME=$(basename "$SHELL")
+MEM_USED=$(free -m | awk '/Mem:/ {print $3}')
+MEM_TOTAL=$(free -m | awk '/Mem:/ {print $2}')
+
+echo -e "${EMERALD}       ▲             ${GOLD}ZOTHOS Linux 1.0 (Azoth Transmutation)${RESET}
+${EMERALD}      ▲ ▲            ${DARK}--------------------------------------${RESET}
+${EMERALD}     ▲   ▲           ${WHITE}OS Reality:       ${EMERALD}${MODE}${RESET}
+${EMERALD}    ▲  ☉  ▲          ${WHITE}Kernel:           ${CYAN}${KERNEL}${RESET}
+${EMERALD}   ▲   |   ▲         ${WHITE}Base Core:        ${CYAN}Debian 13 (Trixie) / Parrot 7${RESET}
+${EMERALD}  ▲ 🜂  ☿  🜄 ▲        ${WHITE}Desktop:          ${CYAN}XFCE 4.18 + Picom (Matrix Glass)${RESET}
+${EMERALD} ▲             ▲       ${WHITE}Shell:            ${CYAN}${SHELL_NAME}${RESET}
+${EMERALD}▲═══════🜁═══════▲      ${WHITE}Memory:           ${CYAN}${MEM_USED}MB / ${MEM_TOTAL}MB${RESET}
+${EMERALD}  \   🜃     /        ${WHITE}Security Stack:   ${EMERALD}Kali + Parrot Dual Repos [Active]${RESET}
+${EMERALD}   \   |   /         ${WHITE}Frontier AI:      ${GOLD}${AI_STATUS}${RESET}
+${EMERALD}    \  🝘  /          ${WHITE}Ghost Routing:    ${GREEN}${TOR_STATUS}${RESET}
+${EMERALD}     \   /           ${WHITE}Zoth Studio:      ${GOLD}v3.2 [Linked]${RESET}
+${EMERALD}      ▼              ${WHITE}Motto:            ${DARK}\"As above, so below. As code, so mind.\"${RESET}
+"

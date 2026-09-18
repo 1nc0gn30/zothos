@@ -1,0 +1,145 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#  ZOTHOS SECURITY ARSENAL (Kali Linux & Parrot OS Unified Toolkit)
+# ==============================================================================
+
+# Interactive security suite launcher
+
+GREEN="\e[1;32m"
+CYAN="\e[1;36m"
+YELLOW="\e[1;33m"
+RED="\e[1;31m"
+BOLD="\e[1m"
+RESET="\e[0m"
+
+header() {
+    clear
+    echo -e "${RED}"
+    echo "  ╔════════════════════════════════════════════════════════════════════╗"
+    echo "  ║      ███████╗ ██████╗ ████████╗██╗  ██╗    ███████╗███████╗ ██████╗ ║"
+    echo "  ║      ╚══███╔╝██╔═══██╗╚══██╔══╝██║  ██║    ██╔════╝██╔════╝██╔════╝ ║"
+    echo "  ║        ███╔╝ ██║   ██║   ██║   ███████║    ███████╗█████╗  ██║      ║"
+    echo "  ║       ███╔╝  ██║   ██║   ██║   ██╔══██║    ╚════██║██╔══╝  ██║      ║"
+    echo "  ║      ███████╗╚██████╔╝   ██║   ██║  ██║    ███████║███████╗╚██████╗ ║"
+    echo "  ║      ╚══════╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝    ╚══════╝╚══════╝ ╚═════╝ ║"
+    echo "  ║                  OFFENSIVE & DEFENSIVE MATRIX ARSENAL              ║"
+    echo "  ╚════════════════════════════════════════════════════════════════════╝"
+    echo -e "${RESET}"
+}
+
+check_tool() {
+    local t="$1"
+    if command -v "$t" >/dev/null 2>&1; then
+        echo -e "${GREEN}[INSTALLED]${RESET}"
+    else
+        echo -e "${YELLOW}[AVAILABLE VIA REPO]${RESET}"
+    fi
+}
+
+show_cat() {
+    local title="$1"
+    shift
+    echo -e "\n${BOLD}${CYAN}--- [ $title ] ---${RESET}"
+    for tool in "$@"; do
+        printf "  %-20s %s\n" "$tool" "$(check_tool "$tool")"
+    done
+}
+
+interactive_menu() {
+    while true; do
+        header
+        echo -e "${BOLD}Select Arsenal Category:${RESET}"
+        echo -e "  ${GREEN}[1]${RESET} 01 - Information Gathering & Recon (Nmap, Amass, Nuclei, Recon-ng)"
+        echo -e "  ${GREEN}[2]${RESET} 02 - Vulnerability Analysis (SQLMap, Nikto, WPScan, Commix)"
+        echo -e "  ${RED}[3]${RESET} 03 - Exploitation Frameworks (Metasploit, BeEF, Searchsploit)"
+        echo -e "  ${CYAN}[4]${RESET} 04 - Wireless & RF Warfare (Aircrack-ng, Airgeddon, Kismet, Wifite)"
+        echo -e "  ${YELLOW}[5]${RESET} 05 - Password Cracking & Hashes (Hashcat, John the Ripper, Hydra)"
+        echo -e "  ${PURPLE}[6]${RESET} 06 - Reverse Engineering & Binaries (Ghidra, Radare2, Cutter, Binwalk)"
+        echo -e "  ${RED}[7]${RESET} 07 - Sniffing, Spoofing & MITM (Wireshark, Bettercap, Responder, Impacket)"
+        echo -e "  ${CYAN}[8]${RESET} 08 - Post-Exploitation & Forensics (Autopsy, Volatility, Lynis, BloodHound)"
+        echo -e "  ${GREEN}[9]${RESET} 09 - Anonymity & Anti-Forensics (Tor, Anonsurf, Macchanger, BleachBit)"
+        echo -e "  ${BOLD}[0]${RESET} Exit"
+        echo ""
+        read -r -p "ZOTH-SEC [choice]: " cat_opt
+
+        case "$cat_opt" in
+            1)
+                header
+                show_cat "01 - Information Gathering" nmap masscan amass nuclei sublist3r theHarvester recon-ng maltego
+                echo ""
+                read -r -p "Run tool (e.g. nmap -sV target, or press enter to back): " cmd
+                [[ -n "$cmd" ]] && eval "$cmd"
+                read -r -p "Press Enter to continue..."
+                ;;
+            2)
+                header
+                show_cat "02 - Vulnerability Analysis" sqlmap nikto wpscan commix testssl.sh gobuster ffuf feroxbuster
+                echo ""
+                read -r -p "Run tool (or press enter to back): " cmd
+                [[ -n "$cmd" ]] && eval "$cmd"
+                read -r -p "Press Enter to continue..."
+                ;;
+            3)
+                header
+                show_cat "03 - Exploitation Frameworks" msfconsole searchsploit beef-xss sliver routerploit
+                echo ""
+                read -r -p "Run tool (e.g. msfconsole, or press enter to back): " cmd
+                [[ -n "$cmd" ]] && eval "$cmd"
+                read -r -p "Press Enter to continue..."
+                ;;
+            4)
+                header
+                show_cat "04 - Wireless & RF" aircrack-ng airgeddon kismet wifite bully reaver gqrx hackrf
+                echo ""
+                read -r -p "Run tool (e.g. airgeddon, or press enter to back): " cmd
+                [[ -n "$cmd" ]] && eval "$cmd"
+                read -r -p "Press Enter to continue..."
+                ;;
+            5)
+                header
+                show_cat "05 - Password & Hashes" hashcat john hydra medusa crunch ophcrack cewl
+                echo ""
+                read -r -p "Run tool (or press enter to back): " cmd
+                [[ -n "$cmd" ]] && eval "$cmd"
+                read -r -p "Press Enter to continue..."
+                ;;
+            6)
+                header
+                show_cat "06 - Reverse Engineering" ghidra radare2 cutter binwalk gdb rasm2
+                echo ""
+                read -r -p "Run tool (or press enter to back): " cmd
+                [[ -n "$cmd" ]] && eval "$cmd"
+                read -r -p "Press Enter to continue..."
+                ;;
+            7)
+                header
+                show_cat "07 - Sniffing & Spoofing" wireshark tshark bettercap mitmproxy responder impacket-smbexec
+                echo ""
+                read -r -p "Run tool (or press enter to back): " cmd
+                [[ -n "$cmd" ]] && eval "$cmd"
+                read -r -p "Press Enter to continue..."
+                ;;
+            8)
+                header
+                show_cat "08 - Post-Exploitation & Forensics" autopsy volatility lynis chkrootkit bloodhound
+                echo ""
+                read -r -p "Run tool (or press enter to back): " cmd
+                [[ -n "$cmd" ]] && eval "$cmd"
+                read -r -p "Press Enter to continue..."
+                ;;
+            9)
+                header
+                show_cat "09 - Anonymity & Anti-Forensics" tor anonsurf macchanger bleachbit mat2 firejail proxychains4
+                echo ""
+                read -r -p "Run tool (or press enter to back): " cmd
+                [[ -n "$cmd" ]] && eval "$cmd"
+                read -r -p "Press Enter to continue..."
+                ;;
+            0)
+                exit 0
+                ;;
+        esac
+    done
+}
+
+interactive_menu

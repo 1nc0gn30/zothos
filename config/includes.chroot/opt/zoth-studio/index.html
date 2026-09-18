@@ -1,0 +1,1718 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="void">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZOTH STUDIO // 3D HYPER-RIDE // DEV STREAM BREAK</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=JetBrains+Mono:wght@400;500;700;800&family=Orbitron:wght@700;900&family=Share+Tech+Mono&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --bg: #02040a;
+      --bg-darker: #010205;
+      --accent: #00f3ff;
+      --accent-rgb: 0, 243, 255;
+      --accent2: #a855f7;
+      --accent2-rgb: 168, 85, 247;
+      --accent3: #3b82f6;
+      --accent3-rgb: 59, 130, 246;
+      --gold: #fbbf24;
+      --fg: #ecf3ff;
+      --muted: #64748b;
+      --card-bg: rgba(6, 12, 26, 0.82);
+      --border-color: rgba(0, 243, 255, 0.35);
+      --glow: 0 0 30px rgba(0, 243, 255, 0.5);
+      --font-mono: 'JetBrains Mono', 'Share Tech Mono', monospace;
+      --font-title: 'Orbitron', 'Cinzel', sans-serif;
+    }
+
+    [data-theme="void"] {
+      --bg: #02040a;
+      --accent: #00f3ff;
+      --accent-rgb: 0, 243, 255;
+      --accent2: #a855f7;
+      --accent2-rgb: 168, 85, 247;
+      --accent3: #3b82f6;
+      --fg: #e2e8f0;
+      --muted: #64748b;
+      --card-bg: rgba(5, 11, 24, 0.85);
+      --border-color: rgba(0, 243, 255, 0.38);
+      --glow: 0 0 35px rgba(0, 243, 255, 0.55);
+    }
+
+    [data-theme="gold"] {
+      --bg: #0b0803;
+      --accent: #fbbf24;
+      --accent-rgb: 251, 191, 36;
+      --accent2: #f59e0b;
+      --accent2-rgb: 245, 158, 11;
+      --accent3: #d97706;
+      --fg: #fef3c7;
+      --muted: #92400e;
+      --card-bg: rgba(20, 15, 8, 0.88);
+      --border-color: rgba(251, 191, 36, 0.45);
+      --glow: 0 0 35px rgba(251, 191, 36, 0.55);
+      --font-title: 'Cinzel', 'Orbitron', serif;
+    }
+
+    [data-theme="matrix"] {
+      --bg: #010903;
+      --accent: #22c55e;
+      --accent-rgb: 34, 197, 94;
+      --accent2: #16a34a;
+      --accent2-rgb: 22, 163, 74;
+      --accent3: #4ade80;
+      --fg: #dcfce7;
+      --muted: #166534;
+      --card-bg: rgba(3, 16, 7, 0.88);
+      --border-color: rgba(34, 197, 94, 0.45);
+      --glow: 0 0 35px rgba(34, 197, 94, 0.55);
+      --font-mono: 'Share Tech Mono', monospace;
+    }
+
+    [data-theme="cyber"] {
+      --bg: #0e0216;
+      --accent: #ff007f;
+      --accent-rgb: 255, 0, 127;
+      --accent2: #00f0ff;
+      --accent2-rgb: 0, 240, 255;
+      --accent3: #ffe600;
+      --fg: #fdf2f8;
+      --muted: #a21caf;
+      --card-bg: rgba(24, 6, 36, 0.88);
+      --border-color: rgba(255, 0, 127, 0.45);
+      --glow: 0 0 35px rgba(255, 0, 127, 0.6);
+    }
+
+    [data-theme="blood"] {
+      --bg: #110202;
+      --accent: #ff2a2a;
+      --accent-rgb: 255, 42, 42;
+      --accent2: #ff7b00;
+      --accent2-rgb: 255, 123, 0;
+      --accent3: #ff0055;
+      --fg: #fee2e2;
+      --muted: #991b1b;
+      --card-bg: rgba(28, 6, 6, 0.88);
+      --border-color: rgba(255, 42, 42, 0.45);
+      --glow: 0 0 35px rgba(255, 42, 42, 0.65);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-mono);
+      font-size: 14px;
+    }
+
+    #webgl-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+      display: block;
+    }
+
+    /* COCKPIT & CRT POST-PROCESSING */
+    .crt-vignette {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 4;
+      pointer-events: none;
+      background: radial-gradient(circle at center, transparent 50%, rgba(0, 0, 0, 0.92) 100%);
+    }
+
+    .scanlines {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 5;
+      pointer-events: none;
+      background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, 0) 50%,
+        rgba(0, 0, 0, 0.32) 50%,
+        rgba(0, 0, 0, 0.32)
+      );
+      background-size: 100% 4px;
+    }
+
+    .cockpit-hud {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 220px;
+      height: 220px;
+      z-index: 6;
+      pointer-events: none;
+      opacity: 0.35;
+      transition: opacity 0.3s ease;
+    }
+
+    .hud-ring {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 120px; height: 120px;
+      border: 1px dashed var(--accent);
+      border-radius: 50%;
+      animation: rotateHud 25s linear infinite;
+    }
+
+    .hud-crosshair-lines {
+      position: absolute;
+      width: 100%; height: 100%;
+    }
+    .hud-crosshair-lines::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, var(--accent), transparent 35%, transparent 65%, var(--accent));
+    }
+    .hud-crosshair-lines::after {
+      content: '';
+      position: absolute;
+      left: 50%; top: 0; bottom: 0; width: 1px;
+      background: linear-gradient(180deg, var(--accent), transparent 35%, transparent 65%, var(--accent));
+    }
+
+    @keyframes rotateHud {
+      from { transform: translate(-50%, -50%) rotate(0deg); }
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    /* UI CHROME LAYER */
+    .ui-layer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 10;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px 36px;
+      transition: opacity 0.35s ease;
+    }
+
+    .ui-layer.hidden {
+      opacity: 0;
+    }
+
+    .interactive {
+      pointer-events: auto;
+    }
+
+    /* CORNER BRACKETS */
+    .bracket {
+      position: fixed;
+      width: 40px;
+      height: 40px;
+      border-color: var(--accent);
+      z-index: 8;
+      pointer-events: none;
+      opacity: 0.8;
+      transition: all 0.3s ease;
+    }
+    .bracket.top-left { top: 18px; left: 18px; border-top: 2px solid; border-left: 2px solid; }
+    .bracket.top-right { top: 18px; right: 18px; border-top: 2px solid; border-right: 2px solid; }
+    .bracket.bottom-left { bottom: 18px; left: 18px; border-bottom: 2px solid; border-left: 2px solid; }
+    .bracket.bottom-right { bottom: 18px; right: 18px; border-bottom: 2px solid; border-right: 2px solid; }
+
+    /* TOP BAR */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    .brand-badge {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 10px 22px;
+      border-radius: 8px;
+      backdrop-filter: blur(20px);
+      box-shadow: var(--glow);
+    }
+
+    .live-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 14px var(--accent);
+      animation: pulseDot 1.3s infinite ease-in-out;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.4); opacity: 0.35; }
+    }
+
+    .brand-title {
+      font-family: var(--font-title);
+      font-size: 17px;
+      font-weight: 900;
+      letter-spacing: 3px;
+      color: var(--fg);
+    }
+
+    .brand-tag {
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 11px;
+      border-left: 1px solid var(--border-color);
+      padding-left: 14px;
+      letter-spacing: 2px;
+    }
+
+    .flight-telemetry {
+      display: flex;
+      gap: 18px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 10px 20px;
+      border-radius: 8px;
+      backdrop-filter: blur(20px);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .telemetry-val {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    /* CENTER STAGE */
+    .center-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      margin: auto 0;
+      max-width: 980px;
+      align-self: center;
+    }
+
+    .hero-glitch {
+      font-family: var(--font-title);
+      font-size: 4.8rem;
+      font-weight: 900;
+      letter-spacing: 12px;
+      text-transform: uppercase;
+      color: var(--fg);
+      text-shadow: 0 0 30px rgba(var(--accent-rgb), 0.95), 0 0 60px rgba(var(--accent-rgb), 0.5);
+      margin-bottom: 4px;
+      position: relative;
+    }
+
+    .sub-glitch {
+      font-size: 1.3rem;
+      color: var(--accent);
+      font-weight: 600;
+      letter-spacing: 4px;
+      margin-bottom: 22px;
+      min-height: 30px;
+      text-shadow: 0 0 14px rgba(var(--accent-rgb), 0.7);
+    }
+
+    .typewriter-cursor {
+      display: inline-block;
+      width: 8px;
+      height: 18px;
+      background-color: var(--accent);
+      vertical-align: middle;
+      animation: blink 0.9s infinite;
+      margin-left: 4px;
+    }
+
+    @keyframes blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+
+    /* COUNTDOWN / TIMER BOX */
+    .timer-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 24px 48px;
+      border-radius: 16px;
+      backdrop-filter: blur(24px);
+      box-shadow: 0 14px 45px rgba(0, 0, 0, 0.75), var(--glow);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      margin-top: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .timer-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), var(--accent2), transparent);
+    }
+
+    .timer-label {
+      font-size: 11px;
+      letter-spacing: 3.5px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .timer-display {
+      font-family: var(--font-title);
+      font-size: 4.5rem;
+      font-weight: 900;
+      letter-spacing: 8px;
+      color: var(--fg);
+      text-shadow: 0 0 35px rgba(var(--accent-rgb), 0.75);
+      line-height: 1;
+    }
+
+    .timer-controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .btn {
+      background: rgba(var(--accent-rgb), 0.12);
+      border: 1px solid var(--border-color);
+      color: var(--fg);
+      padding: 8px 18px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn:hover {
+      background: rgba(var(--accent-rgb), 0.32);
+      border-color: var(--accent);
+      color: #fff;
+      box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.5);
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .btn-primary {
+      background: rgba(var(--accent-rgb), 0.3);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent);
+      color: var(--bg-darker);
+    }
+
+    .btn-warp {
+      background: linear-gradient(135deg, rgba(var(--accent2-rgb), 0.4), rgba(var(--accent-rgb), 0.4));
+      border: 1px solid var(--accent2);
+      color: #fff;
+      animation: warpGlow 2s infinite alternate;
+    }
+
+    @keyframes warpGlow {
+      from { box-shadow: 0 0 14px rgba(var(--accent2-rgb), 0.35); }
+      to { box-shadow: 0 0 28px rgba(var(--accent2-rgb), 0.9), 0 0 45px rgba(var(--accent-rgb), 0.5); }
+    }
+
+    /* STREAM GOAL PROGRESS BAR */
+    .stream-goal-box {
+      width: 100%;
+      max-width: 480px;
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .stream-goal-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--muted);
+    }
+
+    .stream-goal-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      overflow: hidden;
+      border: 1px solid rgba(var(--accent-rgb), 0.2);
+    }
+
+    .stream-goal-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      width: 82%;
+      box-shadow: 0 0 10px var(--accent);
+    }
+
+    /* TICKER MARQUEE */
+    .stream-marquee-box {
+      width: 100%;
+      max-width: 960px;
+      overflow: hidden;
+      white-space: nowrap;
+      margin-top: 22px;
+      padding: 10px 0;
+      border-top: 1px solid rgba(var(--accent-rgb), 0.22);
+      border-bottom: 1px solid rgba(var(--accent-rgb), 0.22);
+      position: relative;
+    }
+
+    .stream-marquee-content {
+      display: inline-block;
+      animation: marqueeScroll 28s linear infinite;
+      font-size: 12px;
+      letter-spacing: 3px;
+      color: var(--accent);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    @keyframes marqueeScroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* BOTTOM BAR */
+    .bottom-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      width: 100%;
+    }
+
+    .hud-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .hud-stat-tile {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 10px 16px;
+      border-radius: 8px;
+      backdrop-filter: blur(16px);
+      min-width: 130px;
+    }
+
+    .hud-stat-title {
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 2px;
+      margin-bottom: 4px;
+    }
+
+    .hud-stat-val {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--fg);
+    }
+
+    .hud-bar {
+      width: 100%;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.1);
+      margin-top: 6px;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .hud-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 65%;
+      transition: width 0.6s ease;
+    }
+
+    .shortcuts-hint {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-align: right;
+    }
+
+    .shortcuts-hint kbd {
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid var(--border-color);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--fg);
+      font-weight: 700;
+    }
+
+    /* CONTROL DRAWER & TOGGLE */
+    .drawer-toggle {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+    }
+
+    .control-drawer {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translate(-50%, 105%);
+      width: min(960px, 95vw);
+      max-height: 85vh;
+      overflow-y: auto;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-bottom: none;
+      border-radius: 20px 20px 0 0;
+      backdrop-filter: blur(32px);
+      box-shadow: 0 -14px 55px rgba(0, 0, 0, 0.9), var(--glow);
+      padding: 28px 36px;
+      z-index: 25;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .control-drawer.open {
+      transform: translate(-50%, 0);
+    }
+
+    .drawer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 14px;
+    }
+
+    .drawer-title {
+      font-family: var(--font-title);
+      font-size: 18px;
+      letter-spacing: 3px;
+      color: var(--accent);
+    }
+
+    .drawer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .control-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 1.5px;
+    }
+
+    .control-label span {
+      color: var(--fg);
+      font-weight: 700;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.16);
+      border-radius: 3px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 0 12px var(--accent);
+    }
+
+    .pills-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .pill-btn {
+      padding: 5px 12px;
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--fg);
+      cursor: pointer;
+      letter-spacing: 1px;
+    }
+
+    .pill-btn.active {
+      background: var(--accent);
+      color: var(--bg-darker);
+      border-color: var(--accent);
+      box-shadow: 0 0 14px var(--accent);
+    }
+
+    .text-input {
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid var(--border-color);
+      color: var(--fg);
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      outline: none;
+      width: 100%;
+    }
+
+    .text-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.5);
+    }
+
+    /* AUDIO REACTIVE OSCILLOSCOPE */
+    .audio-reactive-strip {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 24px;
+      padding: 2px;
+    }
+
+    .audio-bar {
+      flex: 1;
+      background: var(--accent);
+      height: 20%;
+      min-height: 2px;
+      border-radius: 1px;
+      transition: height 0.08s ease;
+      opacity: 0.92;
+    }
+
+    /* HYPERWARP FLASH */
+    .warp-flash {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #fff;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s cubic-bezier(0.1, 0.9, 0.2, 1);
+    }
+
+    .warp-flash.active {
+      opacity: 0.9;
+      transition: opacity 0.04s ease-in;
+    }
+  </style>
+</head>
+<body>
+  <!-- 3D Ride-Through Canvas -->
+  <canvas id="webgl-canvas"></canvas>
+
+  <!-- Cockpit HUD Reticle & CRT FX -->
+  <div class="crt-vignette"></div>
+  <div class="scanlines"></div>
+  <div class="cockpit-hud">
+    <div class="hud-ring"></div>
+    <div class="hud-crosshair-lines"></div>
+  </div>
+  <div class="warp-flash" id="warpFlash"></div>
+
+  <!-- Tactical Corner Framing -->
+  <div class="bracket top-left"></div>
+  <div class="bracket top-right"></div>
+  <div class="bracket bottom-left"></div>
+  <div class="bracket bottom-right"></div>
+
+  <!-- Stream HUD Layer -->
+  <div class="ui-layer" id="uiLayer">
+    <!-- Top Bar -->
+    <header class="top-bar">
+      <div class="brand-badge interactive">
+        <div class="live-dot"></div>
+        <div class="brand-title">ZOTH STUDIO</div>
+        <div class="brand-tag">DEV STREAM ON X</div>
+      </div>
+
+      <div class="flight-telemetry">
+        <div>SPD: <span class="telemetry-val" id="hudSpeed">540 KPH</span></div>
+        <div>ALT: <span class="telemetry-val" id="hudAlt">180M</span></div>
+        <div>CAM: <span class="telemetry-val" id="hudCamMode">HIGHWAY RACER</span></div>
+        <div>SECTOR: <span class="telemetry-val" id="hudSector">AZOTH-09</span></div>
+        <div>FPS: <span class="telemetry-val" id="hudFps">60</span></div>
+      </div>
+    </header>
+
+    <!-- Center Stage (Break Title, Timer, Subtitle) -->
+    <main class="center-stage">
+      <h1 class="hero-glitch" id="heroTitle">STREAM BREAK</h1>
+      <div class="sub-glitch">
+        <span id="typewriterText">COMPILING NEURAL PATHWAYS</span><span class="typewriter-cursor"></span>
+      </div>
+
+      <div class="timer-card interactive">
+        <div class="timer-label" id="timerLabel">ESTIMATED TIME UNTIL RESUME</div>
+        <div class="timer-display" id="timerDisplay">05:00</div>
+        
+        <div class="timer-controls">
+          <button class="btn btn-primary" id="btnPauseResume">⏸ PAUSE</button>
+          <button class="btn" id="btnAdd1m">+1 MIN</button>
+          <button class="btn" id="btnAdd5m">+5 MIN</button>
+          <button class="btn" id="btnResetTimer">↺ RESET</button>
+          <button class="btn btn-warp" id="btnWarpResume">⚡ HYPERWARP</button>
+        </div>
+
+        <div class="stream-goal-box">
+          <div class="stream-goal-header">
+            <span>STREAM PROGRESS</span>
+            <span id="goalPercent">82%</span>
+          </div>
+          <div class="stream-goal-bar">
+            <div class="stream-goal-fill" id="goalBarFill"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stream-marquee-box">
+        <div class="stream-marquee-content" id="marqueeText">
+          ✦ ZOTH STUDIO DEV STREAM ON X ✦ AUTONOMOUS AGENTS • GENERATIVE SYNTHESIS • HYPER-SWARM ARCHITECTURE ✦ BUILDING LIVE ✦ BE RIGHT BACK ✦ STAY LOCKED IN ✦
+        </div>
+      </div>
+    </main>
+
+    <!-- Bottom Bar -->
+    <footer class="bottom-bar">
+      <div class="hud-stats-grid">
+        <div class="hud-stat-tile">
+          <div class="hud-stat-title">NEURAL LOAD</div>
+          <div class="hud-stat-val" id="statLoad">52%</div>
+          <div class="hud-bar"><div class="hud-bar-fill" id="barLoad" style="width: 52%;"></div></div>
+        </div>
+        <div class="hud-stat-tile">
+          <div class="hud-stat-title">AGENT BUS</div>
+          <div class="hud-stat-val" id="statBus">SYNCED</div>
+          <div class="hud-bar"><div class="hud-bar-fill" id="barBus" style="width: 98%;"></div></div>
+        </div>
+        <div class="hud-stat-tile">
+          <div class="hud-stat-title">SYNTH AUDIO</div>
+          <div class="audio-reactive-strip" id="audioBars">
+            <div class="audio-bar"></div>
+            <div class="audio-bar"></div>
+            <div class="audio-bar"></div>
+            <div class="audio-bar"></div>
+            <div class="audio-bar"></div>
+            <div class="audio-bar"></div>
+            <div class="audio-bar"></div>
+            <div class="audio-bar"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="shortcuts-hint">
+        <kbd>SPACE</kbd> Pause &nbsp;|&nbsp; <kbd>C</kbd> Camera &nbsp;|&nbsp; <kbd>W</kbd> Warp &nbsp;|&nbsp; <kbd>T</kbd> Theme &nbsp;|&nbsp; <kbd>M</kbd> Synth &nbsp;|&nbsp; <kbd>A</kbd> Mic In &nbsp;|&nbsp; <kbd>F</kbd> Fullscreen &nbsp;|&nbsp; <kbd>H</kbd> HUD
+      </div>
+    </footer>
+  </div>
+
+  <!-- Center Drawer Toggle -->
+  <div class="drawer-toggle interactive">
+    <button class="btn" id="btnDrawerToggle">⚙ COCKPIT & RIDE CONTROLS</button>
+  </div>
+
+  <!-- Slide-Up Cockpit Drawer -->
+  <div class="control-drawer" id="controlDrawer">
+    <div class="drawer-header">
+      <div class="drawer-title">3D RIDE & STREAM BROADCAST CONTROLS</div>
+      <button class="btn" id="btnCloseDrawer">✕ CLOSE</button>
+    </div>
+
+    <div class="drawer-grid">
+      <!-- Camera Ride Mode -->
+      <div class="control-group">
+        <div class="control-label">RIDE CAMERA PERSPECTIVE</div>
+        <div class="pills-row">
+          <button class="pill-btn active" data-cam-mode="flythrough">HIGHWAY RACER</button>
+          <button class="pill-btn" data-cam-mode="rooftop">ROOFTOP DIVE</button>
+          <button class="pill-btn" data-cam-mode="director">DIRECTOR AUTO-CAM</button>
+          <button class="pill-btn" data-cam-mode="orbit">AZOTH ORBIT</button>
+        </div>
+      </div>
+
+      <!-- Theme Selection -->
+      <div class="control-group">
+        <div class="control-label">COLOR PALETTE PRESET</div>
+        <div class="pills-row">
+          <button class="pill-btn active" data-theme-val="void">VOID DARK</button>
+          <button class="pill-btn" data-theme-val="gold">AZOTH GOLD</button>
+          <button class="pill-btn" data-theme-val="matrix">MATRIX GREEN</button>
+          <button class="pill-btn" data-theme-val="cyber">CYBER MAGENTA</button>
+          <button class="pill-btn" data-theme-val="blood">SOLAR RED</button>
+        </div>
+      </div>
+
+      <!-- Flight Speed -->
+      <div class="control-group">
+        <div class="control-label">RIDE VELOCITY <span id="valSpeed">1.0x</span></div>
+        <input type="range" id="sliderSpeed" min="0.2" max="3.5" step="0.1" value="1.0" />
+      </div>
+
+      <!-- Break Message Editor -->
+      <div class="control-group">
+        <div class="control-label">HERO TITLE</div>
+        <input type="text" class="text-input" id="inputHeroTitle" value="STREAM BREAK" />
+      </div>
+
+      <!-- Custom Marquee Ticker -->
+      <div class="control-group">
+        <div class="control-label">SCROLLING TICKER ANNOUNCEMENT</div>
+        <input type="text" class="text-input" id="inputMarquee" value="✦ ZOTH STUDIO DEV STREAM ON X ✦ AUTONOMOUS AGENTS • GENERATIVE SYNTHESIS • HYPER-SWARM ARCHITECTURE ✦ BUILDING LIVE ✦ BE RIGHT BACK ✦" />
+      </div>
+
+      <!-- Generative Audio Synthesizer -->
+      <div class="control-group">
+        <div class="control-label">AUDIO SOUND ENGINE</div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button class="btn btn-primary" id="btnToggleAudio" style="flex: 1; min-width: 140px;">▶ SYNTH BGM</button>
+          <button class="btn" id="btnMicReactive" style="flex: 1; min-width: 140px;">🎙 MIC REACTIVE</button>
+        </div>
+      </div>
+
+      <!-- Synth Volume -->
+      <div class="control-group">
+        <div class="control-label">BGM VOLUME <span id="valVolume">50%</span></div>
+        <input type="range" id="sliderVolume" min="0" max="1" step="0.05" value="0.5" />
+      </div>
+    </div>
+  </div>
+
+  <!-- 3D Scene Engine Script -->
+  <script type="module">
+    import * as THREE from 'three';
+
+    // Themes Color Palette
+    const THEMES = {
+      void: {
+        primary: 0x00f3ff,
+        secondary: 0xa855f7,
+        tertiary: 0x3b82f6,
+        ambient: 0x02040a,
+        grid: 0x0044bb,
+        buildings: 0x00f3ff,
+        sun: 0xa855f7,
+        laser: 0x00f3ff
+      },
+      gold: {
+        primary: 0xfbbf24,
+        secondary: 0xf59e0b,
+        tertiary: 0xd97706,
+        ambient: 0x0b0803,
+        grid: 0xb45309,
+        buildings: 0xfbbf24,
+        sun: 0xf59e0b,
+        laser: 0xfbbf24
+      },
+      matrix: {
+        primary: 0x22c55e,
+        secondary: 0x16a34a,
+        tertiary: 0x4ade80,
+        ambient: 0x010903,
+        grid: 0x15803d,
+        buildings: 0x22c55e,
+        sun: 0x4ade80,
+        laser: 0x22c55e
+      },
+      cyber: {
+        primary: 0xff007f,
+        secondary: 0x00f0ff,
+        tertiary: 0xffe600,
+        ambient: 0x0e0216,
+        grid: 0x9333ea,
+        buildings: 0xff007f,
+        sun: 0x00f0ff,
+        laser: 0xff007f
+      },
+      blood: {
+        primary: 0xff2a2a,
+        secondary: 0xff7b00,
+        tertiary: 0xff0055,
+        ambient: 0x110202,
+        grid: 0x991b1b,
+        buildings: 0xff2a2a,
+        sun: 0xff7b00,
+        laser: 0xff2a2a
+      }
+    };
+    let currentThemeKey = 'void';
+
+    // Scene & Engine State
+    let scene, camera, renderer;
+    let clock = new THREE.Clock();
+    let flightCurve, rooftopCurve;
+    let flightProgress = 0;
+    let flightSpeed = 1.0;
+    let warpBoost = 0.0;
+    let warpTarget = 0.0;
+    let isWarpActive = false;
+    let isPaused = false;
+    let camMode = 'flythrough'; // 'flythrough', 'rooftop', 'director', 'orbit'
+    let directorTimer = 0;
+    let mouseX = 0, mouseY = 0;
+
+    // 3D Objects & Meshes
+    let cityGroup, gatesGroup, stars, starGeo, starCount = 3000;
+    let sunMesh, terrainMesh, terrainGeo;
+    let centralArtifact, highwayRoadMesh, laserBeamsGroup;
+    const buildingMeshes = [];
+    const gateMeshes = [];
+    const laserMeshes = [];
+
+    // --- Generative Web Audio Engine ---
+    let audioCtx = null;
+    let isAudioPlaying = false;
+    let isMicActive = false;
+    let masterGain, filterNode, bassOsc, kickInterval, arpInterval;
+    let analyserNode = null, audioFreqData = null;
+    const LEAD_SCALE = [220, 261.63, 293.66, 329.63, 392.00, 440, 523.25, 587.33];
+
+    function initAudio() {
+      if (audioCtx) return;
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+
+        analyserNode = audioCtx.createAnalyser();
+        analyserNode.fftSize = 64;
+        audioFreqData = new Uint8Array(analyserNode.frequencyBinCount);
+
+        masterGain = audioCtx.createGain();
+        masterGain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+        masterGain.connect(analyserNode);
+        analyserNode.connect(audioCtx.destination);
+
+        filterNode = audioCtx.createBiquadFilter();
+        filterNode.type = 'lowpass';
+        filterNode.frequency.setValueAtTime(800, audioCtx.currentTime);
+        filterNode.connect(masterGain);
+
+        // Sub Bass Drone
+        bassOsc = audioCtx.createOscillator();
+        bassOsc.type = 'sawtooth';
+        bassOsc.frequency.setValueAtTime(55, audioCtx.currentTime);
+        const bassGain = audioCtx.createGain();
+        bassGain.gain.setValueAtTime(0.28, audioCtx.currentTime);
+        bassOsc.connect(bassGain);
+        bassGain.connect(filterNode);
+        bassOsc.start();
+
+        // 808 Kick pulse
+        kickInterval = setInterval(() => {
+          if (!isAudioPlaying || !audioCtx) return;
+          triggerKick();
+        }, 500);
+
+        // Generative Arpeggiator Loop
+        arpInterval = setInterval(() => {
+          if (!isAudioPlaying || !audioCtx) return;
+          const note = LEAD_SCALE[Math.floor(Math.random() * LEAD_SCALE.length)];
+          triggerSynthBlip(note);
+        }, 250);
+
+      } catch (e) {
+        console.warn('Web Audio error:', e);
+      }
+    }
+
+    function triggerKick() {
+      if (!audioCtx || audioCtx.state !== 'running') return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.frequency.setValueAtTime(120, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(35, audioCtx.currentTime + 0.12);
+      gain.gain.setValueAtTime(0.35, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.18);
+      osc.connect(gain);
+      gain.connect(masterGain);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.2);
+    }
+
+    function triggerSynthBlip(freq) {
+      if (!audioCtx || audioCtx.state !== 'running') return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+      gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.2, audioCtx.currentTime + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.45);
+
+      osc.connect(gain);
+      gain.connect(filterNode);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.5);
+    }
+
+    function toggleAudio() {
+      if (!audioCtx) initAudio();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      isAudioPlaying = !isAudioPlaying;
+      const btn = document.getElementById('btnToggleAudio');
+      if (isAudioPlaying) {
+        masterGain.gain.setValueAtTime(parseFloat(document.getElementById('sliderVolume').value), audioCtx.currentTime);
+        btn.textContent = '⏸ PAUSE SYNTH BGM';
+        btn.classList.add('btn-primary');
+      } else {
+        if (masterGain) masterGain.gain.setValueAtTime(0, audioCtx.currentTime);
+        btn.textContent = '▶ SYNTH BGM';
+        btn.classList.remove('btn-primary');
+      }
+    }
+
+    async function toggleMicReactive() {
+      try {
+        if (!audioCtx) initAudio();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const micSource = audioCtx.createMediaStreamSource(stream);
+        micSource.connect(analyserNode);
+        isMicActive = true;
+        const btn = document.getElementById('btnMicReactive');
+        btn.textContent = '🎙 MIC ACTIVE';
+        btn.classList.add('btn-primary');
+      } catch (err) {
+        alert('Microphone permission required for reactive mode');
+      }
+    }
+
+    // --- 3D Scene Construction ---
+    function init3D() {
+      const canvas = document.getElementById('webgl-canvas');
+      scene = new THREE.Scene();
+      scene.fog = new THREE.FogExp2(THEMES[currentThemeKey].ambient, 0.006);
+
+      camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 2200);
+      camera.position.set(0, 10, 0);
+
+      renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      // 1. Procedural 3D Flight Spline Path (Highway Racer Loop)
+      const points = [];
+      const numPoints = 14;
+      const pathRadius = 420;
+      for (let i = 0; i < numPoints; i++) {
+        const angle = (i / numPoints) * Math.PI * 2;
+        const x = Math.sin(angle) * pathRadius + Math.sin(i * 3) * 70;
+        const y = 8 + Math.sin(angle * 3) * 14 + Math.cos(i * 2) * 6;
+        const z = Math.cos(angle) * pathRadius + Math.cos(i * 4) * 70;
+        points.push(new THREE.Vector3(x, y, z));
+      }
+      flightCurve = new THREE.CatmullRomCurve3(points, true, 'catmullrom', 0.5);
+
+      // Rooftop Dive Curve
+      const roofPts = [];
+      for (let i = 0; i < numPoints; i++) {
+        const angle = (i / numPoints) * Math.PI * 2;
+        const x = Math.sin(angle) * 320;
+        const y = 80 + Math.sin(i * 2) * 45;
+        const z = Math.cos(angle) * 320;
+        roofPts.push(new THREE.Vector3(x, y, z));
+      }
+      rooftopCurve = new THREE.CatmullRomCurve3(roofPts, true, 'catmullrom', 0.5);
+
+      // 2. Fly-Through Holographic Data Gates
+      gatesGroup = new THREE.Group();
+      scene.add(gatesGroup);
+
+      const gatePoints = flightCurve.getSpacedPoints(48);
+      gatePoints.forEach((pt, idx) => {
+        const nextPt = gatePoints[(idx + 1) % gatePoints.length];
+        const dir = new THREE.Vector3().subVectors(nextPt, pt).normalize();
+
+        const hexGeo = new THREE.RingGeometry(9, 10.8, 6);
+        const hexMat = new THREE.MeshBasicMaterial({
+          color: idx % 2 === 0 ? THEMES[currentThemeKey].primary : THEMES[currentThemeKey].secondary,
+          wireframe: true,
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.8
+        });
+        const gate = new THREE.Mesh(hexGeo, hexMat);
+        gate.position.copy(pt);
+        gate.lookAt(pt.clone().add(dir));
+        gatesGroup.add(gate);
+        gateMeshes.push(gate);
+      });
+
+      // 3. Cyberpunk Megacity Skyscrapers & Neon Lasers
+      cityGroup = new THREE.Group();
+      scene.add(cityGroup);
+
+      laserBeamsGroup = new THREE.Group();
+      scene.add(laserBeamsGroup);
+
+      const cityBoxGeo = new THREE.BoxGeometry(1, 1, 1);
+      const laserGeo = new THREE.CylinderGeometry(0.3, 0.3, 300, 8);
+
+      for (let i = 0; i < 280; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 70 + Math.random() * 520;
+        const x = Math.sin(angle) * dist;
+        const z = Math.cos(angle) * dist;
+        const height = 40 + Math.random() * 180;
+        const width = 14 + Math.random() * 26;
+        const depth = 14 + Math.random() * 26;
+
+        const bMat = new THREE.MeshBasicMaterial({
+          color: (i % 3 === 0) ? THEMES[currentThemeKey].buildings : THEMES[currentThemeKey].grid,
+          wireframe: true,
+          transparent: true,
+          opacity: 0.35 + Math.random() * 0.45
+        });
+        const building = new THREE.Mesh(cityBoxGeo, bMat);
+        building.position.set(x, height / 2 - 10, z);
+        building.scale.set(width, height, depth);
+        cityGroup.add(building);
+        buildingMeshes.push(building);
+
+        // Skyscraper Rooftop Sky Laser
+        if (i % 7 === 0) {
+          const lMat = new THREE.MeshBasicMaterial({
+            color: THEMES[currentThemeKey].laser,
+            transparent: true,
+            opacity: 0.65
+          });
+          const laser = new THREE.Mesh(laserGeo, lMat);
+          laser.position.set(x, height + 140, z);
+          laserBeamsGroup.add(laser);
+          laserMeshes.push(laser);
+        }
+      }
+
+      // 4. Central Sacred Monolith / Azoth Core in the center of the world
+      centralArtifact = new THREE.Group();
+      scene.add(centralArtifact);
+      centralArtifact.position.set(0, 95, 0);
+
+      // Multi-layer nested sacred polyhedra
+      const knotGeo = new THREE.TorusKnotGeometry(22, 5.2, 200, 36, 2, 3);
+      const knotMat = new THREE.MeshBasicMaterial({
+        color: THEMES[currentThemeKey].primary,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.85
+      });
+      const knotMesh = new THREE.Mesh(knotGeo, knotMat);
+      centralArtifact.add(knotMesh);
+
+      const ring1 = new THREE.Mesh(
+        new THREE.TorusGeometry(38, 0.5, 16, 140),
+        new THREE.MeshBasicMaterial({ color: THEMES[currentThemeKey].secondary, transparent: true, opacity: 0.55 })
+      );
+      ring1.rotation.x = Math.PI / 2;
+      centralArtifact.add(ring1);
+
+      const innerIco = new THREE.Mesh(
+        new THREE.IcosahedronGeometry(12, 2),
+        new THREE.MeshBasicMaterial({ color: THEMES[currentThemeKey].tertiary, wireframe: true, transparent: true, opacity: 0.7 })
+      );
+      centralArtifact.add(innerIco);
+
+      // 5. Synthwave Horizon Sun Singularity
+      const sunGeo = new THREE.SphereGeometry(90, 36, 36);
+      const sunMat = new THREE.MeshBasicMaterial({
+        color: THEMES[currentThemeKey].sun,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.6
+      });
+      sunMesh = new THREE.Mesh(sunGeo, sunMat);
+      sunMesh.position.set(0, 130, -560);
+      scene.add(sunMesh);
+
+      // 6. Terrain Undulating Floor Grid
+      const terrW = 1100, terrD = 1100, terrSeg = 50;
+      terrainGeo = new THREE.PlaneGeometry(terrW, terrD, terrSeg, terrSeg);
+      terrainGeo.rotateX(-Math.PI / 2);
+      const terrMat = new THREE.MeshBasicMaterial({
+        color: THEMES[currentThemeKey].grid,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.3
+      });
+      terrainMesh = new THREE.Mesh(terrainGeo, terrMat);
+      terrainMesh.position.y = -14;
+      scene.add(terrainMesh);
+
+      // 7. Starfield Particles & Hyperspace Streaks
+      const starPos = new Float32Array(starCount * 3);
+      const starSpeeds = new Float32Array(starCount);
+      for (let i = 0; i < starCount; i++) {
+        starPos[i * 3] = (Math.random() - 0.5) * 1400;
+        starPos[i * 3 + 1] = Math.random() * 600 - 50;
+        starPos[i * 3 + 2] = (Math.random() - 0.5) * 1400;
+        starSpeeds[i] = 0.6 + Math.random() * 1.8;
+      }
+      starGeo = new THREE.BufferGeometry();
+      starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+      starGeo.setAttribute('speed', new THREE.BufferAttribute(starSpeeds, 1));
+
+      const starMat = new THREE.PointsMaterial({
+        color: THEMES[currentThemeKey].primary,
+        size: 2.0,
+        transparent: true,
+        opacity: 0.9
+      });
+      stars = new THREE.Points(starGeo, starMat);
+      scene.add(stars);
+
+      // Mouse Look
+      window.addEventListener('mousemove', (e) => {
+        mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+        mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+      });
+
+      window.addEventListener('resize', onResize);
+    }
+
+    function onResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    // --- Dynamic Theme Swapper ---
+    function applyTheme(themeKey) {
+      currentThemeKey = themeKey;
+      const t = THEMES[themeKey] || THEMES.void;
+      scene.fog.color.setHex(t.ambient);
+      stars.material.color.setHex(t.primary);
+      sunMesh.material.color.setHex(t.sun);
+      terrainMesh.material.color.setHex(t.grid);
+      centralArtifact.children[0].material.color.setHex(t.primary);
+      centralArtifact.children[1].material.color.setHex(t.secondary);
+      centralArtifact.children[2].material.color.setHex(t.tertiary);
+
+      buildingMeshes.forEach((b, idx) => {
+        b.material.color.setHex(idx % 3 === 0 ? t.buildings : t.grid);
+      });
+
+      laserMeshes.forEach(l => l.material.color.setHex(t.laser));
+
+      gateMeshes.forEach((g, idx) => {
+        g.material.color.setHex(idx % 2 === 0 ? t.primary : t.secondary);
+      });
+
+      document.documentElement.setAttribute('data-theme', themeKey);
+    }
+
+    // --- Main Render & Ride Loop ---
+    function animate() {
+      requestAnimationFrame(animate);
+      const dt = clock.getDelta();
+      const time = clock.getElapsedTime();
+
+      // Audio frequency analysis for reactivity
+      let audioPulse = 0;
+      if (analyserNode && audioFreqData) {
+        analyserNode.getByteFrequencyData(audioFreqData);
+        let sum = 0;
+        for (let i = 0; i < 8; i++) sum += audioFreqData[i];
+        audioPulse = (sum / 8) / 255.0; // 0.0 to 1.0
+      }
+
+      // Warp factor easing
+      warpBoost += (warpTarget - warpBoost) * Math.min(dt * 3.5, 1.0);
+      const activeSpeed = (isPaused ? 0 : flightSpeed) * (1.0 + warpBoost * 4.5);
+
+      // Director Cam Mode Auto-Switching every 16s
+      if (camMode === 'director') {
+        directorTimer += dt;
+        if (directorTimer > 16) {
+          directorTimer = 0;
+          const subModes = ['flythrough', 'rooftop', 'orbit'];
+          const picked = subModes[Math.floor(Math.random() * subModes.length)];
+          setCameraMode(picked, false);
+        }
+      }
+
+      // Advance Ride Spline
+      flightProgress = (flightProgress + dt * 0.016 * activeSpeed) % 1.0;
+
+      // Handle Camera Perspectives
+      if (camMode === 'flythrough' || (camMode === 'director' && directorTimer <= 16)) {
+        if (flightCurve) {
+          const camPos = flightCurve.getPointAt(flightProgress);
+          const lookAheadProg = (flightProgress + 0.024) % 1.0;
+          const lookPos = flightCurve.getPointAt(lookAheadProg);
+
+          camera.position.lerp(camPos, 0.14);
+          
+          // Mouse steering drift
+          const steerTarget = lookPos.clone().add(new THREE.Vector3(mouseX * 28, mouseY * 18, 0));
+          camera.lookAt(steerTarget);
+
+          // Bank / Roll into curves
+          const tangent = flightCurve.getTangentAt(flightProgress);
+          camera.rotation.z = -tangent.x * 0.48 + (-mouseX * 0.14);
+
+          camera.fov = 65 + warpBoost * 40;
+          camera.updateProjectionMatrix();
+        }
+
+      } else if (camMode === 'rooftop') {
+        if (rooftopCurve) {
+          const camPos = rooftopCurve.getPointAt(flightProgress);
+          const lookPos = rooftopCurve.getPointAt((flightProgress + 0.03) % 1.0);
+          camera.position.lerp(camPos, 0.12);
+          camera.lookAt(lookPos.x, 30, lookPos.z);
+          camera.fov = 70 + warpBoost * 35;
+          camera.updateProjectionMatrix();
+        }
+
+      } else if (camMode === 'orbit') {
+        const orbitR = 210;
+        const orbitAng = time * 0.18 * activeSpeed;
+        camera.position.set(Math.sin(orbitAng) * orbitR, 95 + Math.sin(time * 0.6) * 25, Math.cos(orbitAng) * orbitR);
+        camera.lookAt(0, 75, 0);
+        camera.fov = 60 + warpBoost * 35;
+        camera.updateProjectionMatrix();
+      }
+
+      // Rotate Central Hyper-Structure
+      if (centralArtifact) {
+        centralArtifact.children[0].rotation.x += dt * 0.45 * activeSpeed;
+        centralArtifact.children[0].rotation.y += dt * 0.65 * activeSpeed;
+        centralArtifact.children[1].rotation.z -= dt * 0.35 * activeSpeed;
+        centralArtifact.children[2].rotation.y += dt * 0.8 * activeSpeed;
+
+        const pulse = 1.0 + Math.sin(time * 2.5) * 0.06 + warpBoost * 0.2 + (audioPulse * 0.15);
+        centralArtifact.scale.set(pulse, pulse, pulse);
+      }
+
+      // Sun Rotation & Pulse
+      if (sunMesh) {
+        sunMesh.rotation.y += dt * 0.1;
+        const sunPulse = 1.0 + Math.sin(time * 3.0) * 0.05 + (audioPulse * 0.1);
+        sunMesh.scale.set(sunPulse, sunPulse, sunPulse);
+      }
+
+      // Gates Glow Pulse
+      gateMeshes.forEach((gate, idx) => {
+        const beat = Math.sin(time * 4.0 + idx * 0.4);
+        gate.scale.setScalar(1.0 + beat * 0.08 + warpBoost * 0.15 + (audioPulse * 0.12));
+      });
+
+      // Terrain Grid Waves
+      if (terrainGeo) {
+        const pos = terrainGeo.attributes.position;
+        for (let i = 0; i < pos.count; i += 4) {
+          const u = pos.getX(i);
+          const v = pos.getZ(i);
+          const wave = Math.sin(u * 0.018 + time * 2.2 * activeSpeed) * Math.cos(v * 0.018 + time * 1.8) * (5 + warpBoost * 8 + audioPulse * 4);
+          pos.setY(i, wave);
+        }
+        terrainGeo.attributes.position.needsUpdate = true;
+      }
+
+      // Stars Streaking Motion
+      if (stars) {
+        const pos = stars.geometry.attributes.position.array;
+        const spd = stars.geometry.attributes.speed.array;
+        const warpZ = 1.0 + warpBoost * 28.0;
+
+        for (let i = 0; i < starCount; i++) {
+          pos[i * 3 + 2] += spd[i] * dt * 50 * activeSpeed * warpZ;
+          if (pos[i * 3 + 2] > 700) {
+            pos[i * 3 + 2] = -700;
+            pos[i * 3] = (Math.random() - 0.5) * 1400;
+          }
+        }
+        stars.geometry.attributes.position.needsUpdate = true;
+      }
+
+      // Audio bar visualizer update
+      updateAudioVisualizer(time, audioPulse);
+
+      renderer.render(scene, camera);
+    }
+
+    // Audio Bars
+    const audioBars = document.querySelectorAll('.audio-bar');
+    function updateAudioVisualizer(time, audioPulse) {
+      audioBars.forEach((bar, idx) => {
+        let h;
+        if (audioPulse > 0.05) {
+          const val = audioFreqData ? audioFreqData[idx * 3] / 255.0 : audioPulse;
+          h = 15 + val * 85;
+        } else if (isAudioPlaying) {
+          h = 20 + Math.abs(Math.sin(time * 7 + idx * 1.4)) * 70 + Math.random() * 10;
+        } else {
+          h = 10 + Math.abs(Math.sin(time * 1.8 + idx * 0.9)) * 25;
+        }
+        bar.style.height = `${Math.min(100, h)}%`;
+      });
+    }
+
+    // Subtitle Typewriter
+    const SUBTITLE_MESSAGES = [
+      "COMPILING NEURAL PATHWAYS",
+      "BUILDING AUTONOMOUS AGENT SWARMS",
+      "OPTIMIZING CODE • REFUELING COFFEE",
+      "LIVE ON X • RESUMING SHORTLY",
+      "GENERATIVE SYNTHESIS IN PROGRESS",
+      "SYNCHRONIZING REPOSITORY STATE"
+    ];
+    let subIdx = 0, charIdx = 0, isDeleting = false;
+    const typewriterEl = document.getElementById('typewriterText');
+
+    function tickTypewriter() {
+      const msg = SUBTITLE_MESSAGES[subIdx];
+      if (isDeleting) {
+        typewriterEl.textContent = msg.substring(0, charIdx - 1);
+        charIdx--;
+      } else {
+        typewriterEl.textContent = msg.substring(0, charIdx + 1);
+        charIdx++;
+      }
+
+      let speed = isDeleting ? 30 : 65;
+      if (!isDeleting && charIdx === msg.length) {
+        speed = 2400;
+        isDeleting = true;
+      } else if (isDeleting && charIdx === 0) {
+        isDeleting = false;
+        subIdx = (subIdx + 1) % SUBTITLE_MESSAGES.length;
+        speed = 500;
+      }
+      setTimeout(tickTypewriter, speed);
+    }
+
+    // Countdown Timer
+    let timerSeconds = 300;
+    let timerRunning = true;
+    const timerDisplay = document.getElementById('timerDisplay');
+    const btnPauseResume = document.getElementById('btnPauseResume');
+
+    function updateTimerUI() {
+      const mins = Math.floor(timerSeconds / 60);
+      const secs = timerSeconds % 60;
+      timerDisplay.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    setInterval(() => {
+      if (timerRunning && timerSeconds > 0) {
+        timerSeconds--;
+        updateTimerUI();
+      }
+    }, 1000);
+
+    btnPauseResume.addEventListener('click', () => {
+      timerRunning = !timerRunning;
+      btnPauseResume.textContent = timerRunning ? '⏸ PAUSE' : '▶ RESUME';
+      btnPauseResume.classList.toggle('btn-primary', timerRunning);
+    });
+
+    document.getElementById('btnAdd1m').addEventListener('click', () => { timerSeconds += 60; updateTimerUI(); });
+    document.getElementById('btnAdd5m').addEventListener('click', () => { timerSeconds += 300; updateTimerUI(); });
+    document.getElementById('btnResetTimer').addEventListener('click', () => { timerSeconds = 300; updateTimerUI(); });
+
+    // Hyperwarp Toggle
+    const btnWarp = document.getElementById('btnWarpResume');
+    const warpFlash = document.getElementById('warpFlash');
+    const heroTitle = document.getElementById('heroTitle');
+
+    function triggerHyperwarp() {
+      isWarpActive = !isWarpActive;
+      warpTarget = isWarpActive ? 1.0 : 0.0;
+      warpFlash.classList.add('active');
+      setTimeout(() => warpFlash.classList.remove('active'), 120);
+
+      if (isWarpActive) {
+        heroTitle.textContent = 'RESUMING STREAM';
+        btnWarp.textContent = '⚡ WARP ACTIVE';
+        if (audioCtx && isAudioPlaying) triggerSynthBlip(880);
+      } else {
+        heroTitle.textContent = document.getElementById('inputHeroTitle').value || 'STREAM BREAK';
+        btnWarp.textContent = '⚡ HYPERWARP';
+      }
+    }
+    btnWarp.addEventListener('click', triggerHyperwarp);
+
+    // HUD Telemetry Updates
+    setInterval(() => {
+      const spd = Math.round((540 + warpBoost * 650 + Math.random() * 15) * (isPaused ? 0 : 1));
+      document.getElementById('hudSpeed').textContent = `${spd} KPH`;
+      document.getElementById('hudAlt').textContent = `${Math.round(camera.position.y || 180)}M`;
+      document.getElementById('hudFps').textContent = `${Math.floor(58 + Math.random() * 3)}`;
+      const load = Math.floor(45 + Math.random() * 25);
+      document.getElementById('statLoad').textContent = `${load}%`;
+      document.getElementById('barLoad').style.width = `${load}%`;
+    }, 1000);
+
+    // Controls Drawer
+    const drawer = document.getElementById('controlDrawer');
+    document.getElementById('btnDrawerToggle').addEventListener('click', () => drawer.classList.toggle('open'));
+    document.getElementById('btnCloseDrawer').addEventListener('click', () => drawer.classList.remove('open'));
+
+    // Camera Mode Selectors
+    const camButtons = document.querySelectorAll('[data-cam-mode]');
+    function setCameraMode(mode, updateButtons = true) {
+      camMode = mode;
+      if (updateButtons) {
+        camButtons.forEach(b => b.classList.toggle('active', b.getAttribute('data-cam-mode') === mode));
+      }
+      document.getElementById('hudCamMode').textContent = mode.toUpperCase();
+    }
+
+    camButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const mode = btn.getAttribute('data-cam-mode');
+        setCameraMode(mode);
+      });
+    });
+
+    // Theme Selectors
+    const themeButtons = document.querySelectorAll('[data-theme-val]');
+    themeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        themeButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        applyTheme(btn.getAttribute('data-theme-val'));
+      });
+    });
+
+    // Speed Slider
+    const sliderSpeed = document.getElementById('sliderSpeed');
+    sliderSpeed.addEventListener('input', (e) => {
+      flightSpeed = parseFloat(e.target.value);
+      document.getElementById('valSpeed').textContent = `${flightSpeed.toFixed(1)}x`;
+    });
+
+    // Custom Hero Title & Marquee
+    document.getElementById('inputHeroTitle').addEventListener('input', (e) => {
+      if (!isWarpActive) heroTitle.textContent = e.target.value || 'STREAM BREAK';
+    });
+    document.getElementById('inputMarquee').addEventListener('input', (e) => {
+      document.getElementById('marqueeText').textContent = e.target.value;
+    });
+
+    // Audio Buttons & Slider
+    document.getElementById('btnToggleAudio').addEventListener('click', toggleAudio);
+    document.getElementById('btnMicReactive').addEventListener('click', toggleMicReactive);
+
+    const sliderVolume = document.getElementById('sliderVolume');
+    sliderVolume.addEventListener('input', (e) => {
+      const v = parseFloat(e.target.value);
+      document.getElementById('valVolume').textContent = `${Math.round(v * 100)}%`;
+      if (masterGain && audioCtx) masterGain.gain.setValueAtTime(v, audioCtx.currentTime);
+    });
+
+    // Keyboard Shortcuts
+    const uiLayer = document.getElementById('uiLayer');
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT') return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        btnPauseResume.click();
+      } else if (e.code === 'KeyC') {
+        const modes = ['flythrough', 'rooftop', 'director', 'orbit'];
+        const nextMode = modes[(modes.indexOf(camMode) + 1) % modes.length];
+        setCameraMode(nextMode);
+      } else if (e.code === 'KeyW') {
+        triggerHyperwarp();
+      } else if (e.code === 'KeyT') {
+        const themeKeys = Object.keys(THEMES);
+        const nextTheme = themeKeys[(themeKeys.indexOf(currentThemeKey) + 1) % themeKeys.length];
+        themeButtons.forEach(b => b.classList.toggle('active', b.getAttribute('data-theme-val') === nextTheme));
+        applyTheme(nextTheme);
+      } else if (e.code === 'KeyM') {
+        toggleAudio();
+      } else if (e.code === 'KeyA') {
+        toggleMicReactive();
+      } else if (e.code === 'KeyF') {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+        else document.exitFullscreen().catch(() => {});
+      } else if (e.code === 'KeyH') {
+        uiLayer.classList.toggle('hidden');
+      }
+    });
+
+    // Initialize & Boot
+    init3D();
+    tickTypewriter();
+    updateTimerUI();
+    animate();
+  </script>
+</body>
+</html>

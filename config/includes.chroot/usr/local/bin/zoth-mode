@@ -1,0 +1,162 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#  ZOTHOS MODE SWITCHER
+#  Seamlessly shifts reality between:
+#    1. [matrix]    - Hermetic Meets The Matrix (Emerald Phosphor, Azoth Glyphs)
+#    2. [ghost]     - Ghostmode by nullai.tech (Amnesic Stealth, Tor, Anti-Forensics)
+#    3. [incognito] - Corporate Chameleon (Windows 11 / 10 Undercover Guise)
+# ==============================================================================
+
+set -e
+
+MODE_DIR="/etc/zothos/modes"
+STATE_FILE="$HOME/.config/zothos/current_mode"
+mkdir -p "$HOME/.config/zothos"
+
+notify() {
+    local title="$1"
+    local msg="$2"
+    local icon="$3"
+    if command -v notify-send >/dev/null 2>&1; then
+        notify-send -a "ZOTHOS" -i "$icon" "$title" "$msg" 2>/dev/null || true
+    fi
+    echo -e "\e[1;32m[*] ZOTHOS:\e[0m $title - $msg"
+}
+
+get_current_mode() {
+    if [[ -f "$STATE_FILE" ]]; then
+        cat "$STATE_FILE"
+    else
+        echo "matrix"
+    fi
+}
+
+apply_matrix_mode() {
+    echo -e "\e[1;32m[+] Initiating Hermetic Matrix Reality...\e[0m"
+    
+    # 1. Wallpaper
+    local wp="/usr/share/backgrounds/zothos/hermetic-matrix.png"
+    if [[ -f "$wp" ]] && command -v xfconf-query >/dev/null 2>&1; then
+        for prop in $(xfconf-query -c xfce4-desktop -l | grep "last-image"); do
+            xfconf-query -c xfce4-desktop -p "$prop" -s "$wp" || true
+        done
+    fi
+
+    # 2. GTK & Icon Theme
+    if command -v xfconf-query >/dev/null 2>&1; then
+        xfconf-query -c xsettings -p /Net/ThemeName -s "Zoth-Hermetic-Matrix" 2>/dev/null || true
+        xfconf-query -c xsettings -p /Net/IconThemeName -s "Zoth-Glyphs" 2>/dev/null || true
+        xfconf-query -c xfwm4 -p /general/theme -s "Zoth-Hermetic-Matrix" 2>/dev/null || true
+    fi
+
+    # 3. Terminal Colors (Emerald Phosphor on Obsidian Void)
+    if command -v xfce4-terminal >/dev/null 2>&1; then
+        mkdir -p "$HOME/.config/xfce4/terminal"
+        cat <<'EOF' > "$HOME/.config/xfce4/terminal/terminalrc"
+[Configuration]
+ColorPalette=#0a0d0c;#e11d48;#00ff9d;#eab308;#38bdf8;#a855f7;#2dd4bf;#e2e8f0;#334155;#f43f5e;#34d399;#facc15;#60a5fa;#c084fc;#5eead4;#ffffff
+ColorForeground=#00ff9d
+ColorBackground=#050807
+ColorCursor=#00ff9d
+FontName=JetBrains Mono Nerd Font 10
+ScrollingBar=TERMINAL_SCROLLING_BAR_OFF
+MiscToolbarDefault=FALSE
+MiscMenubarDefault=FALSE
+TitleMode=TERMINAL_TITLE_REPLACE
+EOF
+    fi
+
+    # 4. Turn off ghostmode network locks if active
+    if command -v zoth-ghost >/dev/null 2>&1; then
+        zoth-ghost status | grep -q "ACTIVE" && zoth-ghost stop || true
+    fi
+
+    echo "matrix" > "$STATE_FILE"
+    notify "Hermetic Matrix Reality" "Alchemical Emerald Phosphor loaded. As above, so below." "dialog-information"
+}
+
+apply_ghost_mode() {
+    echo -e "\e[1;31m[!] Initiating Ghostmode (nullai.tech protocol)...\e[0m"
+
+    # 1. Dark minimalist wallpaper
+    local wp="/usr/share/backgrounds/zothos/ghostmode-nullai.png"
+    if [[ -f "$wp" ]] && command -v xfconf-query >/dev/null 2>&1; then
+        for prop in $(xfconf-query -c xfce4-desktop -l | grep "last-image"); do
+            xfconf-query -c xfce4-desktop -p "$prop" -s "$wp" || true
+        done
+    fi
+
+    # 2. Stealth Theme
+    if command -v xfconf-query >/dev/null 2>&1; then
+        xfconf-query -c xsettings -p /Net/ThemeName -s "Zoth-Ghost-NullAI" 2>/dev/null || true
+        xfconf-query -c xsettings -p /Net/IconThemeName -s "Zoth-Ghost-Icons" 2>/dev/null || true
+        xfconf-query -c xfwm4 -p /general/theme -s "Zoth-Ghost-NullAI" 2>/dev/null || true
+    fi
+
+    # 3. Terminal (Pure Black, Crimson-Amber Phosphor)
+    if command -v xfce4-terminal >/dev/null 2>&1; then
+        mkdir -p "$HOME/.config/xfce4/terminal"
+        cat <<'EOF' > "$HOME/.config/xfce4/terminal/terminalrc"
+[Configuration]
+ColorForeground=#e2e8f0
+ColorBackground=#000000
+ColorCursor=#f43f5e
+ColorPalette=#000000;#e11d48;#10b981;#f59e0b;#3b82f6;#8b5cf6;#06b6d4;#d1d5db;#4b5563;#fb7185;#34d399;#fbbf24;#60a5fa;#a78bfa;#22d3ee;#ffffff
+FontName=JetBrains Mono Nerd Font 10
+ScrollingBar=TERMINAL_SCROLLING_BAR_OFF
+EOF
+    fi
+
+    # 4. Trigger nullai ghostmode network cloaking & anti-forensics
+    if command -v zoth-ghost >/dev/null 2>&1; then
+        zoth-ghost start
+    fi
+
+    echo "ghost" > "$STATE_FILE"
+    notify "Ghostmode Activated" "Anti-forensics active. Tor routed, MAC cloaked, traces zeroed." "security-high"
+}
+
+apply_incognito_mode() {
+    echo -e "\e[1;34m[*] Shifting into Corporate Chameleon (Incognito Windows 11 Guise)...\e[0m"
+
+    # Call dedicated undercover script
+    if command -v zoth-undercover >/dev/null 2>&1; then
+        zoth-undercover on
+    fi
+
+    echo "incognito" > "$STATE_FILE"
+    notify "Incognito Mode" "Corporate Windows 11 disguise active. Stay hidden in plain sight." "security-medium"
+}
+
+target="${1:-status}"
+
+case "$target" in
+    matrix)
+        apply_matrix_mode
+        ;;
+    ghost)
+        apply_ghost_mode
+        ;;
+    incognito|windows|undercover)
+        apply_incognito_mode
+        ;;
+    toggle)
+        cur=$(get_current_mode)
+        if [[ "$cur" == "matrix" ]]; then
+            apply_ghost_mode
+        elif [[ "$cur" == "ghost" ]]; then
+            apply_incognito_mode
+        else
+            apply_matrix_mode
+        fi
+        ;;
+    status)
+        cur=$(get_current_mode)
+        echo -e "\e[1;32mZOTHOS Active Reality:\e[0m \e[1;36m${cur^^}\e[0m"
+        echo "Available modes: [matrix | ghost | incognito | toggle]"
+        ;;
+    *)
+        echo "Usage: zoth-mode {matrix|ghost|incognito|toggle|status}"
+        exit 1
+        ;;
+esac

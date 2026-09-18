@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#  ZOTHOS HERMETIC MATRIX RAIN SCREENSAVER / TERMINAL STREAM
+#  Renders digital rain fused with alchemical glyphs (☉ ☽ ☿ ♀ ♂ ♃ ♄ 🜂 🜄 🜁 🜃)
+# ==============================================================================
+
+trap "tput cnorm; clear; exit 0" SIGINT SIGTERM
+
+tput civis
+clear
+
+LINES=$(tput lines)
+COLS=$(tput cols)
+
+GLYPHS=(
+    "0" "1" "2" "3" "4" "5" "6" "7" "8" "9"
+    "a" "b" "c" "d" "e" "f" "x" "z" "o" "t" "h"
+    "☉" "☽" "☿" "♀" "♂" "♃" "♄" "🜂" "🜄" "🜁" "🜃" "🝘" "🜚"
+    "ｦ" "ｱ" "ｳ" "ｴ" "ｵ" "ｶ" "ｷ" "ｹ" "ｺ" "ｻ" "ｼ" "ｽ" "ｾ" "ｿ" "ﾀ" "ﾂ" "ﾃ" "ﾅ" "ﾆ" "ﾇ" "ﾈ"
+)
+NUM_GLYPHS=${#GLYPHS[@]}
+
+declare -a Y_POS
+declare -a SPEEDS
+
+for ((i=0; i<COLS; i++)); do
+    Y_POS[$i]=$((RANDOM % LINES))
+    SPEEDS[$i]=$((RANDOM % 3 + 1))
+done
+
+while true; do
+    for ((col=0; col<COLS; col+=2)); do
+        y=${Y_POS[$col]}
+        glyph=${GLYPHS[$((RANDOM % NUM_GLYPHS))]}
+
+        # Leading head: Bright white / pale green
+        tput cup "$y" "$col" 2>/dev/null || true
+        echo -ne "\e[1;37m$glyph\e[0m"
+
+        # Trailing tail: Emerald phosphor green
+        prev_y=$((y - 1))
+        if (( prev_y >= 0 && prev_y < LINES )); then
+            tput cup "$prev_y" "$col" 2>/dev/null || true
+            old_glyph=${GLYPHS[$((RANDOM % NUM_GLYPHS))]}
+            echo -ne "\e[38;5;48m$old_glyph\e[0m"
+        fi
+
+        # Deeper tail: Dark green fade
+        deep_y=$((y - 8))
+        if (( deep_y >= 0 && deep_y < LINES )); then
+            tput cup "$deep_y" "$col" 2>/dev/null || true
+            echo -ne "\e[38;5;22m${GLYPHS[$((RANDOM % NUM_GLYPHS))]}\e[0m"
+        fi
+
+        # Erase tail
+        erase_y=$((y - 18))
+        if (( erase_y >= 0 && erase_y < LINES )); then
+            tput cup "$erase_y" "$col" 2>/dev/null || true
+            echo -ne " "
+        fi
+
+        # Advance column position
+        Y_POS[$col]=$((y + 1))
+        if (( Y_POS[$col] >= LINES )); then
+            Y_POS[$col]=0
+        fi
+    done
+    sleep 0.04
+done

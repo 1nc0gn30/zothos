@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#  ZOTHOS EMERGENCY PANIC LOCK & AMNESIC WIPE
+# ==============================================================================
+
+# Drop page caches to RAM
+sync
+echo 3 > /proc/sys/vm/drop_caches 2>/dev/null || true
+
+# Erase recent files list
+rm -f "$HOME/.local/share/recently-used.xbel" 2>/dev/null || true
+rm -rf "$HOME/.cache/thumbnails/*" 2>/dev/null || true
+
+# Lock X11 screen
+if command -v xflock4 >/dev/null 2>&1; then
+    xflock4
+elif command -v slock >/dev/null 2>&1; then
+    slock
+elif command -v i3lock >/dev/null 2>&1; then
+    i3lock -c 000000
+fi
