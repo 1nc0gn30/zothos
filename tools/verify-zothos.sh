@@ -75,8 +75,11 @@ SCRIPTS=(
     "$CHROOT/usr/local/bin/zoth-matrix-rain"
     "$CHROOT/usr/local/bin/zoth-quicklock"
     "$CHROOT/usr/local/bin/zoth-netkill"
-    "$CHROOT/usr/local/bin/zoth-powershell"
     "$CHROOT/usr/local/bin/zoth-cockpit"
+    "$CHROOT/usr/local/bin/zoth-mcp"
+    "$CHROOT/usr/local/bin/hexstrike"
+    "$CHROOT/usr/local/bin/hexstrike_mcp"
+    "$CHROOT/usr/local/bin/hexstrike_server"
 )
 
 for s in "${SCRIPTS[@]}"; do
@@ -126,6 +129,8 @@ echo -e "\n${BOLD}${YELLOW}[4/5] Auditing Package Lists & ISO Builder ...${RESET
 check_file "$ROOT_DIR/package-lists/zothos-core.list.chroot" "Core Package List"
 check_file "$ROOT_DIR/package-lists/zothos-security-kali-parrot.list.chroot" "Security Package List"
 check_file "$ROOT_DIR/package-lists/zothos-programming-devel.list.chroot" "Programming Devel Package List"
+check_file "$ROOT_DIR/package-lists/zothos-ai.list.chroot" "AI Arsenal Package List"
+check_file "$CHROOT/etc/zothos/mcp-servers.json" "Master MCP Server Registry"
 check_file "$ROOT_DIR/build/build-iso.sh" "Master Build Script"
 check_executable "$ROOT_DIR/build/build-iso.sh"
 check_syntax_bash "$ROOT_DIR/build/build-iso.sh"

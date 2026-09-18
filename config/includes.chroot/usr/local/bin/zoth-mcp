@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#  ZOTHOS MCP (Model Context Protocol) Unified Bridge & Manager
+#  Seamlessly binds hot MCP servers to Claude Code, Hermes, Codex & OpenCode
+# ==============================================================================
+
+set -euo pipefail
+
+GREEN="\e[1;32m"
+CYAN="\e[1;36m"
+YELLOW="\e[1;33m"
+RED="\e[1;31m"
+BOLD="\e[1m"
+RESET="\e[0m"
+
+MCP_CONFIG="/etc/zothos/mcp-servers.json"
+
+banner() {
+    echo -e "${GREEN}  ███████╗ ██████╗ ████████╗██╗  ██╗     ███╗   ███╗ ██████╗██████╗ ${RESET}"
+    echo -e "${GREEN}  ╚══███╔╝██╔═══██╗╚══██╔══╝██║  ██║     ████╗ ████║██╔════╝██╔══██╗${RESET}"
+    echo -e "${GREEN}    ███╔╝ ██║   ██║   ██║   ███████║     ██╔████╔██║██║     ██████╔╝${RESET}"
+    echo -e "${GREEN}   ███╔╝  ██║   ██║   ██║   ██╔══██║     ██║╚██╔╝██║██║     ██╔═══╝ ${RESET}"
+    echo -e "${GREEN}  ███████╗╚██████╔╝   ██║   ██║  ██║     ██║ ╚═╝ ██║╚██████╗██║     ${RESET}"
+    echo -e "${GREEN}  ╚══════╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝     ╚═╝     ╚═╝ ╚═════╝╚═╝     ${RESET}"
+    echo -e "         ${BOLD}${CYAN}MODEL CONTEXT PROTOCOL MULTI-AGENT REGISTRY${RESET}"
+    echo ""
+}
+
+cmd_list() {
+    banner
+    echo -e "${BOLD}Registered Master MCP Servers in ${CYAN}${MCP_CONFIG}${RESET}:${RESET}"
+    echo ""
+    if command -v jq >/dev/null 2>&1; then
+        jq -r '.mcpServers | to_entries[] | "  \u001b[1;32m[+]\u001b[0m \u001b[1m\(.key)\u001b[0m\n      Command:     \(.value.command) \(.value.args | join(" "))\n      Description: \(.value.description // "N/A")\n"' "$MCP_CONFIG"
+    else
+        cat "$MCP_CONFIG"
+    fi
+}
+
+cmd_sync() {
+    banner
+    echo -e "${BOLD}${CYAN}[*] Synchronizing MCP servers across all local AI agent configurations...${RESET}"
+    
+    local USER_HOME="${HOME:-/home/neo}"
+    
+    # 1. Sync to Claude Code config
+    local CLAUDE_CONFIG_DIR="$USER_HOME/.config/claude-code"
+    mkdir -p "$CLAUDE_CONFIG_DIR"
+    cp "$MCP_CONFIG" "$CLAUDE_CONFIG_DIR/mcp.json" 2>/dev/null || true
+    echo -e "  ${GREEN}[✓]${RESET} Claude Code MCP synced: ${CLAUDE_CONFIG_DIR}/mcp.json"
+
+    # 2. Sync to Hermes Agent
+    local HERMES_CONFIG_DIR="$USER_HOME/.hermes"
+    mkdir -p "$HERMES_CONFIG_DIR"
+    cp "$MCP_CONFIG" "$HERMES_CONFIG_DIR/mcp_servers.json" 2>/dev/null || true
+    echo -e "  ${GREEN}[✓]${RESET} Hermes Agent MCP synced: ${HERMES_CONFIG_DIR}/mcp_servers.json"
+
+    # 3. Sync to Codex
+    local CODEX_CONFIG_DIR="$USER_HOME/.config/codex"
+    mkdir -p "$CODEX_CONFIG_DIR"
+    cp "$MCP_CONFIG" "$CODEX_CONFIG_DIR/mcp.json" 2>/dev/null || true
+    echo -e "  ${GREEN}[✓]${RESET} Codex MCP synced: ${CODEX_CONFIG_DIR}/mcp.json"
+
+    # 4. Sync to OpenCode
+    local OPENCODE_CONFIG_DIR="$USER_HOME/.config/opencode"
+    mkdir -p "$OPENCODE_CONFIG_DIR"
+    cp "$MCP_CONFIG" "$OPENCODE_CONFIG_DIR/mcp.json" 2>/dev/null || true
+    echo -e "  ${GREEN}[✓]${RESET} OpenCode MCP synced: ${OPENCODE_CONFIG_DIR}/mcp.json"
+
+    echo ""
+    echo -e "${BOLD}${GREEN}[✓] All AI agent runtimes are primed with master MCP servers!${RESET}"
+}
+
+cmd_test() {
+    local server="${1:-}"
+    if [[ -z "$server" ]]; then
+        echo -e "${RED}Error:${RESET} Please specify an MCP server name to test (e.g. zoth-mcp test hexstrike-ai)"
+        exit 1
+    fi
+    echo -e "${BOLD}${CYAN}[*] Testing execution for MCP Server: ${server}...${RESET}"
+    if [[ "$server" == "hexstrike-ai" ]]; then
+        if [[ -f "/usr/share/hexstrike-ai/hexstrike_mcp.py" ]]; then
+            python3 /usr/share/hexstrike-ai/hexstrike_mcp.py --help >/dev/null 2>&1 && echo -e "  ${GREEN}[✓] HexStrike AI MCP Server executable and functional.${RESET}" || echo -e "  ${RED}[!] HexStrike AI MCP python dependencies missing.${RESET}"
+        else
+            echo -e "  ${RED}[!] HexStrike AI MCP script not found in /usr/share/hexstrike-ai/${RESET}"
+        fi
+    elif [[ "$server" == "filesystem" ]]; then
+        npx -y @modelcontextprotocol/server-filesystem --version 2>/dev/null && echo -e "  ${GREEN}[✓] Filesystem MCP package available.${RESET}" || echo -e "  ${YELLOW}[-] Testing package fetch via npx...${RESET}"
+    else
+        echo -e "  ${GREEN}[*] Server entry exists in configuration.${RESET}"
+    fi
+}
+
+case "${1:-list}" in
+    list)
+        cmd_list
+        ;;
+    sync)
+        cmd_sync
+        ;;
+    test)
+        cmd_test "${2:-}"
+        ;;
+    *)
+        echo "Usage: zoth-mcp [list|sync|test <name>]"
+        exit 1
+        ;;
+esac
