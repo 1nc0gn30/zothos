@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#  Ligolo-ng - 2026 Modern TUN-based Pivoting & Tunneling Framework
+# ==============================================================================
+if command -v ligolo-ng >/dev/null 2>&1; then
+    exec ligolo-ng "$@"
+elif command -v proxy >/dev/null 2>&1 && command -v agent >/dev/null 2>&1; then
+    echo -e "\e[1;32m[*] Ligolo-ng Proxy & Agent Ready.\e[0m"
+    exec proxy "$@"
+else
+    echo -e "\e[1;33m[*] Ligolo-ng is configured for TUN-interface pivoting.\e[0m"
+    echo -e "\e[1;36m[*] Run 'proxy -autocert' to start the receiver.\e[0m"
+fi

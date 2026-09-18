@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#  LiteLLM - 2026 Universal 100+ LLM Proxy & OpenAI Gateway
+# ==============================================================================
+if ! command -v litellm >/dev/null 2>&1 && [[ ! -f /opt/zothos-ai-env/bin/litellm ]]; then
+    echo -e "\e[1;36m[*] Provisioning LiteLLM Gateway...\e[0m"
+    mkdir -p /opt/zothos-ai-env
+    python3 -m venv /opt/zothos-ai-env --system-site-packages 2>/dev/null || true
+    /opt/zothos-ai-env/bin/pip install --upgrade "litellm[proxy]" 2>/dev/null || pip install litellm
+fi
+
+if [[ -f /opt/zothos-ai-env/bin/litellm ]]; then
+    exec /opt/zothos-ai-env/bin/litellm "$@"
+elif command -v litellm >/dev/null 2>&1; then
+    exec litellm "$@"
+else
+    echo -e "\e[1;31m[!] Error: LiteLLM initialization failed.\e[0m"
+    exit 1
+fi

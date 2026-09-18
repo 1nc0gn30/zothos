@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#  PyRIT - 2026 Microsoft AI Risk Identification & Red-Teaming Framework
+# ==============================================================================
+if ! command -v pyrit >/dev/null 2>&1 && [[ ! -f /opt/zothos-ai-env/bin/pyrit ]]; then
+    echo -e "\e[1;33m[*] Provisioning Microsoft PyRIT AI Red-Teaming Toolkit...\e[0m"
+    mkdir -p /opt/zothos-ai-env
+    python3 -m venv /opt/zothos-ai-env --system-site-packages 2>/dev/null || true
+    /opt/zothos-ai-env/bin/pip install --upgrade pyrit 2>/dev/null || pip install pyrit
+fi
+
+if [[ -f /opt/zothos-ai-env/bin/pyrit ]]; then
+    exec /opt/zothos-ai-env/bin/python3 -m pyrit "$@"
+else
+    python3 -m pyrit "$@" 2>/dev/null || echo -e "\e[1;31m[!] PyRIT ready in /opt/zothos-ai-env\e[0m"
+fi

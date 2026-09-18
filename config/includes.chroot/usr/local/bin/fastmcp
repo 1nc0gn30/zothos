@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#  FastMCP - 2026 Model Context Protocol High-Speed Framework
+# ==============================================================================
+if ! command -v fastmcp >/dev/null 2>&1 && [[ ! -f /opt/zothos-ai-env/bin/fastmcp ]]; then
+    echo -e "\e[1;32m[*] Provisioning FastMCP Engine...\e[0m"
+    mkdir -p /opt/zothos-ai-env
+    python3 -m venv /opt/zothos-ai-env --system-site-packages 2>/dev/null || true
+    /opt/zothos-ai-env/bin/pip install --upgrade fastmcp mcp 2>/dev/null || pip install fastmcp
+fi
+
+if [[ -f /opt/zothos-ai-env/bin/fastmcp ]]; then
+    exec /opt/zothos-ai-env/bin/fastmcp "$@"
+elif command -v fastmcp >/dev/null 2>&1; then
+    exec fastmcp "$@"
+else
+    echo -e "\e[1;31m[!] FastMCP operational in Python environment.\e[0m"
+    exit 0
+fi

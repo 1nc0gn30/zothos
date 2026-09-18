@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
-#  ZOTHOS Arsenal Synchronizer & Full Toolchain Installer
-#  Ensures 100% parity across Dev, Security (Kali/Parrot), and AI stacks.
+#  ZOTHOS Arsenal Synchronizer & Full Toolchain Installer (2026 Edition)
+#  Ensures 100% parity across Dev, Security (Kali/Parrot), and Sovereign AI stacks.
 # ==============================================================================
 
 set -e
@@ -13,7 +13,7 @@ RED='\033[0;31m'
 NC='\033[0m'
 
 echo -e "${GREEN}======================================================${NC}"
-echo -e "${GOLD}   🜂 ZOTHOS MASTER ARSENAL SYNCHRONIZER 🜄${NC}"
+echo -e "${GOLD}   🜂 ZOTHOS MASTER ARSENAL SYNCHRONIZER (2026) 🜄${NC}"
 echo -e "${CYAN}   Installing & Verifying Dev, Security, and AI Suites${NC}"
 echo -e "${GREEN}======================================================${NC}"
 
@@ -23,29 +23,37 @@ if [[ $EUID -ne 0 ]]; then
     exit 1
 fi
 
-echo -e "\n${CYAN}[1/4] Updating Package Repositories...${NC}"
+echo -e "\n${CYAN}[1/5] Updating Package Repositories...${NC}"
 apt-get update -y || true
 
-echo -e "\n${CYAN}[2/4] Installing Dev Toolchains & Runtimes...${NC}"
+echo -e "\n${CYAN}[2/5] Installing Dev Toolchains & 2026 Runtimes...${NC}"
 apt-get install -y --no-install-recommends \
     build-essential gcc g++ clang make cmake ninja-build autoconf automake \
     libssl-dev libffi-dev zlib1g-dev \
     python3 python3-pip python3-venv python3-dev ipython3 \
-    nodejs npm \
-    sqlite3 postgresql-client redis-tools \
+    nodejs npm yarnpkg rustc cargo golang \
+    sqlite3 postgresql-client redis-tools podman \
     git curl wget rsync tmux zsh neovim bat ripgrep fd-find jq yq htop btop tree unzip p7zip-full fzf lsof strace \
+    zoxide eza starship zellij lazygit \
     || true
 
-echo -e "\n${CYAN}[3/4] Installing Security Arsenal (Kali/Parrot Parity)...${NC}"
+echo -e "\n${CYAN}[3/5] Installing Security Arsenal (Kali & Parrot 2026 Parity)...${NC}"
 apt-get install -y --no-install-recommends \
-    nmap masscan dnsutils whois whatweb wafw00f \
-    sqlmap commix wireshark tshark tcpdump \
-    john hashcat hydra medusa fcrackzip \
-    aircrack-ng radare2 gdb binwalk socat netcat-traditional \
+    nmap masscan rustscan dnsutils whois whatweb wafw00f \
+    sqlmap commix impacket-scripts responder evil-winrm netexec \
+    wireshark tshark tcpdump ettercap-text-only dsniff bettercap \
+    john hashcat hydra medusa fcrackzip crunch \
+    aircrack-ng kismet wifite radare2 gdb binwalk socat netcat-traditional \
+    nuclei chisel ligolo-ng sliver caido burpsuite zaproxy bloodhound neo4j \
     tor torsocks proxychains4 macchanger iptables nftables \
     || true
 
-echo -e "\n${CYAN}[4/4] Configuring Sovereign AI Virtual Environment...${NC}"
+echo -e "\n${CYAN}[4/5] Installing uv Package Manager & Core Runtimes...${NC}"
+if ! command -v uv >/dev/null 2>&1; then
+    curl -LsSf https://astral.sh/uv/install.sh | sh 2>/dev/null || python3 -m pip install uv || true
+fi
+
+echo -e "\n${CYAN}[5/5] Provisioning 2026 AI Environment (Aider, FastMCP, LiteLLM, Garak, PyRIT)...${NC}"
 mkdir -p /opt/zothos-ai-env
 if [[ ! -f /opt/zothos-ai-env/bin/activate ]]; then
     python3 -m venv /opt/zothos-ai-env --system-site-packages
@@ -55,6 +63,7 @@ fi
 /opt/zothos-ai-env/bin/pip install --no-cache-dir \
     rich textual requests aiohttp urllib3 websockets \
     fastapi uvicorn pydantic psutil cryptography scapy \
+    aider-chat fastmcp mcp litellm garak pyrit \
     2>/dev/null || true
 
 # Symlink environment into global profile
@@ -64,4 +73,4 @@ EOF
 chmod +x /etc/profile.d/zothos-ai-path.sh
 
 echo -e "\n${GREEN}[✓] ZOTHOS Arsenal Synchronization Complete!${NC}"
-echo -e "${GOLD}[*] Run 'zoth-sec' to view pentesting tools, or 'zoth-cockpit' for full operations hub.${NC}\n"
+echo -e "${GOLD}[*] Run 'zoth-cockpit' for full operations hub or 'zoth-sec' for pentest suite.${NC}\n"
