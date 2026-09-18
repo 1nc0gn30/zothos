@@ -1,0 +1,332 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#  ZOTHOS WINDOWS POWERSHELL EMULATOR (v7.4.2)
+#  Corporate disguise wrapper mimicking Windows PowerShell Core.
+#  Translates common PowerShell cmdlets to Linux equivalents while falling
+#  back to standard execution for unmapped tools.
+# ==============================================================================
+
+set -o pipefail
+
+# Windows PowerShell Header Banner
+show_header() {
+    cat <<'EOF'
+Windows PowerShell v7.4.2
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+https://aka.ms/powershell
+Type 'help' to get help.
+
+EOF
+}
+
+# Version table display ($PSVersionTable)
+show_version_table() {
+    cat <<'EOF'
+
+Name                           Value
+----                           -----
+PSVersion                      7.4.2
+PSEdition                      Core
+GitCommitId                    7.4.2
+OS                             Linux 6.1.0-zothos
+Platform                       Unix
+PSCompatibleVersions           {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0}
+PSRemotingProtocolVersion      2.3
+SerializationVersion           1.1.0.1
+WSManStackVersion              3.0
+
+EOF
+}
+
+# Translate a single PowerShell command segment to Linux equivalent
+translate_cmd() {
+    local cmd="$1"
+    # Trim leading and trailing whitespace
+    cmd="${cmd#"${cmd%%[![:space:]]*}"}"
+    cmd="${cmd%"${cmd##*[![:space:]]}"}"
+    [[ -z "$cmd" ]] && return 0
+
+    local first_word="${cmd%% *}"
+    local rest=""
+    if [[ "$cmd" == *" "* ]]; then
+        rest="${cmd#* }"
+        rest="${rest#"${rest%%[![:space:]]*}"}"
+    fi
+
+    case "$first_word" in
+        Get-Process|gps)
+            if [[ -z "$rest" ]]; then
+                echo "ps aux"
+            elif [[ "$rest" =~ ^-Name[[:space:]]+(.*)$ ]]; then
+                echo "ps aux | grep -i -- ${BASH_REMATCH[1]}"
+            elif [[ "$rest" =~ ^-Id[[:space:]]+(.*)$ ]]; then
+                echo "ps aux | grep -w -- ${BASH_REMATCH[1]}"
+            else
+                echo "ps aux | grep -i -- $rest"
+            fi
+            ;;
+        Get-Service|gsv)
+            if [[ -z "$rest" ]]; then
+                echo "systemctl list-units"
+            elif [[ "$rest" =~ ^-Name[[:space:]]+(.*)$ ]]; then
+                echo "systemctl status -- ${BASH_REMATCH[1]}"
+            else
+                echo "systemctl list-units $rest"
+            fi
+            ;;
+        dir|ls|Get-ChildItem|gci)
+            local clean_rest="${rest//\\//}"
+            clean_rest="${clean_rest/#C:\/Users\/Administrator/$HOME}"
+            clean_rest="${clean_rest/#c:\/Users\/Administrator/$HOME}"
+            clean_rest="${clean_rest/#C:\//\/}"
+            clean_rest="${clean_rest/#c:\//\/}"
+            clean_rest="${clean_rest//\/a/}"
+            clean_rest="${clean_rest//\/s/}"
+            clean_rest="${clean_rest//\/b/}"
+            if [[ -z "$clean_rest" ]]; then
+                echo "ls -la"
+            else
+                echo "ls -la $clean_rest"
+            fi
+            ;;
+        cls|clear|Clear-Host)
+            echo "clear"
+            ;;
+        ipconfig|Get-NetIPAddress)
+            echo "ip a"
+            ;;
+        Get-Content|gc|type)
+            local clean_rest="${rest//-Path /}"
+            clean_rest="${clean_rest//\\//}"
+            clean_rest="${clean_rest/#C:\/Users\/Administrator/$HOME}"
+            clean_rest="${clean_rest/#C:\//\/}"
+            if [[ "$clean_rest" =~ -TotalCount[[:space:]]+([0-9]+)[[:space:]]+(.*) ]]; then
+                echo "head -n ${BASH_REMATCH[1]} ${BASH_REMATCH[2]}"
+            elif [[ "$clean_rest" =~ (.*)[[:space:]]+-TotalCount[[:space:]]+([0-9]+) ]]; then
+                echo "head -n ${BASH_REMATCH[2]} ${BASH_REMATCH[1]}"
+            elif [[ "$clean_rest" =~ -Tail[[:space:]]+([0-9]+)[[:space:]]+(.*) ]]; then
+                echo "tail -n ${BASH_REMATCH[1]} ${BASH_REMATCH[2]}"
+            elif [[ "$clean_rest" =~ (.*)[[:space:]]+-Tail[[:space:]]+([0-9]+) ]]; then
+                echo "tail -n ${BASH_REMATCH[2]} ${BASH_REMATCH[1]}"
+            else
+                echo "cat $clean_rest"
+            fi
+            ;;
+        Select-String|sls)
+            local clean_rest="${rest//-Pattern /}"
+            clean_rest="${clean_rest//-Path /}"
+            clean_rest="${clean_rest//\\//}"
+            echo "grep $clean_rest"
+            ;;
+        Stop-Process|spps)
+            local clean_rest="${rest//-Force/}"
+            clean_rest="${clean_rest#"${clean_rest%%[![:space:]]*}"}"
+            clean_rest="${clean_rest%"${clean_rest##*[![:space:]]}"}"
+            if [[ "$clean_rest" =~ ^-Name[[:space:]]+(.*)$ ]]; then
+                echo "pkill -9 -f ${BASH_REMATCH[1]}"
+            elif [[ "$clean_rest" =~ ^-Id[[:space:]]+(.*)$ ]]; then
+                echo "kill -9 ${BASH_REMATCH[1]}"
+            elif [[ "$clean_rest" =~ ^[0-9]+$ ]]; then
+                echo "kill -9 $clean_rest"
+            elif [[ -n "$clean_rest" ]]; then
+                echo "pkill -9 -f $clean_rest"
+            else
+                echo "kill -9"
+            fi
+            ;;
+        whoami)
+            echo "echo 'DESKTOP-ZOTHOS\\Administrator'"
+            ;;
+        Get-Date)
+            echo "date"
+            ;;
+        Get-Location|gl)
+            echo "pwd"
+            ;;
+        Get-Uptime)
+            echo "uptime -p 2>/dev/null || uptime"
+            ;;
+        Restart-Computer)
+            echo "systemctl reboot"
+            ;;
+        Stop-Computer)
+            echo "systemctl poweroff"
+            ;;
+        Test-Connection)
+            echo "ping -c 4 $rest"
+            ;;
+        Copy-Item|cpi|copy)
+            echo "cp -r ${rest//\\//}"
+            ;;
+        Move-Item|mi|move)
+            echo "mv ${rest//\\//}"
+            ;;
+        Remove-Item|ri|del|rmdir)
+            echo "rm -rf ${rest//\\//}"
+            ;;
+        New-Item)
+            if [[ "$rest" =~ -ItemType[[:space:]]+Directory[[:space:]]+(.*) ]]; then
+                local path="${BASH_REMATCH[1]//-Path /}"
+                echo "mkdir -p ${path//\\//}"
+            else
+                local path="${rest//-Path /}"
+                echo "touch ${path//\\//}"
+            fi
+            ;;
+        Write-Host)
+            echo "echo $rest"
+            ;;
+        *)
+            # Fallback: standard execution while maintaining disguise
+            echo "$cmd"
+            ;;
+    esac
+}
+
+# Translate pipeline (supports multiple commands separated by '|')
+translate_pipeline() {
+    local raw="$1"
+    if [[ "$raw" == *"|"* ]]; then
+        local IFS='|'
+        local stages=()
+        read -ra parts <<< "$raw"
+        local translated_parts=()
+        for part in "${parts[@]}"; do
+            local clean_part="${part#"${part%%[![:space:]]*}"}"
+            clean_part="${clean_part%"${clean_part##*[![:space:]]}"}"
+            translated_parts+=("$(translate_cmd "$clean_part")")
+        done
+        local out=""
+        for ((i = 0; i < ${#translated_parts[@]}; i++)); do
+            if [[ $i -eq 0 ]]; then
+                out="${translated_parts[i]}"
+            else
+                out="$out | ${translated_parts[i]}"
+            fi
+        done
+        echo "$out"
+    else
+        translate_cmd "$raw"
+    fi
+}
+
+# Process command-line flags
+NOLOGO=0
+COMMAND_TO_RUN=""
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -NoLogo|-nologo)
+            NOLOGO=1
+            shift
+            ;;
+        -Command|-command|-c)
+            shift
+            COMMAND_TO_RUN="$*"
+            break
+            ;;
+        -File|-file)
+            shift
+            SCRIPT_FILE="$1"
+            shift || true
+            if [[ -f "$SCRIPT_FILE" ]]; then
+                while IFS= read -r line || [[ -n "$line" ]]; do
+                    [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue
+                    exec_cmd=$(translate_pipeline "$line")
+                    eval "$exec_cmd"
+                done < "$SCRIPT_FILE"
+                exit 0
+            else
+                echo "zoth-powershell : Cannot find path '$SCRIPT_FILE' because it does not exist." >&2
+                exit 1
+            fi
+            ;;
+        -Version|-v|--version)
+            echo "PowerShell 7.4.2"
+            exit 0
+            ;;
+        -Help|-h|--help)
+            echo "PowerShell 7.4.2"
+            echo "Usage: pwsh [-Command <cmd>] [-File <file>] [-NoLogo] [-NoExit]"
+            exit 0
+            ;;
+        *)
+            # Direct command invocation
+            COMMAND_TO_RUN="$*"
+            break
+            ;;
+    esac
+done
+
+# Execute non-interactive command if specified
+if [[ -n "$COMMAND_TO_RUN" ]]; then
+    exec_cmd=$(translate_pipeline "$COMMAND_TO_RUN")
+    eval "$exec_cmd"
+    exit $?
+fi
+
+# Interactive PowerShell REPL Session
+export PS1='PS C:\Users\Administrator> '
+PROMPT='PS C:\Users\Administrator> '
+
+if [[ $NOLOGO -eq 0 ]]; then
+    show_header
+fi
+
+while true; do
+    if [[ -t 0 ]]; then
+        read -e -r -p "$PROMPT" line || break
+    else
+        printf "%s" "$PROMPT"
+        read -r line || break
+    fi
+
+    # Trim leading/trailing whitespace
+    trimmed="${line#"${line%%[![:space:]]*}"}"
+    trimmed="${trimmed%"${trimmed##*[![:space:]]}"}"
+
+    # Skip empty lines
+    [[ -z "$trimmed" ]] && continue
+
+    # Skip comments
+    [[ "$trimmed" =~ ^# ]] && continue
+
+    # Handle exit
+    if [[ "$trimmed" == "exit" || "$trimmed" == "quit" || "$trimmed" == "exit 0" ]]; then
+        break
+    fi
+
+    # Navigation handling: cd / Set-Location
+    if [[ "$trimmed" =~ ^(cd|Set-Location)([[:space:]]+(.*))?$ ]]; then
+        target="${BASH_REMATCH[3]}"
+        target="${target#"${target%%[![:space:]]*}"}"
+        target="${target%"${target##*[![:space:]]}"}"
+        target="${target#[\"\']}"
+        target="${target%[\"\']}"
+
+        if [[ -z "$target" || "$target" == "~" || "$target" =~ ^[Cc]:\\Users\\Administrator ]]; then
+            cd "$HOME" || true
+        elif [[ "$target" == "C:" || "$target" == "C:\\" || "$target" == "\\" || "$target" == "c:" || "$target" == "c:\\" ]]; then
+            cd / || true
+        else
+            clean_target="${target//\\//}"
+            clean_target="${clean_target/#C:\/Users\/Administrator/$HOME}"
+            clean_target="${clean_target/#c:\/Users\/Administrator/$HOME}"
+            clean_target="${clean_target/#C:\//\/}"
+            clean_target="${clean_target/#c:\//\/}"
+            cd "$clean_target" 2>/dev/null || cd "$target" 2>/dev/null || echo "Set-Location : Cannot find path '$target' because it does not exist."
+        fi
+        continue
+    fi
+
+    # PowerShell Version Table
+    if [[ "$trimmed" == '$PSVersionTable' || "$trimmed" == "echo \$PSVersionTable" ]]; then
+        show_version_table
+        continue
+    fi
+
+    # Translate and execute
+    translated=$(translate_pipeline "$trimmed")
+    eval "$translated"
+done

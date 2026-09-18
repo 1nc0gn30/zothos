@@ -1,0 +1,836 @@
+#!/usr/bin/env python3
+"""
+ZOTHOS COCKPIT TUI - Sovereign Interactive Operations Dashboard
+===============================================================
+A standalone, full-screen terminal operations center for ZOTHOS Linux.
+Integrates live hardware & network metrics, instant reality mode switching,
+frontier AI engine launchers, offensive/defensive security tools,
+and the Zoth Studio sovereign workspace.
+
+Author: ZOTHOS Linux Core Systems Engineering
+License: MIT / Sovereign Open Source
+"""
+
+from __future__ import annotations
+
+import argparse
+import curses
+import os
+import shutil
+import signal
+import socket
+import subprocess
+import sys
+import time
+from typing import Any, Dict, List, Optional, Tuple
+
+VERSION = "1.0.0-Azoth"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ANSI Color Constants (for headless/status mode)
+# ═══════════════════════════════════════════════════════════════════════════════
+ANSI_RESET = "\033[0m"
+ANSI_BOLD = "\033[1m"
+ANSI_DIM = "\033[2m"
+ANSI_GREEN = "\033[38;2;0;255;157m"   # Emerald phosphor (#00ff9d)
+ANSI_GOLD = "\033[38;2;251;191;36m"   # Cyber gold (#fbbf24)
+ANSI_CYAN = "\033[38;2;56;189;248m"   # Neon cyan (#38bdf8)
+ANSI_RED = "\033[38;2;244;63;94m"     # Crimson stealth (#f43f5e)
+ANSI_PURPLE = "\033[38;2;192;132;252m"# Synth purple (#c084fc)
+ANSI_GRAY = "\033[38;2;148;163;184m"  # Slate (#94a3b8)
+ANSI_BG_DARK = "\033[48;2;5;8;7m"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# System Metrics & Telemetry Engine
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class SystemMetrics:
+    def __init__(self) -> None:
+        self.prev_cpu_idle: float = 0.0
+        self.prev_cpu_total: float = 0.0
+        self._init_cpu()
+
+    def _init_cpu(self) -> None:
+        try:
+            with open("/proc/stat", "r") as f:
+                fields = [float(x) for x in f.readline().split()[1:8]]
+                self.prev_cpu_idle = fields[3] + fields[4]
+                self.prev_cpu_total = sum(fields)
+        except Exception:
+            self.prev_cpu_idle = 0.0
+            self.prev_cpu_total = 1.0
+
+    def get_cpu(self) -> Tuple[float, List[float]]:
+        """Returns (cpu_percentage, [load1, load5, load15])."""
+        cpu_pct = 0.0
+        try:
+            with open("/proc/stat", "r") as f:
+                fields = [float(x) for x in f.readline().split()[1:8]]
+                idle = fields[3] + fields[4]
+                total = sum(fields)
+                idle_delta = idle - self.prev_cpu_idle
+                total_delta = total - self.prev_cpu_total
+                self.prev_cpu_idle = idle
+                self.prev_cpu_total = total
+                if total_delta > 0:
+                    cpu_pct = max(0.0, min(100.0, 100.0 * (1.0 - idle_delta / total_delta)))
+        except Exception:
+            cpu_pct = 0.0
+
+        loads = [0.0, 0.0, 0.0]
+        try:
+            loads = list(os.getloadavg())
+        except Exception:
+            pass
+
+        return cpu_pct, loads
+
+    @staticmethod
+    def get_ram() -> Tuple[float, float, float]:
+        """Returns (used_gb, total_gb, percentage)."""
+        try:
+            mem = {}
+            with open("/proc/meminfo", "r") as f:
+                for line in f:
+                    parts = line.split(":")
+                    if len(parts) == 2:
+                        mem[parts[0].strip()] = int(parts[1].split()[0])
+            total_kb = mem.get("MemTotal", 1024)
+            avail_kb = mem.get("MemAvailable", mem.get("MemFree", 0))
+            used_kb = total_kb - avail_kb
+            pct = max(0.0, min(100.0, (used_kb / total_kb) * 100.0))
+            return used_kb / (1024.0 ** 2), total_kb / (1024.0 ** 2), pct
+        except Exception:
+            return 0.0, 1.0, 0.0
+
+    @staticmethod
+    def get_disk(path: str = "/") -> Tuple[float, float, float]:
+        """Returns (used_gb, total_gb, percentage)."""
+        try:
+            usage = shutil.disk_usage(path)
+            total_gb = usage.total / (1024.0 ** 3)
+            used_gb = usage.used / (1024.0 ** 3)
+            pct = (usage.used / usage.total) * 100.0 if usage.total > 0 else 0.0
+            return used_gb, total_gb, pct
+        except Exception:
+            return 0.0, 1.0, 0.0
+
+    @staticmethod
+    def get_uptime() -> str:
+        """Returns human-readable uptime."""
+        try:
+            with open("/proc/uptime", "r") as f:
+                up_sec = float(f.readline().split()[0])
+            days = int(up_sec // 86400)
+            hours = int((up_sec % 86400) // 3600)
+            mins = int((up_sec % 3600) // 60)
+            if days > 0:
+                return f"{days}d {hours:02d}h {mins:02d}m"
+            return f"{hours:02d}h {mins:02d}m"
+        except Exception:
+            return "unknown"
+
+    @staticmethod
+    def get_tor_route() -> Tuple[str, bool]:
+        """Returns (status_text, is_cloaked)."""
+        # 1. Check ghostmode state file
+        if os.path.exists("/run/zoth_ghostmode.state"):
+            return "CLOAKED (Ghostmode Active)", True
+
+        # 2. Check SOCKS5 Tor port 9050
+        if check_port(9050):
+            return "ACTIVE (Tor SOCKS5 :9050)", True
+
+        # 3. Check Tor service state
+        try:
+            res = subprocess.run(
+                ["systemctl", "is-active", "tor"],
+                capture_output=True,
+                text=True,
+                timeout=0.25,
+            )
+            if res.returncode == 0 and res.stdout.strip() == "active":
+                return "ONLINE (Tor Daemon)", True
+        except Exception:
+            pass
+
+        return "CLEAN (Direct Clearnet Route)", False
+
+    @staticmethod
+    def get_active_mode() -> str:
+        """Returns 'matrix', 'ghost', or 'incognito'."""
+        if os.path.exists("/run/zoth_ghostmode.state"):
+            return "ghost"
+        state_file = os.path.expanduser("~/.config/zothos/current_mode")
+        if os.path.exists(state_file):
+            try:
+                with open(state_file, "r") as f:
+                    mode = f.read().strip().lower()
+                    if mode in ["matrix", "ghost", "incognito"]:
+                        return mode
+            except Exception:
+                pass
+        undercover_state = os.path.expanduser("~/.config/zothos/undercover.state")
+        if os.path.exists(undercover_state):
+            return "incognito"
+        return "matrix"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Port & Binary Inspection Helpers
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def check_port(port: int, host: str = "127.0.0.1", timeout: float = 0.15) -> bool:
+    """Check if TCP port is bound."""
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(timeout)
+            return s.connect_ex((host, port)) == 0
+    except Exception:
+        return False
+
+def tool_available(cmd: str) -> bool:
+    """Check if CLI tool exists in PATH."""
+    return shutil.which(cmd) is not None
+
+def python_pkg_available(pkg: str) -> bool:
+    """Check if a Python package can be imported."""
+    try:
+        res = subprocess.run(
+            [sys.executable, "-c", f"import {pkg}"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=0.4,
+        )
+        return res.returncode == 0
+    except Exception:
+        return False
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Arsenal & Service Definitions
+# ═══════════════════════════════════════════════════════════════════════════════
+
+AI_ENGINES = [
+    {
+        "key": "o",
+        "name": "Ollama",
+        "port": 11434,
+        "type": "port",
+        "bin": "ollama",
+        "desc": "Neural inference engine (Qwen, DeepSeek, Hermes)",
+        "launch_cmd": ["ollama", "serve"],
+        "chat_cmd": ["ollama", "run", "llama3.2"],
+    },
+    {
+        "key": "c",
+        "name": "ComfyUI",
+        "port": 8188,
+        "type": "port",
+        "bin": "python3",
+        "desc": "Generative visual diffusion & alchemical canvas",
+        "url": "http://127.0.0.1:8188",
+    },
+    {
+        "key": "v",
+        "name": "vLLM",
+        "port": 8000,
+        "type": "port",
+        "bin": "vllm",
+        "desc": "High-throughput PagedAttention inference server",
+        "launch_cmd": ["vllm", "serve", "--help"],
+    },
+    {
+        "key": "h",
+        "name": "Hermes Agent",
+        "port": 0,
+        "type": "bin",
+        "bin": "hermes",
+        "desc": "Autonomous agent runner & skill execution bus",
+        "launch_cmd": ["hermes"],
+    },
+    {
+        "key": "g",
+        "name": "Garak",
+        "port": 0,
+        "type": "python",
+        "bin": "garak",
+        "pkg": "garak",
+        "desc": "Generative AI vulnerability & jailbreak scanner",
+        "launch_cmd": [sys.executable, "-m", "garak", "--help"],
+    },
+    {
+        "key": "p",
+        "name": "PyRIT",
+        "port": 0,
+        "type": "python",
+        "bin": "pyrit",
+        "pkg": "pyrit",
+        "desc": "Microsoft AI Red Teaming Orchestrator",
+        "launch_cmd": [sys.executable, "-c", "import pyrit; print('[✓] PyRIT framework operational'); input('Press Enter...')"],
+    },
+]
+
+SECURITY_TOOLS = [
+    {
+        "key": "n",
+        "name": "Nmap",
+        "bin": "nmap",
+        "desc": "Network exploration & port vulnerability discovery",
+        "launch_cmd": ["nmap", "--help"],
+    },
+    {
+        "key": "m",
+        "name": "Metasploit",
+        "bin": "msfconsole",
+        "desc": "Exploitation & automated payload delivery framework",
+        "launch_cmd": ["msfconsole"],
+    },
+    {
+        "key": "w",
+        "name": "Wireshark",
+        "bin": "wireshark",
+        "gui": True,
+        "desc": "Deep packet inspection & real-time network protocol analyzer",
+        "launch_cmd": ["wireshark"],
+    },
+    {
+        "key": "b",
+        "name": "Burp Suite",
+        "bin": "burpsuite",
+        "alt_bin": "caido",
+        "gui": True,
+        "desc": "Web penetration testing & security interceptor",
+        "launch_cmd": ["burpsuite"],
+    },
+    {
+        "key": "a",
+        "name": "Aircrack-ng",
+        "bin": "aircrack-ng",
+        "desc": "802.11 wireless security audit & WEP/WPA key recovery",
+        "launch_cmd": ["aircrack-ng", "--help"],
+    },
+]
+
+ZOTH_STUDIO_SERVICES = [
+    {"name": "Fast Gateway / Dev Server", "port": 8199},
+    {"name": "Orchestrator Swarm Bus", "port": 8484},
+    {"name": "Studio Web & Comics Hub", "port": 8088},
+    {"name": "Vector Memory Matrix", "port": 8788},
+    {"name": "SimpleX Quantum Bridge", "port": 8767},
+]
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Visual Helpers (Meters, Progress Bars)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def render_meter(pct: float, width: int = 14) -> str:
+    """Generate high-density unicode meter bar [████░░░░░░]"""
+    pct = max(0.0, min(100.0, pct))
+    filled = int(round((pct / 100.0) * width))
+    empty = width - filled
+    return "█" * filled + "░" * empty
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Headless / Status Mode CLI Renderer
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def render_headless_status() -> None:
+    """Prints a clean snapshot of ZOTHOS Cockpit directly to stdout."""
+    metrics = SystemMetrics()
+    time.sleep(0.08)
+    cpu_pct, loads = metrics.get_cpu()
+    ram_used, ram_total, ram_pct = metrics.get_ram()
+    disk_used, disk_total, disk_pct = metrics.get_disk("/")
+    uptime = metrics.get_uptime()
+    tor_status, is_cloaked = metrics.get_tor_route()
+    active_mode = metrics.get_active_mode().upper()
+
+    print(f"{ANSI_GREEN}{ANSI_BOLD}")
+    print("  ╔══════════════════════════════════════════════════════════════════════╗")
+    print("  ║        🜂 ZOTHOS LINUX COCKPIT - SOVEREIGN OPERATIONS DECK 🜄         ║")
+    print("  ╚══════════════════════════════════════════════════════════════════════╝")
+    print(f"{ANSI_RESET}")
+
+    print(f"  {ANSI_BOLD}REALITY MODE:{ANSI_RESET}  [{ANSI_GREEN}{active_mode}{ANSI_RESET}]   │  {ANSI_BOLD}UPTIME:{ANSI_RESET} {uptime}   │  {ANSI_BOLD}VERSION:{ANSI_RESET} {VERSION}")
+    print(f"  {ANSI_BOLD}TOR CLOAKING:{ANSI_RESET}  {ANSI_GREEN if is_cloaked else ANSI_RED}{tor_status}{ANSI_RESET}\n")
+
+    print(f"  {ANSI_CYAN}{ANSI_BOLD}--- [ LIVE HARDWARE TELEMETRY ] ---{ANSI_RESET}")
+    print(f"  CPU Usage: [{render_meter(cpu_pct)}] {cpu_pct:5.1f}%  (Load: {loads[0]:.2f}, {loads[1]:.2f}, {loads[2]:.2f})")
+    print(f"  RAM Usage: [{render_meter(ram_pct)}] {ram_pct:5.1f}%  ({ram_used:.1f} GB / {ram_total:.1f} GB)")
+    print(f"  Disk (/) : [{render_meter(disk_pct)}] {disk_pct:5.1f}%  ({disk_used:.1f} GB / {disk_total:.1f} GB)\n")
+
+    print(f"  {ANSI_PURPLE}{ANSI_BOLD}--- [ AI ENGINES STATUS ] ---{ANSI_RESET}")
+    for eng in AI_ENGINES:
+        if eng["type"] == "port":
+            is_up = check_port(eng["port"])
+            status = f"{ANSI_GREEN}[ONLINE :{eng['port']}]{ANSI_RESET}" if is_up else f"{ANSI_RED}[OFFLINE]{ANSI_RESET}"
+        elif eng["type"] == "bin":
+            status = f"{ANSI_GREEN}[INSTALLED]{ANSI_RESET}" if tool_available(eng["bin"]) else f"{ANSI_GRAY}[NOT IN PATH]{ANSI_RESET}"
+        else:
+            ready = tool_available(eng.get("bin", "")) or python_pkg_available(eng.get("pkg", ""))
+            status = f"{ANSI_GREEN}[READY]{ANSI_RESET}" if ready else f"{ANSI_GRAY}[AVAILABLE VIA VENV]{ANSI_RESET}"
+        print(f"  [{eng['key'].upper()}] {eng['name']:<14} {status:<24} {ANSI_GRAY}{eng['desc']}{ANSI_RESET}")
+
+    print(f"\n  {ANSI_RED}{ANSI_BOLD}--- [ SECURITY ARSENAL QUICK LAUNCHER ] ---{ANSI_RESET}")
+    for sec in SECURITY_TOOLS:
+        avail = tool_available(sec["bin"]) or (sec.get("alt_bin") and tool_available(sec["alt_bin"]))
+        status = f"{ANSI_GREEN}[INSTALLED]{ANSI_RESET}" if avail else f"{ANSI_GRAY}[APT AVAILABLE]{ANSI_RESET}"
+        print(f"  [{sec['key'].upper()}] {sec['name']:<14} {status:<24} {ANSI_GRAY}{sec['desc']}{ANSI_RESET}")
+
+    print(f"\n  {ANSI_GOLD}{ANSI_BOLD}--- [ ZOTH STUDIO DAEMONS ] ---{ANSI_RESET}")
+    for s in ZOTH_STUDIO_SERVICES:
+        up = check_port(s["port"])
+        status = f"{ANSI_GREEN}● ONLINE{ANSI_RESET}" if up else f"{ANSI_GRAY}○ OFFLINE{ANSI_RESET}"
+        print(f"  {s['name']:<28} Port: {s['port']:<6} {status}")
+    print("")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Interactive Fullscreen Curses Application
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class CockpitTUI:
+    def __init__(self, stdscr: curses.window) -> None:
+        self.stdscr = stdscr
+        self.metrics = SystemMetrics()
+        self.status_msg = "Sovereign Cockpit active. Press keys [1-3, O, C, V, H, G, P, N, M, W, B, A, Z] or [Q] to quit."
+        self.status_time = time.time()
+        self.selected_index = 0
+        self.running = True
+
+        # Build list of selectable actions for arrow navigation
+        self.menu_items: List[Dict[str, Any]] = [
+            # Modes
+            {"cat": "mode", "key": "1", "label": "Switch to Hermetic Matrix Reality", "action": lambda: self.set_mode("matrix")},
+            {"cat": "mode", "key": "2", "label": "Switch to Ghostmode (nullai.tech)", "action": lambda: self.set_mode("ghost")},
+            {"cat": "mode", "key": "3", "label": "Switch to Incognito Windows 11 Guise", "action": lambda: self.set_mode("incognito")},
+            # AI Engines
+            {"cat": "ai", "key": "o", "label": "Launch Ollama Neural Model Runner", "action": lambda: self.launch_ai("o")},
+            {"cat": "ai", "key": "c", "label": "Launch ComfyUI Generative Visuals", "action": lambda: self.launch_ai("c")},
+            {"cat": "ai", "key": "v", "label": "Launch vLLM High-Throughput Server", "action": lambda: self.launch_ai("v")},
+            {"cat": "ai", "key": "h", "label": "Launch Hermes Autonomous Agent", "action": lambda: self.launch_ai("h")},
+            {"cat": "ai", "key": "g", "label": "Launch Garak LLM Vulnerability Scanner", "action": lambda: self.launch_ai("g")},
+            {"cat": "ai", "key": "p", "label": "Launch PyRIT AI Red Teaming Framework", "action": lambda: self.launch_ai("p")},
+            # Security Tools
+            {"cat": "sec", "key": "n", "label": "Launch Nmap Network Exploration", "action": lambda: self.launch_sec("n")},
+            {"cat": "sec", "key": "m", "label": "Launch Metasploit Framework (msfconsole)", "action": lambda: self.launch_sec("m")},
+            {"cat": "sec", "key": "w", "label": "Launch Wireshark Packet Analyzer (GUI)", "action": lambda: self.launch_sec("w")},
+            {"cat": "sec", "key": "b", "label": "Launch Burp Suite / Caido (GUI)", "action": lambda: self.launch_sec("b")},
+            {"cat": "sec", "key": "a", "label": "Launch Aircrack-ng Wireless Security", "action": lambda: self.launch_sec("a")},
+            # Zoth Studio
+            {"cat": "studio", "key": "z", "label": "Launch Zoth Studio Sovereign Deck", "action": self.launch_zoth_studio},
+        ]
+
+    def init_colors(self) -> None:
+        curses.start_color()
+        curses.use_default_colors()
+        # Pair IDs: 1: Emerald/Green, 2: Gold/Yellow, 3: Cyan/Blue, 4: Red, 5: Purple, 6: Dim Gray, 7: Active Badge
+        curses.init_pair(1, curses.COLOR_GREEN, -1)
+        curses.init_pair(2, curses.COLOR_YELLOW, -1)
+        curses.init_pair(3, curses.COLOR_CYAN, -1)
+        curses.init_pair(4, curses.COLOR_RED, -1)
+        curses.init_pair(5, curses.COLOR_MAGENTA, -1)
+        curses.init_pair(6, curses.COLOR_WHITE, -1)
+        curses.init_pair(7, curses.COLOR_BLACK, curses.COLOR_GREEN)
+        curses.init_pair(8, curses.COLOR_BLACK, curses.COLOR_YELLOW)
+        curses.init_pair(9, curses.COLOR_BLACK, curses.COLOR_CYAN)
+
+    def notify(self, msg: str) -> None:
+        self.status_msg = msg
+        self.status_time = time.time()
+
+    def safe_addstr(self, y: int, x: int, text: str, attr: int = 0) -> None:
+        h, w = self.stdscr.getmaxyx()
+        if 0 <= y < h and 0 <= x < w:
+            max_len = max(0, w - x - 1)
+            try:
+                self.stdscr.addstr(y, x, text[:max_len], attr)
+            except curses.error:
+                pass
+
+    def run_external_cli(self, cmd_list: List[str], title: str) -> None:
+        """Suspends curses, runs CLI interactive command, and restores curses."""
+        curses.def_prog_mode()
+        curses.endwin()
+        print(f"\033[1;32m[*] ZOTHOS Cockpit: Launching {title}...\033[0m\n")
+        try:
+            subprocess.run(cmd_list)
+        except Exception as e:
+            print(f"\033[1;31m[!] Error executing {title}: {e}\033[0m")
+        print("\n\033[1;36m[✓] Process terminated. Press Enter to return to Cockpit...\033[0m")
+        try:
+            input()
+        except Exception:
+            pass
+        curses.reset_prog_mode()
+        self.stdscr.clear()
+        self.notify(f"Returned from {title}")
+
+    def run_external_gui(self, cmd_list: List[str], title: str) -> None:
+        """Spawns GUI / background application without suspending curses."""
+        try:
+            subprocess.Popen(
+                cmd_list,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                start_new_session=True,
+            )
+            self.notify(f"[✓] Launched {title} in background")
+        except Exception as e:
+            self.notify(f"[!] Failed to launch {title}: {e}")
+
+    def set_mode(self, mode: str) -> None:
+        """Switches active reality mode."""
+        self.notify(f"Engaging {mode.upper()} mode...")
+        # Check if zoth-mode exists
+        if tool_available("zoth-mode"):
+            try:
+                res = subprocess.run(["zoth-mode", mode], capture_output=True, text=True, timeout=5.0)
+                self.notify(f"[✓] Reality shifted to {mode.upper()}")
+            except Exception as e:
+                self.notify(f"[!] Mode switch error: {e}")
+        else:
+            # Direct state file update fallback
+            cfg_dir = os.path.expanduser("~/.config/zothos")
+            os.makedirs(cfg_dir, exist_ok=True)
+            with open(os.path.join(cfg_dir, "current_mode"), "w") as f:
+                f.write(mode)
+            self.notify(f"[✓] Mode state set to {mode.upper()}")
+
+    def launch_ai(self, key: str) -> None:
+        eng = next((x for x in AI_ENGINES if x["key"] == key.lower()), None)
+        if not eng:
+            return
+        if eng["key"] == "o":
+            if not check_port(11434):
+                if tool_available("ollama"):
+                    self.run_external_gui(["ollama", "serve"], "Ollama Daemon")
+                else:
+                    self.notify("[!] 'ollama' binary not found in PATH")
+            else:
+                self.run_external_cli(["ollama", "list"], "Ollama Models")
+        elif eng["key"] == "c":
+            if check_port(8188):
+                self.run_external_gui(["xdg-open", "http://127.0.0.1:8188"], "ComfyUI Browser")
+            elif os.path.isdir("/opt/ComfyUI"):
+                self.run_external_gui(["python3", "/opt/ComfyUI/main.py", "--listen", "127.0.0.1", "--port", "8188"], "ComfyUI Daemon")
+            else:
+                self.notify("[!] ComfyUI not detected on port 8188 or /opt/ComfyUI")
+        elif eng["key"] == "v":
+            self.run_external_cli(eng["launch_cmd"], "vLLM Inference Server")
+        elif eng["key"] == "h":
+            if tool_available("hermes"):
+                self.run_external_cli(["hermes"], "Hermes Agent CLI")
+            else:
+                self.notify("[!] 'hermes' agent CLI not found in PATH")
+        elif eng["key"] == "g":
+            self.run_external_cli(eng["launch_cmd"], "Garak Vulnerability Scanner")
+        elif eng["key"] == "p":
+            self.run_external_cli(eng["launch_cmd"], "PyRIT Red Teaming Harness")
+
+    def launch_sec(self, key: str) -> None:
+        sec = next((x for x in SECURITY_TOOLS if x["key"] == key.lower()), None)
+        if not sec:
+            return
+        bin_name = sec["bin"]
+        if not tool_available(bin_name):
+            if sec.get("alt_bin") and tool_available(sec["alt_bin"]):
+                bin_name = sec["alt_bin"]
+            else:
+                self.notify(f"[!] Tool '{bin_name}' not installed. Install via: apt install {bin_name}")
+                return
+
+        if sec.get("gui", False):
+            self.run_external_gui([bin_name], sec["name"])
+        else:
+            self.run_external_cli(sec["launch_cmd"], sec["name"])
+
+    def launch_zoth_studio(self) -> None:
+        """Launches the Zoth Studio hub or web interface."""
+        if os.path.exists("/opt/zoth-studio/launch.sh"):
+            self.run_external_gui(["/opt/zoth-studio/launch.sh"], "Zoth Studio Launch Script")
+        elif tool_available("zoth"):
+            self.run_external_cli(["zoth", "status"], "Zoth Studio Deck")
+        elif check_port(8199):
+            self.run_external_gui(["xdg-open", "http://127.0.0.1:8199"], "Zoth Studio Web")
+        elif check_port(8989):
+            self.run_external_gui(["xdg-open", "http://127.0.0.1:8989"], "Zoth Studio Web")
+        else:
+            self.notify("[*] Zoth background services offline. Run: zoth start")
+
+    def handle_input(self, ch: int) -> None:
+        if ch in [ord("q"), ord("Q"), 27]: # q or ESC
+            self.running = False
+            return
+        elif ch in [curses.KEY_UP, ord("k"), ord("K")]:
+            self.selected_index = (self.selected_index - 1) % len(self.menu_items)
+            return
+        elif ch in [curses.KEY_DOWN, ord("j"), ord("J")]:
+            self.selected_index = (self.selected_index + 1) % len(self.menu_items)
+            return
+        elif ch in [10, 13, curses.KEY_ENTER]: # Enter key executes selected
+            item = self.menu_items[self.selected_index]
+            item["action"]()
+            return
+
+        # Direct Hotkeys
+        c = chr(ch).lower() if 0 <= ch < 256 else ""
+        if c == "1":
+            self.set_mode("matrix")
+        elif c == "2":
+            self.set_mode("ghost")
+        elif c == "3":
+            self.set_mode("incognito")
+        elif c in ["o", "c", "v", "h", "g", "p"]:
+            self.launch_ai(c)
+        elif c in ["n", "m", "w", "b", "a"]:
+            self.launch_sec(c)
+        elif c == "z":
+            self.launch_zoth_studio()
+        elif c == "r":
+            self.notify("[✓] Live metrics refreshed")
+
+    def draw(self) -> None:
+        self.stdscr.erase()
+        h, w = self.stdscr.getmaxyx()
+
+        # Telemetry samples
+        cpu_pct, loads = self.metrics.get_cpu()
+        ram_used, ram_total, ram_pct = self.metrics.get_ram()
+        disk_used, disk_total, disk_pct = self.metrics.get_disk("/")
+        uptime = self.metrics.get_uptime()
+        tor_status, is_cloaked = self.metrics.get_tor_route()
+        active_mode = self.metrics.get_active_mode().upper()
+
+        c_green = curses.color_pair(1) | curses.A_BOLD
+        c_gold = curses.color_pair(2) | curses.A_BOLD
+        c_cyan = curses.color_pair(3) | curses.A_BOLD
+        c_red = curses.color_pair(4) | curses.A_BOLD
+        c_purple = curses.color_pair(5) | curses.A_BOLD
+        c_dim = curses.color_pair(6) | curses.A_DIM
+        c_bold = curses.A_BOLD
+
+        # ── 1. Top Header Banner ────────────────────────────────────────────────
+        title_text = f" 🜂 ZOTHOS LINUX COCKPIT 🜄  v{VERSION}  [Reality: {active_mode}] "
+        self.safe_addstr(0, max(0, (w - len(title_text)) // 2), title_text, curses.color_pair(7) | curses.A_BOLD)
+
+        clock_str = time.strftime("%Y-%m-%d %H:%M:%S")
+        self.safe_addstr(1, 2, f"Node: {socket.gethostname()}", c_dim)
+        self.safe_addstr(1, max(2, w - len(clock_str) - 3), clock_str, c_dim)
+
+        sep_line = "═" * (w - 4)
+        self.safe_addstr(2, 2, sep_line, c_green)
+
+        # Responsive layout: If height >= 32, show full vertical cards; else compact
+        cur_y = 3
+
+        # ── 2. Box 1: Hardware & Tor Telemetry ─────────────────────────────────
+        self.safe_addstr(cur_y, 2, "┌── [ 1. LIVE SYSTEM METRICS & SECURITY ROUTE ] " + ("─" * max(0, w - 50)) + "┐", c_cyan)
+        cur_y += 1
+        
+        # Telemetry Row 1: CPU & RAM
+        cpu_str = f"CPU: [{render_meter(cpu_pct, 12)}] {cpu_pct:5.1f}% (Load: {loads[0]:.2f}, {loads[1]:.2f})"
+        ram_str = f"RAM: [{render_meter(ram_pct, 12)}] {ram_pct:5.1f}% ({ram_used:.1f}/{ram_total:.1f} GB)"
+        self.safe_addstr(cur_y, 4, cpu_str, c_green if cpu_pct < 80 else c_red)
+        if w >= 80:
+            self.safe_addstr(cur_y, 48, ram_str, c_green if ram_pct < 85 else c_gold)
+        else:
+            cur_y += 1
+            self.safe_addstr(cur_y, 4, ram_str, c_green if ram_pct < 85 else c_gold)
+        cur_y += 1
+
+        # Telemetry Row 2: Disk & Tor Route
+        disk_str = f"DISK: [{render_meter(disk_pct, 12)}] {disk_pct:5.1f}% ({disk_used:.1f}/{disk_total:.1f} GB)"
+        tor_attr = c_green if is_cloaked else c_red
+        tor_str = f"TOR ROUTE: ● {tor_status}" if is_cloaked else f"TOR ROUTE: ○ {tor_status}"
+        self.safe_addstr(cur_y, 4, disk_str, c_cyan)
+        if w >= 80:
+            self.safe_addstr(cur_y, 48, tor_str, tor_attr)
+        else:
+            cur_y += 1
+            self.safe_addstr(cur_y, 4, tor_str, tor_attr)
+        cur_y += 1
+
+        # Uptime
+        self.safe_addstr(cur_y, 4, f"SYSTEM UPTIME: {uptime}", c_dim)
+        cur_y += 1
+        self.safe_addstr(cur_y, 2, "└" + ("─" * (w - 6)) + "┘", c_cyan)
+        cur_y += 1
+
+        # ── 3. Box 2: Quick Reality Switcher ───────────────────────────────────
+        self.safe_addstr(cur_y, 2, "┌── [ 2. QUICK REALITY SWITCHER ] " + ("─" * max(0, w - 36)) + "┐", c_gold)
+        cur_y += 1
+        
+        modes = [
+            ("1", "Hermetic Matrix", "matrix", "Emerald Phosphor · Azoth Glyphs · Glassmorphic", c_green),
+            ("2", "Ghostmode (nullai)", "ghost", "Amnesic Stealth · Torified · MAC Cloaked", c_red),
+            ("3", "Incognito Win 11", "incognito", "Windows 11 Fluent Guise · Decoy Desktop", c_cyan),
+        ]
+        for key, name, mode_id, desc, col in modes:
+            is_active = (active_mode.lower() == mode_id)
+            badge = " [ACTIVE] " if is_active else " [IDLE]   "
+            badge_attr = curses.color_pair(7) | curses.A_BOLD if is_active else c_dim
+            self.safe_addstr(cur_y, 4, f"[{key}]", c_gold)
+            self.safe_addstr(cur_y, 8, f"{name:<20}", col | c_bold)
+            self.safe_addstr(cur_y, 30, badge, badge_attr)
+            if w >= 80:
+                self.safe_addstr(cur_y, 42, f"↳ {desc}", c_dim)
+            cur_y += 1
+
+        self.safe_addstr(cur_y, 2, "└" + ("─" * (w - 6)) + "┘", c_gold)
+        cur_y += 1
+
+        # ── 4. Box 3: AI Engines Launcher ──────────────────────────────────────
+        self.safe_addstr(cur_y, 2, "┌── [ 3. FRONTIER & UNDERGROUND AI ENGINES ] " + ("─" * max(0, w - 47)) + "┐", c_purple)
+        cur_y += 1
+
+        for eng in AI_ENGINES:
+            if eng["type"] == "port":
+                up = check_port(eng["port"])
+                status_text = f"● ONLINE :{eng['port']}" if up else f"○ OFFLINE :{eng['port']}"
+                status_attr = c_green if up else c_dim
+            elif eng["type"] == "bin":
+                avail = tool_available(eng["bin"])
+                status_text = "✓ INSTALLED" if avail else "○ NOT IN PATH"
+                status_attr = c_green if avail else c_dim
+            else:
+                ready = tool_available(eng.get("bin", "")) or python_pkg_available(eng.get("pkg", ""))
+                status_text = "✓ READY" if ready else "○ AVAILABLE"
+                status_attr = c_green if ready else c_dim
+
+            self.safe_addstr(cur_y, 4, f"[{eng['key'].upper()}]", c_purple)
+            self.safe_addstr(cur_y, 8, f"{eng['name']:<14}", c_bold)
+            self.safe_addstr(cur_y, 24, f"{status_text:<18}", status_attr)
+            if w >= 80:
+                self.safe_addstr(cur_y, 44, f"↳ {eng['desc']}", c_dim)
+            cur_y += 1
+
+        self.safe_addstr(cur_y, 2, "└" + ("─" * (w - 6)) + "┘", c_purple)
+        cur_y += 1
+
+        # ── 5. Box 4: Security Quick Launcher ──────────────────────────────────
+        if cur_y + 8 < h:
+            self.safe_addstr(cur_y, 2, "┌── [ 4. SECURITY QUICK ARSENAL ] " + ("─" * max(0, w - 36)) + "┐", c_red)
+            cur_y += 1
+
+            for sec in SECURITY_TOOLS:
+                avail = tool_available(sec["bin"]) or (sec.get("alt_bin") and tool_available(sec["alt_bin"]))
+                status_text = "✓ INSTALLED" if avail else "○ APT AVAILABLE"
+                status_attr = c_green if avail else c_dim
+
+                self.safe_addstr(cur_y, 4, f"[{sec['key'].upper()}]", c_red)
+                self.safe_addstr(cur_y, 8, f"{sec['name']:<14}", c_bold)
+                self.safe_addstr(cur_y, 24, f"{status_text:<18}", status_attr)
+                if w >= 80:
+                    self.safe_addstr(cur_y, 44, f"↳ {sec['desc']}", c_dim)
+                cur_y += 1
+
+            self.safe_addstr(cur_y, 2, "└" + ("─" * (w - 6)) + "┘", c_red)
+            cur_y += 1
+
+        # ── 6. Box 5: Zoth Studio Status & Launcher ───────────────────────────
+        if cur_y + 4 < h:
+            self.safe_addstr(cur_y, 2, "┌── [ 5. ZOTH STUDIO SOVEREIGN HUB ] " + ("─" * max(0, w - 39)) + "┐", c_gold)
+            cur_y += 1
+
+            studio_statuses = []
+            for s in ZOTH_STUDIO_SERVICES[:3]:
+                is_up = check_port(s["port"])
+                studio_statuses.append(f"{s['name'].split()[0]}:" + (f"{ANSI_GREEN}UP{ANSI_RESET}" if is_up else "OFF"))
+            
+            p8199_up = check_port(8199)
+            p8484_up = check_port(8484)
+            p8989_up = check_port(8989)
+            p8788_up = check_port(8788)
+
+            ports_summary = (
+                f"Gateway(8199):{'ON' if p8199_up else 'OFF'} | "
+                f"Bus(8484):{'ON' if p8484_up else 'OFF'} | "
+                f"Hub(8989):{'ON' if p8989_up else 'OFF'} | "
+                f"Memory(8788):{'ON' if p8788_up else 'OFF'}"
+            )
+            self.safe_addstr(cur_y, 4, "[Z] Launch Zoth Studio", c_gold | curses.A_BOLD)
+            self.safe_addstr(cur_y, 30, ports_summary, c_dim)
+            cur_y += 1
+            self.safe_addstr(cur_y, 2, "└" + ("─" * (w - 6)) + "┘", c_gold)
+            cur_y += 1
+
+        # ── 7. Notification Status Bar ─────────────────────────────────────────
+        status_line_y = h - 2
+        if status_line_y > cur_y:
+            msg_bar = f" STATUS: {self.status_msg} "
+            self.safe_addstr(status_line_y, 2, msg_bar, curses.color_pair(8) if "!" in self.status_msg else curses.color_pair(9))
+
+        # ── 8. Bottom Key Legend Bar ──────────────────────────────────────────
+        footer_y = h - 1
+        legend = " [1-3: Modes] [O,C,V,H,G,P: AI] [N,M,W,B,A: Sec] [Z: Studio] [R: Refresh] [▲/▼/Enter: Select] [Q: Quit] "
+        self.safe_addstr(footer_y, max(0, (w - len(legend)) // 2), legend, curses.color_pair(7) | curses.A_BOLD)
+
+        self.stdscr.refresh()
+
+    def run(self) -> None:
+        curses.curs_set(0)
+        self.stdscr.nodelay(True)
+        self.stdscr.timeout(1000) # Refresh loop every 1s
+        self.init_colors()
+
+        while self.running:
+            self.draw()
+            try:
+                ch = self.stdscr.getch()
+                if ch != -1:
+                    self.handle_input(ch)
+            except KeyboardInterrupt:
+                break
+            except Exception as e:
+                self.notify(f"UI Error: {e}")
+                time.sleep(0.5)
+
+
+def curses_main(stdscr: curses.window) -> None:
+    app = CockpitTUI(stdscr)
+    app.run()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Main Entrypoint & CLI Parsing
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="ZOTHOS Cockpit - Interactive Sovereign Terminal Operations Center"
+    )
+    parser.add_argument(
+        "--status",
+        "--headless",
+        action="store_true",
+        help="Print real-time system metrics and service status to stdout without curses",
+    )
+    parser.add_argument(
+        "--version",
+        "-v",
+        action="version",
+        version=f"zoth-cockpit {VERSION}",
+    )
+    args = parser.parse_args()
+
+    if args.status or not sys.stdin.isatty():
+        render_headless_status()
+        return 0
+
+    try:
+        curses.wrapper(curses_main)
+    except KeyboardInterrupt:
+        pass
+    except Exception as e:
+        print(f"Error initializing curses interface: {e}", file=sys.stderr)
+        render_headless_status()
+        return 1
+
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())

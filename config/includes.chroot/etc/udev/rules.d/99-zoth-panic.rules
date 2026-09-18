@@ -1,0 +1,23 @@
+# ==============================================================================
+#  ZOTHOS EMERGENCY ANTI-FORENSIC PANIC RULES (udev)
+#  Trigger emergency panic lock or memory flush on:
+#   1. Unauthorized USB drive insertion (USB drop / forensic imager)
+#   2. Specific USB token removal (Deadman switch)
+# ==============================================================================
+
+# 1. Unauthorized USB Drive Insertion:
+# Trigger emergency panic lock and memory flush when an unauthorized USB block storage device is attached.
+ACTION=="add", SUBSYSTEM=="block", ENV{ID_BUS}=="usb", RUN+="/usr/local/bin/zoth-ghost panic"
+
+# Fallback match on USB Mass Storage device class
+ACTION=="add", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ENV{ID_USB_DRIVER}=="usb-storage", RUN+="/usr/local/bin/zoth-ghost panic"
+
+# 2. Specific USB Token Removal (Deadman Switch):
+# Trigger emergency panic lock and memory flush when a designated security token is unplugged.
+# Matches generic FIDO/U2F security tokens or Yubico hardware tokens (Vendor ID 1050).
+ACTION=="remove", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ENV{ID_SECURITY_TOKEN}=="1", RUN+="/usr/local/bin/zoth-ghost panic"
+ACTION=="remove", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ENV{ID_VENDOR_ID}=="1050", RUN+="/usr/local/bin/zoth-ghost panic"
+
+# Custom Token Deadman Key:
+# Users can uncomment and specify their custom hardware VID/PID:
+# ACTION=="remove", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ENV{ID_VENDOR_ID}=="XXXX", ENV{ID_MODEL_ID}=="YYYY", RUN+="/usr/local/bin/zoth-ghost panic"

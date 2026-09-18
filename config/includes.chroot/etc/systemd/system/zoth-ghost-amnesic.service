@@ -1,0 +1,14 @@
+[Unit]
+Description=ZOTHOS Ghost Amnesic Anti-Forensics Memory & History Scrub
+Documentation=https://zothos.org
+DefaultDependencies=no
+Before=shutdown.target halt.target poweroff.target reboot.target sleep.target suspend.target hibernate.target hybrid-sleep.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=no
+ExecStart=/bin/bash -c "if [ -x /usr/local/bin/zoth-ghost ]; then /usr/local/bin/zoth-ghost scrub; else sync; echo 3 > /proc/sys/vm/drop_caches; for h in /home/*/.bash_history /root/.bash_history /home/*/.zsh_history /root/.zsh_history; do [ -f \"$h\" ] && shred -u -z -n 3 \"$h\" 2>/dev/null || true; done; rm -rf /home/*/.cache/thumbnails/* /root/.cache/thumbnails/* 2>/dev/null || true; rm -f /home/*/.local/share/recently-used.xbel /root/.local/share/recently-used.xbel 2>/dev/null || true; swapoff -a 2>/dev/null || true; fi"
+TimeoutSec=30
+
+[Install]
+WantedBy=shutdown.target halt.target poweroff.target reboot.target sleep.target suspend.target hibernate.target hybrid-sleep.target
