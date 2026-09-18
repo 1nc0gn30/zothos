@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+unset PYTHONPATH
+unset PYTHONHOME
+if [[ -f "/home/neo/.hermes/hermes-agent/venv/bin/python" && -f "/home/neo/.hermes/hermes-agent/hermes" ]]; then
+    exec "/home/neo/.hermes/hermes-agent/venv/bin/python" "/home/neo/.hermes/hermes-agent/hermes" "$@"
+elif [[ -f "/opt/hermes/hermes-agent/venv/bin/python" ]]; then
+    exec "/opt/hermes/hermes-agent/venv/bin/python" "/opt/hermes/hermes-agent/hermes" "$@"
+else
+    echo "[!] Hermes runtime not found in ~/.hermes or /opt/hermes."
+    exit 1
+fi
