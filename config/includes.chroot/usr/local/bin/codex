@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#  ZOTHOS OpenAI Codex CLI Auto-Bootstrap & Runner
+# ==============================================================================
+set -euo pipefail
+
+if [[ -f "/usr/lib/node_modules/@openai/codex/bin/codex.js" ]]; then
+    exec node "/usr/lib/node_modules/@openai/codex/bin/codex.js" "$@"
+elif [[ -f "/usr/local/lib/node_modules/@openai/codex/bin/codex.js" ]]; then
+    exec node "/usr/local/lib/node_modules/@openai/codex/bin/codex.js" "$@"
+elif command -v codex >/dev/null 2>&1 && [[ "$(which codex)" != "$0" ]]; then
+    exec "$(which codex)" "$@"
+else
+    echo -e "\e[1;36m[⚡] ZOTHOS: Invoking Codex via npx...\e[0m"
+    npx @openai/codex "$@"
+fi
