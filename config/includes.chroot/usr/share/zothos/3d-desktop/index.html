@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="emerald">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZOTHOS // 3D SPATIAL DESKTOP ENVIRONMENT</title>
+  <script src="./vendor/three.min.js"></script>
+  <script src="./vendor/OrbitControls.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    :root {
+      --bg: #02040a;
+      --accent: #00ff88;
+      --accent-rgb: 0, 255, 136;
+      --accent2: #00f3ff;
+      --accent2-rgb: 0, 243, 255;
+      --gold: #fbbf24;
+      --purple: #a855f7;
+      --fg: #ecfdf5;
+      --card-bg: rgba(2, 8, 18, 0.88);
+      --border: rgba(0, 255, 136, 0.4);
+      --glow: 0 0 25px rgba(0, 255, 136, 0.5);
+      --font-mono: 'JetBrains Mono', 'Share Tech Mono', 'DejaVu Sans Mono', monospace;
+    }
+
+    [data-theme="ghost"] {
+      --accent: #c084fc;
+      --accent-rgb: 192, 132, 252;
+      --accent2: #a855f7;
+      --fg: #faf5ff;
+      --card-bg: rgba(12, 4, 24, 0.90);
+      --border: rgba(168, 85, 247, 0.45);
+      --glow: 0 0 25px rgba(168, 85, 247, 0.55);
+    }
+
+    [data-theme="gold"] {
+      --accent: #fbbf24;
+      --accent-rgb: 251, 191, 36;
+      --accent2: #f59e0b;
+      --fg: #fefce8;
+      --card-bg: rgba(20, 14, 2, 0.90);
+      --border: rgba(251, 191, 36, 0.45);
+      --glow: 0 0 25px rgba(251, 191, 36, 0.55);
+    }
+
+    [data-theme="cyan"] {
+      --accent: #00f3ff;
+      --accent-rgb: 0, 243, 255;
+      --accent2: #38bdf8;
+      --fg: #f0fdfa;
+      --card-bg: rgba(2, 14, 28, 0.90);
+      --border: rgba(0, 243, 255, 0.45);
+      --glow: 0 0 25px rgba(0, 243, 255, 0.55);
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      font-family: var(--font-mono);
+      color: var(--fg);
+    }
+
+    #webgl-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    .crt-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+      background-size: 100% 3px, 4px 100%;
+    }
+
+    /* Top HUD Action Bar */
+    .top-action-bar {
+      position: absolute;
+      top: 16px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+      pointer-events: auto;
+    }
+
+    .brand-pill {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      padding: 8px 18px;
+      border-radius: 999px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6), var(--glow);
+    }
+
+    .brand-pill .pulse-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+      animation: pulse 1.5s infinite alternate;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.85); opacity: 0.7; }
+      100% { transform: scale(1.25); opacity: 1; }
+    }
+
+    .brand-pill span {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--accent);
+    }
+
+    .exit-controls {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-exit {
+      background: rgba(239, 68, 68, 0.25);
+      border: 1px solid rgba(239, 68, 68, 0.7);
+      color: #fca5a5;
+      padding: 8px 18px;
+      border-radius: 999px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      backdrop-filter: blur(12px);
+      transition: all 0.2s ease;
+      box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-exit:hover {
+      background: rgba(239, 68, 68, 0.9);
+      color: #ffffff;
+      box-shadow: 0 0 25px rgba(239, 68, 68, 0.8);
+      transform: translateY(-1px);
+    }
+
+    /* Floating Info Tooltip for 3D Target */
+    .target-tooltip {
+      position: absolute;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 24px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), var(--glow);
+      z-index: 50;
+      text-align: center;
+      transition: all 0.2s ease;
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    .target-tooltip.active {
+      opacity: 1;
+      transform: translateX(-50%) translateY(-10px);
+    }
+
+    .target-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--accent);
+      letter-spacing: 1px;
+    }
+
+    .target-desc {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    .target-action {
+      font-size: 10px;
+      font-weight: bold;
+      color: var(--accent2);
+      margin-top: 6px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Bottom Status & Theme Bar */
+    .bottom-bar {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 50;
+    }
+
+    .telemetry-pill {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 11px;
+      color: var(--accent);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--glow);
+    }
+
+    .theme-picker {
+      display: flex;
+      gap: 8px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 999px;
+      backdrop-filter: blur(12px);
+    }
+
+    .theme-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      transition: transform 0.2s ease;
+    }
+
+    .theme-dot:hover {
+      transform: scale(1.2);
+    }
+
+    .dot-emerald { background: #00ff88; }
+    .dot-ghost { background: #c084fc; }
+    .dot-gold { background: #fbbf24; }
+    .dot-cyan { background: #00f3ff; }
+  </style>
+</head>
+<body>
+
+  <div id="webgl-canvas"></div>
+  <div class="crt-overlay"></div>
+
+  <!-- Top Action Bar -->
+  <div class="top-action-bar">
+    <div class="brand-pill">
+      <div class="pulse-dot"></div>
+      <span>ZOTHOS // 3D SPATIAL OS DECK</span>
+    </div>
+    <div class="exit-controls">
+      <button class="btn-exit" onclick="exitSpatialDesktop()">✕ RETURN TO 2D DESKTOP [ESC]</button>
+    </div>
+  </div>
+
+  <!-- Floating Target Tooltip -->
+  <div class="target-tooltip" id="targetTooltip">
+    <div class="target-title" id="ttTitle">ZOTH STUDIO</div>
+    <div class="target-desc" id="ttDesc">Alchemical Neural Hub & Tooling Suite</div>
+    <div class="target-action">CLICK 3D NODE TO LAUNCH APPLICATION</div>
+  </div>
+
+  <!-- Bottom Bar -->
+  <div class="bottom-bar">
+    <div class="telemetry-pill" id="telemetryPill">
+      ● 3D ENGINE ACTIVE &nbsp;|&nbsp; 60 FPS &nbsp;|&nbsp; DRAG MOUSE TO ORBIT &nbsp;|&nbsp; SCROLL TO ZOOM
+    </div>
+    <div class="theme-picker">
+      <div class="theme-dot dot-emerald" onclick="changeTheme('emerald')" title="Emerald Matrix"></div>
+      <div class="theme-dot dot-ghost" onclick="changeTheme('ghost')" title="Ghost Amethyst"></div>
+      <div class="theme-dot dot-gold" onclick="changeTheme('gold')" title="Celestial Gold"></div>
+      <div class="theme-dot dot-cyan" onclick="changeTheme('cyan')" title="Electric Cyan"></div>
+    </div>
+  </div>
+
+  <script>
+    // ── APPLICATION LAUNCH REGISTRY ─────────────────────────────────────────
+    const APPS = [
+      { id: 'zoth-studio', name: 'Zoth Studio', desc: 'Alchemical Neural Hub & Full Tooling Suite', exec: '/opt/zoth-studio/launch.sh', color: 0xfbbf24, icon: '⚡' },
+      { id: 'zoth-agent-hud', name: 'Zoth Agent HUD', desc: 'Autonomous OS Controller & Layer Selector', exec: '/usr/local/bin/zoth-agent-hud', color: 0x00ff88, icon: '🜂' },
+      { id: 'hermes-agent', name: 'Hermes Agent', desc: 'Autonomous AI Gateway & Skill Runner', exec: 'xfce4-terminal -e hermes', color: 0xfbbf24, icon: '☤' },
+      { id: 'claude-code', name: 'Claude Code', desc: 'Anthropic Autonomous Coding Agent', exec: 'xfce4-terminal -e claude', color: 0xf97316, icon: '✦' },
+      { id: 'openai-codex', name: 'OpenAI Codex', desc: 'OpenAI Codex Terminal Toolchain', exec: 'xfce4-terminal -e codex', color: 0x10b981, icon: '◎' },
+      { id: 'opencode', name: 'OpenCode AI', desc: 'Open Source Terminal AI Pair Programmer', exec: 'xfce4-terminal -e opencode', color: 0x00f3ff, icon: '<>' },
+      { id: 'grok-ai', name: 'xAI Grok', desc: 'xAI Grok Intelligence Terminal', exec: 'xfce4-terminal -e grok', color: 0xffffff, icon: '╱' },
+      { id: 'hexstrike-ai', name: 'HexStrike AI', desc: 'Autonomous Pentesting & Exploit Engine', exec: 'xfce4-terminal -e hexstrike', color: 0xef4444, icon: '⚔' },
+      { id: 'zoth-sec', name: 'ZOTHOS Sec Arsenal', desc: 'Kali & Parrot Security Tooling Stack', exec: 'xfce4-terminal -e zoth-sec', color: 0xd946ef, icon: 'Ψ' },
+      { id: 'zoth-ghost', name: 'NullAI Ghostmode', desc: 'Tor Anonymous Routing & Amnesic RAM Flush', exec: 'xfce4-terminal -e zoth-ghost', color: 0xa855f7, icon: '👻' },
+      { id: 'zoth-cockpit', name: 'Zoth Cockpit TUI', desc: 'Full-Screen Terminal Operations Dashboard', exec: 'xfce4-terminal -e zoth-cockpit', color: 0x38bdf8, icon: '⛶' }
+    ];
+
+    function launchApp(app) {
+      console.log('Launching app:', app.name, app.exec);
+      // Trigger execution via local background endpoint or URI
+      fetch('http://127.0.0.1:8088/api/launch?cmd=' + encodeURIComponent(app.exec)).catch(() => {});
+      
+      // Visual Feedback
+      const pill = document.getElementById('telemetryPill');
+      pill.innerText = `⚡ LAUNCHING [${app.name.toUpperCase()}] ...`;
+      setTimeout(() => {
+        pill.innerText = `● 3D ENGINE ACTIVE | 60 FPS | DRAG MOUSE TO ORBIT | SCROLL TO ZOOM`;
+      }, 3000);
+    }
+
+    function exitSpatialDesktop() {
+      if (window.opener) window.close();
+      else window.location.href = "about:blank";
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' || e.key === 'q' || e.key === 'Q') exitSpatialDesktop();
+    });
+
+    // ── THREE.JS 3D SCENE SETUP ────────────────────────────────────────────
+    let scene, camera, renderer, controls;
+    let cards = [];
+    let raycaster = new THREE.Raycaster();
+    let mouse = new THREE.Vector2();
+    let hoveredCard = null;
+
+    const PALETTES = {
+      emerald: { primary: 0x00ff88, secondary: 0x00f3ff, bg: 0x02040a, star: 0x6ee7b7 },
+      ghost:   { primary: 0xc084fc, secondary: 0xa855f7, bg: 0x07030e, star: 0xe9d5ff },
+      gold:    { primary: 0xfbbf24, secondary: 0xf59e0b, bg: 0x0d0902, star: 0xfef08a },
+      cyan:    { primary: 0x00f3ff, secondary: 0x38bdf8, bg: 0x020a14, star: 0xbae6fd }
+    };
+    let activePalette = PALETTES.emerald;
+
+    function init() {
+      const container = document.getElementById('webgl-canvas');
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(activePalette.bg);
+      scene.fog = new THREE.FogExp2(activePalette.bg, 0.003);
+
+      camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 15, 75);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      container.appendChild(renderer.domElement);
+
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.maxDistance = 140;
+      controls.minDistance = 20;
+
+      // Lights
+      scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+      const pointLight = new THREE.PointLight(activePalette.primary, 3, 200);
+      pointLight.position.set(0, 30, 40);
+      scene.add(pointLight);
+
+      // 1. Grid Floor
+      const grid = new THREE.GridHelper(200, 40, activePalette.primary, 0x1e293b);
+      grid.position.y = -20;
+      scene.add(grid);
+
+      // 2. Starfield
+      buildStarfield();
+
+      // 3. Central Azoth Metatron Orb
+      buildCentralOrb();
+
+      // 4. Floating Holographic 3D App Cards in Cylindrical Ring
+      buildAppCards();
+
+      window.addEventListener('resize', onWindowResize);
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('click', onMouseClick);
+    }
+
+    function buildStarfield() {
+      const geo = new THREE.BufferGeometry();
+      const count = 1500;
+      const pos = new Float32Array(count * 3);
+      for (let i = 0; i < count * 3; i += 3) {
+        pos[i] = (Math.random() - 0.5) * 350;
+        pos[i + 1] = (Math.random() - 0.5) * 350;
+        pos[i + 2] = (Math.random() - 0.5) * 350;
+      }
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      const mat = new THREE.PointsMaterial({ size: 1.4, color: activePalette.star, transparent: true, opacity: 0.8 });
+      scene.add(new THREE.Points(geo, mat));
+    }
+
+    let orbGroup;
+    function buildCentralOrb() {
+      orbGroup = new THREE.Group();
+      
+      const coreGeo = new THREE.IcosahedronGeometry(8, 2);
+      const coreMat = new THREE.MeshStandardMaterial({
+        color: activePalette.primary,
+        wireframe: true,
+        emissive: activePalette.primary,
+        emissiveIntensity: 0.8
+      });
+      const core = new THREE.Mesh(coreGeo, coreMat);
+      orbGroup.add(core);
+
+      const ring1Geo = new THREE.TorusGeometry(14, 0.4, 16, 100);
+      const ring1Mat = new THREE.MeshBasicMaterial({ color: activePalette.secondary });
+      const ring1 = new THREE.Mesh(ring1Geo, ring1Mat);
+      ring1.rotation.x = Math.PI / 3;
+      orbGroup.add(ring1);
+
+      const ring2Geo = new THREE.TorusGeometry(18, 0.3, 16, 100);
+      const ring2Mat = new THREE.MeshBasicMaterial({ color: 0xfbbf24 });
+      const ring2 = new THREE.Mesh(ring2Geo, ring2Mat);
+      ring2.rotation.y = Math.PI / 4;
+      orbGroup.add(ring2);
+
+      scene.add(orbGroup);
+    }
+
+    function createCardCanvas(app) {
+      const cv = document.createElement('canvas');
+      cv.width = 512;
+      cv.height = 340;
+      const ctx = cv.getContext('2d');
+
+      // Card Background Glass
+      ctx.fillStyle = 'rgba(6, 14, 26, 0.92)';
+      ctx.roundRect(10, 10, 492, 320, 24);
+      ctx.fill();
+
+      // Border Glow
+      ctx.strokeStyle = '#00ff88';
+      ctx.lineWidth = 6;
+      ctx.roundRect(10, 10, 492, 320, 24);
+      ctx.stroke();
+
+      // App Icon Symbol
+      ctx.font = 'bold 72px monospace';
+      ctx.fillStyle = '#00f3ff';
+      ctx.textAlign = 'center';
+      ctx.fillText(app.icon, 256, 110);
+
+      // Title
+      ctx.font = 'bold 32px "JetBrains Mono", monospace';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(app.name, 256, 180);
+
+      // Description
+      ctx.font = '20px "JetBrains Mono", monospace';
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText(app.desc.substring(0, 32), 256, 230);
+
+      // Launch Badge
+      ctx.fillStyle = 'rgba(0, 255, 136, 0.2)';
+      ctx.roundRect(130, 260, 252, 44, 22);
+      ctx.fill();
+      ctx.strokeStyle = '#00ff88';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.font = 'bold 18px monospace';
+      ctx.fillStyle = '#00ff88';
+      ctx.fillText('▶ LAUNCH APP', 256, 288);
+
+      return cv;
+    }
+
+    function buildAppCards() {
+      const radius = 38;
+      const total = APPS.length;
+
+      APPS.forEach((app, i) => {
+        const angle = (i / total) * Math.PI * 2;
+        const x = Math.sin(angle) * radius;
+        const z = Math.cos(angle) * radius;
+
+        const cv = createCardCanvas(app);
+        const texture = new THREE.CanvasTexture(cv);
+        texture.minFilter = THREE.LinearFilter;
+
+        const cardGeo = new THREE.PlaneGeometry(12, 8);
+        const cardMat = new THREE.MeshStandardMaterial({
+          map: texture,
+          transparent: true,
+          side: THREE.DoubleSide,
+          roughness: 0.3,
+          metalness: 0.1
+        });
+
+        const mesh = new THREE.Mesh(cardGeo, cardMat);
+        mesh.position.set(x, 0, z);
+        mesh.lookAt(0, 0, 0); // Face central orb
+        mesh.userData = { app: app, baseScale: 1.0, origY: 0 };
+
+        cards.push(mesh);
+        scene.add(mesh);
+      });
+    }
+
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    function onMouseMove(e) {
+      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(cards);
+
+      const tooltip = document.getElementById('targetTooltip');
+
+      if (intersects.length > 0) {
+        const hit = intersects[0].object;
+        if (hoveredCard !== hit) {
+          if (hoveredCard) hoveredCard.scale.set(1, 1, 1);
+          hoveredCard = hit;
+          hoveredCard.scale.set(1.15, 1.15, 1.15);
+        }
+
+        const app = hit.userData.app;
+        document.getElementById('ttTitle').innerText = app.name.toUpperCase();
+        document.getElementById('ttDesc').innerText = app.desc;
+        tooltip.classList.add('active');
+        document.body.style.cursor = 'pointer';
+      } else {
+        if (hoveredCard) {
+          hoveredCard.scale.set(1, 1, 1);
+          hoveredCard = null;
+        }
+        tooltip.classList.remove('active');
+        document.body.style.cursor = 'default';
+      }
+    }
+
+    function onMouseClick(e) {
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(cards);
+      if (intersects.length > 0) {
+        const app = intersects[0].object.userData.app;
+        launchApp(app);
+      }
+    }
+
+    function changeTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      activePalette = PALETTES[theme] || PALETTES.emerald;
+      if (scene) {
+        scene.background.setHex(activePalette.bg);
+        scene.fog.color.setHex(activePalette.bg);
+      }
+    }
+
+    // ── ANIMATION LOOP ─────────────────────────────────────────────────────
+    let clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = clock.getDelta();
+
+      if (controls) controls.update();
+
+      if (orbGroup) {
+        orbGroup.children[0].rotation.x += 0.01;
+        orbGroup.children[0].rotation.y += 0.015;
+        orbGroup.children[1].rotation.x += 0.02;
+        orbGroup.children[2].rotation.y += 0.015;
+      }
+
+      // Gentle floating animation on cards
+      const time = clock.getElapsedTime();
+      cards.forEach((card, idx) => {
+        card.position.y = Math.sin(time * 2 + idx) * 0.8;
+      });
+
+      renderer.render(scene, camera);
+    }
+
+    init();
+    animate();
+  </script>
+</body>
+</html>
