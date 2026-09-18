@@ -1,0 +1,263 @@
+#!/usr/bin/env python3
+"""
+⚡ ZOTHOS Apex Desktop HUD: Real-Time Glassmorphic Telemetry Widget
+Native PyGObject + Cairo hardware-accelerated desktop HUD displaying CPU, RAM, Disk, Net, and Agent Swarm metrics.
+"""
+
+import sys
+import os
+import time
+import psutil
+import math
+
+import gi
+gi.require_version('Gtk', '3.0')
+gi.require_version('Gdk', '3.0')
+from gi.repository import Gtk, Gdk, GLib, Pango
+import cairo
+
+class ZothDesktopHUD(Gtk.Window):
+    def __init__(self):
+        super().__init__(type=Gtk.WindowType.TOPLEVEL)
+        
+        self.set_title("ZOTHOS Desktop Telemetry HUD")
+        self.set_decorated(False)
+        self.set_resizable(False)
+        self.set_skip_taskbar_hint(True)
+        self.set_skip_pager_hint(True)
+        self.set_type_hint(Gdk.WindowTypeHint.DESKTOP)
+        self.set_keep_below(True)
+        self.set_accept_focus(False)
+        
+        # Transparent visual
+        screen = self.get_screen()
+        visual = screen.get_rgba_visual()
+        if visual and screen.is_composited():
+            self.set_visual(visual)
+        self.set_app_paintable(True)
+        
+        self.width = 310
+        self.height = 440
+        self.set_default_size(self.width, self.height)
+        
+        # Position at top right
+        screen_w = screen.get_width()
+        self.move(max(20, screen_w - self.width - 24), 50)
+        
+        self.connect("draw", self.on_draw)
+        self.connect("delete-event", Gtk.main_quit)
+        
+        # Telemetry State
+        self.cpu_percent = 0.0
+        self.cpu_cores = []
+        self.ram_percent = 0.0
+        self.ram_used_gb = 0.0
+        self.ram_total_gb = 0.0
+        self.disk_percent = 0.0
+        self.disk_free_gb = 0.0
+        self.net_rx_kb = 0.0
+        self.net_tx_kb = 0.0
+        self.last_net = psutil.net_io_counters() if hasattr(psutil, 'net_io_counters') else None
+        self.last_time = time.time()
+        self.tor_active = os.path.exists("/run/tor/tor.pid") or os.system("systemctl is-active --quiet tor 2>/dev/null") == 0
+        
+        # Timer update every 1000ms
+        GLib.timeout_add(1000, self.update_metrics)
+        self.update_metrics()
+
+    def update_metrics(self):
+        try:
+            self.cpu_percent = psutil.cpu_percent(interval=None)
+            self.cpu_cores = psutil.cpu_percent(percpu=True, interval=None)
+            mem = psutil.virtual_memory()
+            self.ram_percent = mem.percent
+            self.ram_used_gb = mem.used / (1024 ** 3)
+            self.ram_total_gb = mem.total / (1024 ** 3)
+            
+            disk = psutil.disk_usage('/')
+            self.disk_percent = disk.percent
+            self.disk_free_gb = disk.free / (1024 ** 3)
+            
+            now = time.time()
+            dt = max(0.1, now - self.last_time)
+            if hasattr(psutil, 'net_io_counters'):
+                cur_net = psutil.net_io_counters()
+                if self.last_net:
+                    self.net_rx_kb = (cur_net.bytes_recv - self.last_net.bytes_recv) / 1024.0 / dt
+                    self.net_tx_kb = (cur_net.bytes_sent - self.last_net.bytes_sent) / 1024.0 / dt
+                self.last_net = cur_net
+            self.last_time = now
+            self.tor_active = os.path.exists("/run/tor/tor.pid")
+        except Exception:
+            pass
+        self.queue_draw()
+        return True
+
+    def on_draw(self, widget, cr):
+        # Clear / transparent base
+        cr.set_operator(cairo.OPERATOR_SOURCE)
+        cr.set_source_rgba(0, 0, 0, 0)
+        cr.paint()
+        cr.set_operator(cairo.OPERATOR_OVER)
+        
+        w, h = self.width, self.height
+        
+        # 1. Glassmorphic Card Background
+        self.rounded_rect(cr, 4, 4, w - 8, h - 8, 16)
+        cr.set_source_rgba(0.04, 0.06, 0.10, 0.82)
+        cr.fill_preserve()
+        
+        # Metallic / Neon Border
+        cr.set_source_rgba(0.0, 1.0, 0.61, 0.35)
+        cr.set_line_width(1.5)
+        cr.stroke()
+        
+        # 2. Header
+        cr.select_font_face("JetBrains Mono", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
+        cr.set_font_size(12)
+        cr.set_source_rgba(1.0, 0.84, 0.0, 0.95) # Gold
+        cr.move_to(20, 32)
+        cr.show_text("⚡ ZOTHOS TELEMETRY MATRIX")
+        
+        cr.set_source_rgba(0.0, 1.0, 0.61, 0.4)
+        cr.set_line_width(1)
+        cr.move_to(20, 42)
+        cr.line_to(w - 20, 42)
+        cr.stroke()
+        
+        y = 66
+        # 3. CPU Metrics
+        cr.set_font_size(11)
+        cr.set_source_rgba(0.9, 0.95, 1.0, 0.9)
+        cr.move_to(20, y)
+        cr.show_text("CPU LOAD")
+        
+        cr.set_source_rgba(0.0, 1.0, 0.61, 1.0)
+        cpu_str = f"{self.cpu_percent:.1f}%"
+        cr.move_to(w - 65, y)
+        cr.show_text(cpu_str)
+        
+        y += 10
+        self.draw_progress_bar(cr, 20, y, w - 40, 8, self.cpu_percent, 0.0, 1.0, 0.61)
+        
+        # Multi-core mini bars
+        if self.cpu_cores:
+            y += 18
+            cr.set_font_size(9)
+            cr.set_source_rgba(0.6, 0.7, 0.8, 0.8)
+            core_w = (w - 40 - (len(self.cpu_cores) - 1) * 6) / max(1, len(self.cpu_cores))
+            for i, c_pct in enumerate(self.cpu_cores):
+                cx = 20 + i * (core_w + 6)
+                cr.move_to(cx, y)
+                cr.show_text(f"C{i}:{int(c_pct)}%")
+                self.draw_progress_bar(cr, cx, y + 4, core_w, 4, c_pct, 0.0, 0.9, 1.0)
+            y += 10
+
+        y += 24
+        # 4. RAM Metrics
+        cr.set_font_size(11)
+        cr.set_source_rgba(0.9, 0.95, 1.0, 0.9)
+        cr.move_to(20, y)
+        cr.show_text("MEMORY (RAM)")
+        
+        cr.set_source_rgba(0.0, 0.9, 1.0, 1.0)
+        ram_str = f"{self.ram_used_gb:.1f}/{self.ram_total_gb:.1f}G ({int(self.ram_percent)}%)"
+        cr.move_to(w - 110, y)
+        cr.show_text(ram_str)
+        
+        y += 10
+        self.draw_progress_bar(cr, 20, y, w - 40, 8, self.ram_percent, 0.0, 0.9, 1.0)
+        
+        y += 26
+        # 5. DISK STORAGE
+        cr.set_font_size(11)
+        cr.set_source_rgba(0.9, 0.95, 1.0, 0.9)
+        cr.move_to(20, y)
+        cr.show_text("ROOT DISK")
+        
+        cr.set_source_rgba(1.0, 0.84, 0.0, 1.0)
+        disk_str = f"{self.disk_free_gb:.1f}G Free ({int(self.disk_percent)}%)"
+        cr.move_to(w - 110, y)
+        cr.show_text(disk_str)
+        
+        y += 10
+        self.draw_progress_bar(cr, 20, y, w - 40, 8, self.disk_percent, 1.0, 0.84, 0.0)
+        
+        y += 26
+        # 6. NETWORK SPEED
+        cr.set_font_size(11)
+        cr.set_source_rgba(0.9, 0.95, 1.0, 0.9)
+        cr.move_to(20, y)
+        cr.show_text("NETWORK I/O")
+        
+        cr.set_font_size(10)
+        cr.set_source_rgba(0.0, 1.0, 0.61, 0.9)
+        cr.move_to(20, y + 18)
+        cr.show_text(f"▼ RX: {self.net_rx_kb:.1f} KB/s")
+        
+        cr.set_source_rgba(0.0, 0.9, 1.0, 0.9)
+        cr.move_to(w / 2 + 10, y + 18)
+        cr.show_text(f"▲ TX: {self.net_tx_kb:.1f} KB/s")
+        
+        y += 36
+        # 7. AGENT SWARM & OPSEC PILLS
+        cr.set_source_rgba(0.0, 1.0, 0.61, 0.25)
+        cr.set_line_width(1)
+        cr.move_to(20, y)
+        cr.line_to(w - 20, y)
+        cr.stroke()
+        
+        y += 20
+        # Pill 1: Swarm
+        self.rounded_rect(cr, 20, y, 128, 26, 6)
+        cr.set_source_rgba(0.0, 1.0, 0.61, 0.15)
+        cr.fill_preserve()
+        cr.set_source_rgba(0.0, 1.0, 0.61, 0.5)
+        cr.stroke()
+        cr.set_font_size(10)
+        cr.set_source_rgba(0.0, 1.0, 0.61, 1.0)
+        cr.move_to(28, y + 17)
+        cr.show_text("🤖 L4 SWARM: RUN")
+        
+        # Pill 2: Ghostmode
+        self.rounded_rect(cr, w - 148, y, 128, 26, 6)
+        cr.set_source_rgba(0.0, 0.9, 1.0, 0.15)
+        cr.fill_preserve()
+        cr.set_source_rgba(0.0, 0.9, 1.0, 0.5)
+        cr.stroke()
+        cr.set_source_rgba(0.0, 0.9, 1.0, 1.0)
+        cr.move_to(w - 140, y + 17)
+        cr.show_text("👻 OPSEC: SECURE")
+        
+        y += 42
+        cr.set_font_size(9)
+        cr.set_source_rgba(0.5, 0.6, 0.7, 0.7)
+        cr.move_to(20, y)
+        cr.show_text("ZOTH-CORE KERNEL // v3.2 ACTIVE")
+        
+        return False
+
+    def draw_progress_bar(self, cr, x, y, width, height, percent, r, g, b):
+        # Bar track
+        self.rounded_rect(cr, x, y, width, height, 4)
+        cr.set_source_rgba(0.08, 0.12, 0.20, 0.8)
+        cr.fill()
+        
+        # Bar fill
+        fill_w = max(4, (width * min(100.0, max(0.0, percent))) / 100.0)
+        self.rounded_rect(cr, x, y, fill_w, height, 4)
+        cr.set_source_rgba(r, g, b, 0.9)
+        cr.fill()
+
+    def rounded_rect(self, cr, x, y, width, height, radius):
+        cr.new_sub_path()
+        cr.arc(x + width - radius, y + radius, radius, -math.pi / 2, 0)
+        cr.arc(x + width - radius, y + height - radius, radius, 0, math.pi / 2)
+        cr.arc(x + radius, y + height - radius, radius, math.pi / 2, math.pi)
+        cr.arc(x + radius, y + radius, radius, math.pi, 3 * math.pi / 2)
+        cr.close_path()
+
+if __name__ == "__main__":
+    app = ZothDesktopHUD()
+    app.show_all()
+    Gtk.main()

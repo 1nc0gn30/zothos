@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
 # ==============================================================================
-#  ZOTHOS Desktop Environment Initialization & Trust Engine
+#  ZOTHOS Apex Desktop Initialization Engine
 # ==============================================================================
 
-# 1. Trust and mark all desktop launchers executable (Fixes "white sheet" icons)
+# 1. Update icon caches
+gtk-update-icon-cache -f -q /usr/share/icons/hicolor 2>/dev/null || true
+gtk-update-icon-cache -f -q /usr/share/icons/Zoth-Hermetic 2>/dev/null || true
+
+# 2. Trust and mark all desktop launchers executable (prevents untrusted prompt)
 if [[ -d "$HOME/Desktop" ]]; then
     chmod +x "$HOME"/Desktop/*.desktop 2>/dev/null || true
     for f in "$HOME"/Desktop/*.desktop; do
@@ -14,16 +18,14 @@ if [[ -d "$HOME/Desktop" ]]; then
     done
 fi
 
-# 2. Update icon caches
-gtk-update-icon-cache -f -q /usr/share/icons/hicolor 2>/dev/null || true
-gtk-update-icon-cache -f -q /usr/share/icons/Zoth-Hermetic 2>/dev/null || true
-
 # 3. Ensure XFWM4 window theme and draggable settings are applied
 xfconf-query -c xfwm4 -p /general/theme -s "Zoth-Hermetic-Matrix" 2>/dev/null || true
 xfconf-query -c xfwm4 -p /general/easy_click -s "Alt" 2>/dev/null || true
 xfconf-query -c xfwm4 -p /general/button_layout -s "O|HMC" 2>/dev/null || true
 xfconf-query -c xsettings -p /Net/ThemeName -s "Zoth-Hermetic-Matrix" 2>/dev/null || true
 xfconf-query -c xsettings -p /Net/IconThemeName -s "Zoth-Hermetic" 2>/dev/null || true
+xfconf-query -c xsettings -p /Gtk/FontName -s "JetBrains Mono 10" 2>/dev/null || true
+xfconf-query -c xsettings -p /Gtk/MonospaceFontName -s "JetBrains Mono 10" 2>/dev/null || true
 
 # 4. Set desktop wallpaper across all detected monitors in xfconf
 WALLPAPER="/usr/share/backgrounds/zothos/hermetic-matrix.png"
@@ -37,7 +39,13 @@ if [[ -f "$WALLPAPER" ]]; then
     feh --bg-fill "$WALLPAPER" 2>/dev/null || true
 fi
 
-# 5. Reload xfdesktop to render icons and wallpaper
+# 5. Launch Desktop Telemetry HUD if not running
+if ! pgrep -f "zoth-desktop-hud" >/dev/null 2>&1; then
+    /usr/local/bin/zoth-desktop-hud &
+fi
+
+# 6. Reload xfdesktop and panel to render changes
 xfdesktop --reload 2>/dev/null || true
+xfce4-panel -r 2>/dev/null || true
 
 exit 0
