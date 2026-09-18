@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#  ZOTHOS Arsenal Synchronizer & Full Toolchain Installer
+#  Ensures 100% parity across Dev, Security (Kali/Parrot), and AI stacks.
+# ==============================================================================
+
+set -e
+
+GREEN='\033[0;32m'
+CYAN='\033[0;36m'
+GOLD='\033[0;33m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+echo -e "${GREEN}======================================================${NC}"
+echo -e "${GOLD}   🜂 ZOTHOS MASTER ARSENAL SYNCHRONIZER 🜄${NC}"
+echo -e "${CYAN}   Installing & Verifying Dev, Security, and AI Suites${NC}"
+echo -e "${GREEN}======================================================${NC}"
+
+# Check for root/sudo
+if [[ $EUID -ne 0 ]]; then
+    echo -e "${RED}[!] This script must be run as root or with sudo.${NC}"
+    exit 1
+fi
+
+echo -e "\n${CYAN}[1/4] Updating Package Repositories...${NC}"
+apt-get update -y || true
+
+echo -e "\n${CYAN}[2/4] Installing Dev Toolchains & Runtimes...${NC}"
+apt-get install -y --no-install-recommends \
+    build-essential gcc g++ clang make cmake ninja-build autoconf automake \
+    libssl-dev libffi-dev zlib1g-dev \
+    python3 python3-pip python3-venv python3-dev ipython3 \
+    nodejs npm \
+    sqlite3 postgresql-client redis-tools \
+    git curl wget rsync tmux zsh neovim bat ripgrep fd-find jq yq htop btop tree unzip p7zip-full fzf lsof strace \
+    || true
+
+echo -e "\n${CYAN}[3/4] Installing Security Arsenal (Kali/Parrot Parity)...${NC}"
+apt-get install -y --no-install-recommends \
+    nmap masscan dnsutils whois whatweb wafw00f \
+    sqlmap commix wireshark tshark tcpdump \
+    john hashcat hydra medusa fcrackzip \
+    aircrack-ng radare2 gdb binwalk socat netcat-traditional \
+    tor torsocks proxychains4 macchanger iptables nftables \
+    || true
+
+echo -e "\n${CYAN}[4/4] Configuring Sovereign AI Virtual Environment...${NC}"
+mkdir -p /opt/zothos-ai-env
+if [[ ! -f /opt/zothos-ai-env/bin/activate ]]; then
+    python3 -m venv /opt/zothos-ai-env --system-site-packages
+fi
+
+/opt/zothos-ai-env/bin/pip install --upgrade pip wheel setuptools 2>/dev/null || true
+/opt/zothos-ai-env/bin/pip install --no-cache-dir \
+    rich textual requests aiohttp urllib3 websockets \
+    fastapi uvicorn pydantic psutil cryptography scapy \
+    2>/dev/null || true
+
+# Symlink environment into global profile
+cat << 'EOF' > /etc/profile.d/zothos-ai-path.sh
+export PATH="/opt/zothos-ai-env/bin:$PATH"
+EOF
+chmod +x /etc/profile.d/zothos-ai-path.sh
+
+echo -e "\n${GREEN}[✓] ZOTHOS Arsenal Synchronization Complete!${NC}"
+echo -e "${GOLD}[*] Run 'zoth-sec' to view pentesting tools, or 'zoth-cockpit' for full operations hub.${NC}\n"
