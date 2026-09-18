@@ -1,0 +1,41 @@
+#!/bin/bash
+# ==============================================================================
+#  ZOTHOS SESSION SWITCHER (Hyprland Wayland <-> XFCE4 X11)
+# ==============================================================================
+set -e
+
+SESSION="${1:-}"
+
+if [[ -z "$SESSION" ]]; then
+    echo "======================================================================"
+    echo " ◈ ZOTHOS SESSION SELECTOR"
+    echo "======================================================================"
+    echo " 1) hyprland  - Apex Wayland Compositor (Bezier Physics, Shaders, Glass)"
+    echo " 2) xfce      - Classic 2D X11 Cyberpunk Desktop (Low Resource, Fixed)"
+    echo "======================================================================"
+    read -rp " Select default session [1 or 2]: " choice
+    case "$choice" in
+        1|hyprland|wayland) SESSION="hyprland" ;;
+        2|xfce|x11) SESSION="xfce" ;;
+        *) echo "[-] Invalid selection."; exit 1 ;;
+    esac
+fi
+
+CONF="/etc/lightdm/lightdm.conf.d/99-zothos-default.conf"
+
+case "$SESSION" in
+    hyprland|wayland|apex)
+        echo "[+] Setting default graphical session to Hyprland (Wayland)..."
+        sudo sed -i 's/^user-session=.*/user-session=hyprland/' "$CONF" 2>/dev/null || true
+        echo "[+] Done. Next graphical login or reboot will launch Hyprland."
+        ;;
+    xfce|xfce4|x11)
+        echo "[+] Setting default graphical session to XFCE4 (X11)..."
+        sudo sed -i 's/^user-session=.*/user-session=xfce/' "$CONF" 2>/dev/null || true
+        echo "[+] Done. Next graphical login or reboot will launch XFCE."
+        ;;
+    *)
+        echo "[-] Unknown session '$SESSION'. Supported: hyprland, xfce."
+        exit 1
+        ;;
+esac
