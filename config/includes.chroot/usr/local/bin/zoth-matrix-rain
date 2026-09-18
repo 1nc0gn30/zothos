@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # ==============================================================================
-#  ZOTHOS HERMETIC MATRIX RAIN SCREENSAVER / TERMINAL STREAM
-#  Renders digital rain fused with alchemical glyphs (☉ ☽ ☿ ♀ ♂ ♃ ♄ 🜂 🜄 🜁 🜃)
+#  🜂 ZOTHOS HERMETIC MATRIX DIGITAL RAIN v2.0 🜄
+#  Alchemical Glyphs, Sacred Geometry & Digital Rain Screensaver
 # ==============================================================================
 
-trap "tput cnorm; clear; exit 0" SIGINT SIGTERM
+trap "tput cnorm; clear; exit 0" SIGINT SIGTERM EXIT
 
 tput civis
 clear
@@ -15,55 +15,82 @@ COLS=$(tput cols)
 GLYPHS=(
     "0" "1" "2" "3" "4" "5" "6" "7" "8" "9"
     "a" "b" "c" "d" "e" "f" "x" "z" "o" "t" "h"
-    "☉" "☽" "☿" "♀" "♂" "♃" "♄" "🜂" "🜄" "🜁" "🜃" "🝘" "🜚"
+    "☉" "☽" "☿" "♀" "♂" "♃" "♄" "🜂" "🜄" "🜁" "🜃" "🝘" "🜚" "🜛" "🜞" "🝠"
+    "ᚠ" "ᚢ" "ᚦ" "ᚨ" "ᚱ" "ᚲ" "ᚷ" "ᚹ" "ᚺ" "ᚾ" "ᛁ" "ᛃ" "ᛈ" "ᛇ" "ᛉ" "ᛋ" "ᛏ"
     "ｦ" "ｱ" "ｳ" "ｴ" "ｵ" "ｶ" "ｷ" "ｹ" "ｺ" "ｻ" "ｼ" "ｽ" "ｾ" "ｿ" "ﾀ" "ﾂ" "ﾃ" "ﾅ" "ﾆ" "ﾇ" "ﾈ"
 )
 NUM_GLYPHS=${#GLYPHS[@]}
 
 declare -a Y_POS
 declare -a SPEEDS
+declare -a LENGTHS
 
 for ((i=0; i<COLS; i++)); do
     Y_POS[$i]=$((RANDOM % LINES))
-    SPEEDS[$i]=$((RANDOM % 3 + 1))
+    SPEEDS[$i]=$((RANDOM % 2 + 1))
+    LENGTHS[$i]=$((RANDOM % 14 + 10))
 done
 
+# Check non-blocking keypress to exit on 'q' or 'ESC'
 while true; do
+    read -t 0.03 -n 1 key 2>/dev/null && [[ "$key" == "q" || "$key" == $'\e' ]] && break
+
     for ((col=0; col<COLS; col+=2)); do
         y=${Y_POS[$col]}
+        stream_len=${LENGTHS[$col]}
         glyph=${GLYPHS[$((RANDOM % NUM_GLYPHS))]}
 
-        # Leading head: Bright white / pale green
-        tput cup "$y" "$col" 2>/dev/null || true
-        echo -ne "\e[1;37m$glyph\e[0m"
-
-        # Trailing tail: Emerald phosphor green
-        prev_y=$((y - 1))
-        if (( prev_y >= 0 && prev_y < LINES )); then
-            tput cup "$prev_y" "$col" 2>/dev/null || true
-            old_glyph=${GLYPHS[$((RANDOM % NUM_GLYPHS))]}
-            echo -ne "\e[38;5;48m$old_glyph\e[0m"
+        # 1. Lead glyph: Radiant brilliant white / golden core
+        if (( y >= 0 && y < LINES )); then
+            tput cup "$y" "$col" 2>/dev/null || true
+            if (( RANDOM % 5 == 0 )); then
+                echo -ne "\e[1;38;5;220m$glyph\e[0m" # Solar gold flash
+            else
+                echo -ne "\e[1;37m$glyph\e[0m" # Pure white lead
+            fi
         fi
 
-        # Deeper tail: Dark green fade
-        deep_y=$((y - 8))
+        # 2. First trail: High-phosphor emerald green
+        y1=$((y - 1))
+        if (( y1 >= 0 && y1 < LINES )); then
+            tput cup "$y1" "$col" 2>/dev/null || true
+            echo -ne "\e[38;5;48m${GLYPHS[$((RANDOM % NUM_GLYPHS))]}\e[0m"
+        fi
+
+        # 3. Second trail: Bright matrix green
+        y2=$((y - 2))
+        if (( y2 >= 0 && y2 < LINES )); then
+            tput cup "$y2" "$col" 2>/dev/null || true
+            echo -ne "\e[38;5;42m${GLYPHS[$((RANDOM % NUM_GLYPHS))]}\e[0m"
+        fi
+
+        # 4. Mid trail: Medium forest emerald
+        mid_y=$((y - 6))
+        if (( mid_y >= 0 && mid_y < LINES )); then
+            tput cup "$mid_y" "$col" 2>/dev/null || true
+            echo -ne "\e[38;5;29m${GLYPHS[$((RANDOM % NUM_GLYPHS))]}\e[0m"
+        fi
+
+        # 5. Deep tail: Deep obsidian green fade
+        deep_y=$((y - stream_len + 2))
         if (( deep_y >= 0 && deep_y < LINES )); then
             tput cup "$deep_y" "$col" 2>/dev/null || true
             echo -ne "\e[38;5;22m${GLYPHS[$((RANDOM % NUM_GLYPHS))]}\e[0m"
         fi
 
-        # Erase tail
-        erase_y=$((y - 18))
+        # 6. Tail erase
+        erase_y=$((y - stream_len))
         if (( erase_y >= 0 && erase_y < LINES )); then
             tput cup "$erase_y" "$col" 2>/dev/null || true
             echo -ne " "
         fi
 
-        # Advance column position
-        Y_POS[$col]=$((y + 1))
-        if (( Y_POS[$col] >= LINES )); then
+        # Advance stream
+        Y_POS[$col]=$((y + SPEEDS[$col]))
+        if (( Y_POS[$col] - stream_len >= LINES )); then
             Y_POS[$col]=0
+            LENGTHS[$col]=$((RANDOM % 14 + 10))
+            SPEEDS[$col]=$((RANDOM % 2 + 1))
         fi
     done
-    sleep 0.04
 done
