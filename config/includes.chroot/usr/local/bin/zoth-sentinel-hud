@@ -1,0 +1,158 @@
+#!/usr/bin/env python3
+"""
+==============================================================================
+ * ZOTHOS SENTINEL AI HUD — QUICK PROMPT & COMMAND OVERLAY *
+ Magic UI Cyber-Alchemical Floating Window for Instant OS Interaction
+ Triggered via Super+A or Super+Space
+==============================================================================
+"""
+
+import sys
+import os
+import tkinter as tk
+from tkinter import ttk
+import subprocess
+import threading
+
+# Colors
+BG_COLOR = "#06090e"
+CARD_BG = "#0c121c"
+ACCENT_GREEN = "#00ff9d"
+ACCENT_CYAN = "#00e5ff"
+ACCENT_GOLD = "#ffd700"
+TEXT_COLOR = "#f1f5f9"
+DIM_TEXT = "#7d90a0"
+
+
+class SentinelHUD:
+    def __init__(self):
+        self.root = tk.Tk()
+        self.root.title("ZOTH SENTINEL AI OS HUD")
+        self.root.configure(bg=BG_COLOR)
+        self.root.overrideredirect(True) # Frameless floating window
+        self.root.attributes("-topmost", True)
+
+        # Center on screen
+        w, h = 680, 420
+        sw = self.root.winfo_screenwidth()
+        sh = self.root.winfo_screenheight()
+        x = (sw - w) // 2
+        y = (sh - h) // 3
+        self.root.geometry(f"{w}x{h}+{x}+{y}")
+
+        # Border frame for Magic UI neon glow
+        self.border_frame = tk.Frame(self.root, bg=ACCENT_GREEN, bd=1)
+        self.border_frame.pack(fill=tk.BOTH, expand=True, padx=2, pady=2)
+
+        self.main_frame = tk.Frame(self.border_frame, bg=BG_COLOR, padx=16, pady=16)
+        self.main_frame.pack(fill=tk.BOTH, expand=True)
+
+        # Header
+        header_frame = tk.Frame(self.main_frame, bg=BG_COLOR)
+        header_frame.pack(fill=tk.X, pady=(0, 10))
+
+        title_lbl = tk.Label(
+            header_frame,
+            text="🜂 ZOTH SENTINEL AI  //  OS COCKPIT",
+            font=("JetBrains Mono", 12, "bold"),
+            fg=ACCENT_GREEN,
+            bg=BG_COLOR
+        )
+        title_lbl.pack(side=tk.LEFT)
+
+        close_btn = tk.Label(
+            header_frame,
+            text="[ ESC to close ]",
+            font=("JetBrains Mono", 9),
+            fg=DIM_TEXT,
+            bg=BG_COLOR,
+            cursor="hand2"
+        )
+        close_btn.pack(side=tk.RIGHT)
+        close_btn.bind("<Button-1>", lambda e: self.root.destroy())
+
+        # Subtitle / Model info
+        self.sub_lbl = tk.Label(
+            self.main_frame,
+            text="Autonomous System Agent Ready • Enter command, question, or !bash_task",
+            font=("JetBrains Mono", 9),
+            fg=ACCENT_CYAN,
+            bg=BG_COLOR
+        )
+        self.sub_lbl.pack(anchor="w", pady=(0, 12))
+
+        # Input box
+        input_frame = tk.Frame(self.main_frame, bg=CARD_BG, bd=1, highlightbackground=ACCENT_GREEN, highlightthickness=1)
+        input_frame.pack(fill=tk.X, pady=(0, 12))
+
+        prompt_sym = tk.Label(input_frame, text=" ⚡ > ", font=("JetBrains Mono", 11, "bold"), fg=ACCENT_GOLD, bg=CARD_BG)
+        prompt_sym.pack(side=tk.LEFT, padx=(6, 0))
+
+        self.entry = tk.Entry(
+            input_frame,
+            font=("JetBrains Mono", 11),
+            fg="#ffffff",
+            bg=CARD_BG,
+            insertbackground=ACCENT_GREEN,
+            relief=tk.FLAT,
+            bd=0
+        )
+        self.entry.pack(fill=tk.X, expand=True, padx=8, pady=8)
+        self.entry.focus_set()
+        self.entry.bind("<Return>", self.on_submit)
+
+        # Output text area
+        self.output_text = tk.Text(
+            self.main_frame,
+            font=("JetBrains Mono", 9),
+            fg=TEXT_COLOR,
+            bg=CARD_BG,
+            relief=tk.FLAT,
+            bd=0,
+            padx=10,
+            pady=10,
+            wrap=tk.WORD,
+            height=12
+        )
+        self.output_text.pack(fill=tk.BOTH, expand=True)
+        self.output_text.insert(tk.END, "ZOTH SENTINEL v3.0 ACTIVE.\nTry:\n • 'how much memory is used?'\n • 'switch tor ghostmode on'\n • '!systemctl restart lightdm'\n • 'open maya and hexstrike'\n")
+        self.output_text.config(state=tk.DISABLED)
+
+        # Global keybinds
+        self.root.bind("<Escape>", lambda e: self.root.destroy())
+
+    def append_output(self, text: str, color=TEXT_COLOR):
+        self.output_text.config(state=tk.NORMAL)
+        self.output_text.insert(tk.END, text + "\n")
+        self.output_text.see(tk.END)
+        self.output_text.config(state=tk.DISABLED)
+
+    def on_submit(self, event=None):
+        query = self.entry.get().strip()
+        if not query:
+            return
+        self.entry.delete(0, tk.END)
+        self.append_output(f"\n[USER] > {query}")
+        self.append_output("[SENTINEL] Processing request...", color=ACCENT_CYAN)
+
+        def worker():
+            if query.startswith("!"):
+                cmd = ["/usr/local/bin/zoth-sentinel", "exec", query]
+            else:
+                cmd = ["/usr/local/bin/zoth-sentinel", "ask", query]
+            try:
+                p = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+                out = p.stdout.strip()
+                self.root.after(0, lambda: self.append_output(f"\n{out}"))
+            except Exception as e:
+                self.root.after(0, lambda: self.append_output(f"[ERROR]: {e}", color=ACCENT_GOLD))
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    def run(self):
+        self.root.mainloop()
+
+
+if __name__ == "__main__":
+    app = SentinelHUD()
+    app.run()

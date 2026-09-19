@@ -1,0 +1,556 @@
+#!/usr/bin/env python3
+"""
+==============================================================================
+ * ZOTHOS AI SENTINEL DAEMON & OS EXECUTOR v3.0 *
+ Ultra-lightweight, multi-model autonomous OS supervisor and execution engine.
+ Supports: Ollama, OpenAI, Anthropic, DeepSeek, Groq, Grok/xAI, Gemini, OpenRouter.
+==============================================================================
+"""
+
+import sys
+import os
+import time
+import json
+import socket
+import asyncio
+import argparse
+import subprocess
+import urllib.request
+import urllib.error
+import urllib.parse
+from datetime import datetime
+from typing import Dict, Any, List, Optional
+
+# --- Constants & Paths ---
+CONFIG_PATH_SYSTEM = "/etc/zothos/sentinel.json"
+CONFIG_PATH_USER = os.path.expanduser("~/.config/zothos/sentinel.json")
+SOCKET_PATH = "/tmp/zoth-sentinel.sock"
+LOG_PATH = os.path.expanduser("~/.local/share/zothos/sentinel.log")
+STATE_PATH = os.path.expanduser("~/.config/zothos/sentinel_state.json")
+
+os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
+os.makedirs(os.path.dirname(STATE_PATH), exist_ok=True)
+
+# ANSI Colors
+EMERALD = "\033[38;2;0;255;157m"
+GOLD = "\033[38;2;255;215;0m"
+CYAN = "\033[38;2;0;229;255m"
+CRIMSON = "\033[38;2;255;51;85m"
+GRAY = "\033[38;2;140;160;180m"
+BOLD = "\033[1m"
+DIM = "\033[2m"
+RESET = "\033[0m"
+
+
+def log(msg: str, level: str = "INFO"):
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    formatted = f"[{ts}] [{level}] {msg}"
+    try:
+        with open(LOG_PATH, "a") as f:
+            f.write(formatted + "\n")
+    except Exception:
+        pass
+
+
+def load_config() -> Dict[str, Any]:
+    cfg = {
+        "sentinel_name": "ZOTH-SENTINEL-APEX",
+        "enabled": True,
+        "provider": "ollama",
+        "model": "llama3.2:latest",
+        "base_url": "http://127.0.0.1:11434/v1",
+        "api_key_env": "OPENAI_API_KEY",
+        "custom_api_key": "",
+        "safety_ring": "ring-1",
+        "auto_execute": True,
+        "telemetry": {
+            "interval_seconds": 10,
+            "cpu_threshold_percent": 90,
+            "ram_threshold_percent": 90,
+            "disk_threshold_percent": 92
+        }
+    }
+    if os.path.exists(CONFIG_PATH_SYSTEM):
+        try:
+            with open(CONFIG_PATH_SYSTEM, "r") as f:
+                cfg.update(json.load(f))
+        except Exception as e:
+            log(f"Failed to load system config: {e}", "WARN")
+    if os.path.exists(CONFIG_PATH_USER):
+        try:
+            with open(CONFIG_PATH_USER, "r") as f:
+                cfg.update(json.load(f))
+        except Exception as e:
+            log(f"Failed to load user config: {e}", "WARN")
+    return cfg
+
+
+def save_user_config(cfg: Dict[str, Any]):
+    os.makedirs(os.path.dirname(CONFIG_PATH_USER), exist_ok=True)
+    with open(CONFIG_PATH_USER, "w") as f:
+        json.dump(cfg, f, indent=2)
+
+
+# --- System Telemetry & Probes ---
+def get_system_telemetry() -> Dict[str, Any]:
+    telemetry = {
+        "timestamp": time.time(),
+        "cpu_usage": 0.0,
+        "ram_total_mb": 0,
+        "ram_used_mb": 0,
+        "ram_percent": 0.0,
+        "disk_percent": 0.0,
+        "active_processes": 0,
+        "failed_services": [],
+        "tor_active": False,
+        "open_ports": []
+    }
+    try:
+        # CPU
+        with open("/proc/stat", "r") as f:
+            line = f.readline()
+            fields = [float(x) for x in line.strip().split()[1:8]]
+            idle = fields[3]
+            total = sum(fields)
+            telemetry["cpu_usage"] = round(100.0 * (1.0 - idle / max(total, 1)), 1)
+    except Exception:
+        pass
+
+    try:
+        # RAM
+        with open("/proc/meminfo", "r") as f:
+            lines = f.readlines()
+            mem = {}
+            for line in lines:
+                parts = line.split(":")
+                if len(parts) == 2:
+                    mem[parts[0].strip()] = int(parts[1].split()[0])
+            total = mem.get("MemTotal", 1)
+            avail = mem.get("MemAvailable", mem.get("MemFree", 0))
+            used = total - avail
+            telemetry["ram_total_mb"] = total // 1024
+            telemetry["ram_used_mb"] = used // 1024
+            telemetry["ram_percent"] = round((used / total) * 100, 1)
+    except Exception:
+        pass
+
+    try:
+        # Disk /
+        st = os.statvfs("/")
+        total_b = st.f_blocks * st.f_frsize
+        free_b = st.f_bavail * st.f_frsize
+        used_b = total_b - free_b
+        telemetry["disk_percent"] = round((used_b / max(total_b, 1)) * 100, 1)
+    except Exception:
+        pass
+
+    try:
+        # Tor stealth probe
+        tor_proc = subprocess.run(["pgrep", "-x", "tor"], capture_output=True)
+        telemetry["tor_active"] = (tor_proc.returncode == 0)
+    except Exception:
+        pass
+
+    try:
+        # Failed systemd units
+        res = subprocess.run(["systemctl", "--failed", "--no-legend", "--plain"], capture_output=True, text=True)
+        failed = [l.split()[0] for l in res.stdout.strip().splitlines() if l.strip()]
+        telemetry["failed_services"] = failed
+    except Exception:
+        pass
+
+    return telemetry
+
+
+# --- AI Engine Client (Provider Agnostic) ---
+def call_llm(prompt: str, system_context: Optional[str] = None) -> str:
+    cfg = load_config()
+    provider = cfg.get("provider", "ollama").lower()
+    model = cfg.get("model", "llama3.2:latest")
+    base_url = cfg.get("base_url", "http://127.0.0.1:11434/v1")
+    custom_key = cfg.get("custom_api_key", "")
+    key_env = cfg.get("api_key_env", "OPENAI_API_KEY")
+    api_key = custom_key or os.environ.get(key_env, "")
+
+    # Telemetry snapshot for context
+    telem = get_system_telemetry()
+    default_sys = (
+        f"You are ZOTH-SENTINEL, the supreme sovereign AI supervisor for ZOTHOS Linux. "
+        f"You have full autonomous access to inspect and execute commands on this system.\n"
+        f"Current Telemetry: CPU={telem['cpu_usage']}%, RAM={telem['ram_percent']}% ({telem['ram_used_mb']}/{telem['ram_total_mb']}MB), "
+        f"Disk={telem['disk_percent']}%, TorStealth={telem['tor_active']}, FailedUnits={telem['failed_services']}.\n"
+        f"When asked to perform system actions, return the EXACT executable bash command inside a fenced block like:\n"
+        f"```bash\n<command>\n```\n"
+        f"Keep explanations sharp, concise, and hacker-grade."
+    )
+    sys_prompt = system_context or default_sys
+
+    # Anthropic direct API format
+    if provider == "anthropic":
+        url = "https://api.anthropic.com/v1/messages"
+        headers = {
+            "Content-Type": "application/json",
+            "x-api-key": api_key,
+            "anthropic-version": "2023-06-01"
+        }
+        body = {
+            "model": model,
+            "max_tokens": 2048,
+            "system": sys_prompt,
+            "messages": [{"role": "user", "content": prompt}]
+        }
+        req = urllib.request.Request(url, data=json.dumps(body).encode("utf-8"), headers=headers, method="POST")
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                return data["content"][0]["text"]
+        except Exception as e:
+            return f"[SENTINEL ERROR: Anthropic API failed: {e}]"
+
+    # OpenAI-compatible format (Ollama, OpenAI, Groq, DeepSeek, Grok, vLLM, OpenRouter, Gemini OpenAI bridge)
+    endpoint = f"{base_url.rstrip('/')}/chat/completions"
+    headers = {"Content-Type": "application/json"}
+    if api_key:
+        headers["Authorization"] = f"Bearer {api_key}"
+
+    body = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": sys_prompt},
+            {"role": "user", "content": prompt}
+        ],
+        "temperature": 0.3
+    }
+    req = urllib.request.Request(endpoint, data=json.dumps(body).encode("utf-8"), headers=headers, method="POST")
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            return data["choices"][0]["message"]["content"]
+    except urllib.error.URLError as e:
+        # Fallback heuristic if local Ollama or server is currently offline
+        return (
+            f"[SENTINEL LOCAL AGENT] (LLM provider '{provider}' at {base_url} unreachable: {e.reason})\n"
+            f"Autonomous Rule-Engine Fallback: Query parsed for '{prompt}'.\n"
+            f"Telemetry: CPU={telem['cpu_usage']}%, RAM={telem['ram_percent']}%, Disk={telem['disk_percent']}%."
+        )
+    except Exception as e:
+        return f"[SENTINEL ERROR: {e}]"
+
+
+# --- Command Execution Engine ---
+def execute_system_command(cmd: str) -> Dict[str, Any]:
+    log(f"Executing OS command: {cmd}", "EXEC")
+    t0 = time.time()
+    try:
+        proc = subprocess.run(
+            cmd,
+            shell=True,
+            executable="/bin/bash",
+            capture_output=True,
+            text=True,
+            timeout=60
+        )
+        duration = round(time.time() - t0, 3)
+        return {
+            "success": proc.returncode == 0,
+            "returncode": proc.returncode,
+            "stdout": proc.stdout.strip(),
+            "stderr": proc.stderr.strip(),
+            "duration_sec": duration
+        }
+    except subprocess.TimeoutExpired:
+        return {"success": False, "returncode": -1, "stdout": "", "stderr": "Command timed out (60s)", "duration_sec": 60.0}
+    except Exception as e:
+        return {"success": False, "returncode": -1, "stdout": "", "stderr": str(e), "duration_sec": 0.0}
+
+
+# --- Background Monitoring Loop ---
+async def telemetry_monitor_loop():
+    while True:
+        try:
+            cfg = load_config()
+            interval = cfg.get("telemetry", {}).get("interval_seconds", 10)
+            telem = get_system_telemetry()
+            
+            # Check thresholds
+            cpu_th = cfg.get("telemetry", {}).get("cpu_threshold_percent", 90)
+            ram_th = cfg.get("telemetry", {}).get("ram_threshold_percent", 90)
+            disk_th = cfg.get("telemetry", {}).get("disk_threshold_percent", 92)
+
+            anomalies = []
+            if telem["cpu_usage"] > cpu_th:
+                anomalies.append(f"High CPU: {telem['cpu_usage']}% > {cpu_th}%")
+            if telem["ram_percent"] > ram_th:
+                anomalies.append(f"High RAM: {telem['ram_percent']}% ({telem['ram_used_mb']}MB) > {ram_th}%")
+            if telem["disk_percent"] > disk_th:
+                anomalies.append(f"High Disk: {telem['disk_percent']}% > {disk_th}%")
+            if telem["failed_services"]:
+                anomalies.append(f"Failed Services: {', '.join(telem['failed_services'])}")
+
+            if anomalies:
+                alert_msg = " | ".join(anomalies)
+                log(f"Anomaly detected: {alert_msg}", "ALERT")
+                if cfg.get("auto_execute", True):
+                    # Proactive AI remediation or notification
+                    subprocess.run(["notify-send", "-a", "Zoth Sentinel AI", "-u", "critical", "System Telemetry Alert", alert_msg], check=False)
+
+            # Persist state
+            with open(STATE_PATH, "w") as f:
+                json.dump({"telemetry": telem, "anomalies": anomalies, "last_sweep": time.time()}, f, indent=2)
+
+        except Exception as e:
+            log(f"Monitor loop error: {e}", "ERROR")
+
+        await asyncio.sleep(interval)
+
+
+# --- IPC Server ---
+async def handle_ipc_client(reader, writer):
+    try:
+        data = await reader.read(65536)
+        if not data:
+            writer.close()
+            return
+        req = json.loads(data.decode("utf-8"))
+        action = req.get("action", "")
+
+        if action == "status":
+            cfg = load_config()
+            telem = get_system_telemetry()
+            resp = {"status": "active", "config": cfg, "telemetry": telem}
+
+        elif action == "ask":
+            prompt = req.get("prompt", "")
+            ans = call_llm(prompt)
+            resp = {"status": "ok", "response": ans}
+
+        elif action == "exec":
+            task = req.get("task", "")
+            # Query LLM to generate precise command or execute directly if script
+            if task.startswith("!"):
+                cmd_to_run = task[1:].strip()
+                result = execute_system_command(cmd_to_run)
+                resp = {"status": "ok", "command": cmd_to_run, "result": result}
+            else:
+                ai_out = call_llm(f"Generate the exact bash command to accomplish this task on ZothOS: {task}")
+                # Extract code block if present
+                cmd_to_run = ""
+                if "```bash" in ai_out:
+                    cmd_to_run = ai_out.split("```bash")[1].split("```")[0].strip()
+                elif "```sh" in ai_out:
+                    cmd_to_run = ai_out.split("```sh")[1].split("```")[0].strip()
+                elif "```" in ai_out:
+                    cmd_to_run = ai_out.split("```")[1].split("```")[0].strip()
+                else:
+                    cmd_to_run = ai_out.strip()
+
+                result = execute_system_command(cmd_to_run)
+                resp = {"status": "ok", "ai_reasoning": ai_out, "command": cmd_to_run, "result": result}
+
+        elif action == "set_model":
+            model = req.get("model")
+            provider = req.get("provider")
+            cfg = load_config()
+            if model:
+                cfg["model"] = model
+            if provider:
+                cfg["provider"] = provider
+                catalog = cfg.get("providers_catalog", {})
+                if provider in catalog:
+                    cfg["base_url"] = catalog[provider].get("base_url", cfg.get("base_url"))
+                    cfg["api_key_env"] = catalog[provider].get("api_key_env", cfg.get("api_key_env"))
+            save_user_config(cfg)
+            resp = {"status": "ok", "config": cfg}
+
+        else:
+            resp = {"status": "error", "message": f"Unknown action: {action}"}
+
+        writer.write(json.dumps(resp).encode("utf-8"))
+        await writer.drain()
+    except Exception as e:
+        log(f"IPC Handler error: {e}", "ERROR")
+        err_resp = {"status": "error", "message": str(e)}
+        writer.write(json.dumps(err_resp).encode("utf-8"))
+        await writer.drain()
+    finally:
+        writer.close()
+        await writer.wait_closed()
+
+
+async def run_daemon_server():
+    if os.path.exists(SOCKET_PATH):
+        try:
+            os.remove(SOCKET_PATH)
+        except OSError:
+            pass
+    server = await asyncio.start_unix_server(handle_ipc_client, path=SOCKET_PATH)
+    log(f"Zoth Sentinel AI Daemon started on socket {SOCKET_PATH}", "START")
+    os.chmod(SOCKET_PATH, 0o666)
+    
+    # Run both IPC server and Telemetry loop
+    await asyncio.gather(
+        server.serve_forever(),
+        telemetry_monitor_loop()
+    )
+
+
+# --- Client IPC Helper ---
+def send_ipc_request(payload: Dict[str, Any]) -> Dict[str, Any]:
+    if not os.path.exists(SOCKET_PATH):
+        # Daemon not running, run in direct standalone mode
+        action = payload.get("action")
+        if action == "ask":
+            return {"status": "standalone", "response": call_llm(payload.get("prompt", ""))}
+        elif action == "status":
+            return {"status": "stopped", "config": load_config(), "telemetry": get_system_telemetry()}
+        elif action == "exec":
+            task = payload.get("task", "")
+            if task.startswith("!"):
+                return {"status": "standalone", "command": task[1:], "result": execute_system_command(task[1:])}
+            ai_out = call_llm(f"Generate the exact bash command to accomplish this task: {task}")
+            cmd = ai_out.split("```bash")[1].split("```")[0].strip() if "```bash" in ai_out else ai_out.strip()
+            return {"status": "standalone", "ai_reasoning": ai_out, "command": cmd, "result": execute_system_command(cmd)}
+        elif action == "set_model":
+            cfg = load_config()
+            if payload.get("model"):
+                cfg["model"] = payload["model"]
+            if payload.get("provider"):
+                cfg["provider"] = payload["provider"]
+            save_user_config(cfg)
+            return {"status": "ok", "config": cfg}
+
+    s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    try:
+        s.connect(SOCKET_PATH)
+        s.sendall(json.dumps(payload).encode("utf-8"))
+        resp_data = s.recv(65536)
+        return json.loads(resp_data.decode("utf-8"))
+    except Exception as e:
+        return {"status": "error", "message": f"Socket communication failed: {e}"}
+    finally:
+        s.close()
+
+
+# --- CLI Commands & Renderers ---
+def banner():
+    print(f"{EMERALD}{BOLD}======================================================================{RESET}")
+    print(f"{GOLD}{BOLD}   * *  ZOTHOS AUTONOMOUS AI SENTINEL & OS EXECUTOR v3.0  ~ *{RESET}")
+    print(f"{CYAN}   Continuous System Telemetry • Multi-Model Engine • Root Execution{RESET}")
+    print(f"{EMERALD}{BOLD}======================================================================{RESET}")
+
+
+def cmd_status():
+    banner()
+    res = send_ipc_request({"action": "status"})
+    cfg = res.get("config", {})
+    telem = res.get("telemetry", {})
+    daemon_st = res.get("status", "unknown").upper()
+    
+    color_st = EMERALD if daemon_st == "ACTIVE" else CRIMSON
+    print(f"\n{BOLD}Sentinel Daemon State:{RESET} {color_st}[ {daemon_st} ]{RESET}")
+    print(f"{BOLD}Configured AI Model:  {RESET}{GOLD}{cfg.get('model')}{RESET} ({CYAN}{cfg.get('provider')}{RESET})")
+    print(f"{BOLD}API Endpoint:         {RESET}{GRAY}{cfg.get('base_url')}{RESET}")
+    print(f"{BOLD}Safety Execution Ring:{RESET} {EMERALD}{cfg.get('safety_ring')}{RESET} (Auto-exec: {cfg.get('auto_execute')})")
+    
+    print(f"\n{BOLD}--- Live OS Telemetry ---{RESET}")
+    print(f"  CPU Usage:       {EMERALD if telem.get('cpu_usage', 0) < 80 else CRIMSON}{telem.get('cpu_usage')}%{RESET}")
+    print(f"  RAM Usage:       {EMERALD if telem.get('ram_percent', 0) < 80 else CRIMSON}{telem.get('ram_percent')}%{RESET} ({telem.get('ram_used_mb')}MB / {telem.get('ram_total_mb')}MB)")
+    print(f"  Root Disk Usage: {EMERALD if telem.get('disk_percent', 0) < 85 else CRIMSON}{telem.get('disk_percent')}%{RESET}")
+    print(f"  Tor Stealth:     {EMERALD if telem.get('tor_active') else GRAY}{'ENABLED (Ghostmode)' if telem.get('tor_active') else 'DISABLED (Clear)'}{RESET}")
+    
+    failed = telem.get("failed_services", [])
+    if failed:
+        print(f"  Failed Services: {CRIMSON}{', '.join(failed)}{RESET}")
+    else:
+        print(f"  Systemd Status:  {EMERALD}All units operational (0 failed){RESET}")
+    print("")
+
+
+def cmd_ask(prompt: str):
+    print(f"{CYAN}[*] Querying Sentinel AI ({load_config().get('model')})...{RESET}")
+    res = send_ipc_request({"action": "ask", "prompt": prompt})
+    print(f"\n{GOLD}{BOLD}[SENTINEL RESPONSE]{RESET}")
+    print(res.get("response", res.get("message", "No response")))
+    print("")
+
+
+def cmd_exec(task: str):
+    print(f"{CYAN}[*] Dispatching Task to Sentinel OS Execution Engine...{RESET}")
+    res = send_ipc_request({"action": "exec", "task": task})
+    cmd = res.get("command", "")
+    result = res.get("result", {})
+    
+    print(f"\n{GOLD}{BOLD}[TARGET COMMAND]{RESET}: {EMERALD}{cmd}{RESET}")
+    if result:
+        success = result.get("success", False)
+        st_color = EMERALD if success else CRIMSON
+        print(f"{BOLD}Exit Status:{RESET} {st_color}{result.get('returncode')} ({'SUCCESS' if success else 'FAILED'}){RESET} in {result.get('duration_sec')}s")
+        if result.get("stdout"):
+            print(f"\n{BOLD}[STDOUT]{RESET}\n{result.get('stdout')}")
+        if result.get("stderr"):
+            print(f"\n{CRIMSON}{BOLD}[STDERR]{RESET}\n{result.get('stderr')}")
+    print("")
+
+
+def cmd_set_model(model: str, provider: Optional[str] = None):
+    res = send_ipc_request({"action": "set_model", "model": model, "provider": provider})
+    print(f"{EMERALD}[✓] Sentinel AI Model updated to:{RESET} {GOLD}{model}{RESET} (Provider: {CYAN}{provider or 'auto'}{RESET})")
+
+
+def cmd_monitor():
+    banner()
+    print(f"{CYAN}[*] Entering live telemetry stream (Press Ctrl+C to exit)...{RESET}\n")
+    try:
+        while True:
+            telem = get_system_telemetry()
+            sys.stdout.write(
+                f"\r{EMERALD}CPU: {telem['cpu_usage']}%{RESET} | "
+                f"{CYAN}RAM: {telem['ram_percent']}% ({telem['ram_used_mb']}MB){RESET} | "
+                f"{GOLD}DISK: {telem['disk_percent']}%{RESET} | "
+                f"{'TOR: ON' if telem['tor_active'] else 'TOR: OFF'} | "
+                f"FAIL: {len(telem['failed_services'])} units   "
+            )
+            sys.stdout.flush()
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("\n\nExited monitor.")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="ZOTHOS Autonomous AI Sentinel & OS Execution Engine")
+    subparsers = parser.add_subparsers(dest="command", help="Command to run")
+
+    subparsers.add_parser("daemon", help="Run the background sentinel supervisor & IPC daemon")
+    subparsers.add_parser("status", help="Display live sentinel status and OS telemetry")
+    subparsers.add_parser("monitor", help="Stream live terminal telemetry HUD")
+    
+    ask_p = subparsers.add_parser("ask", help="Query the AI model with system awareness")
+    ask_p.add_argument("prompt", nargs="+", help="Prompt or question")
+
+    exec_p = subparsers.add_parser("exec", help="Autonomous OS execution from natural language or !cmd")
+    exec_p.add_argument("task", nargs="+", help="Task description or !bash_command")
+
+    model_p = subparsers.add_parser("set-model", help="Switch active AI model and provider")
+    model_p.add_argument("model", help="Model name (e.g. llama3.2, claude-3-5-sonnet, gpt-4o, deepseek-chat)")
+    model_p.add_argument("provider", nargs="?", default=None, help="Provider (ollama, anthropic, openai, deepseek, groq, grok, gemini, openrouter)")
+
+    args = parser.parse_args()
+
+    if args.command == "daemon":
+        asyncio.run(run_daemon_server())
+    elif args.command == "status":
+        cmd_status()
+    elif args.command == "monitor":
+        cmd_monitor()
+    elif args.command == "ask":
+        cmd_ask(" ".join(args.prompt))
+    elif args.command == "exec":
+        cmd_exec(" ".join(args.task))
+    elif args.command == "set-model":
+        cmd_set_model(args.model, args.provider)
+    else:
+        cmd_status()
+
+
+if __name__ == "__main__":
+    main()
