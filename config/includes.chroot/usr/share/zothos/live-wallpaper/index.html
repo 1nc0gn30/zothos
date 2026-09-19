@@ -3,7 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZothOS • Hermetic Matrix & Alchemical Live Wallpaper</title>
+    <title>ZothOS • 3D Alchemical Live Wallpaper & WebGL Engine v3.0 Ultra</title>
+    
+    <!-- Three.js and Post-Processing Vendor Pipeline -->
+    <script src="../../../../opt/zoth-studio/public/assets/vendor/three.min.js" onerror="this.onerror=null;this.src='/opt/zoth-studio/public/assets/vendor/three.min.js'"></script>
+    <script src="../../../../opt/zoth-studio/public/assets/vendor/OrbitControls.js" onerror="this.onerror=null;this.src='/opt/zoth-studio/public/assets/vendor/OrbitControls.js'"></script>
+    <script src="../../../../opt/zoth-studio/public/assets/vendor/Pass.js" onerror="this.onerror=null;this.src='/opt/zoth-studio/public/assets/vendor/Pass.js'"></script>
+    <script src="../../../../opt/zoth-studio/public/assets/vendor/CopyShader.js" onerror="this.onerror=null;this.src='/opt/zoth-studio/public/assets/vendor/CopyShader.js'"></script>
+    <script src="../../../../opt/zoth-studio/public/assets/vendor/LuminosityHighPassShader.js" onerror="this.onerror=null;this.src='/opt/zoth-studio/public/assets/vendor/LuminosityHighPassShader.js'"></script>
+    <script src="../../../../opt/zoth-studio/public/assets/vendor/ShaderPass.js" onerror="this.onerror=null;this.src='/opt/zoth-studio/public/assets/vendor/ShaderPass.js'"></script>
+    <script src="../../../../opt/zoth-studio/public/assets/vendor/EffectComposer.js" onerror="this.onerror=null;this.src='/opt/zoth-studio/public/assets/vendor/EffectComposer.js'"></script>
+    <script src="../../../../opt/zoth-studio/public/assets/vendor/RenderPass.js" onerror="this.onerror=null;this.src='/opt/zoth-studio/public/assets/vendor/RenderPass.js'"></script>
+    <script src="../../../../opt/zoth-studio/public/assets/vendor/UnrealBloomPass.js" onerror="this.onerror=null;this.src='/opt/zoth-studio/public/assets/vendor/UnrealBloomPass.js'"></script>
+
     <style>
         * {
             margin: 0;
@@ -13,16 +25,28 @@
             -webkit-user-select: none;
         }
 
+        :root {
+            --primary: #00ff9d;
+            --primary-glow: rgba(0, 255, 157, 0.4);
+            --secondary: #ffd700;
+            --bg-base: #010804;
+            --hud-bg: rgba(4, 12, 10, 0.85);
+            --hud-border: rgba(0, 255, 157, 0.35);
+            --text-main: #e2fdf1;
+            --text-dim: #7da592;
+        }
+
         body, html {
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #020408;
-            font-family: 'JetBrains Mono', 'Fira Code', 'Segoe UI', monospace;
-            color: #00ff9d;
+            background-color: var(--bg-base);
+            font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+            color: var(--text-main);
+            transition: background-color 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        canvas {
+        #webgl-canvas {
             display: block;
             position: absolute;
             top: 0;
@@ -30,9 +54,14 @@
             width: 100%;
             height: 100%;
             z-index: 1;
+            cursor: grab;
         }
 
-        /* Scanline and CRT Phosphor Glow Overlay */
+        #webgl-canvas:active {
+            cursor: grabbing;
+        }
+
+        /* Scanline & CRT Phosphor Overlay */
         .crt-overlay {
             position: absolute;
             top: 0;
@@ -43,15 +72,15 @@
             z-index: 10;
             background: linear-gradient(
                 rgba(18, 16, 16, 0) 50%, 
-                rgba(0, 0, 0, 0.25) 50%
+                rgba(0, 0, 0, 0.3) 50%
             ), linear-gradient(
                 90deg,
-                rgba(255, 0, 0, 0.03),
+                rgba(255, 0, 0, 0.02),
                 rgba(0, 255, 0, 0.01),
-                rgba(0, 0, 255, 0.03)
+                rgba(0, 0, 255, 0.02)
             );
             background-size: 100% 3px, 6px 100%;
-            opacity: 0.75;
+            opacity: 0.65;
         }
 
         .vignette {
@@ -62,29 +91,80 @@
             height: 100%;
             pointer-events: none;
             z-index: 11;
-            box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.85);
+            background: radial-gradient(circle at center, transparent 40%, rgba(0, 0, 0, 0.75) 100%);
         }
 
-        /* HUD & Controls Drawer */
-        #hud {
+        /* Top Status Bar */
+        .top-bar {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 20;
-            background: rgba(4, 10, 16, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(0, 255, 157, 0.3);
-            border-radius: 8px;
-            padding: 16px 20px;
-            color: #d1fae5;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 255, 157, 0.15);
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            max-width: 320px;
+            top: 18px;
+            left: 20px;
+            z-index: 25;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            pointer-events: auto;
         }
 
-        #hud.hidden {
-            transform: translateX(120%);
+        .hud-pill {
+            background: var(--hud-bg);
+            border: 1px solid var(--hud-border);
+            border-radius: 20px;
+            padding: 7px 16px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            color: var(--primary);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 10px var(--primary-glow);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .hud-pill:hover {
+            transform: translateY(-1px);
+            border-color: var(--primary);
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.7), 0 0 16px var(--primary-glow);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+            box-shadow: 0 0 8px var(--primary);
+            animation: pulse-dot 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.4); opacity: 1; filter: drop-shadow(0 0 4px var(--primary)); }
+        }
+
+        /* Main Cockpit HUD Overlay */
+        #hud-drawer {
+            position: absolute;
+            top: 18px;
+            right: 20px;
+            z-index: 25;
+            width: 340px;
+            background: var(--hud-bg);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid var(--hud-border);
+            border-radius: 10px;
+            padding: 16px 20px;
+            color: var(--text-main);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.75), 0 0 20px var(--primary-glow);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #hud-drawer.collapsed {
+            transform: translateX(380px);
             opacity: 0;
             pointer-events: none;
         }
@@ -93,827 +173,1516 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border-bottom: 1px solid rgba(0, 255, 157, 0.2);
+            border-bottom: 1px solid var(--hud-border);
             padding-bottom: 10px;
             margin-bottom: 12px;
         }
 
-        .hud-title {
-            font-size: 13px;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            color: #00ff9d;
+        .hud-brand {
             display: flex;
             align-items: center;
             gap: 8px;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            color: var(--primary);
+            text-transform: uppercase;
         }
 
-        .hud-glyph {
-            color: #ffd700;
+        .hud-brand-icon {
+            color: var(--secondary);
             font-size: 16px;
-            text-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+            text-shadow: 0 0 10px var(--secondary);
         }
 
-        .hud-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin: 8px 0;
-            font-size: 11px;
-            letter-spacing: 0.5px;
-        }
-
-        .hud-label {
-            color: #94a3b8;
-        }
-
-        .hud-val {
-            color: #00ff9d;
-            font-weight: bold;
-        }
-
-        .theme-pills {
+        .hud-stat-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .hud-stat-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 6px;
+            padding: 8px 10px;
+        }
+
+        .stat-label {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-dim);
+            margin-bottom: 3px;
+        }
+
+        .stat-value {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--primary);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Realtime Sparkline Graph */
+        .sparkline-container {
+            margin: 10px 0;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--hud-border);
+            border-radius: 6px;
+            padding: 8px;
+        }
+
+        .sparkline-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 9px;
+            color: var(--text-dim);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #sparkline-canvas {
+            width: 100%;
+            height: 38px;
+            display: block;
+        }
+
+        /* Audio Visualizer Bars */
+        .audio-bars-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            height: 22px;
+            gap: 3px;
+            padding: 4px 6px;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
+            margin: 8px 0;
+        }
+
+        .audio-bar {
+            flex: 1;
+            background: var(--primary);
+            height: 4px;
+            border-radius: 2px;
+            transition: height 0.08s ease, background-color 0.3s ease;
+            box-shadow: 0 0 6px var(--primary-glow);
+        }
+
+        /* Theme Selector Buttons */
+        .section-title {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-dim);
+            margin: 10px 0 6px;
+        }
+
+        .theme-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 6px;
-            margin-top: 10px;
+            margin-bottom: 12px;
         }
 
         .theme-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #cbd5e1;
-            padding: 6px 8px;
-            border-radius: 4px;
-            font-size: 10px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #d1d5db;
+            padding: 7px 8px;
+            border-radius: 5px;
             font-family: inherit;
+            font-size: 10px;
+            font-weight: 600;
             cursor: pointer;
             text-align: center;
-            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: all 0.2s ease;
         }
 
         .theme-btn:hover {
-            background: rgba(0, 255, 157, 0.15);
-            border-color: #00ff9d;
-            color: #00ff9d;
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--primary);
+            color: var(--primary);
         }
 
         .theme-btn.active {
-            background: rgba(0, 255, 157, 0.25);
-            border-color: #00ff9d;
-            color: #00ff9d;
-            font-weight: bold;
-            box-shadow: 0 0 10px rgba(0, 255, 157, 0.3);
+            background: var(--primary-glow);
+            border-color: var(--primary);
+            color: #ffffff;
+            box-shadow: 0 0 12px var(--primary-glow);
         }
 
-        .ctrl-btn {
-            width: 100%;
-            margin-top: 10px;
-            padding: 8px;
-            background: rgba(0, 255, 157, 0.1);
-            border: 1px solid rgba(0, 255, 157, 0.4);
-            border-radius: 4px;
-            color: #00ff9d;
+        /* Controls Grid */
+        .action-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        .ctrl-action-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--hud-border);
+            color: var(--text-main);
+            padding: 8px 6px;
+            border-radius: 5px;
             font-family: inherit;
-            font-size: 11px;
-            font-weight: 600;
+            font-size: 10px;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .ctrl-btn:hover {
-            background: rgba(0, 255, 157, 0.3);
-            box-shadow: 0 0 12px rgba(0, 255, 157, 0.4);
-        }
-
-        /* Toggle HUD Pill Button (Top Left) */
-        #hud-toggle {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 25;
-            background: rgba(4, 10, 16, 0.7);
-            border: 1px solid rgba(0, 255, 157, 0.3);
-            border-radius: 20px;
-            padding: 6px 14px;
-            font-size: 11px;
-            color: #00ff9d;
-            cursor: pointer;
-            backdrop-filter: blur(8px);
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 6px;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
         }
 
-        #hud-toggle:hover {
-            background: rgba(0, 255, 157, 0.2);
-            border-color: #00ff9d;
+        .ctrl-action-btn:hover {
+            background: var(--primary-glow);
+            border-color: var(--primary);
+            color: #fff;
+            box-shadow: 0 0 14px var(--primary-glow);
         }
 
-        /* Bottom watermark */
-        .watermark {
+        .ctrl-action-btn.active {
+            background: var(--primary);
+            color: #000;
+            border-color: var(--primary);
+            box-shadow: 0 0 16px var(--primary);
+        }
+
+        /* Watermarks & Bottom Bar */
+        .bottom-watermark {
             position: absolute;
-            bottom: 15px;
+            bottom: 16px;
             left: 20px;
             z-index: 20;
             font-size: 10px;
             letter-spacing: 2px;
-            color: rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.35);
             text-transform: uppercase;
             pointer-events: none;
         }
 
-        .watermark span {
-            color: #00ff9d;
+        .bottom-watermark span {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .bottom-shortcuts {
+            position: absolute;
+            bottom: 16px;
+            right: 20px;
+            z-index: 20;
+            font-size: 10px;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.45);
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 4px 12px;
+            pointer-events: none;
+            backdrop-filter: blur(8px);
+        }
+
+        .bottom-shortcuts kbd {
+            background: rgba(255, 255, 255, 0.12);
+            color: var(--primary);
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 9px;
             font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <canvas id="canvas"></canvas>
+    <canvas id="webgl-canvas"></canvas>
     <div class="crt-overlay"></div>
     <div class="vignette"></div>
 
-    <button id="hud-toggle"><span>🜂</span> HUD [H]</button>
-
-    <div id="hud">
-        <div class="hud-header">
-            <div class="hud-title">
-                <span class="hud-glyph">☉</span>
-                <span>ZOTH MATRIX FX</span>
-            </div>
-            <span id="fps-display" style="font-size: 11px; color: #ffd700;">60 FPS</span>
-        </div>
-        
-        <div class="hud-row">
-            <span class="hud-label">Hermetic Streams</span>
-            <span id="stream-count" class="hud-val">120</span>
-        </div>
-        <div class="hud-row">
-            <span class="hud-label">Active Particles</span>
-            <span id="particle-count" class="hud-val">240</span>
-        </div>
-        <div class="hud-row">
-            <span class="hud-label">Sacred Geometry</span>
-            <span id="geo-status" class="hud-val">Metatron • 🜂🜄</span>
-        </div>
-        <div class="hud-row">
-            <span class="hud-label">Audio Resonance</span>
-            <span id="audio-status" class="hud-val">OFF [A]</span>
-        </div>
-
-        <div style="margin-top: 10px;">
-            <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-bottom: 4px;">Alchemical Realities [M]</div>
-            <div class="theme-pills">
-                <button class="theme-btn active" data-theme="emerald">🜂 Matrix Green</button>
-                <button class="theme-btn" data-theme="gold">☉ Azoth Gold</button>
-                <button class="theme-btn" data-theme="cyan">☿ Amnesic Cyan</button>
-                <button class="theme-btn" data-theme="crimson">🜄 Crimson Fire</button>
-            </div>
-        </div>
-
-        <button id="nova-btn" class="ctrl-btn">💥 Trigger Nova Burst [C]</button>
-        <button id="audio-btn" class="ctrl-btn" style="border-color: #ffd700; color: #ffd700; background: rgba(255,215,0,0.1);">🔊 Toggle Sound [A]</button>
+    <!-- Top Status Bar -->
+    <div class="top-bar">
+        <button id="toggle-hud-btn" class="hud-pill">
+            <div class="status-dot"></div>
+            <span>ZOTH HUD [H]</span>
+        </button>
+        <button id="quick-theme-btn" class="hud-pill" style="font-size: 10px; padding: 7px 12px;">
+            <span id="theme-glyph">🜂</span>
+            <span id="quick-theme-name">EMERALD MATRIX</span>
+        </button>
     </div>
 
-    <div class="watermark">ZOTHOS <span>//</span> HERMETIC MATRIX ENGINE v2.5 <span>//</span> ☉ ☽ ☿ ♀ ♂ 🜂 🜄 🜁 🜃</div>
+    <!-- Main Cockpit HUD Overlay -->
+    <div id="hud-drawer">
+        <div class="hud-header">
+            <div class="hud-brand">
+                <span class="hud-brand-icon">☉</span>
+                <span>ZOTH 3D ALCHEMICAL ENGINE</span>
+            </div>
+            <span id="fps-counter" style="font-size: 11px; font-weight: bold; color: var(--secondary);">60 FPS</span>
+        </div>
 
+        <div class="hud-stat-grid">
+            <div class="hud-stat-box">
+                <div class="stat-label">Quantum Flux</div>
+                <div id="val-flux" class="stat-value">99.8%</div>
+            </div>
+            <div class="hud-stat-box">
+                <div class="stat-label">Active Particles</div>
+                <div id="val-particles" class="stat-value">3,500</div>
+            </div>
+            <div class="hud-stat-box">
+                <div class="stat-label">Sacred Orbitals</div>
+                <div id="val-orbitals" class="stat-value">Metatron 12☉</div>
+            </div>
+            <div class="hud-stat-box">
+                <div class="stat-label">Harmonic Freq</div>
+                <div id="val-freq" class="stat-value">528 Hz 🜂</div>
+            </div>
+        </div>
+
+        <!-- Telemetry Oscilloscope Sparkline -->
+        <div class="sparkline-container">
+            <div class="sparkline-header">
+                <span>Alchemical Coherence</span>
+                <span id="coherence-pct">1.000 φ</span>
+            </div>
+            <canvas id="sparkline-canvas"></canvas>
+        </div>
+
+        <!-- Audio EQ Spectrum Visualizer -->
+        <div class="section-title">Harmonic Resonance [A]</div>
+        <div class="audio-bars-container" id="eq-bars">
+            <div class="audio-bar"></div>
+            <div class="audio-bar"></div>
+            <div class="audio-bar"></div>
+            <div class="audio-bar"></div>
+            <div class="audio-bar"></div>
+            <div class="audio-bar"></div>
+            <div class="audio-bar"></div>
+            <div class="audio-bar"></div>
+            <div class="audio-bar"></div>
+            <div class="audio-bar"></div>
+            <div class="audio-bar"></div>
+            <div class="audio-bar"></div>
+        </div>
+
+        <!-- Alchemical Reality Themes -->
+        <div class="section-title">Alchemical Realities [M]</div>
+        <div class="theme-grid">
+            <button class="theme-btn active" data-theme="emerald">🜂 Emerald Matrix</button>
+            <button class="theme-btn" data-theme="gold">☉ 24k Aurum Gold</button>
+            <button class="theme-btn" data-theme="crimson">🜄 NullAI Ghostmode</button>
+            <button class="theme-btn" data-theme="cyan">☿ Quantum Cyber</button>
+        </div>
+
+        <!-- Quick Trigger Actions -->
+        <div class="section-title">Interactive Commands</div>
+        <div class="action-grid">
+            <button id="btn-nova" class="ctrl-action-btn">💥 Nova Burst [C]</button>
+            <button id="btn-audio" class="ctrl-action-btn">🔊 Synth Drone [A]</button>
+            <button id="btn-bloom" class="ctrl-action-btn active">✨ Bloom FX [B]</button>
+            <button id="btn-warp" class="ctrl-action-btn">🌌 Warp Surge [SPC]</button>
+        </div>
+    </div>
+
+    <!-- Bottom Watermark & Shortcut Hints -->
+    <div class="bottom-watermark">
+        ZOTHOS <span>//</span> SOVEREIGN 3D WEBGL ENGINE <span>//</span> ☉ ☽ ☿ ♀ ♂ 🜂 🜄 🜁 🜃
+    </div>
+    <div class="bottom-shortcuts">
+        <kbd>Drag</kbd> Orbit &bull; <kbd>Scroll</kbd> Zoom &bull; <kbd>M</kbd> Theme &bull; <kbd>C</kbd> Nova &bull; <kbd>A</kbd> Audio &bull; <kbd>H</kbd> HUD
+    </div>
+
+    <!-- ========================================================================= -->
+    <!--  3D WEBGL ENGINE & ALCHEMICAL SCRIPT CORE                                -->
+    <!-- ========================================================================= -->
     <script>
-        (function() {
-            // =========================================================================
-            //  CANVAS & GRAPHICS CONTEXT SETUP
-            // =========================================================================
-            const canvas = document.getElementById('canvas');
-            const ctx = canvas.getContext('2d', { alpha: false });
+    (function() {
+        'use strict';
 
-            let width = 0;
-            let height = 0;
-            let dpr = window.devicePixelRatio || 1;
-
-            function resize() {
-                width = window.innerWidth;
-                height = window.innerHeight;
-                canvas.width = width * dpr;
-                canvas.height = height * dpr;
-                ctx.scale(dpr, dpr);
-                initMatrixStreams();
+        // -------------------------------------------------------------------------
+        // 1. MASTER THEME SPECIFICATIONS
+        // -------------------------------------------------------------------------
+        const THEMES = {
+            emerald: {
+                id: 'emerald',
+                name: 'Emerald Matrix',
+                glyph: '🜂',
+                freq: '528 Hz 🜂',
+                primaryHex: '#00ff9d',
+                primaryNum: 0x00ff9d,
+                secondaryNum: 0xffd700,
+                tertiaryNum: 0x004724,
+                bgHex: '#010804',
+                bgClear: 0x010804,
+                hudGlow: 'rgba(0, 255, 157, 0.4)',
+                hudBorder: 'rgba(0, 255, 157, 0.35)',
+                textMain: '#e2fdf1',
+                textDim: '#7da592',
+                bloomStrength: 1.4,
+                bloomRadius: 0.65,
+                coreTexture: 'assets/mascot/azoth-code-matrix.jpg',
+                holos: [
+                    'assets/brand/azoth-seal-masterpiece.jpg',
+                    'assets/brand/zoth-seal-hermetic-hd.jpg',
+                    'assets/mascot/azoth-hermetic-seal.jpg',
+                    'assets/brand/zoth-golden-z-512.png'
+                ]
+            },
+            gold: {
+                id: 'gold',
+                name: '24k Aurum Gold',
+                glyph: '☉',
+                freq: '432 Hz ☉',
+                primaryHex: '#ffd700',
+                primaryNum: 0xffd700,
+                secondaryNum: 0xff9900,
+                tertiaryNum: 0x5c4000,
+                bgHex: '#090601',
+                bgClear: 0x090601,
+                hudGlow: 'rgba(255, 215, 0, 0.45)',
+                hudBorder: 'rgba(255, 215, 0, 0.35)',
+                textMain: '#fffbeb',
+                textDim: '#b49f6b',
+                bloomStrength: 1.6,
+                bloomRadius: 0.75,
+                coreTexture: 'assets/brand/zoth-golden-z-512.png',
+                holos: [
+                    'assets/brand/azoth-seal-masterpiece.jpg',
+                    'assets/brand/zoth-golden-z-emblem.png',
+                    'assets/brand/ai-math-pillars-emblem.jpg',
+                    'assets/brand/zoth-seal-hermetic-hd.jpg'
+                ]
+            },
+            crimson: {
+                id: 'crimson',
+                name: 'NullAI Ghostmode',
+                glyph: '🜄',
+                freq: '666 Hz 🜄',
+                primaryHex: '#ff0055',
+                primaryNum: 0xff0055,
+                secondaryNum: 0xff3366,
+                tertiaryNum: 0x4a0014,
+                bgHex: '#0c0205',
+                bgClear: 0x0c0205,
+                hudGlow: 'rgba(255, 0, 85, 0.45)',
+                hudBorder: 'rgba(255, 0, 85, 0.35)',
+                textMain: '#ffe4ea',
+                textDim: '#a86576',
+                bloomStrength: 1.5,
+                bloomRadius: 0.7,
+                coreTexture: 'assets/mascot/ghostbyte-nullai-icon.png',
+                holos: [
+                    'assets/mascot/azoth-ghostbyte.jpg',
+                    'assets/mascot/azoth-sanctum-throne.jpg',
+                    'assets/mascot/azoth-command-deck.jpg',
+                    'assets/mascot/azoth-cinematic.jpg'
+                ]
+            },
+            cyan: {
+                id: 'cyan',
+                name: 'Quantum Cyber',
+                glyph: '☿',
+                freq: '963 Hz ☿',
+                primaryHex: '#00f0ff',
+                primaryNum: 0x00f0ff,
+                secondaryNum: 0xa855f7,
+                tertiaryNum: 0x082f49,
+                bgHex: '#020713',
+                bgClear: 0x020713,
+                hudGlow: 'rgba(0, 240, 255, 0.4)',
+                hudBorder: 'rgba(0, 240, 255, 0.35)',
+                textMain: '#e0f2fe',
+                textDim: '#739bb5',
+                bloomStrength: 1.4,
+                bloomRadius: 0.65,
+                coreTexture: 'assets/mascot/azoth-quantum-orb.jpg',
+                holos: [
+                    'assets/mascot/azoth-quantum-arena.jpg',
+                    'assets/mascot/azoth-aether.jpg',
+                    'assets/mascot/azoth-cosmic-citadel.jpg',
+                    'assets/mascot/azoth-antigravity.jpg'
+                ]
             }
-            window.addEventListener('resize', resize);
+        };
 
-            // =========================================================================
-            //  ALCHEMICAL SYMBOLS & RUNIC DICTIONARY
-            // =========================================================================
-            const GLYPHS = [
-                // Alchemical & Planetary Core
-                '☉', '☽', '☿', '♀', '♂', '♃', '♄', '🜂', '🜄', '🜁', '🜃', '🝘', '🜚', '🜛', '🜞', '🝠', '🜵',
-                // Elder Futhark Runes
-                'ᚠ', 'ᚢ', 'ᚦ', 'ᚨ', 'ᚱ', 'ᚲ', 'ᚷ', 'ᚹ', 'ᚺ', 'ᚾ', 'ᛁ', 'ᛃ', 'ᛈ', 'ᛇ', 'ᛉ', 'ᛋ', 'ᛏ',
-                // Matrix Half-width Katakana
-                'ｦ', 'ｱ', 'ｳ', 'ｴ', 'ｵ', 'ｶ', 'ｷ', 'ｹ', 'ｺ', 'ｻ', 'ｼ', 'ｽ', 'ｾ', 'ｿ', 'ﾀ', 'ﾂ', 'ﾃ', 'ﾅ', 'ﾆ', 'ﾇ', 'ﾈ',
-                // Hex & Binary
-                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'X', 'Z', 'Ω'
+        let currentThemeKey = 'emerald';
+        let currentTheme = THEMES[currentThemeKey];
+
+        // -------------------------------------------------------------------------
+        // 2. ASSET PATH RESOLUTION & SMART TEXTURE LOADER
+        // -------------------------------------------------------------------------
+        function resolveAssetUrl(relPath) {
+            const prefixes = [
+                '../../../../opt/zoth-studio/public/',
+                '/opt/zoth-studio/public/',
+                '../',
+                './'
             ];
+            return prefixes[0] + relPath;
+        }
 
-            // =========================================================================
-            //  THEMES & PALETTES
-            // =========================================================================
-            const THEMES = {
-                emerald: {
-                    name: 'Hermetic Matrix',
-                    bg: '#020704',
-                    lead: '#ffffff',
-                    leadGold: '#ffd700',
-                    primary: '#00ff9d',
-                    secondary: '#00b368',
-                    dim: '#004724',
-                    glow: 'rgba(0, 255, 157, 0.4)',
-                    geoPrimary: '#00ff9d',
-                    geoSecondary: '#ffd700',
-                    particle: '#00ff9d'
+        const textureLoader = new THREE.TextureLoader();
+        const loadedTextures = {};
+
+        function loadSmartTexture(relPath, fallbackColor) {
+            if (loadedTextures[relPath]) return loadedTextures[relPath];
+
+            const primaryUrl = resolveAssetUrl(relPath);
+            const fallbackUrl = '/opt/zoth-studio/public/' + relPath;
+
+            const tex = textureLoader.load(
+                primaryUrl,
+                (t) => {
+                    t.wrapS = THREE.RepeatWrapping;
+                    t.wrapT = THREE.RepeatWrapping;
                 },
-                gold: {
-                    name: 'Azoth Solar Sanctum',
-                    bg: '#070501',
-                    lead: '#ffffff',
-                    leadGold: '#ffffff',
-                    primary: '#ffd700',
-                    secondary: '#e6a100',
-                    dim: '#5c4000',
-                    glow: 'rgba(255, 215, 0, 0.4)',
-                    geoPrimary: '#ffd700',
-                    geoSecondary: '#ff9100',
-                    particle: '#ffd700'
-                },
-                cyan: {
-                    name: 'Amnesic Cyber Void',
-                    bg: '#01050a',
-                    lead: '#ffffff',
-                    leadGold: '#00e5ff',
-                    primary: '#00e5ff',
-                    secondary: '#0088cc',
-                    dim: '#003355',
-                    glow: 'rgba(0, 229, 255, 0.4)',
-                    geoPrimary: '#00e5ff',
-                    geoSecondary: '#7928ca',
-                    particle: '#00e5ff'
-                },
-                crimson: {
-                    name: 'Crimson Alchemical Fire',
-                    bg: '#0a0102',
-                    lead: '#ffffff',
-                    leadGold: '#ffcc00',
-                    primary: '#ff3355',
-                    secondary: '#cc1133',
-                    dim: '#440011',
-                    glow: 'rgba(255, 51, 85, 0.4)',
-                    geoPrimary: '#ff3355',
-                    geoSecondary: '#ffd700',
-                    particle: '#ff3355'
+                undefined,
+                () => {
+                    // Fallback attempt
+                    textureLoader.load(fallbackUrl, (t) => {
+                        tex.image = t.image;
+                        tex.needsUpdate = true;
+                    }, undefined, () => {
+                        // Procedural Canvas fallback if missing
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 512;
+                        canvas.height = 512;
+                        const c = canvas.getContext('2d');
+                        c.fillStyle = fallbackColor || '#00ff9d';
+                        c.fillRect(0, 0, 512, 512);
+                        c.strokeStyle = '#ffffff';
+                        c.lineWidth = 8;
+                        c.beginPath();
+                        c.arc(256, 256, 200, 0, Math.PI * 2);
+                        c.stroke();
+                        c.font = 'bold 160px monospace';
+                        c.fillStyle = '#ffffff';
+                        c.textAlign = 'center';
+                        c.textBaseline = 'middle';
+                        c.fillText('Z', 256, 256);
+                        tex.image = canvas;
+                        tex.needsUpdate = true;
+                    });
                 }
+            );
+            loadedTextures[relPath] = tex;
+            return tex;
+        }
+
+        // Preload key textures
+        const texMatrix = loadSmartTexture('assets/mascot/azoth-code-matrix.jpg', '#00ff9d');
+        const texGold = loadSmartTexture('assets/brand/zoth-golden-z-512.png', '#ffd700');
+        const texNullAI = loadSmartTexture('assets/mascot/ghostbyte-nullai-icon.png', '#ff0055');
+        const texQuantum = loadSmartTexture('assets/mascot/azoth-quantum-orb.jpg', '#00f0ff');
+        const texSealMaster = loadSmartTexture('assets/brand/azoth-seal-masterpiece.jpg', '#ffd700');
+        const texSealGhost = loadSmartTexture('assets/mascot/azoth-ghostbyte.jpg', '#ff0055');
+        const texSealArena = loadSmartTexture('assets/mascot/azoth-quantum-arena.jpg', '#00f0ff');
+        const texSealHermetic = loadSmartTexture('assets/brand/zoth-seal-hermetic-hd.jpg', '#00ff9d');
+
+        // -------------------------------------------------------------------------
+        // 3. THREE.JS SCENE, CAMERA, RENDERER & POSTPROCESSING SETUP
+        // -------------------------------------------------------------------------
+        const canvas = document.getElementById('webgl-canvas');
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(currentTheme.bgClear, 0.0006);
+
+        const camera = new THREE.PerspectiveCamera(55, width / height, 1, 8000);
+        camera.position.set(0, 30, 440);
+
+        const renderer = new THREE.WebGLRenderer({
+            canvas: canvas,
+            antialias: true,
+            alpha: false,
+            powerPreference: 'high-performance'
+        });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setSize(width, height);
+        renderer.setClearColor(currentTheme.bgClear, 1);
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.15;
+
+        // OrbitControls
+        let controls = null;
+        if (typeof THREE.OrbitControls === 'function') {
+            controls = new THREE.OrbitControls(camera, canvas);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.045;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.65;
+            controls.minDistance = 140;
+            controls.maxDistance = 1400;
+            controls.maxPolarAngle = Math.PI * 0.85;
+            controls.minPolarAngle = Math.PI * 0.15;
+        }
+
+        // EffectComposer & UnrealBloomPass
+        let composer = null;
+        let bloomPass = null;
+        let bloomEnabled = true;
+
+        if (typeof THREE.EffectComposer === 'function' && typeof THREE.UnrealBloomPass === 'function') {
+            composer = new THREE.EffectComposer(renderer);
+            const renderPass = new THREE.RenderPass(scene, camera);
+            composer.addPass(renderPass);
+
+            bloomPass = new THREE.UnrealBloomPass(
+                new THREE.Vector2(width, height),
+                currentTheme.bloomStrength,
+                currentTheme.bloomRadius,
+                0.12
+            );
+            composer.addPass(bloomPass);
+        }
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.45);
+        scene.add(ambientLight);
+
+        const pointLightCore = new THREE.PointLight(currentTheme.primaryNum, 3.5, 900);
+        pointLightCore.position.set(0, 0, 0);
+        scene.add(pointLightCore);
+
+        const pointLightOrbital = new THREE.PointLight(currentTheme.secondaryNum, 2.0, 700);
+        pointLightOrbital.position.set(220, 160, 180);
+        scene.add(pointLightOrbital);
+
+        // -------------------------------------------------------------------------
+        // 4. CENTRAL 3D ALCHEMICAL AZOTH ORB
+        // -------------------------------------------------------------------------
+        const orbGroup = new THREE.Group();
+        scene.add(orbGroup);
+
+        // Custom Shader for Alchemical Plasma Core
+        const orbVertexShader = `
+            varying vec2 vUv;
+            varying vec3 vNormal;
+            varying vec3 vPosition;
+            uniform float uTime;
+            uniform float uDistort;
+
+            void main() {
+                vUv = uv;
+                vNormal = normalize(normalMatrix * normal);
+                vPosition = position;
+
+                vec3 pos = position;
+                float wave = sin(pos.x * 0.08 + uTime * 2.5) * cos(pos.y * 0.08 + uTime * 2.0) * sin(pos.z * 0.08 + uTime * 1.8);
+                pos += normal * wave * uDistort;
+
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+            }
+        `;
+
+        const orbFragmentShader = `
+            varying vec2 vUv;
+            varying vec3 vNormal;
+            varying vec3 vPosition;
+            uniform float uTime;
+            uniform vec3 uColorPrimary;
+            uniform vec3 uColorSecondary;
+            uniform sampler2D uTexture;
+            uniform float uNoiseIntensity;
+
+            void main() {
+                vec2 uv = vUv;
+                // Subtle animated UV swirl
+                uv.x += sin(uv.y * 6.0 + uTime * 0.8) * 0.015;
+                uv.y += cos(uv.x * 6.0 + uTime * 0.7) * 0.015;
+
+                vec4 texColor = texture2D(uTexture, uv);
+                
+                // Fresnel rim glow
+                vec3 viewDir = normalize(-vPosition);
+                float fresnel = pow(1.0 - max(dot(vNormal, vec3(0.0, 0.0, 1.0)), 0.0), 2.2);
+
+                // Harmonic plasma bands
+                float band = sin(vPosition.y * 0.12 + uTime * 2.0) * 0.5 + 0.5;
+                vec3 plasma = mix(uColorPrimary, uColorSecondary, band);
+
+                // Rich alchemical blend preserving texture details
+                vec3 finalColor = mix(texColor.rgb, plasma, 0.35);
+                finalColor += uColorPrimary * fresnel * 0.85;
+                finalColor += uColorSecondary * pow(fresnel, 3.5) * 1.1;
+
+                gl_FragColor = vec4(finalColor, 0.98);
+            }
+        `;
+
+        const orbUniforms = {
+            uTime: { value: 0 },
+            uDistort: { value: 2.2 },
+            uColorPrimary: { value: new THREE.Color(currentTheme.primaryNum) },
+            uColorSecondary: { value: new THREE.Color(currentTheme.secondaryNum) },
+            uTexture: { value: texMatrix },
+            uNoiseIntensity: { value: 0.6 }
+        };
+
+        const orbGeo = new THREE.SphereGeometry(48, 64, 64);
+        const orbMat = new THREE.ShaderMaterial({
+            vertexShader: orbVertexShader,
+            fragmentShader: orbFragmentShader,
+            uniforms: orbUniforms,
+            transparent: true
+        });
+        const orbMesh = new THREE.Mesh(orbGeo, orbMat);
+        orbGroup.add(orbMesh);
+
+        // Nested Metatron Sacred Geometry & Wireframe Energy Rings
+        const ringMaterial1 = new THREE.MeshBasicMaterial({
+            color: currentTheme.primaryNum,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.55
+        });
+        const ringGeo1 = new THREE.TorusGeometry(74, 1.2, 16, 100);
+        const ringMesh1 = new THREE.Mesh(ringGeo1, ringMaterial1);
+        ringMesh1.rotation.x = Math.PI / 3;
+        orbGroup.add(ringMesh1);
+
+        const ringMaterial2 = new THREE.MeshBasicMaterial({
+            color: currentTheme.secondaryNum,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.5
+        });
+        const ringGeo2 = new THREE.TorusGeometry(92, 0.9, 16, 100);
+        const ringMesh2 = new THREE.Mesh(ringGeo2, ringMaterial2);
+        ringMesh2.rotation.y = Math.PI / 4;
+        orbGroup.add(ringMesh2);
+
+        const ringMaterial3 = new THREE.MeshBasicMaterial({
+            color: currentTheme.primaryNum,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.4
+        });
+        const ringGeo3 = new THREE.TorusGeometry(110, 0.7, 16, 100);
+        const ringMesh3 = new THREE.Mesh(ringGeo3, ringMaterial3);
+        ringMesh3.rotation.z = Math.PI / 6;
+        orbGroup.add(ringMesh3);
+
+        // Outer Metatron Sacred Icosahedron Cage
+        const cageGeo = new THREE.IcosahedronGeometry(130, 1);
+        const cageMat = new THREE.MeshBasicMaterial({
+            color: currentTheme.primaryNum,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.25
+        });
+        const cageMesh = new THREE.Mesh(cageGeo, cageMat);
+        orbGroup.add(cageMesh);
+
+        // -------------------------------------------------------------------------
+        // 5. ROTATING 3D PLANETARY & ALCHEMICAL GLYPH SPRITES
+        // -------------------------------------------------------------------------
+        const GLYPH_LIST = ['☉', '☽', '☿', '♀', '♂', '♃', '♄', '🜂', '🜄', '🜁', '🜃', '🝠'];
+        const glyphGroup = new THREE.Group();
+        orbGroup.add(glyphGroup);
+
+        function createGlyphTexture(char, colorHex) {
+            const gCanvas = document.createElement('canvas');
+            gCanvas.width = 128;
+            gCanvas.height = 128;
+            const gCtx = gCanvas.getContext('2d');
+            gCtx.clearRect(0, 0, 128, 128);
+
+            // Subtle outer glow
+            gCtx.shadowColor = colorHex;
+            gCtx.shadowBlur = 18;
+
+            gCtx.font = 'bold 64px sans-serif';
+            gCtx.fillStyle = '#ffffff';
+            gCtx.textAlign = 'center';
+            gCtx.textBaseline = 'middle';
+            gCtx.fillText(char, 64, 64);
+
+            // Second pass for inner tint
+            gCtx.shadowBlur = 4;
+            gCtx.fillStyle = colorHex;
+            gCtx.fillText(char, 64, 64);
+
+            const gTexture = new THREE.CanvasTexture(gCanvas);
+            return gTexture;
+        }
+
+        const glyphSprites = [];
+        const glyphRadius = 165;
+
+        GLYPH_LIST.forEach((glyph, index) => {
+            const angle = (index / GLYPH_LIST.length) * Math.PI * 2;
+            const texture = createGlyphTexture(glyph, currentTheme.primaryHex);
+            const spriteMat = new THREE.SpriteMaterial({
+                map: texture,
+                transparent: true,
+                opacity: 0.85,
+                blending: THREE.AdditiveBlending
+            });
+            const sprite = new THREE.Sprite(spriteMat);
+            sprite.scale.set(32, 32, 1);
+            sprite.userData = {
+                baseAngle: angle,
+                speed: 0.008 + (index % 3) * 0.003,
+                radius: glyphRadius + (index % 2) * 20,
+                elevation: (Math.sin(index) * 45)
             };
+            glyphGroup.add(sprite);
+            glyphSprites.push(sprite);
+        });
 
-            let currentThemeKey = 'emerald';
-            let currentTheme = THEMES[currentThemeKey];
+        // -------------------------------------------------------------------------
+        // 6. HOLOGRAPHIC PROJECTION PLANES WITH AUTHENTIC SEALS
+        // -------------------------------------------------------------------------
+        const holoGroup = new THREE.Group();
+        orbGroup.add(holoGroup);
 
-            // Parse URL parameters for initial theme
-            const urlParams = new URLSearchParams(window.location.search);
-            const initialTheme = urlParams.get('theme') || urlParams.get('mode');
-            if (initialTheme && THEMES[initialTheme]) {
-                currentThemeKey = initialTheme;
-                currentTheme = THEMES[currentThemeKey];
-            }
+        const holoTextures = [texSealMaster, texSealHermetic, texSealGhost, texSealArena];
+        const holoMeshes = [];
 
-            // =========================================================================
-            //  MOUSE & INTERACTION STATE
-            // =========================================================================
-            const mouse = {
-                x: window.innerWidth / 2,
-                y: window.innerHeight / 2,
-                vx: 0,
-                vy: 0,
-                isDown: false,
-                lastX: window.innerWidth / 2,
-                lastY: window.innerHeight / 2,
-                active: false
-            };
-
-            window.addEventListener('mousemove', (e) => {
-                mouse.x = e.clientX;
-                mouse.y = e.clientY;
-                mouse.vx = mouse.x - mouse.lastX;
-                mouse.vy = mouse.y - mouse.lastY;
-                mouse.lastX = mouse.x;
-                mouse.lastY = mouse.y;
-                mouse.active = true;
-
-                // Spawn interactive sparks on fast movement
-                if (Math.hypot(mouse.vx, mouse.vy) > 8) {
-                    spawnSparks(mouse.x, mouse.y, 2);
-                }
+        holoTextures.forEach((tex, i) => {
+            const planeGeo = new THREE.PlaneGeometry(55, 55);
+            const planeMat = new THREE.MeshBasicMaterial({
+                map: tex,
+                transparent: true,
+                opacity: 0.45,
+                side: THREE.DoubleSide,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
             });
+            const plane = new THREE.Mesh(planeGeo, planeMat);
+            const orbitAngle = (i / holoTextures.length) * Math.PI * 2;
+            plane.userData = { orbitAngle: orbitAngle, distance: 210, speed: 0.012 * (i % 2 === 0 ? 1 : -1) };
+            holoGroup.add(plane);
+            holoMeshes.push(plane);
+        });
 
-            window.addEventListener('mousedown', (e) => {
-                mouse.isDown = true;
-                triggerNova(e.clientX, e.clientY);
+        // -------------------------------------------------------------------------
+        // 7. 3D MATRIX RAIN & PARTICLE STORM ENGINE WITH Z-DEPTH
+        // -------------------------------------------------------------------------
+        const MATRIX_CHARS = '0123456789ABCDEFｦｱｳｴｵｶｷｹｺｻｼｽｾｿﾀﾂﾃﾅﾆﾇﾈ☉☽☿♀♂🜂🜄🜁🜃';
+        const STREAM_COUNT = 180;
+        const STREAM_LENGTH = 14;
+
+        // Construct 3D matrix particle system
+        const totalMatrixParticles = STREAM_COUNT * STREAM_LENGTH;
+        const matrixPositions = new Float32Array(totalMatrixParticles * 3);
+        const matrixColors = new Float32Array(totalMatrixParticles * 3);
+        const matrixSizes = new Float32Array(totalMatrixParticles);
+
+        const streams = [];
+        for (let s = 0; s < STREAM_COUNT; s++) {
+            const x = (Math.random() - 0.5) * 2400;
+            const y = (Math.random() - 0.5) * 1800 + 400;
+            const z = (Math.random() - 0.5) * 2000;
+            const speed = 2.8 + Math.random() * 4.5;
+            streams.push({ x, y, z, speed, length: STREAM_LENGTH });
+        }
+
+        const matrixGeo = new THREE.BufferGeometry();
+        matrixGeo.setAttribute('position', new THREE.BufferAttribute(matrixPositions, 3));
+        matrixGeo.setAttribute('color', new THREE.BufferAttribute(matrixColors, 3));
+        matrixGeo.setAttribute('size', new THREE.BufferAttribute(matrixSizes, 1));
+
+        // Create Matrix glyph texture atlas
+        function createMatrixPointTexture() {
+            const pCanvas = document.createElement('canvas');
+            pCanvas.width = 64;
+            pCanvas.height = 64;
+            const pCtx = pCanvas.getContext('2d');
+            const grad = pCtx.createRadialGradient(32, 32, 4, 32, 32, 30);
+            grad.addColorStop(0, '#ffffff');
+            grad.addColorStop(0.3, '#00ff9d');
+            grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            pCtx.fillStyle = grad;
+            pCtx.beginPath();
+            pCtx.arc(32, 32, 30, 0, Math.PI * 2);
+            pCtx.fill();
+            return new THREE.CanvasTexture(pCanvas);
+        }
+
+        const matrixTexture = createMatrixPointTexture();
+
+        const matrixMat = new THREE.PointsMaterial({
+            size: 8,
+            map: matrixTexture,
+            vertexColors: true,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        });
+
+        const matrixPoints = new THREE.Points(matrixGeo, matrixMat);
+        scene.add(matrixPoints);
+
+        // 3D Ambient Stardust Galaxy Field
+        const STAR_COUNT = 3200;
+        const starPositions = new Float32Array(STAR_COUNT * 3);
+        const starColors = new Float32Array(STAR_COUNT * 3);
+        const starVelocities = [];
+
+        const pColorObj = new THREE.Color(currentTheme.primaryNum);
+        const sColorObj = new THREE.Color(currentTheme.secondaryNum);
+
+        for (let i = 0; i < STAR_COUNT; i++) {
+            const rad = 100 + Math.random() * 1200;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = (Math.random() - 0.5) * Math.PI * 0.75;
+
+            const x = rad * Math.cos(phi) * Math.cos(theta);
+            const y = rad * Math.sin(phi);
+            const z = rad * Math.cos(phi) * Math.sin(theta);
+
+            starPositions[i * 3] = x;
+            starPositions[i * 3 + 1] = y;
+            starPositions[i * 3 + 2] = z;
+
+            const col = Math.random() > 0.3 ? pColorObj : sColorObj;
+            starColors[i * 3] = col.r;
+            starColors[i * 3 + 1] = col.g;
+            starColors[i * 3 + 2] = col.b;
+
+            starVelocities.push({
+                radius: rad,
+                angle: theta,
+                speed: (0.001 + (1200 - rad) * 0.00001) * (Math.random() > 0.5 ? 1 : -1),
+                yVel: (Math.random() - 0.5) * 0.3
             });
+        }
 
-            window.addEventListener('mouseup', () => {
-                mouse.isDown = false;
-            });
+        const starGeo = new THREE.BufferGeometry();
+        starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+        starGeo.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
 
-            // Touch support for mobile / touchpads
-            window.addEventListener('touchmove', (e) => {
-                if (e.touches.length > 0) {
-                    mouse.x = e.touches[0].clientX;
-                    mouse.y = e.touches[0].clientY;
-                    mouse.active = true;
-                }
-            });
+        const starMat = new THREE.PointsMaterial({
+            size: 4.5,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.75,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        });
 
-            window.addEventListener('touchstart', (e) => {
-                if (e.touches.length > 0) {
-                    triggerNova(e.touches[0].clientX, e.touches[0].clientY);
-                }
-            });
+        const starPoints = new THREE.Points(starGeo, starMat);
+        scene.add(starPoints);
 
-            // =========================================================================
-            //  MATRIX DIGITAL RAIN ENGINE
-            // =========================================================================
-            const FONT_SIZE = 16;
-            let columns = 0;
-            let streams = [];
+        // -------------------------------------------------------------------------
+        // 8. NOVA EXPLOSION & BURST PARTICLES ENGINE
+        // -------------------------------------------------------------------------
+        const NOVA_COUNT = 600;
+        const novaPositions = new Float32Array(NOVA_COUNT * 3);
+        const novaColors = new Float32Array(NOVA_COUNT * 3);
+        const novaVelocities = [];
+        let novaActive = false;
+        let novaProgress = 0;
 
-            class MatrixStream {
-                constructor(x) {
-                    this.x = x;
-                    this.reset();
-                }
+        for (let i = 0; i < NOVA_COUNT; i++) {
+            novaPositions[i * 3] = 0;
+            novaPositions[i * 3 + 1] = 0;
+            novaPositions[i * 3 + 2] = 0;
 
-                reset() {
-                    this.y = -Math.random() * 500 - 50;
-                    this.speed = Math.random() * 3 + 2;
-                    this.length = Math.floor(Math.random() * 22 + 12);
-                    this.chars = [];
-                    this.lastSwitch = 0;
-                    this.switchRate = Math.random() * 10 + 5;
-                    this.glowGold = Math.random() < 0.15;
-                    this.depth = Math.random() * 0.7 + 0.3; // Parallax depth
+            novaColors[i * 3] = 1;
+            novaColors[i * 3 + 1] = 1;
+            novaColors[i * 3 + 2] = 1;
 
-                    for (let i = 0; i < this.length; i++) {
-                        this.chars.push(GLYPHS[Math.floor(Math.random() * GLYPHS.length)]);
-                    }
-                }
+            const u = Math.random();
+            const v = Math.random();
+            const theta = u * 2.0 * Math.PI;
+            const phi = Math.acos(2.0 * v - 1.0);
+            const speed = 12 + Math.random() * 28;
 
-                update(time) {
-                    this.y += this.speed * this.depth;
+            const vx = speed * Math.sin(phi) * Math.cos(theta);
+            const vy = speed * Math.sin(phi) * Math.sin(theta);
+            const vz = speed * Math.cos(phi);
 
-                    // Mutate glyphs randomly
-                    if (time - this.lastSwitch > this.switchRate) {
-                        const mutateIdx = Math.floor(Math.random() * this.length);
-                        this.chars[mutateIdx] = GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
-                        this.lastSwitch = time;
-                    }
+            novaVelocities.push({ vx, vy, vz, life: 1.0 });
+        }
 
-                    // Mouse deflection effect
-                    if (mouse.active) {
-                        const dx = this.x - mouse.x;
-                        const dy = this.y - mouse.y;
-                        const dist = Math.hypot(dx, dy);
-                        if (dist < 120) {
-                            const force = (120 - dist) / 120;
-                            this.x += (dx / dist) * force * 3;
-                        }
-                    }
+        const novaGeo = new THREE.BufferGeometry();
+        novaGeo.setAttribute('position', new THREE.BufferAttribute(novaPositions, 3));
+        novaGeo.setAttribute('color', new THREE.BufferAttribute(novaColors, 3));
 
-                    if (this.y - (this.length * FONT_SIZE) > height) {
-                        this.reset();
-                    }
-                }
+        const novaMat = new THREE.PointsMaterial({
+            size: 8.0,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.0,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        });
 
-                draw(ctx) {
-                    const baseSize = FONT_SIZE * this.depth;
-                    ctx.font = `${Math.floor(baseSize)}px 'JetBrains Mono', monospace`;
+        const novaPoints = new THREE.Points(novaGeo, novaMat);
+        scene.add(novaPoints);
 
-                    for (let i = 0; i < this.length; i++) {
-                        const cy = this.y - (i * baseSize);
-                        if (cy < -20 || cy > height + 20) continue;
+        // Expanding Shockwave Ring Mesh
+        const shockGeo = new THREE.RingGeometry(1, 14, 64);
+        const shockMat = new THREE.MeshBasicMaterial({
+            color: currentTheme.primaryNum,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.0,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        });
+        const shockMesh = new THREE.Mesh(shockGeo, shockMat);
+        shockMesh.rotation.x = Math.PI / 2;
+        scene.add(shockMesh);
 
-                        const char = this.chars[i] || '0';
+        function triggerNovaBurst() {
+            novaActive = true;
+            novaProgress = 0;
+            novaMat.opacity = 1.0;
+            shockMat.opacity = 0.9;
+            shockMesh.scale.set(1, 1, 1);
 
-                        if (i === 0) {
-                            // Leading head glyph: radiant white or solar flash
-                            ctx.fillStyle = this.glowGold ? currentTheme.leadGold : currentTheme.lead;
-                            ctx.shadowBlur = 10;
-                            ctx.shadowColor = this.glowGold ? currentTheme.leadGold : currentTheme.primary;
-                            ctx.fillText(char, this.x, cy);
-                            ctx.shadowBlur = 0;
-                        } else if (i < 3) {
-                            ctx.fillStyle = currentTheme.primary;
-                            ctx.fillText(char, this.x, cy);
-                        } else if (i < this.length - 4) {
-                            ctx.fillStyle = currentTheme.secondary;
-                            ctx.fillText(char, this.x, cy);
-                        } else {
-                            // Trailing fade
-                            const alpha = (this.length - i) / 4;
-                            ctx.fillStyle = currentTheme.dim;
-                            ctx.globalAlpha = Math.max(0.1, alpha * this.depth);
-                            ctx.fillText(char, this.x, cy);
-                            ctx.globalAlpha = 1.0;
-                        }
-                    }
-                }
+            const posArr = novaGeo.attributes.position.array;
+            const colArr = novaGeo.attributes.color.array;
+            const pCol = new THREE.Color(currentTheme.primaryNum);
+
+            for (let i = 0; i < NOVA_COUNT; i++) {
+                posArr[i * 3] = 0;
+                posArr[i * 3 + 1] = 0;
+                posArr[i * 3 + 2] = 0;
+
+                colArr[i * 3] = pCol.r;
+                colArr[i * 3 + 1] = pCol.g;
+                colArr[i * 3 + 2] = pCol.b;
+            }
+            novaGeo.attributes.position.needsUpdate = true;
+            novaGeo.attributes.color.needsUpdate = true;
+
+            // Spike bloom temporarily
+            if (bloomPass) {
+                bloomPass.strength = currentTheme.bloomStrength * 2.5;
             }
 
-            function initMatrixStreams() {
-                columns = Math.floor(width / (FONT_SIZE * 1.3));
-                streams = [];
-                for (let i = 0; i < columns; i++) {
-                    const x = i * (FONT_SIZE * 1.3) + (Math.random() * 4);
-                    streams.push(new MatrixStream(x));
-                }
-                const streamCountEl = document.getElementById('stream-count');
-                if (streamCountEl) streamCountEl.innerText = streams.length;
-            }
+            // Play Nova Sound
+            playNovaSound();
+        }
 
-            // =========================================================================
-            //  SACRED GEOMETRY ALCHEMICAL ENGINE
-            // =========================================================================
-            let geoAngle = 0;
-            let geoPulse = 0;
+        // -------------------------------------------------------------------------
+        // 9. PROCEDURAL WEB AUDIO ALCHEMICAL SYNTHESIZER
+        // -------------------------------------------------------------------------
+        let audioCtx = null;
+        let isAudioPlaying = false;
+        let droneOsc1 = null;
+        let droneOsc2 = null;
+        let filterNode = null;
+        let masterGain = null;
+        let analyserNode = null;
 
-            function drawSacredGeometry(ctx, cx, cy, time) {
-                ctx.save();
-                ctx.translate(cx, cy);
+        function initWebAudio() {
+            if (audioCtx) return;
+            try {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContextClass();
 
-                // Mouse subtle parallax tilt
-                const targetRotX = (mouse.y - height / 2) * 0.0003;
-                const targetRotY = (mouse.x - width / 2) * 0.0003;
-
-                geoAngle += 0.006 + Math.hypot(mouse.vx, mouse.vy) * 0.0002;
-                geoPulse = Math.sin(time * 0.002) * 10;
-
-                const baseRadius = Math.min(width, height) * 0.22 + geoPulse;
-
-                // 1. Concentric Planetary & Alchemical Glyphs Orbit Ring
-                ctx.strokeStyle = currentTheme.geoSecondary;
-                ctx.lineWidth = 1.5;
-                ctx.shadowBlur = 12;
-                ctx.shadowColor = currentTheme.geoSecondary;
-
-                ctx.beginPath();
-                ctx.arc(0, 0, baseRadius * 1.25, 0, Math.PI * 2);
-                ctx.stroke();
-
-                ctx.beginPath();
-                ctx.arc(0, 0, baseRadius * 0.75, 0, Math.PI * 2);
-                ctx.stroke();
-
-                // 2. Orbital Glyphs on Ring
-                const orbitGlyphs = ['☉', '☽', '☿', '♀', '♂', '♃', '♄', '🜂', '🜄', '🜁', '🜃', '🝘'];
-                const numOrbit = orbitGlyphs.length;
-                ctx.font = '16px "JetBrains Mono", sans-serif';
-                ctx.fillStyle = currentTheme.leadGold;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-
-                for (let i = 0; i < numOrbit; i++) {
-                    const a = geoAngle * 0.5 + (i * (Math.PI * 2 / numOrbit));
-                    const gx = Math.cos(a) * (baseRadius * 1.25);
-                    const gy = Math.sin(a) * (baseRadius * 1.25);
-                    ctx.fillText(orbitGlyphs[i], gx, gy);
-                }
-
-                // 3. Central Hexagram & Metatron Triangle Interlacing
-                ctx.strokeStyle = currentTheme.geoPrimary;
-                ctx.lineWidth = 1.8;
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = currentTheme.geoPrimary;
-
-                // Triangle 1 (Fire: 🜂 Upward)
-                drawPolygon(ctx, 0, 0, baseRadius, 3, geoAngle);
-                // Triangle 2 (Water: 🜄 Downward)
-                drawPolygon(ctx, 0, 0, baseRadius, 3, geoAngle + Math.PI);
-                // Inner Octagon (Earth & Air fusion)
-                drawPolygon(ctx, 0, 0, baseRadius * 0.5, 8, -geoAngle * 1.5);
-
-                // 4. Central Core Alchemical Sun ☉
-                ctx.fillStyle = currentTheme.leadGold;
-                ctx.font = `${Math.floor(baseRadius * 0.28)}px sans-serif`;
-                ctx.shadowBlur = 20;
-                ctx.shadowColor = '#ffd700';
-                ctx.fillText('☉', 0, 0);
-
-                ctx.restore();
-            }
-
-            function drawPolygon(ctx, x, y, radius, sides, angleOffset) {
-                ctx.beginPath();
-                for (let i = 0; i < sides; i++) {
-                    const a = angleOffset + (i * 2 * Math.PI / sides);
-                    const px = x + Math.cos(a) * radius;
-                    const py = y + Math.sin(a) * radius;
-                    if (i === 0) ctx.moveTo(px, py);
-                    else ctx.lineTo(px, py);
-                }
-                ctx.closePath();
-                ctx.stroke();
-            }
-
-            // =========================================================================
-            //  ALCHEMICAL NOVA & PARTICLE EXPLOSION SYSTEM
-            // =========================================================================
-            let particles = [];
-
-            class Particle {
-                constructor(x, y, vx, vy, char, color, size, life) {
-                    this.x = x;
-                    this.y = y;
-                    this.vx = vx;
-                    this.vy = vy;
-                    this.char = char;
-                    this.color = color;
-                    this.size = size;
-                    this.maxLife = life;
-                    this.life = life;
-                    this.decay = Math.random() * 0.02 + 0.01;
-                    this.rotation = Math.random() * Math.PI * 2;
-                    this.rotSpeed = (Math.random() - 0.5) * 0.1;
-                }
-
-                update() {
-                    this.x += this.vx;
-                    this.y += this.vy;
-                    this.vx *= 0.96;
-                    this.vy *= 0.96;
-                    this.rotation += this.rotSpeed;
-                    this.life -= this.decay;
-                }
-
-                draw(ctx) {
-                    if (this.life <= 0) return;
-                    ctx.save();
-                    ctx.translate(this.x, this.y);
-                    ctx.rotate(this.rotation);
-                    ctx.globalAlpha = Math.max(0, this.life / this.maxLife);
-                    ctx.fillStyle = this.color;
-                    ctx.shadowBlur = 10;
-                    ctx.shadowColor = this.color;
-
-                    if (this.char) {
-                        ctx.font = `${Math.floor(this.size)}px "JetBrains Mono", sans-serif`;
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillText(this.char, 0, 0);
-                    } else {
-                        ctx.beginPath();
-                        ctx.arc(0, 0, this.size, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                    ctx.restore();
-                }
-            }
-
-            function triggerNova(x, y) {
-                const count = 60;
-                for (let i = 0; i < count; i++) {
-                    const angle = Math.random() * Math.PI * 2;
-                    const speed = Math.random() * 12 + 2;
-                    const char = Math.random() < 0.4 ? GLYPHS[Math.floor(Math.random() * GLYPHS.length)] : null;
-                    const color = Math.random() < 0.3 ? '#ffd700' : (Math.random() < 0.5 ? currentTheme.primary : '#ffffff');
-                    const size = char ? Math.random() * 12 + 10 : Math.random() * 4 + 2;
-                    particles.push(new Particle(
-                        x, y,
-                        Math.cos(angle) * speed,
-                        Math.sin(angle) * speed,
-                        char, color, size, 1.0
-                    ));
-                }
-
-                // Play synth tone if audio enabled
-                playAlchemicalChirp(440 + Math.random() * 400);
-            }
-
-            function spawnSparks(x, y, count) {
-                for (let i = 0; i < count; i++) {
-                    const angle = Math.random() * Math.PI * 2;
-                    const speed = Math.random() * 4 + 1;
-                    particles.push(new Particle(
-                        x, y,
-                        Math.cos(angle) * speed,
-                        Math.sin(angle) * speed,
-                        null, currentTheme.particle, Math.random() * 2 + 1, 0.6
-                    ));
-                }
-            }
-
-            // =========================================================================
-            //  GENERATIVE WEB AUDIO ALCHEMICAL SYNTHESIZER
-            // =========================================================================
-            let audioCtx = null;
-            let isAudioOn = false;
-            let droneOsc1, droneOsc2, filterNode, masterGain;
-
-            function toggleAudio() {
-                if (!audioCtx) {
-                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                }
-
-                if (audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
-
-                if (!isAudioOn) {
-                    startAmbientDrone();
-                    isAudioOn = true;
-                    document.getElementById('audio-status').innerText = 'ACTIVE [A]';
-                    document.getElementById('audio-btn').innerText = '🔇 Mute Sound [A]';
-                } else {
-                    stopAmbientDrone();
-                    isAudioOn = false;
-                    document.getElementById('audio-status').innerText = 'OFF [A]';
-                    document.getElementById('audio-btn').innerText = '🔊 Toggle Sound [A]';
-                }
-            }
-
-            function startAmbientDrone() {
-                if (!audioCtx) return;
                 masterGain = audioCtx.createGain();
-                masterGain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                masterGain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+
+                analyserNode = audioCtx.createAnalyser();
+                analyserNode.fftSize = 64;
 
                 filterNode = audioCtx.createBiquadFilter();
                 filterNode.type = 'lowpass';
-                filterNode.frequency.setValueAtTime(320, audioCtx.currentTime);
+                filterNode.frequency.setValueAtTime(800, audioCtx.currentTime);
+                filterNode.Q.setValueAtTime(4.0, audioCtx.currentTime);
 
+                // Sub Drone (Solfeggio 432 / 528 Hz base harmonic)
                 droneOsc1 = audioCtx.createOscillator();
                 droneOsc1.type = 'sawtooth';
-                droneOsc1.frequency.setValueAtTime(55, audioCtx.currentTime); // A1 note
+                droneOsc1.frequency.setValueAtTime(54.0, audioCtx.currentTime); // A1 Sub-drone
 
                 droneOsc2 = audioCtx.createOscillator();
                 droneOsc2.type = 'sine';
-                droneOsc2.frequency.setValueAtTime(110.5, audioCtx.currentTime); // Subtle binaural beat
+                droneOsc2.frequency.setValueAtTime(108.0, audioCtx.currentTime); // Harmonic
+
+                const droneGain = audioCtx.createGain();
+                droneGain.gain.setValueAtTime(0.25, audioCtx.currentTime);
 
                 droneOsc1.connect(filterNode);
                 droneOsc2.connect(filterNode);
-                filterNode.connect(masterGain);
+                filterNode.connect(analyserNode);
+                analyserNode.connect(masterGain);
                 masterGain.connect(audioCtx.destination);
 
                 droneOsc1.start();
                 droneOsc2.start();
+                isAudioPlaying = true;
+            } catch (err) {
+                console.warn('Web Audio init suppressed:', err);
             }
+        }
 
-            function stopAmbientDrone() {
-                if (masterGain && audioCtx) {
-                    masterGain.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
-                    setTimeout(() => {
-                        try {
-                            droneOsc1.stop();
-                            droneOsc2.stop();
-                        } catch(e) {}
-                    }, 350);
+        function toggleAudio() {
+            if (!audioCtx) {
+                initWebAudio();
+            } else {
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                    isAudioPlaying = true;
+                } else if (audioCtx.state === 'running') {
+                    audioCtx.suspend();
+                    isAudioPlaying = false;
                 }
             }
+            updateAudioButtonUI();
+        }
 
-            function playAlchemicalChirp(freq) {
-                if (!isAudioOn || !audioCtx) return;
-                try {
-                    const osc = audioCtx.createOscillator();
-                    const gain = audioCtx.createGain();
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(freq * 2.2, audioCtx.currentTime + 0.15);
-                    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
-                    osc.connect(gain);
-                    gain.connect(audioCtx.destination);
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + 0.25);
-                } catch(e) {}
+        function playNovaSound() {
+            if (!audioCtx || audioCtx.state !== 'running') return;
+            try {
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(260, now);
+                osc.frequency.exponentialRampToValueAtTime(32, now + 0.9);
+
+                gain.gain.setValueAtTime(0.6, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.95);
+
+                osc.connect(gain);
+                gain.connect(masterGain);
+
+                osc.start(now);
+                osc.stop(now + 1.0);
+            } catch (e) {}
+        }
+
+        function updateAudioButtonUI() {
+            const btn = document.getElementById('btn-audio');
+            if (isAudioPlaying && audioCtx && audioCtx.state === 'running') {
+                btn.classList.add('active');
+                btn.innerHTML = '🔊 Synth ON [A]';
+            } else {
+                btn.classList.remove('active');
+                btn.innerHTML = '🔇 Synth OFF [A]';
             }
+        }
 
-            // =========================================================================
-            //  MAIN ANIMATION LOOP & FPS COUNTER
-            // =========================================================================
-            let lastTime = 0;
-            let frameCount = 0;
-            let fpsLastCheck = 0;
-            let isPaused = false;
+        // -------------------------------------------------------------------------
+        // 10. REALTIME HUD SPARKLINE & TELEMETRY
+        // -------------------------------------------------------------------------
+        const sparkCanvas = document.getElementById('sparkline-canvas');
+        const sparkCtx = sparkCanvas.getContext('2d');
+        const sparkHistory = new Array(60).fill(0.5);
 
-            function animate(timestamp) {
-                requestAnimationFrame(animate);
+        function updateSparkline(val) {
+            sparkHistory.push(val);
+            sparkHistory.shift();
 
-                if (isPaused) return;
+            const w = sparkCanvas.width = sparkCanvas.clientWidth * (window.devicePixelRatio || 1);
+            const h = sparkCanvas.height = sparkCanvas.clientHeight * (window.devicePixelRatio || 1);
 
-                const dt = timestamp - lastTime;
-                lastTime = timestamp;
+            sparkCtx.clearRect(0, 0, w, h);
 
-                frameCount++;
-                if (timestamp - fpsLastCheck > 1000) {
-                    const fps = Math.round((frameCount * 1000) / (timestamp - fpsLastCheck));
-                    const fpsEl = document.getElementById('fps-display');
-                    if (fpsEl) fpsEl.innerText = `${fps} FPS`;
-                    frameCount = 0;
-                    fpsLastCheck = timestamp;
-                }
+            // Grid lines
+            sparkCtx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+            sparkCtx.lineWidth = 1;
+            sparkCtx.beginPath();
+            sparkCtx.moveTo(0, h * 0.5);
+            sparkCtx.lineTo(w, h * 0.5);
+            sparkCtx.stroke();
 
-                // 1. Clear with trailing phosphor persistence
-                ctx.fillStyle = currentTheme.bg;
-                ctx.globalAlpha = 0.25; // Motion blur persistence
-                ctx.fillRect(0, 0, width, height);
-                ctx.globalAlpha = 1.0;
+            // Waveform path
+            sparkCtx.strokeStyle = currentTheme.primaryHex;
+            sparkCtx.lineWidth = 2;
+            sparkCtx.beginPath();
 
-                // 2. Draw matrix rain streams
-                for (let i = 0; i < streams.length; i++) {
-                    streams[i].update(timestamp);
-                    streams[i].draw(ctx);
-                }
-
-                // 3. Draw Sacred Geometry Centerpiece
-                drawSacredGeometry(ctx, width / 2, height / 2, timestamp);
-
-                // 4. Update and draw particles
-                for (let i = particles.length - 1; i >= 0; i--) {
-                    particles[i].update();
-                    particles[i].draw(ctx);
-                    if (particles[i].life <= 0) {
-                        particles.splice(i, 1);
-                    }
-                }
-
-                const partCountEl = document.getElementById('particle-count');
-                if (partCountEl) partCountEl.innerText = particles.length;
-            }
-
-            // =========================================================================
-            //  UI CONTROLS & EVENT BINDINGS
-            // =========================================================================
-            const hud = document.getElementById('hud');
-            const hudToggle = document.getElementById('hud-toggle');
-            const novaBtn = document.getElementById('nova-btn');
-            const audioBtn = document.getElementById('audio-btn');
-
-            hudToggle.addEventListener('click', () => {
-                hud.classList.toggle('hidden');
+            const step = w / (sparkHistory.length - 1);
+            sparkHistory.forEach((pt, i) => {
+                const y = h - pt * h * 0.85 - h * 0.075;
+                if (i === 0) sparkCtx.moveTo(0, y);
+                else sparkCtx.lineTo(i * step, y);
             });
+            sparkCtx.stroke();
 
-            novaBtn.addEventListener('click', () => {
-                triggerNova(width / 2, height / 2);
-            });
+            // Glow under fill
+            sparkCtx.lineTo(w, h);
+            sparkCtx.lineTo(0, h);
+            sparkCtx.fillStyle = currentTheme.hudGlow;
+            sparkCtx.fill();
+        }
 
-            audioBtn.addEventListener('click', toggleAudio);
+        // -------------------------------------------------------------------------
+        // 11. THEME SWITCHING ENGINE
+        // -------------------------------------------------------------------------
+        function applyTheme(themeKey) {
+            if (!THEMES[themeKey]) return;
+            currentThemeKey = themeKey;
+            currentTheme = THEMES[themeKey];
 
+            // Update CSS Root Variables
+            document.documentElement.style.setProperty('--primary', currentTheme.primaryHex);
+            document.documentElement.style.setProperty('--primary-glow', currentTheme.hudGlow);
+            document.documentElement.style.setProperty('--secondary', currentTheme.primaryHex === '#ffd700' ? '#ff9900' : '#ffd700');
+            document.documentElement.style.setProperty('--bg-base', currentTheme.bgHex);
+            document.documentElement.style.setProperty('--hud-border', currentTheme.hudBorder);
+            document.documentElement.style.setProperty('--text-main', currentTheme.textMain);
+            document.documentElement.style.setProperty('--text-dim', currentTheme.textDim);
+
+            // Update UI Badges
+            document.getElementById('theme-glyph').textContent = currentTheme.glyph;
+            document.getElementById('quick-theme-name').textContent = currentTheme.name.toUpperCase();
+            document.getElementById('val-freq').textContent = currentTheme.freq;
+
+            // Update Active Theme Pill
             document.querySelectorAll('.theme-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const themeKey = btn.dataset.theme;
-                    if (THEMES[themeKey]) {
-                        currentThemeKey = themeKey;
-                        currentTheme = THEMES[themeKey];
-                        document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                    }
-                });
+                if (btn.dataset.theme === themeKey) btn.classList.add('active');
+                else btn.classList.remove('active');
             });
 
-            // Keyboard Shortcuts
-            window.addEventListener('keydown', (e) => {
-                switch(e.key.toLowerCase()) {
-                    case ' ':
-                        isPaused = !isPaused;
-                        break;
-                    case 'm':
-                        const keys = Object.keys(THEMES);
-                        const nextIdx = (keys.indexOf(currentThemeKey) + 1) % keys.length;
-                        currentThemeKey = keys[nextIdx];
-                        currentTheme = THEMES[currentThemeKey];
-                        document.querySelectorAll('.theme-btn').forEach(b => {
-                            b.classList.toggle('active', b.dataset.theme === currentThemeKey);
-                        });
-                        break;
-                    case 'a':
-                        toggleAudio();
-                        break;
-                    case 'c':
-                        triggerNova(mouse.x || width / 2, mouse.y || height / 2);
-                        break;
-                    case 'h':
-                        hud.classList.toggle('hidden');
-                        break;
-                    case 'f':
-                        if (!document.fullscreenElement) {
-                            document.documentElement.requestFullscreen().catch(() => {});
-                        } else {
-                            document.exitFullscreen().catch(() => {});
-                        }
-                        break;
+            // Update WebGL Scene & Materials
+            renderer.setClearColor(currentTheme.bgClear, 1);
+            scene.fog.color.setHex(currentTheme.bgClear);
+
+            pointLightCore.color.setHex(currentTheme.primaryNum);
+            pointLightOrbital.color.setHex(currentTheme.secondaryNum);
+
+            ringMaterial1.color.setHex(currentTheme.primaryNum);
+            ringMaterial2.color.setHex(currentTheme.secondaryNum);
+            ringMaterial3.color.setHex(currentTheme.primaryNum);
+            cageMat.color.setHex(currentTheme.primaryNum);
+            shockMat.color.setHex(currentTheme.primaryNum);
+
+            orbUniforms.uColorPrimary.value.setHex(currentTheme.primaryNum);
+            orbUniforms.uColorSecondary.value.setHex(currentTheme.secondaryNum);
+
+            if (themeKey === 'emerald') orbUniforms.uTexture.value = texMatrix;
+            else if (themeKey === 'gold') orbUniforms.uTexture.value = texGold;
+            else if (themeKey === 'crimson') orbUniforms.uTexture.value = texNullAI;
+            else if (themeKey === 'cyan') orbUniforms.uTexture.value = texQuantum;
+
+            // Update Hologram projection discs for current theme
+            if (currentTheme.holos && currentTheme.holos.length > 0) {
+                holoMeshes.forEach((mesh, idx) => {
+                    const holoPath = currentTheme.holos[idx % currentTheme.holos.length];
+                    mesh.material.map = loadSmartTexture(holoPath, currentTheme.primaryHex);
+                    mesh.material.needsUpdate = true;
+                });
+            }
+
+            if (bloomPass) {
+                bloomPass.strength = currentTheme.bloomStrength;
+                bloomPass.radius = currentTheme.bloomRadius;
+            }
+
+            // Update glyph sprites tint
+            glyphSprites.forEach((sprite, idx) => {
+                sprite.material.map = createGlyphTexture(GLYPH_LIST[idx], currentTheme.primaryHex);
+                sprite.material.needsUpdate = true;
+            });
+
+            // Update Star Particle Colors
+            const starColArr = starGeo.attributes.color.array;
+            const pCol = new THREE.Color(currentTheme.primaryNum);
+            const sCol = new THREE.Color(currentTheme.secondaryNum);
+
+            for (let i = 0; i < STAR_COUNT; i++) {
+                const c = Math.random() > 0.35 ? pCol : sCol;
+                starColArr[i * 3] = c.r;
+                starColArr[i * 3 + 1] = c.g;
+                starColArr[i * 3 + 2] = c.b;
+            }
+            starGeo.attributes.color.needsUpdate = true;
+        }
+
+        function cycleNextTheme() {
+            const keys = Object.keys(THEMES);
+            const nextIdx = (keys.indexOf(currentThemeKey) + 1) % keys.length;
+            applyTheme(keys[nextIdx]);
+        }
+
+        // -------------------------------------------------------------------------
+        // 12. EVENT LISTENERS & INTERACTION CONTROLS
+        // -------------------------------------------------------------------------
+        // HUD Collapse Toggle
+        const hudDrawer = document.getElementById('hud-drawer');
+        const toggleHudBtn = document.getElementById('toggle-hud-btn');
+
+        function toggleHud() {
+            hudDrawer.classList.toggle('collapsed');
+        }
+        toggleHudBtn.addEventListener('click', toggleHud);
+
+        // Theme Pills Click
+        document.querySelectorAll('.theme-btn').forEach(btn => {
+            btn.addEventListener('click', () => applyTheme(btn.dataset.theme));
+        });
+        document.getElementById('quick-theme-btn').addEventListener('click', cycleNextTheme);
+
+        // Buttons
+        document.getElementById('btn-nova').addEventListener('click', triggerNovaBurst);
+        document.getElementById('btn-audio').addEventListener('click', toggleAudio);
+
+        const btnBloom = document.getElementById('btn-bloom');
+        btnBloom.addEventListener('click', () => {
+            bloomEnabled = !bloomEnabled;
+            btnBloom.classList.toggle('active', bloomEnabled);
+            btnBloom.innerHTML = bloomEnabled ? '✨ Bloom ON [B]' : '✨ Bloom OFF [B]';
+        });
+
+        let warpActive = false;
+        const btnWarp = document.getElementById('btn-warp');
+        function toggleWarp() {
+            warpActive = !warpActive;
+            btnWarp.classList.toggle('active', warpActive);
+        }
+        btnWarp.addEventListener('click', toggleWarp);
+
+        // Canvas Click -> Nova Burst
+        canvas.addEventListener('click', (e) => {
+            // Trigger nova on click if not dragging
+            triggerNovaBurst();
+        });
+
+        // Keyboard Shortcuts
+        window.addEventListener('keydown', (e) => {
+            const key = e.key.toUpperCase();
+            if (key === 'M') cycleNextTheme();
+            if (key === 'C') triggerNovaBurst();
+            if (key === 'A') toggleAudio();
+            if (key === 'H') toggleHud();
+            if (key === 'B') btnBloom.click();
+            if (key === ' ') {
+                e.preventDefault();
+                toggleWarp();
+            }
+            if (key === 'R' && controls) {
+                camera.position.set(0, 30, 440);
+                controls.target.set(0, 0, 0);
+            }
+        });
+
+        // Resize Listener
+        function onResize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(width, height);
+            if (composer) composer.setSize(width, height);
+            if (bloomPass) bloomPass.resolution.set(width, height);
+        }
+        window.addEventListener('resize', onResize);
+
+        // -------------------------------------------------------------------------
+        // 13. ANIMATION RENDER LOOP & TELEMETRY UPDATE
+        // -------------------------------------------------------------------------
+        let lastTime = performance.now();
+        let frameCount = 0;
+        let lastFpsUpdate = performance.now();
+        const fpsDisplay = document.getElementById('fps-counter');
+        const eqBars = document.querySelectorAll('.audio-bar');
+        const audioFreqArray = new Uint8Array(32);
+
+        function animate(timestamp) {
+            requestAnimationFrame(animate);
+
+            const dt = (timestamp - lastTime) * 0.001;
+            lastTime = timestamp;
+
+            // Calculate FPS
+            frameCount++;
+            if (timestamp - lastFpsUpdate >= 500) {
+                const fps = Math.round((frameCount * 1000) / (timestamp - lastFpsUpdate));
+                fpsDisplay.textContent = fps + ' FPS';
+                frameCount = 0;
+                lastFpsUpdate = timestamp;
+            }
+
+            const time = timestamp * 0.001;
+            const warpMultiplier = warpActive ? 3.8 : 1.0;
+
+            // Update Shader Uniforms
+            orbUniforms.uTime.value = time * warpMultiplier;
+
+            // Rotate Orb & Metatron Energy Rings
+            orbMesh.rotation.y = time * 0.35 * warpMultiplier;
+            ringMesh1.rotation.x += 0.012 * warpMultiplier;
+            ringMesh1.rotation.y += 0.008 * warpMultiplier;
+            ringMesh2.rotation.y -= 0.015 * warpMultiplier;
+            ringMesh2.rotation.z += 0.010 * warpMultiplier;
+            ringMesh3.rotation.z += 0.009 * warpMultiplier;
+            cageMesh.rotation.x = time * 0.12 * warpMultiplier;
+            cageMesh.rotation.y = time * 0.18 * warpMultiplier;
+
+            // Breathe Cage Geometry
+            const cageScale = 1.0 + Math.sin(time * 2.0) * 0.06;
+            cageMesh.scale.set(cageScale, cageScale, cageScale);
+
+            // Orbit 3D Glyphs
+            glyphSprites.forEach((sprite) => {
+                const data = sprite.userData;
+                data.baseAngle += data.speed * warpMultiplier;
+                const gx = Math.cos(data.baseAngle) * data.radius;
+                const gz = Math.sin(data.baseAngle) * data.radius;
+                const gy = data.elevation + Math.sin(time * 2.0 + data.baseAngle) * 12;
+                sprite.position.set(gx, gy, gz);
+            });
+
+            // Orbit Hologram Seals
+            holoMeshes.forEach((holo) => {
+                const d = holo.userData;
+                d.orbitAngle += d.speed * warpMultiplier;
+                holo.position.x = Math.cos(d.orbitAngle) * d.distance;
+                holo.position.z = Math.sin(d.orbitAngle) * d.distance;
+                holo.position.y = Math.sin(time * 1.5 + d.orbitAngle) * 35;
+                holo.lookAt(camera.position);
+            });
+
+            // Update 3D Matrix Rain Streams
+            const mPos = matrixGeo.attributes.position.array;
+            const mCol = matrixGeo.attributes.color.array;
+            const pCol = new THREE.Color(currentTheme.primaryNum);
+            const sCol = new THREE.Color(currentTheme.secondaryNum);
+
+            let pIdx = 0;
+            streams.forEach((stream) => {
+                stream.y -= stream.speed * warpMultiplier;
+                if (stream.y < -900) {
+                    stream.y = 900 + Math.random() * 200;
+                    stream.x = (Math.random() - 0.5) * 2400;
+                    stream.z = (Math.random() - 0.5) * 2000;
+                }
+
+                for (let k = 0; k < stream.length; k++) {
+                    const particleY = stream.y + k * 22;
+                    mPos[pIdx * 3] = stream.x;
+                    mPos[pIdx * 3 + 1] = particleY;
+                    mPos[pIdx * 3 + 2] = stream.z;
+
+                    // Lead character is glowing white/bright gold, trailing characters fade
+                    if (k === 0) {
+                        mCol[pIdx * 3] = 1.0;
+                        mCol[pIdx * 3 + 1] = 1.0;
+                        mCol[pIdx * 3 + 2] = 1.0;
+                    } else {
+                        const alpha = 1.0 - k / stream.length;
+                        mCol[pIdx * 3] = pCol.r * alpha;
+                        mCol[pIdx * 3 + 1] = pCol.g * alpha;
+                        mCol[pIdx * 3 + 2] = pCol.b * alpha;
+                    }
+                    pIdx++;
                 }
             });
+            matrixGeo.attributes.position.needsUpdate = true;
+            matrixGeo.attributes.color.needsUpdate = true;
 
-            // Start simulation
-            resize();
-            requestAnimationFrame(animate);
-        })();
+            // Update 3D Galaxy Stardust Swirl
+            const starPos = starGeo.attributes.position.array;
+            for (let i = 0; i < STAR_COUNT; i++) {
+                const vel = starVelocities[i];
+                vel.angle += vel.speed * warpMultiplier;
+                starPos[i * 3] = vel.radius * Math.cos(vel.angle);
+                starPos[i * 3 + 2] = vel.radius * Math.sin(vel.angle);
+                starPos[i * 3 + 1] += vel.yVel * warpMultiplier;
+
+                if (starPos[i * 3 + 1] > 600) starPos[i * 3 + 1] = -600;
+                if (starPos[i * 3 + 1] < -600) starPos[i * 3 + 1] = 600;
+            }
+            starGeo.attributes.position.needsUpdate = true;
+
+            // Update Nova Burst Physics
+            if (novaActive) {
+                novaProgress += dt * 1.8;
+                const nPos = novaGeo.attributes.position.array;
+                const nCol = novaGeo.attributes.color.array;
+
+                for (let i = 0; i < NOVA_COUNT; i++) {
+                    const vel = novaVelocities[i];
+                    nPos[i * 3] += vel.vx * (1.0 - novaProgress * 0.45);
+                    nPos[i * 3 + 1] += vel.vy * (1.0 - novaProgress * 0.45);
+                    nPos[i * 3 + 2] += vel.vz * (1.0 - novaProgress * 0.45);
+                }
+                novaGeo.attributes.position.needsUpdate = true;
+
+                novaMat.opacity = Math.max(0, 1.0 - novaProgress);
+                shockMesh.scale.multiplyScalar(1.08);
+                shockMat.opacity = Math.max(0, 0.9 - novaProgress * 1.2);
+
+                // Restore Bloom smoothly
+                if (bloomPass) {
+                    bloomPass.strength = THREE.MathUtils.lerp(
+                        bloomPass.strength,
+                        currentTheme.bloomStrength,
+                        0.05
+                    );
+                }
+
+                if (novaProgress >= 1.0) {
+                    novaActive = false;
+                    novaMat.opacity = 0;
+                    shockMat.opacity = 0;
+                }
+            }
+
+            // Update OrbitControls
+            if (controls) controls.update();
+
+            // Audio EQ Analysis or Synthetic Fallback
+            if (analyserNode && isAudioPlaying) {
+                analyserNode.getByteFrequencyData(audioFreqArray);
+                eqBars.forEach((bar, idx) => {
+                    const val = audioFreqArray[idx] || 0;
+                    const h = Math.max(3, (val / 255) * 22);
+                    bar.style.height = h + 'px';
+                });
+            } else {
+                // Procedural rhythmic bounce
+                eqBars.forEach((bar, idx) => {
+                    const h = Math.max(3, (Math.sin(time * 5 + idx * 0.6) * 0.5 + 0.5) * 18);
+                    bar.style.height = h + 'px';
+                });
+            }
+
+            // Update Sparkline
+            const sparkVal = Math.sin(time * 3.5) * 0.35 + Math.cos(time * 7.2) * 0.15 + 0.5;
+            updateSparkline(sparkVal);
+
+            // Render Frame
+            if (composer && bloomEnabled) {
+                composer.render();
+            } else {
+                renderer.render(scene, camera);
+            }
+        }
+
+        // Expose public API for system scripting & telemetry
+        window.applyTheme = applyTheme;
+        window.triggerNovaBurst = triggerNovaBurst;
+        window.toggleAudio = toggleAudio;
+        window.cycleNextTheme = cycleNextTheme;
+        window.ZothEngine = {
+            applyTheme,
+            triggerNovaBurst,
+            toggleAudio,
+            cycleNextTheme,
+            getCurrentTheme: () => currentTheme,
+            getThemes: () => THEMES,
+            getScene: () => scene,
+            getCamera: () => camera,
+            getControls: () => controls,
+            getRenderer: () => renderer
+        };
+
+        // Initialize Theme & Start Engine Loop
+        applyTheme('emerald');
+        requestAnimationFrame(animate);
+
+    })();
     </script>
 </body>
 </html>
