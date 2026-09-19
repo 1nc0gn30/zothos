@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 # ==============================================================================
-#  ZOTHOS Agent Permission Layer Switcher & Ring Controller
+#  ZOTHOS Agent Permission Layer Switcher & Security Ring Controller
 # ==============================================================================
 
 set -euo pipefail
 
 CONFIG_FILE="/etc/zothos/agent-permissions.json"
+DEV_CONFIG_FILE="/home/neo/zothos/config/includes.chroot/etc/zothos/agent-permissions.json"
 USER_STATE="$HOME/.config/zothos/agent-layer.state"
+USER_RING_STATE="$HOME/.config/zothos/agent-ring.state"
 
 GREEN="\e[1;32m"
 CYAN="\e[1;36m"
@@ -22,8 +24,63 @@ get_active_layer() {
         cat "$USER_STATE"
     elif [[ -f "$CONFIG_FILE" ]] && command -v jq >/dev/null 2>&1; then
         jq -r '.active_layer // 2' "$CONFIG_FILE"
+    elif [[ -f "$DEV_CONFIG_FILE" ]] && command -v jq >/dev/null 2>&1; then
+        jq -r '.active_layer // 2' "$DEV_CONFIG_FILE"
     else
         echo "2"
+    fi
+}
+
+get_active_ring() {
+    if [[ -f "$USER_RING_STATE" ]]; then
+        cat "$USER_RING_STATE"
+    else
+        local l
+        l=$(get_active_layer)
+        case "$l" in
+            4) echo "0" ;;
+            3) echo "1" ;;
+            2|1) echo "2" ;;
+            0) echo "3" ;;
+            *) echo "2" ;;
+        esac
+    fi
+}
+
+set_active_ring() {
+    local target="$1"
+    if [[ ! "$target" =~ ^[0-3]$ ]]; then
+        echo -e "${RED}[!] Invalid ring '$target'. Must be between 0 (Root) and 3 (Sandbox).${RESET}"
+        exit 1
+    fi
+    mkdir -p "$(dirname "$USER_RING_STATE")"
+    echo "$target" > "$USER_RING_STATE"
+    
+    # Also update layer state for backward compatibility
+    local layer_equiv=2
+    case "$target" in
+        0) layer_equiv=4 ;;
+        1) layer_equiv=3 ;;
+        2) layer_equiv=2 ;;
+        3) layer_equiv=0 ;;
+    esac
+    echo "$layer_equiv" > "$USER_STATE"
+
+    local codename=""
+    local title=""
+    case "$target" in
+        0) codename="SOVEREIGN"; title="Ring 0: Root, Kernel & Amnesic Authority" ;;
+        1) codename="SYSADMIN"; title="Ring 1: System Admin & Privileged Operations" ;;
+        2) codename="TOOLMASTER"; title="Ring 2: Agent Tools & MCP Runtime" ;;
+        3) codename="SPECTRE"; title="Ring 3: Sandboxed LLM Execution & Untrusted Code" ;;
+    esac
+
+    echo -e "${GREEN}[✓] ZOTHOS Agent Security Ring updated to Ring ${target}: ${BOLD}${codename}${RESET} (${title})"
+    
+    if [[ -n "${DISPLAY:-}" ]] && command -v notify-send >/dev/null 2>&1; then
+        notify-send -u normal -i /usr/share/icons/Zoth-Hermetic/scalable/apps/zoth-agent.svg \
+            "ZOTHOS Security Ring: Ring $target ($codename)" \
+            "$title" 2>/dev/null || true
     fi
 }
 
@@ -35,6 +92,15 @@ set_active_layer() {
     fi
     mkdir -p "$(dirname "$USER_STATE")"
     echo "$target" > "$USER_STATE"
+    
+    local ring_equiv=2
+    case "$target" in
+        4) ring_equiv=0 ;;
+        3) ring_equiv=1 ;;
+        2|1) ring_equiv=2 ;;
+        0) ring_equiv=3 ;;
+    esac
+    echo "$ring_equiv" > "$USER_RING_STATE"
     
     local codename=""
     local title=""
@@ -48,7 +114,6 @@ set_active_layer() {
     
     echo -e "${GREEN}[✓] ZOTHOS Agent Security Ring updated to Layer ${target}: ${BOLD}${codename}${RESET} (${title})"
     
-    # Broadcast notification to desktop if graphical
     if [[ -n "${DISPLAY:-}" ]] && command -v notify-send >/dev/null 2>&1; then
         notify-send -u normal -i /usr/share/icons/Zoth-Hermetic/scalable/apps/zoth-agent.svg \
             "ZOTHOS Agent Authority: Layer $target ($codename)" \
@@ -57,8 +122,11 @@ set_active_layer() {
 }
 
 show_status() {
-    local active
-    active=$(get_active_layer)
+    local active_layer
+    active_layer=$(get_active_layer)
+    local active_ring
+    active_ring=$(get_active_ring)
+
     echo -e "${GREEN}  ███████╗ ██████╗ ████████╗██╗  ██╗     █████╗  ██████╗ ███████╗███╗   ██╗████████╗${RESET}"
     echo -e "${GREEN}  ╚══███╔╝██╔═══██╗╚══██╔══╝██║  ██║    ██╔══██╗██╔════╝ ██╔════╝████╗  ██║╚══██╔══╝${RESET}"
     echo -e "${GREEN}    ███╔╝ ██║   ██║   ██║   ███████║    ███████║██║  ███╗█████╗  ██╔██╗ ██║   ██║   ${RESET}"
@@ -67,8 +135,28 @@ show_status() {
     echo -e "${GREEN}  ╚══════╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝    ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝   ╚═╝   ${RESET}"
     echo -e "                   ${BOLD}${CYAN}AUTONOMOUS OS CONTROL PERMISSION RINGS${RESET}\n"
     
-    echo -e "${BOLD}Current Active Authority Level:${RESET} ${YELLOW}Layer ${active}${RESET}\n"
+    echo -e "${BOLD}Current Active Authority:${RESET} ${YELLOW}Ring ${active_ring}${RESET} / ${CYAN}Layer ${active_layer}${RESET}\n"
     
+    echo -e "${BOLD}${PURPLE}--- [ SECURITY RINGS (0 to 3) ] ---${RESET}"
+    local rings=(
+        "0|SOVEREIGN|Ring 0: Root, Kernel & Amnesia|Sudo execution, systemd services, firewall, panic RAM purge"
+        "1|SYSADMIN|Ring 1: System Admin & Privileged Ops|User-space daemons, network routing, security audit"
+        "2|TOOLMASTER|Ring 2: Agent Tools & MCP Runtime|Filesystem, GUI automation, Puppeteer, SQLite/DuckDB, HexStrike"
+        "3|SPECTRE|Ring 3: Sandboxed LLM & Untrusted Code|Strict firejail/sandbox, read-only telemetry, isolated loopback"
+    )
+    for entry in "${rings[@]}"; do
+        IFS="|" read -r rnum rcode rtitle rdesc <<< "$entry"
+        local prefix="  "
+        local color="${CYAN}"
+        if [[ "$rnum" -eq "$active_ring" ]]; then
+            prefix="${GREEN}▶ [ACTIVE]${RESET} "
+            color="${BOLD}${GREEN}"
+        fi
+        echo -e "${prefix}${color}Ring ${rnum}: ${rcode}${RESET} - ${BOLD}${rtitle}${RESET}"
+        echo -e "      ${RESET}${rdesc}"
+    done
+
+    echo -e "\n${BOLD}${CYAN}--- [ COMPATIBILITY LAYERS (0 to 4) ] ---${RESET}"
     local layers=(
         "0|SPECTRE|Observer / Read-Only Telemetry|Metrics, logs, search, process inspection (0 mutation)"
         "1|RUNECRAFTER|User-Space Shell & Code|Execute bash/zsh, build code, git repos in user space"
@@ -76,12 +164,11 @@ show_status() {
         "3|WARLOCK|Offensive Security & Red Team|Nmap, Metasploit, HexStrike AI, Tor routing, MAC randomize"
         "4|SOVEREIGN|Root, Kernel & Amnesic Authority|Sudo execution, systemd services, firewall, panic RAM purge"
     )
-    
     for entry in "${layers[@]}"; do
         IFS="|" read -r lnum lcode ltitle ldesc <<< "$entry"
         local prefix="  "
         local color="${CYAN}"
-        if [[ "$lnum" -eq "$active" ]]; then
+        if [[ "$lnum" -eq "$active_layer" ]]; then
             prefix="${GREEN}▶ [ACTIVE]${RESET} "
             color="${BOLD}${GREEN}"
         fi
@@ -89,12 +176,19 @@ show_status() {
         echo -e "      ${RESET}${ldesc}"
     done
     echo ""
-    echo -e "Usage: ${BOLD}zoth-agent-layer set <0-4>${RESET} or ${BOLD}zoth-agent-layer get${RESET}"
+    echo -e "Usage: ${BOLD}zoth-agent-layer set <0-4>${RESET} | ${BOLD}zoth-agent-layer ring <0-3>${RESET} | ${BOLD}zoth-agent-layer get${RESET}"
+}
+
+show_help() {
+    show_status
 }
 
 case "${1:-status}" in
     get)
         get_active_layer
+        ;;
+    get-ring)
+        get_active_ring
         ;;
     set)
         if [[ -z "${2:-}" ]]; then
@@ -103,15 +197,25 @@ case "${1:-status}" in
         fi
         set_active_layer "$2"
         ;;
+    ring)
+        if [[ -z "${2:-}" ]]; then
+            echo -e "${RED}Error:${RESET} Specify ring number 0-3 (e.g., zoth-agent-layer ring 2)"
+            exit 1
+        fi
+        set_active_ring "$2"
+        ;;
     status)
         show_status
         ;;
     lock)
-        set_active_layer 0
-        echo -e "${CYAN}[*] Agent locked in Read-Only (Layer 0 SPECTRE) Mode.${RESET}"
+        set_active_ring 3
+        echo -e "${CYAN}[*] Agent locked in Sandboxed / Read-Only (Ring 3 SPECTRE) Mode.${RESET}"
+        ;;
+    help|-h|--help)
+        show_help
         ;;
     *)
-        echo "Usage: zoth-agent-layer [status|get|set <0-4>|lock]"
+        echo "Usage: zoth-agent-layer [status|get|get-ring|set <0-4>|ring <0-3>|lock|help]"
         exit 1
         ;;
 esac

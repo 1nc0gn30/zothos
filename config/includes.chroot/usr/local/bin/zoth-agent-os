@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """
 ZOTHOS Autonomous OS Agent Engine (zoth-agent-os)
-Hermetic Layer-Gated Autonomous Operating System Controller.
+Hermetic Layer-Gated and Security-Ring-Enforced Operating System Controller.
 
 Supports:
-- Granular Security Rings (Layers 0 to 4)
+- Granular Security Rings (Ring 0: Root/Kernel, Ring 1: SysAdmin, Ring 2: Agent Tools/MCP, Ring 3: Sandboxed LLM/Untrusted Code)
+- File System Path Policies & Network Egress Enforcement
 - Multi-Engine Routing (Ollama, Hermes, Grok, Claude, Codex, OpenAI)
-- Computer Use & Desktop Automation (Mouse, Keyboard, OCR, Screenshots via xdotool)
-- Shell & Code Execution, Security Arsenal Automation & Amnesic Root Operations
+- Computer Use & Desktop Automation (Mouse, Keyboard, OCR, Screenshots)
+- Security Arsenal Tool Execution & MCP Bridge
 """
 
 import os
@@ -15,6 +16,7 @@ import sys
 import json
 import time
 import shutil
+import fnmatch
 import socket
 import argparse
 import subprocess
@@ -22,7 +24,10 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional, Tuple
 
 CONFIG_FILE = Path("/etc/zothos/agent-permissions.json")
+DEV_CONFIG_FILE = Path("/home/neo/zothos/config/includes.chroot/etc/zothos/agent-permissions.json")
+USER_CONFIG_FILE = Path(os.path.expanduser("~/.config/zothos/agent-permissions.json"))
 USER_STATE = Path(os.path.expanduser("~/.config/zothos/agent-layer.state"))
+USER_RING_STATE = Path(os.path.expanduser("~/.config/zothos/agent-ring.state"))
 LOG_FILE = Path(os.path.expanduser("~/.local/share/zothos/agent.log"))
 
 # ANSI Colors
@@ -35,6 +40,13 @@ C_BLUE = "\033[1;34m"
 C_BOLD = "\033[1m"
 C_RESET = "\033[0m"
 
+RING_NAMES = {
+    0: ("SOVEREIGN", "Ring 0: Root, Kernel & Amnesic Authority", C_YELLOW),
+    1: ("SYSADMIN", "Ring 1: System Admin & Privileged Operations", C_PURPLE),
+    2: ("TOOLMASTER", "Ring 2: Agent Tools & MCP Runtime", C_BLUE),
+    3: ("SPECTRE", "Ring 3: Sandboxed LLM Execution & Untrusted Code", C_CYAN),
+}
+
 LAYER_NAMES = {
     0: ("SPECTRE", "Observer / Read-Only Telemetry", C_CYAN),
     1: ("RUNECRAFTER", "User-Space Shell & Code Execution", C_GREEN),
@@ -43,19 +55,27 @@ LAYER_NAMES = {
     4: ("SOVEREIGN", "Root, Kernel & Amnesic Authority", C_YELLOW),
 }
 
-ACTION_MIN_LAYERS = {
-    "read_file": 0,
-    "system_status": 0,
-    "inspect_process": 0,
-    "list_directory": 0,
-    "search_filesystem": 0,
-    "network_info": 0,
-    "view_logs": 0,
-    "write_file": 1,
-    "delete_file": 1,
-    "run_shell": 1,
-    "git_operations": 1,
-    "package_query": 1,
+# Minimum Ring level required (0 is highest privilege, 3 is lowest)
+ACTION_MIN_RINGS = {
+    # Ring 0 Actions (Root/Kernel)
+    "run_root_command": 0,
+    "kernel_module_load": 0,
+    "panic_kill": 0,
+    "amnesic_purge": 0,
+    "disk_format": 0,
+    "systemd_manage": 0,
+    # Ring 1 Actions (SysAdmin)
+    "systemd_query": 1,
+    "toggle_ghostmode": 1,
+    "mac_randomize": 1,
+    "tor_routing_control": 1,
+    "package_install": 1,
+    # Ring 2 Actions (Agent Tools & MCP)
+    "write_file": 2,
+    "delete_file": 2,
+    "run_shell": 2,
+    "git_operations": 2,
+    "package_query": 2,
     "gui_click": 2,
     "gui_type": 2,
     "gui_press_key": 2,
@@ -63,44 +83,93 @@ ACTION_MIN_LAYERS = {
     "gui_drag_window": 2,
     "gui_open_app": 2,
     "browser_automate": 2,
-    "run_sec_tool": 3,
-    "toggle_ghostmode": 3,
-    "mac_randomize": 3,
-    "hexstrike_orchestrate": 3,
-    "tor_routing_control": 3,
-    "run_root_command": 4,
-    "systemd_manage": 4,
-    "apt_install": 4,
-    "panic_kill": 4,
-    "amnesic_purge": 4,
+    "run_sec_tool": 2,
+    "hexstrike_orchestrate": 2,
+    "mcp_invoke": 2,
+    "db_query": 2,
+    # Ring 3 Actions (Sandboxed / Read-Only)
+    "read_file": 3,
+    "system_status": 3,
+    "inspect_process": 3,
+    "list_directory": 3,
+    "search_filesystem": 3,
+    "network_info": 3,
+    "view_logs": 3,
+    "run_sandboxed_code": 3,
 }
 
 def log_msg(msg: str):
-    LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
-    ts = time.strftime("%Y-%m-%d %H:%M:%S")
-    with open(LOG_FILE, "a") as f:
-        f.write(f"[{ts}] {msg}\n")
+    try:
+        LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
+        ts = time.strftime("%Y-%m-%d %H:%M:%S")
+        with open(LOG_FILE, "a") as f:
+            f.write(f"[{ts}] {msg}\n")
+    except Exception:
+        pass
 
-def get_active_layer() -> int:
-    if USER_STATE.exists():
+def load_policy_config() -> Dict[str, Any]:
+    for path in [USER_CONFIG_FILE, CONFIG_FILE, DEV_CONFIG_FILE]:
+        if path.exists():
+            try:
+                return json.loads(path.read_text())
+            except Exception:
+                pass
+    return {}
+
+def get_active_ring() -> int:
+    """Returns active security ring (0 to 3, where 0 is Root and 3 is Sandbox)."""
+    if USER_RING_STATE.exists():
         try:
-            return int(USER_STATE.read_text().strip())
+            val = int(USER_RING_STATE.read_text().strip())
+            if 0 <= val <= 3:
+                return val
         except Exception:
             pass
-    if CONFIG_FILE.exists():
+    if USER_STATE.exists():
         try:
-            data = json.loads(CONFIG_FILE.read_text())
-            return int(data.get("active_layer", 2))
+            layer = int(USER_STATE.read_text().strip())
+            # Convert layer 0-4 to ring 0-3
+            layer_to_ring = {4: 0, 3: 1, 2: 2, 1: 2, 0: 3}
+            return layer_to_ring.get(layer, 2)
+        except Exception:
+            pass
+    cfg = load_policy_config()
+    if "active_ring" in cfg:
+        try:
+            return int(cfg["active_ring"])
         except Exception:
             pass
     return 2
 
-def check_permission(action: str) -> Tuple[bool, str]:
-    active = get_active_layer()
-    required = ACTION_MIN_LAYERS.get(action, 4)
-    if active >= required:
-        return True, f"Action '{action}' authorized under Layer {active} ({LAYER_NAMES[active][0]})"
-    return False, f"PERMISSION DENIED: Action '{action}' requires Layer {required} ({LAYER_NAMES[required][0]}), but active authority is Layer {active} ({LAYER_NAMES[active][0]}). Elevate via 'zoth-agent-layer set {required}'."
+def check_permission(action: str, target_path: Optional[str] = None) -> Tuple[bool, str]:
+    active_ring = get_active_ring()
+    max_allowed_ring = ACTION_MIN_RINGS.get(action, 0)
+    
+    # In ring security: ring 0 can do rings 0,1,2,3; ring 2 can do rings 2,3; ring 3 can only do ring 3.
+    # Active ring must be <= max_allowed_ring
+    if active_ring > max_allowed_ring:
+        req_codename = RING_NAMES.get(max_allowed_ring, ("UNKNOWN", "", ""))[0]
+        act_codename = RING_NAMES.get(active_ring, ("UNKNOWN", "", ""))[0]
+        return False, (
+            f"SECURITY RING VIOLATION: Action '{action}' requires Ring {max_allowed_ring} ({req_codename}) or higher authority. "
+            f"Current authority is Ring {active_ring} ({act_codename}). "
+            f"Elevate authority via 'zoth-agent-layer set <0-4>'."
+        )
+
+    # Path policy checking
+    if target_path:
+        cfg = load_policy_config()
+        ring_policy = cfg.get("security_rings", {}).get(str(active_ring), {})
+        fs_policy = ring_policy.get("filesystem_policy", {})
+        forbidden = fs_policy.get("forbidden_paths", [])
+        
+        target_resolved = os.path.abspath(os.path.expanduser(target_path))
+        for pattern in forbidden:
+            pat_expanded = os.path.abspath(os.path.expanduser(pattern))
+            if fnmatch.fnmatch(target_resolved, pat_expanded) or target_resolved.startswith(pat_expanded.rstrip("*")):
+                return False, f"SECURITY POLICY DENIED: Path '{target_path}' matches forbidden policy pattern '{pattern}' for Ring {active_ring}."
+
+    return True, f"Action '{action}' authorized under Ring {active_ring} ({RING_NAMES[active_ring][0]})."
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Tool Implementations
@@ -113,10 +182,12 @@ class OSToolkit:
         if not allowed:
             return {"error": msg}
         
+        active_ring = get_active_ring()
         info = {
-            "time": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "layer": get_active_layer(),
-            "layer_name": LAYER_NAMES[get_active_layer()][0],
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "active_ring": active_ring,
+            "ring_name": RING_NAMES[active_ring][0],
+            "ring_title": RING_NAMES[active_ring][1],
             "uname": subprocess.getoutput("uname -a"),
             "uptime": subprocess.getoutput("uptime -p 2>/dev/null || uptime"),
             "memory": subprocess.getoutput("free -h | head -n 2"),
@@ -128,28 +199,66 @@ class OSToolkit:
 
     @staticmethod
     def read_file(path: str) -> Dict[str, Any]:
-        allowed, msg = check_permission("read_file")
+        allowed, msg = check_permission("read_file", target_path=path)
         if not allowed:
             return {"error": msg}
         p = Path(os.path.expanduser(path))
         if not p.exists():
             return {"error": f"File '{path}' does not exist."}
         try:
-            return {"content": p.read_text()[:30000], "bytes": p.stat().st_size}
+            return {"content": p.read_text(errors="replace")[:60000], "bytes": p.stat().st_size}
         except Exception as e:
             return {"error": str(e)}
 
     @staticmethod
     def write_file(path: str, content: str) -> Dict[str, Any]:
-        allowed, msg = check_permission("write_file")
+        allowed, msg = check_permission("write_file", target_path=path)
         if not allowed:
             return {"error": msg}
         p = Path(os.path.expanduser(path))
-        p.parent.mkdir(parents=True, exist_ok=True)
         try:
+            p.parent.mkdir(parents=True, exist_ok=True)
             p.write_text(content)
             log_msg(f"Wrote file: {path} ({len(content)} bytes)")
             return {"success": True, "path": str(p), "bytes_written": len(content)}
+        except Exception as e:
+            return {"error": str(e)}
+
+    @staticmethod
+    def delete_file(path: str) -> Dict[str, Any]:
+        allowed, msg = check_permission("delete_file", target_path=path)
+        if not allowed:
+            return {"error": msg}
+        p = Path(os.path.expanduser(path))
+        if not p.exists():
+            return {"error": f"File '{path}' does not exist."}
+        try:
+            if p.is_dir():
+                shutil.rmtree(p)
+            else:
+                p.unlink()
+            log_msg(f"Deleted path: {path}")
+            return {"success": True, "deleted": str(p)}
+        except Exception as e:
+            return {"error": str(e)}
+
+    @staticmethod
+    def list_directory(path: str = ".") -> Dict[str, Any]:
+        allowed, msg = check_permission("list_directory", target_path=path)
+        if not allowed:
+            return {"error": msg}
+        p = Path(os.path.expanduser(path))
+        if not p.exists():
+            return {"error": f"Directory '{path}' does not exist."}
+        try:
+            entries = []
+            for item in p.iterdir():
+                entries.append({
+                    "name": item.name,
+                    "is_dir": item.is_dir(),
+                    "size": item.stat().st_size if item.is_file() else 0
+                })
+            return {"path": str(p), "entries": entries[:100], "total": len(entries)}
         except Exception as e:
             return {"error": str(e)}
 
@@ -170,7 +279,7 @@ class OSToolkit:
             )
             return {
                 "exit_code": res.returncode,
-                "stdout": res.stdout[:20000],
+                "stdout": res.stdout[:30000],
                 "stderr": res.stderr[:10000],
             }
         except subprocess.TimeoutExpired:
@@ -188,13 +297,15 @@ class OSToolkit:
         res = subprocess.run(cmd, shell=True)
         if os.path.exists(save_path):
             return {"success": True, "path": save_path, "size": os.path.getsize(save_path)}
-        return {"error": "Failed to capture screenshot."}
+        return {"error": "Failed to capture screenshot. Ensure DISPLAY is active."}
 
     @staticmethod
     def gui_click(x: int, y: int, button: int = 1) -> Dict[str, Any]:
         allowed, msg = check_permission("gui_click")
         if not allowed:
             return {"error": msg}
+        if not shutil.which("xdotool"):
+            return {"error": "xdotool is required for GUI click actions."}
         display = os.environ.get("DISPLAY", ":0")
         cmd = f"DISPLAY={display} xdotool mousemove {x} {y} click {button}"
         res = subprocess.run(cmd, shell=True, capture_output=True, text=True)
@@ -205,8 +316,9 @@ class OSToolkit:
         allowed, msg = check_permission("gui_type")
         if not allowed:
             return {"error": msg}
+        if not shutil.which("xdotool"):
+            return {"error": "xdotool is required for GUI type actions."}
         display = os.environ.get("DISPLAY", ":0")
-        # Escaped typing
         res = subprocess.run(["xdotool", "type", "--delay", "12", text], env=dict(os.environ, DISPLAY=display), capture_output=True)
         return {"success": res.returncode == 0, "typed": text}
 
@@ -215,6 +327,8 @@ class OSToolkit:
         allowed, msg = check_permission("gui_press_key")
         if not allowed:
             return {"error": msg}
+        if not shutil.which("xdotool"):
+            return {"error": "xdotool is required for GUI key actions."}
         display = os.environ.get("DISPLAY", ":0")
         res = subprocess.run(["xdotool", "key", key], env=dict(os.environ, DISPLAY=display), capture_output=True)
         return {"success": res.returncode == 0, "key": key}
@@ -233,14 +347,17 @@ class OSToolkit:
         allowed, msg = check_permission("run_sec_tool")
         if not allowed:
             return {"error": msg}
-        valid_tools = ["nmap", "rustscan", "masscan", "sqlmap", "nikto", "nuclei", "ffuf", "hexstrike"]
+        valid_tools = ["nmap", "rustscan", "masscan", "sqlmap", "nikto", "nuclei", "ffuf", "gobuster", "hexstrike"]
         if tool not in valid_tools:
             return {"error": f"Tool '{tool}' not in recognized security arsenal list ({valid_tools})"}
         
-        cmd = f"{tool} {extra_args} {target}"
+        cmd = f"{tool} {extra_args} {target}".strip()
         log_msg(f"Security tool invocation: {cmd}")
-        res = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=180)
-        return {"exit_code": res.returncode, "stdout": res.stdout[:30000], "stderr": res.stderr[:10000]}
+        try:
+            res = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=180)
+            return {"exit_code": res.returncode, "stdout": res.stdout[:40000], "stderr": res.stderr[:10000]}
+        except subprocess.TimeoutExpired:
+            return {"error": f"Security tool '{tool}' timed out after 180 seconds."}
 
     @staticmethod
     def toggle_ghostmode(enable: bool) -> Dict[str, Any]:
@@ -257,23 +374,60 @@ class OSToolkit:
         if not allowed:
             return {"error": msg}
         log_msg(f"ROOT EXEC: {command}")
-        res = subprocess.run(f"sudo {command}", shell=True, capture_output=True, text=True, timeout=120)
-        return {"exit_code": res.returncode, "stdout": res.stdout[:30000], "stderr": res.stderr[:10000]}
+        try:
+            res = subprocess.run(f"sudo {command}", shell=True, capture_output=True, text=True, timeout=120)
+            return {"exit_code": res.returncode, "stdout": res.stdout[:40000], "stderr": res.stderr[:10000]}
+        except subprocess.TimeoutExpired:
+            return {"error": "Root command timed out after 120 seconds."}
+        except Exception as e:
+            return {"error": str(e)}
+
+    @staticmethod
+    def db_query(query: str, db_type: str = "sqlite", db_path: str = "/var/lib/zothos/knowledge.db") -> Dict[str, Any]:
+        allowed, msg = check_permission("db_query")
+        if not allowed:
+            return {"error": msg}
+        try:
+            if db_type == "sqlite":
+                import sqlite3
+                os.makedirs(os.path.dirname(db_path), exist_ok=True)
+                conn = sqlite3.connect(db_path)
+                cursor = conn.cursor()
+                cursor.execute(query)
+                if query.strip().upper().startswith("SELECT"):
+                    rows = cursor.fetchall()
+                    cols = [d[0] for d in cursor.description] if cursor.description else []
+                    conn.close()
+                    return {"columns": cols, "rows": rows[:100], "total_rows": len(rows)}
+                else:
+                    conn.commit()
+                    rowcount = cursor.rowcount
+                    conn.close()
+                    return {"success": True, "rows_affected": rowcount}
+            elif db_type == "duckdb":
+                import duckdb
+                con = duckdb.connect(db_path)
+                res = con.execute(query).fetchall()
+                con.close()
+                return {"rows": res[:100]}
+            else:
+                return {"error": f"Unsupported db_type: {db_type}"}
+        except Exception as e:
+            return {"error": str(e)}
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # AI Reasoning & Execution Dispatcher
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def execute_natural_command(instruction: str, engine: str = "ollama") -> str:
-    """Interprets and executes a user command against the OS toolkit under active layer constraints."""
-    active = get_active_layer()
-    codename, title, color = LAYER_NAMES[active]
+    active_ring = get_active_ring()
+    codename, title, color = RING_NAMES[active_ring]
     
-    print(f"{C_CYAN}[*] Agent analyzing intent under {color}Layer {active}: {codename}{C_RESET}...")
+    print(f"{C_CYAN}[*] Agent analyzing intent under {color}Ring {active_ring}: {codename}{C_RESET}...")
     
-    # 1. Quick rule-based dispatcher for instant responsive actions
     lower = instruction.lower().strip()
     
+    # Direct rule mappings
     if "status" in lower or "health" in lower or "metrics" in lower:
         st = OSToolkit.system_status()
         return json.dumps(st, indent=2)
@@ -301,6 +455,8 @@ def execute_natural_command(instruction: str, engine: str = "ollama") -> str:
             "ai": "xfce4-terminal -e zoth-ai",
             "hexstrike": "xfce4-terminal -e hexstrike",
             "matrix": "xfce4-terminal -e zoth-matrix-rain",
+            "sec": "xfce4-terminal -e zoth-sec",
+            "mcp": "xfce4-terminal -e zoth-mcp",
         }
         target_app = app_map.get(app, app)
         res = OSToolkit.gui_open_app(target_app)
@@ -316,16 +472,16 @@ def execute_natural_command(instruction: str, engine: str = "ollama") -> str:
         res = OSToolkit.run_shell(cmd)
         return json.dumps(res, indent=2)
 
-    # 2. Local LLM / Ollama routing if available
+    # Local LLM / Ollama routing if available
     try:
         import urllib.request
-        prompt = f"""You are the ZOTHOS Autonomous OS Agent. Current Authority: Layer {active} ({codename}).
+        prompt = f"""You are the ZOTHOS Autonomous OS Agent. Current Authority: Ring {active_ring} ({codename}).
 Translate this user instruction into an OS action:
 User instruction: "{instruction}"
 
 Respond in clean JSON format:
 {{"action": "<tool_name>", "args": {{...}}, "summary": "<explanation>"}}
-Supported tools: system_status, read_file, write_file, run_shell, gui_click, gui_type, gui_screenshot, gui_open_app, run_sec_tool, toggle_ghostmode, run_root_command.
+Supported tools: system_status, read_file, write_file, list_directory, run_shell, gui_click, gui_type, gui_screenshot, gui_open_app, run_sec_tool, toggle_ghostmode, run_root_command, db_query.
 """
         req_data = json.dumps({
             "model": "llama3.2" if shutil.which("ollama") else "qwen2.5-coder",
@@ -347,9 +503,65 @@ Supported tools: system_status, read_file, write_file, run_shell, gui_click, gui
     except Exception:
         pass
 
-    # Fallback to direct user-space shell execution
+    # Fallback to direct shell execution
     res = OSToolkit.run_shell(instruction)
     return json.dumps(res, indent=2)
+
+def run_mcp_server():
+    """Runs a standard MCP stdio JSON-RPC server for ZOTHOS OS operations."""
+    for line in sys.stdin:
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            req = json.loads(line)
+            req_id = req.get("id")
+            method = req.get("method")
+            params = req.get("params", {})
+
+            if method == "initialize":
+                resp = {
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "result": {
+                        "protocolVersion": "2024-11-05",
+                        "capabilities": {"tools": {}},
+                        "serverInfo": {"name": "zoth-agent-os", "version": "3.0.0"}
+                    }
+                }
+            elif method == "tools/list":
+                tools = [
+                    {"name": "os_system_status", "description": "Fetch real-time OS telemetry, memory, and security status", "inputSchema": {"type": "object", "properties": {}}},
+                    {"name": "os_read_file", "description": "Read file contents with Ring path policy checks", "inputSchema": {"type": "object", "properties": {"path": {"type": "string"}}, "required": ["path"]}},
+                    {"name": "os_write_file", "description": "Write file contents with Ring path policy checks", "inputSchema": {"type": "object", "properties": {"path": {"type": "string"}, "content": {"type": "string"}}, "required": ["path", "content"]}},
+                    {"name": "os_list_directory", "description": "List directory contents", "inputSchema": {"type": "object", "properties": {"path": {"type": "string", "default": "."}}}},
+                    {"name": "os_run_shell", "description": "Execute shell command under current Ring authority", "inputSchema": {"type": "object", "properties": {"command": {"type": "string"}}, "required": ["command"]}},
+                    {"name": "os_gui_screenshot", "description": "Capture desktop screenshot", "inputSchema": {"type": "object", "properties": {}}},
+                    {"name": "os_run_sec_tool", "description": "Execute Kali/Parrot security arsenal tool", "inputSchema": {"type": "object", "properties": {"tool": {"type": "string"}, "target": {"type": "string"}, "extra_args": {"type": "string", "default": ""}}, "required": ["tool", "target"]}},
+                ]
+                resp = {"jsonrpc": "2.0", "id": req_id, "result": {"tools": tools}}
+            elif method == "tools/call":
+                name = params.get("name", "").replace("os_", "")
+                args = params.get("arguments", {})
+                if hasattr(OSToolkit, name):
+                    func = getattr(OSToolkit, name)
+                    res = func(**args)
+                    resp = {
+                        "jsonrpc": "2.0",
+                        "id": req_id,
+                        "result": {"content": [{"type": "text", "text": json.dumps(res, indent=2)}], "isError": "error" in res}
+                    }
+                else:
+                    resp = {"jsonrpc": "2.0", "id": req_id, "error": {"code": -32601, "message": f"Tool '{name}' not found."}}
+            else:
+                resp = {"jsonrpc": "2.0", "id": req_id, "result": {}}
+
+            sys.stdout.write(json.dumps(resp) + "\n")
+            sys.stdout.flush()
+        except Exception as e:
+            err = {"jsonrpc": "2.0", "error": {"code": -32700, "message": str(e)}}
+            sys.stdout.write(json.dumps(err) + "\n")
+            sys.stdout.flush()
 
 def interactive_chat():
     banner = f"""{C_GREEN}
@@ -364,22 +576,28 @@ def interactive_chat():
   ╚══════════════════════════════════════════════════════════════════════╝{C_RESET}
 """
     print(banner)
-    active = get_active_layer()
-    codename, title, color = LAYER_NAMES[active]
-    print(f"  {C_BOLD}Active Security Ring:{C_RESET} {color}Layer {active} - {codename}{C_RESET} ({title})")
-    print(f"  {C_CYAN}Commands: /layer <0-4> | /status | /hud | /exit{C_RESET}\n")
+    active_ring = get_active_ring()
+    codename, title, color = RING_NAMES[active_ring]
+    print(f"  {C_BOLD}Active Security Ring:{C_RESET} {color}Ring {active_ring} - {codename}{C_RESET} ({title})")
+    print(f"  {C_CYAN}Commands: /ring <0-3> | /layer <0-4> | /status | /hud | /exit{C_RESET}\n")
 
     while True:
         try:
-            active = get_active_layer()
-            codename, _, color = LAYER_NAMES[active]
-            prompt_str = f"{C_BOLD}{color}[ZOTH-AGENT:L{active}]{C_RESET} ❯ "
+            active_ring = get_active_ring()
+            codename, _, color = RING_NAMES[active_ring]
+            prompt_str = f"{C_BOLD}{color}[ZOTH-AGENT:R{active_ring}]{C_RESET} ❯ "
             user_input = input(prompt_str).strip()
             
             if not user_input:
                 continue
             if user_input in ["exit", "quit", "/exit"]:
                 break
+            if user_input.startswith("/ring "):
+                new_r = user_input.split()[1]
+                USER_RING_STATE.parent.mkdir(parents=True, exist_ok=True)
+                USER_RING_STATE.write_text(new_r)
+                print(f"{C_GREEN}[✓] Active Ring updated to {new_r}{C_RESET}")
+                continue
             if user_input.startswith("/layer "):
                 new_l = user_input.split()[1]
                 subprocess.run(f"zoth-agent-layer set {new_l}", shell=True)
@@ -401,12 +619,12 @@ def interactive_chat():
             break
 
 def main():
-    parser = argparse.ArgumentParser(description="ZOTHOS Autonomous OS Agent Engine")
+    parser = argparse.ArgumentParser(description="ZOTHOS Autonomous OS Agent Engine (zoth-agent-os)")
     subparsers = parser.add_subparsers(dest="subcommand")
 
     # run command
     run_parser = subparsers.add_parser("run", help="Execute single autonomous natural command")
-    run_parser.add_argument("instruction", help="Natural language instruction for the OS agent")
+    run_parser.add_argument("instruction", nargs="+", help="Natural language instruction for the OS agent")
 
     # chat command
     subparsers.add_parser("chat", help="Interactive terminal agent chat session")
@@ -414,15 +632,34 @@ def main():
     # status command
     subparsers.add_parser("status", help="View current agent permissions and telemetry")
 
+    # mcp command
+    subparsers.add_parser("mcp", help="Run as Model Context Protocol (MCP) stdio server")
+
+    # If first argument is not a known subcommand or flag, treat all args as a direct natural command
+    known_commands = ["run", "chat", "status", "mcp", "-h", "--help"]
+    if len(sys.argv) > 1 and sys.argv[1] not in known_commands:
+        instruction = " ".join(sys.argv[1:])
+        res = execute_natural_command(instruction)
+        print(res)
+        return
+
     args = parser.parse_args()
 
     if args.subcommand == "run":
-        res = execute_natural_command(args.instruction)
+        instruction = " ".join(args.instruction)
+        res = execute_natural_command(instruction)
         print(res)
     elif args.subcommand == "status":
         print(json.dumps(OSToolkit.system_status(), indent=2))
-    else:
+    elif args.subcommand == "mcp":
+        run_mcp_server()
+    elif args.subcommand == "chat":
         interactive_chat()
+    else:
+        if sys.stdin.isatty():
+            interactive_chat()
+        else:
+            print(json.dumps(OSToolkit.system_status(), indent=2))
 
 if __name__ == "__main__":
     main()

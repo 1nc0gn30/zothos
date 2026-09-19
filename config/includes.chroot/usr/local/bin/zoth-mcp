@@ -15,37 +15,20 @@ BOLD="\e[1m"
 RESET="\e[0m"
 
 MCP_CONFIG="/etc/zothos/mcp-servers.json"
-mkdir -p /etc/zothos
+USER_MCP_CONFIG="${HOME:-/home/neo}/.config/zothos/mcp-servers.json"
 
-# Ensure master mcp config exists
-if [[ ! -f "$MCP_CONFIG" ]]; then
-    cat <<'EOF' > "$MCP_CONFIG"
-{
-  "mcpServers": {
-    "filesystem": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/neo"],
-      "description": "Secure direct host filesystem access"
-    },
-    "hexstrike-ai": {
-      "command": "python3",
-      "args": ["/usr/local/bin/hexstrike"],
-      "description": "HexStrike AI autonomous security & reconnaissance server"
-    },
-    "zoth-bridge": {
-      "command": "python3",
-      "args": ["/usr/local/bin/zoth-bridge"],
-      "description": "Zoth multi-model streaming API gateway proxy"
-    },
-    "sqlite-vault": {
-      "command": "sqlite3",
-      "args": ["/var/lib/zothos/vault.db"],
-      "description": "Local encrypted database and knowledge store"
-    }
-  }
+# Resolve active config path
+get_config_path() {
+    if [[ -f "$USER_MCP_CONFIG" ]]; then
+        echo "$USER_MCP_CONFIG"
+    elif [[ -f "$MCP_CONFIG" ]]; then
+        echo "$MCP_CONFIG"
+    elif [[ -f "/home/neo/zothos/config/includes.chroot/etc/zothos/mcp-servers.json" ]]; then
+        echo "/home/neo/zothos/config/includes.chroot/etc/zothos/mcp-servers.json"
+    else
+        echo "$MCP_CONFIG"
+    fi
 }
-EOF
-fi
 
 banner() {
     echo -e "${GREEN}${BOLD}  ███████╗ ██████╗ ████████╗██╗  ██╗     ███╗   ███╗ ██████╗██████╗ ${RESET}"
@@ -58,46 +41,108 @@ banner() {
     echo ""
 }
 
-cmd_list() {
+show_help() {
     banner
-    echo -e "${BOLD}Registered Master MCP Servers in ${CYAN}${MCP_CONFIG}${RESET}:${RESET}"
+    echo -e "${BOLD}Usage:${RESET} zoth-mcp [command] [options]"
     echo ""
+    echo -e "${BOLD}Commands:${RESET}"
+    echo -e "  ${GREEN}list${RESET}                 List all registered MCP servers with command & description"
+    echo -e "  ${GREEN}sync${RESET}                 Sync master MCP registry to Claude Code, Hermes, Codex & OpenCode"
+    echo -e "  ${GREEN}test [server]${RESET}        Validate configuration and executable for specified MCP server"
+    echo -e "  ${GREEN}status${RESET}               Display operational status of all registered MCP endpoints"
+    echo -e "  ${GREEN}json${RESET}                 Output raw JSON configuration"
+    echo -e "  ${GREEN}interactive${RESET}          Launch interactive terminal management interface"
+    echo -e "  ${GREEN}help, -h, --help${RESET}     Show this help documentation"
+    echo ""
+    echo -e "${BOLD}Registered Master Config:${RESET} $(get_config_path)"
+}
+
+cmd_list() {
+    local cfg
+    cfg=$(get_config_path)
+    banner
+    echo -e "${BOLD}Registered Master MCP Servers in ${CYAN}${cfg}${RESET}:${RESET}"
+    echo ""
+    if [[ ! -f "$cfg" ]]; then
+        echo -e "${RED}[!] Configuration file not found: ${cfg}${RESET}"
+        return 1
+    fi
+
     if command -v jq >/dev/null 2>&1; then
-        jq -r '.mcpServers | to_entries[] | "  \u001b[38;2;0;255;157m[+]\u001b[0m \u001b[1m\(.key)\u001b[0m\n      Command:     \(.value.command) \(.value.args | join(" "))\n      Description: \(.value.description // "N/A")\n"' "$MCP_CONFIG"
+        jq -r '.mcpServers | to_entries[] | "  \u001b[38;2;0;255;157m[+]\u001b[0m \u001b[1m\(.key)\u001b[0m\n      Command:     \(.value.command) \((.value.args // []) | join(" "))\n      Description: \(.value.description // "N/A")\n"' "$cfg"
     else
-        cat "$MCP_CONFIG"
+        cat "$cfg"
     fi
 }
 
+cmd_status() {
+    local cfg
+    cfg=$(get_config_path)
+    banner
+    echo -e "${BOLD}Operational Status of MCP Servers (${CYAN}${cfg}${RESET}):${RESET}\n"
+    if [[ ! -f "$cfg" ]] || ! command -v jq >/dev/null 2>&1; then
+        cmd_list
+        return
+    fi
+
+    local servers
+    servers=$(jq -r '.mcpServers | keys[]' "$cfg")
+    for s in $servers; do
+        local cmd
+        cmd=$(jq -r ".mcpServers[\"$s\"].command" "$cfg")
+        local desc
+        desc=$(jq -r ".mcpServers[\"$s\"].description // \"N/A\"" "$cfg")
+        local stat="${GREEN}[READY]${RESET}"
+        if ! command -v "$cmd" >/dev/null 2>&1; then
+            stat="${YELLOW}[STANDBY: $cmd not in PATH]${RESET}"
+        fi
+        printf "  %-24s %-20b %s\n" "$s" "$stat" "${GRAY}$desc${RESET}"
+    done
+    echo ""
+}
+
 cmd_sync() {
+    local cfg
+    cfg=$(get_config_path)
     banner
     echo -e "${BOLD}${CYAN}[*] Synchronizing MCP servers across all local AI agent configurations...${RESET}"
     
+    if [[ ! -f "$cfg" ]]; then
+        echo -e "${RED}[!] Error: Configuration file not found at ${cfg}${RESET}"
+        return 1
+    fi
+
     local USER_HOME="${HOME:-/home/neo}"
     
     # 1. Sync to Claude Code config
     local CLAUDE_CONFIG_DIR="$USER_HOME/.config/claude-code"
     mkdir -p "$CLAUDE_CONFIG_DIR"
-    cp "$MCP_CONFIG" "$CLAUDE_CONFIG_DIR/mcp.json" 2>/dev/null || true
+    cp "$cfg" "$CLAUDE_CONFIG_DIR/mcp.json" 2>/dev/null || true
     echo -e "  ${GREEN}[✓]${RESET} Claude Code MCP synced: ${CLAUDE_CONFIG_DIR}/mcp.json"
 
     # 2. Sync to Hermes Agent
     local HERMES_CONFIG_DIR="$USER_HOME/.hermes"
     mkdir -p "$HERMES_CONFIG_DIR"
-    cp "$MCP_CONFIG" "$HERMES_CONFIG_DIR/mcp_servers.json" 2>/dev/null || true
+    cp "$cfg" "$HERMES_CONFIG_DIR/mcp_servers.json" 2>/dev/null || true
     echo -e "  ${GREEN}[✓]${RESET} Hermes Agent MCP synced: ${HERMES_CONFIG_DIR}/mcp_servers.json"
 
     # 3. Sync to Codex
     local CODEX_CONFIG_DIR="$USER_HOME/.config/codex"
     mkdir -p "$CODEX_CONFIG_DIR"
-    cp "$MCP_CONFIG" "$CODEX_CONFIG_DIR/mcp.json" 2>/dev/null || true
+    cp "$cfg" "$CODEX_CONFIG_DIR/mcp.json" 2>/dev/null || true
     echo -e "  ${GREEN}[✓]${RESET} OpenAI Codex MCP synced: ${CODEX_CONFIG_DIR}/mcp.json"
 
     # 4. Sync to OpenCode
     local OPENCODE_CONFIG_DIR="$USER_HOME/.config/opencode"
     mkdir -p "$OPENCODE_CONFIG_DIR"
-    cp "$MCP_CONFIG" "$OPENCODE_CONFIG_DIR/mcp.json" 2>/dev/null || true
+    cp "$cfg" "$OPENCODE_CONFIG_DIR/mcp.json" 2>/dev/null || true
     echo -e "  ${GREEN}[✓]${RESET} OpenCode AI MCP synced: ${OPENCODE_CONFIG_DIR}/mcp.json"
+
+    # 5. Sync to Cursor / VSCode MCP settings
+    local CURSOR_CONFIG_DIR="$USER_HOME/.cursor"
+    mkdir -p "$CURSOR_CONFIG_DIR"
+    cp "$cfg" "$CURSOR_CONFIG_DIR/mcp.json" 2>/dev/null || true
+    echo -e "  ${GREEN}[✓]${RESET} Cursor MCP synced: ${CURSOR_CONFIG_DIR}/mcp.json"
 
     echo ""
     echo -e "${BOLD}${GREEN}[✓] All AI agent runtimes are primed with master MCP servers!${RESET}"
@@ -105,32 +150,70 @@ cmd_sync() {
 
 cmd_test() {
     local server="${1:-filesystem}"
+    local cfg
+    cfg=$(get_config_path)
+    banner
     echo -e "${BOLD}${CYAN}[*] Testing execution for MCP Server: ${server}...${RESET}"
-    echo -e "  ${GREEN}[✓]${RESET} Server '${server}' registered and valid in config."
+    
+    if [[ ! -f "$cfg" ]] || ! command -v jq >/dev/null 2>&1; then
+        echo -e "  ${YELLOW}[!] JQ not available or config missing. Raw validation skipped.${RESET}"
+        return 0
+    fi
+
+    local exists
+    exists=$(jq -r ".mcpServers[\"$server\"] // empty" "$cfg")
+    if [[ -z "$exists" ]]; then
+        echo -e "  ${RED}[✗] Server '${server}' NOT found in ${cfg}.${RESET}"
+        echo -e "      Available servers: $(jq -r '.mcpServers | keys | join(", ")' "$cfg")"
+        return 1
+    fi
+
+    local cmd
+    cmd=$(jq -r ".mcpServers[\"$server\"].command" "$cfg")
+    local args
+    args=$(jq -r ".mcpServers[\"$server\"].args // [] | join(\" \")" "$cfg")
+    local desc
+    desc=$(jq -r ".mcpServers[\"$server\"].description // \"N/A\"" "$cfg")
+
+    echo -e "  ${GREEN}[✓]${RESET} Server '${server}' registered."
+    echo -e "      Description: ${desc}"
+    echo -e "      Invocation:  ${cmd} ${args}"
+
+    if command -v "$cmd" >/dev/null 2>&1; then
+        echo -e "  ${GREEN}[✓]${RESET} Binary executable '${cmd}' resolved in PATH: $(command -v "$cmd")"
+    else
+        echo -e "  ${YELLOW}[!]${RESET} Binary executable '${cmd}' not currently in PATH. Will resolve upon container/package load."
+    fi
 }
 
 interactive_menu() {
     while true; do
         clear
-        cmd_list
+        cmd_status
         echo -e "${GREEN}${BOLD}══════════════════════════════════════════════════════════════════════${RESET}"
         echo -e "  ${BOLD}${GREEN}[1]${RESET} 🔄  ${BOLD}Sync MCP Servers to Claude Code, Hermes, Codex & OpenCode${RESET}"
         echo -e "  ${BOLD}${CYAN}[2]${RESET} 🧪  ${BOLD}Test MCP Server Connection${RESET}"
-        echo -e "  ${BOLD}${GOLD}[3]${RESET} 📝  ${BOLD}View Raw MCP Configuration JSON${RESET}"
+        echo -e "  ${BOLD}${GOLD}[3]${RESET} 📋  ${BOLD}Detailed Server Registry Listing${RESET}"
+        echo -e "  ${BOLD}${PURPLE}[4]${RESET} 📝  ${BOLD}View Raw MCP Configuration JSON${RESET}"
         echo -e "  ${BOLD}${GRAY}[0]${RESET} 🚪  ${BOLD}Exit Hub${RESET}"
         echo -e "${GREEN}${BOLD}══════════════════════════════════════════════════════════════════════${RESET}"
-        read -p "Select MCP operation [0-3]: " choice
+        read -r -p "Select MCP operation [0-4]: " choice
         case "$choice" in
-            1) cmd_sync; read -p "Press Enter to continue..." _ ;;
+            1) cmd_sync; read -r -p "Press Enter to continue..." _ ;;
             2) 
-                read -p "Enter MCP server name to test [default: filesystem]: " sname
+                read -r -p "Enter MCP server name to test [default: filesystem]: " sname
                 cmd_test "${sname:-filesystem}"
-                read -p "Press Enter to continue..." _
+                read -r -p "Press Enter to continue..." _
                 ;;
             3)
+                cmd_list
+                read -r -p "Press Enter to continue..." _
+                ;;
+            4)
                 echo ""
-                cat "$MCP_CONFIG"
-                read -p "Press Enter to continue..." _
+                cat "$(get_config_path)"
+                echo ""
+                read -r -p "Press Enter to continue..." _
                 ;;
             0|q|Q) break ;;
             *) echo -e "${RED}Invalid option${RESET}"; sleep 1 ;;
@@ -144,17 +227,34 @@ case "$action" in
     list)
         cmd_list
         ;;
+    status)
+        cmd_status
+        ;;
     sync)
         cmd_sync
         ;;
     test)
         cmd_test "${2:-filesystem}"
         ;;
-    interactive|"")
+    json)
+        cat "$(get_config_path)"
+        ;;
+    interactive)
         interactive_menu
         ;;
+    help|-h|--help)
+        show_help
+        ;;
+    "")
+        if [[ -t 0 ]]; then
+            interactive_menu
+        else
+            cmd_list
+        fi
+        ;;
     *)
-        echo "Usage: zoth-mcp [list|sync|test <name>|interactive]"
+        echo -e "${RED}Unknown command: ${action}${RESET}\n"
+        show_help
         exit 1
         ;;
 esac
