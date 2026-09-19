@@ -150,13 +150,16 @@ class AgentHUDApp:
         telem_box.pack(side="left", fill="both", expand=True, padx=(0, 6))
 
         self.lbl_cpu = tk.Label(telem_box, text="CPU: --%", font=("JetBrains Mono", 10), fg="#00ff9d", bg="#080e18")
-        self.lbl_cpu.pack(anchor="w", padx=12, pady=4)
+        self.lbl_cpu.pack(anchor="w", padx=12, pady=2)
 
         self.lbl_ram = tk.Label(telem_box, text="RAM: -- / -- GB", font=("JetBrains Mono", 10), fg="#00e5ff", bg="#080e18")
-        self.lbl_ram.pack(anchor="w", padx=12, pady=4)
+        self.lbl_ram.pack(anchor="w", padx=12, pady=2)
+
+        self.lbl_net = tk.Label(telem_box, text="NET: -- | MAC: --", font=("JetBrains Mono", 9), fg="#ffd700", bg="#080e18")
+        self.lbl_net.pack(anchor="w", padx=12, pady=2)
 
         self.lbl_tor = tk.Label(telem_box, text="TOR: CLEARNET", font=("JetBrains Mono", 10), fg="#ff3355", bg="#080e18")
-        self.lbl_tor.pack(anchor="w", padx=12, pady=4)
+        self.lbl_tor.pack(anchor="w", padx=12, pady=2)
 
         # Arsenal Card
         arsenal_box = tk.LabelFrame(
@@ -278,17 +281,27 @@ class AgentHUDApp:
         threading.Thread(target=worker, daemon=True).start()
 
     def update_telemetry(self):
-        # CPU
+        # Read sentinel status
         try:
             res = subprocess.run(["/usr/local/bin/zoth-sentinel", "status"], capture_output=True, text=True, timeout=2)
             lines = res.stdout.splitlines()
+            ip_val = ""
+            mac_val = ""
             for line in lines:
-                if "CPU Usage:" in line:
-                    self.lbl_cpu.config(text=line.strip())
-                elif "RAM Usage:" in line:
-                    self.lbl_ram.config(text=line.strip())
-                elif "Tor Stealth:" in line:
-                    self.lbl_tor.config(text=line.strip())
+                clean = line.strip()
+                if "CPU Usage:" in clean:
+                    self.lbl_cpu.config(text=clean)
+                elif "RAM Usage:" in clean:
+                    self.lbl_ram.config(text=clean)
+                elif "Primary IP:" in clean:
+                    ip_val = clean.replace("Primary IP:", "").strip()
+                elif "Primary MAC:" in clean:
+                    mac_val = clean.replace("Primary MAC:", "").strip()
+                elif "Tor Stealth:" in clean:
+                    self.lbl_tor.config(text=clean)
+
+            if ip_val or mac_val:
+                self.lbl_net.config(text=f"NET: {ip_val or '127.0.0.1'} | MAC: {mac_val or '00:00:00:00:00:00'}")
         except Exception:
             pass
 

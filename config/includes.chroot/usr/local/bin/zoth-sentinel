@@ -159,6 +159,47 @@ def get_system_telemetry() -> Dict[str, Any]:
     except Exception:
         pass
 
+    try:
+        # Network Identities (IP & MAC)
+        def iface_priority(name):
+            if name.startswith(('en', 'eth', 'wl')):
+                return 0
+            if name.startswith(('tun', 'tap', 'wg', 'tailscale', 'proton')):
+                return 1
+            if name.startswith(('br', 'docker', 'veth', 'virbr')):
+                return 3
+            return 2
+
+        ifaces = os.listdir("/sys/class/net/")
+        sorted_ifaces = sorted([i for i in ifaces if i != "lo"], key=lambda x: (iface_priority(x), x))
+        net_list = []
+        for iface in sorted_ifaces:
+            mac = "00:00:00:00:00:00"
+            mac_p = f"/sys/class/net/{iface}/address"
+            if os.path.exists(mac_p):
+                with open(mac_p) as f:
+                    mac = f.read().strip().upper()
+
+            ip = ""
+            try:
+                ip_res = subprocess.run(["ip", "-4", "-brief", "addr", "show", iface], capture_output=True, text=True)
+                parts = ip_res.stdout.strip().split()
+                if len(parts) >= 3:
+                    ip = parts[2].split('/')[0]
+            except Exception:
+                pass
+
+            if ip or mac != "00:00:00:00:00:00":
+                net_list.append({"iface": iface, "ip": ip or "offline", "mac": mac})
+
+        telemetry["network_interfaces"] = net_list
+        telemetry["primary_ip"] = net_list[0]["ip"] if net_list else "127.0.0.1"
+        telemetry["primary_mac"] = net_list[0]["mac"] if net_list else "00:00:00:00:00:00"
+    except Exception:
+        telemetry["network_interfaces"] = []
+        telemetry["primary_ip"] = "127.0.0.1"
+        telemetry["primary_mac"] = "00:00:00:00:00:00"
+
     return telemetry
 
 
@@ -456,6 +497,8 @@ def cmd_status():
     print(f"  CPU Usage:       {EMERALD if telem.get('cpu_usage', 0) < 80 else CRIMSON}{telem.get('cpu_usage')}%{RESET}")
     print(f"  RAM Usage:       {EMERALD if telem.get('ram_percent', 0) < 80 else CRIMSON}{telem.get('ram_percent')}%{RESET} ({telem.get('ram_used_mb')}MB / {telem.get('ram_total_mb')}MB)")
     print(f"  Root Disk Usage: {EMERALD if telem.get('disk_percent', 0) < 85 else CRIMSON}{telem.get('disk_percent')}%{RESET}")
+    print(f"  Primary IP:      {GOLD}{telem.get('primary_ip', '127.0.0.1')}{RESET}")
+    print(f"  Primary MAC:     {CYAN}{telem.get('primary_mac', '00:00:00:00:00:00')}{RESET}")
     print(f"  Tor Stealth:     {EMERALD if telem.get('tor_active') else GRAY}{'ENABLED (Ghostmode)' if telem.get('tor_active') else 'DISABLED (Clear)'}{RESET}")
     
     failed = telem.get("failed_services", [])

@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
 ==============================================================================
- [+] ZOTHOS APEX TELEMETRY HUD v3.5 ULTRA — MAGIC UI EDITION [+]
+ [+] ZOTHOS APEX TELEMETRY HUD v3.6 ULTRA — MAGIC UI EDITION [+]
  Real-time Cyber-Alchemical Glassmorphic OS Telemetry, Security & AI Cockpit.
+ Shows CPU/RAM/Storage/Network I/O, IP & MAC Hardware Identities & AI Status.
  PyGObject + Cairo + Pure Linux Probes (Zero External Pip Bloat).
 ==============================================================================
 """
@@ -69,8 +70,8 @@ C_DIM    = (0.50, 0.60, 0.75, 0.80)
 C_BAR_BG = (0.05, 0.08, 0.14, 0.90)
 C_RED    = (1.0,  0.25, 0.35, 1.0)
 
-HUD_W       = 330
-HUD_H_FULL  = 560
+HUD_W       = 340
+HUD_H_FULL  = 610
 HUD_H_MINI  = 90
 REFRESH_MS  = 800
 
@@ -157,6 +158,7 @@ class ZothApexHUD(Gtk.Window):
         self.top_proc_cpu = 0.0
         self.ai_model = "llama3.2 (ollama)"
         self.sentinel_active = True
+        self.net_identities = []
 
         # Sparklines
         self.sl_cpu = Sparkline(45)
@@ -243,6 +245,49 @@ class ZothApexHUD(Gtk.Window):
                 pass
         return "llama3.2:latest (ollama)"
 
+    def _read_network_identities(self):
+        identities = []
+        try:
+            def iface_priority(name):
+                if name.startswith(('en', 'eth', 'wl')):
+                    return 0
+                if name.startswith(('tun', 'tap', 'wg', 'tailscale', 'proton')):
+                    return 1
+                if name.startswith(('br', 'docker', 'veth', 'virbr')):
+                    return 3
+                return 2
+
+            ifaces = os.listdir('/sys/class/net/')
+            sorted_ifaces = sorted([i for i in ifaces if i != 'lo'], key=lambda x: (iface_priority(x), x))
+            for iface in sorted_ifaces:
+                mac_path = f'/sys/class/net/{iface}/address'
+                mac = "00:00:00:00:00:00"
+                if os.path.exists(mac_path):
+                    with open(mac_path, 'r') as f:
+                        mac = f.read().strip()
+
+                ip = ""
+                try:
+                    res = subprocess.run(
+                        ["ip", "-4", "-brief", "addr", "show", iface],
+                        capture_output=True, text=True, timeout=1
+                    )
+                    parts = res.stdout.strip().split()
+                    if len(parts) >= 3:
+                        ip = parts[2].split('/')[0]
+                except Exception:
+                    pass
+
+                if ip or (mac and mac != "00:00:00:00:00:00"):
+                    identities.append({
+                        "iface": iface,
+                        "ip": ip or "0.0.0.0 (Offline)",
+                        "mac": mac.upper()
+                    })
+        except Exception:
+            pass
+        return identities
+
     # ── Update loop ─────────────────────────────────────────────
     def _update_metrics(self):
         now = time.time()
@@ -299,6 +344,7 @@ class ZothApexHUD(Gtk.Window):
         self.top_proc, self.top_proc_cpu = self._read_top_process()
         self.ai_model = self._read_sentinel_info()
         self.sentinel_active = (subprocess.run(['systemctl', 'is-active', 'zoth-sentinel'], capture_output=True).returncode == 0)
+        self.net_identities = self._read_network_identities()
 
         # Sparklines
         self.sl_cpu.push(self.cpu_pct)
@@ -320,7 +366,6 @@ class ZothApexHUD(Gtk.Window):
         # Drag window on header click
         if event.button == 1 and y < 44:
             if event.type == Gdk.EventType._2BUTTON_PRESS:
-                # Double click to toggle compact mode
                 self.compact_mode = not self.compact_mode
                 h = HUD_H_MINI if self.compact_mode else HUD_H_FULL
                 self.resize(HUD_W, h)
@@ -374,12 +419,10 @@ class ZothApexHUD(Gtk.Window):
 
     def _bar(self, cr, x, y, w, h, pct, color):
         r, g, b = color[:3]
-        # Background Track
         self._rrect(cr, x, y, w, h, h / 2)
         cr.set_source_rgba(*C_BAR_BG)
         cr.fill()
 
-        # Filled portion
         fw = max(h, (w * min(100.0, max(0.0, pct)) / 100.0))
         self._rrect(cr, x, y, fw, h, h / 2)
         pat = cairo.LinearGradient(x, y, x + fw, y)
@@ -452,14 +495,13 @@ class ZothApexHUD(Gtk.Window):
         cr.fill()
 
         self._text(cr, PAD + 16, 26, "ZOTHOS APEX HUD", size=10.5, bold=True, color=thm["accent"])
-        self._text(cr, W - 110, 20, "v3.5 PRO", size=8, color=thm["primary"])
+        self._text(cr, W - 110, 20, "v3.6 PRO", size=8, color=thm["primary"])
         self._text(cr, W - 110, 32, f"[{self.theme_name.upper()}]", size=7.5, color=C_DIM)
 
         # Theme Cycle Button in header
         self._button_pill(cr, W - 48, 14, 32, 18, "FX", True, thm["secondary"], "btn_theme", self.cycle_theme)
 
         if self.compact_mode:
-            # Compact summary line
             self._text(cr, PAD, 64, f"CPU: {self.cpu_pct:.1f}% | RAM: {self.ram_pct:.0f}% | NET: ▼{self.net_rx:.0f}K", size=9, color=thm["primary"])
             return False
 
@@ -506,20 +548,41 @@ class ZothApexHUD(Gtk.Window):
         self.sl_ram.draw(cr, PAD, y, W - PAD * 2, 18, thm["secondary"])
         y += 26
 
-        # ── Storage & Network Split ────────────────────────────────
+        # ── Storage & Network I/O Split ────────────────────────────
         self._text(cr, PAD, y, "STORAGE", size=8, bold=True, color=thm["accent"])
         self._text(cr, W // 2 + 6, y, "NETWORK I/O", size=8, bold=True, color=thm["primary"])
         y += 14
 
         half_w = (W - PAD * 2 - 10) // 2
-        # Disk Free
         self._text(cr, PAD, y, f"{self.disk_free_gb:.1f}G Free ({self.disk_pct:.0f}%)", size=9, color=thm["accent"])
-        # Net Rates
         self._text(cr, W // 2 + 6, y, f"▼{self.net_rx:.0f}K ▲{self.net_tx:.0f}K", size=9, color=thm["primary"])
         y += 6
         self._bar(cr, PAD, y, half_w, 5, self.disk_pct, thm["accent"])
         self.sl_net.draw(cr, W // 2 + 6, y, half_w, 16, thm["primary"])
         y += 24
+
+        # ── Network Identity (IP & MAC Address) ────────────────────
+        cr.set_source_rgba(thm["primary"][0], thm["primary"][1], thm["primary"][2], 0.18)
+        cr.set_line_width(0.8)
+        cr.move_to(PAD, y)
+        cr.line_to(W - PAD, y)
+        cr.stroke()
+        y += 12
+
+        self._text(cr, PAD, y, "NETWORK IDENTITY // IP & MAC", size=8, bold=True, color=thm["secondary"])
+        y += 14
+
+        if self.net_identities:
+            for ident in self.net_identities[:2]:
+                iface_txt = f"[{ident['iface']}] {ident['ip']}"
+                self._text(cr, PAD, y, iface_txt, size=9, bold=True, color=C_WHITE)
+                self._text(cr, W - PAD - 126, y, f"MAC: {ident['mac']}", size=7.5, color=thm["primary"])
+                y += 14
+        else:
+            self._text(cr, PAD, y, "No active network adapters", size=8.5, color=C_DIM)
+            y += 14
+
+        y += 4
 
         # ── AI Sentinel & Autonomous Engine ────────────────────────
         cr.set_source_rgba(thm["primary"][0], thm["primary"][1], thm["primary"][2], 0.18)
@@ -539,14 +602,9 @@ class ZothApexHUD(Gtk.Window):
 
         # ── Interactive Quick Actions ──────────────────────────────
         pw = (W - PAD * 2 - 12) // 3
-        # Tor Ghostmode Button
         tor_lbl = "TOR: ON" if self.tor_active else "TOR: OFF"
         self._button_pill(cr, PAD, y, pw, 22, tor_lbl, self.tor_active, thm["primary"], "btn_tor", self.toggle_tor)
-
-        # AI Prompt HUD
         self._button_pill(cr, PAD + pw + 6, y, pw, 22, "⚡ AI HUD", True, thm["accent"], "btn_ai", self.toggle_sentinel_hud)
-
-        # Purge Cache
         self._button_pill(cr, PAD + (pw + 6) * 2, y, pw, 22, "PURGE", True, thm["secondary"], "btn_purge", self.purge_ram)
         y += 32
 
