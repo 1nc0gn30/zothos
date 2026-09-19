@@ -137,7 +137,12 @@ class ZothApexHUD(Gtk.Window):
         self.set_app_paintable(True)
 
         # Position top-right with margin
-        sw = screen.get_width()
+        try:
+            display = Gdk.Display.get_default()
+            monitor = display.get_primary_monitor() or display.get_monitor(0)
+            sw = monitor.get_geometry().width if monitor else 1920
+        except Exception:
+            sw = 1920
         self.move(sw - HUD_W - 20, 42)
 
         # State
