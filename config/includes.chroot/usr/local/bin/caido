@@ -2,11 +2,18 @@
 # ==============================================================================
 #  Caido - 2026 Modern Rust Web Application Security Auditing Proxy
 # ==============================================================================
-if command -v caido-cli >/dev/null 2>&1; then
+if [ -x "/opt/Caido/caido" ]; then
+    exec "/opt/Caido/caido" "$@"
+elif command -v caido-cli >/dev/null 2>&1; then
     exec caido-cli "$@"
 elif command -v caido >/dev/null 2>&1; then
     exec caido "$@"
 else
-    echo -e "\e[1;32m[*] Launching Caido Web Security Suite...\e[0m"
-    xdg-open "https://caido.io" 2>/dev/null || true
+    echo -e "\e[1;32m[*] Bootstrapping Caido Security Suite...\e[0m"
+    mkdir -p /tmp/caido-install
+    curl -sL "https://caido.download/releases/v0.58.3/caido-cli-v0.58.3-linux-x86_64.tar.gz" -o /tmp/caido-install/caido.tar.gz
+    tar -xzf /tmp/caido-install/caido.tar.gz -C /tmp/caido-install/
+    sudo cp /tmp/caido-install/caido-cli /usr/local/bin/caido-cli 2>/dev/null || cp /tmp/caido-install/caido-cli ~/.local/bin/caido-cli 2>/dev/null
+    chmod +x /usr/local/bin/caido-cli 2>/dev/null || chmod +x ~/.local/bin/caido-cli 2>/dev/null
+    exec /usr/local/bin/caido-cli "$@"
 fi
