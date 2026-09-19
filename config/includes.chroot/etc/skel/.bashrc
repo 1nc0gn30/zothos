@@ -74,11 +74,11 @@ _build_prompt() {
     local load=$(awk '{print int($1*100/4)}' /proc/loadavg 2>/dev/null || echo "0")
     if [[ "$load" -gt 100 ]]; then load=100; fi
 
-    # Mode glyph
-    local mode_glyph="🜂"
+    # Mode identifier
+    local mode_tag="MATRIX"
     case "$mode" in
-        ghost) mode_glyph="👻" ;;
-        incognito) mode_glyph="🪟" ;;
+        ghost) mode_tag="GHOST" ;;
+        incognito) mode_tag="WIN11" ;;
     esac
 
     # Git status
@@ -87,30 +87,13 @@ _build_prompt() {
         local branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
         local dirty=""
         if ! git diff-index --quiet HEAD -- 2>/dev/null; then
-            dirty=" ✗"
+            dirty="*"
         fi
         git_info=" [${branch}${dirty}]"
     fi
 
-    # Load bar (visual)
-    local load_bars=""
-    local l=${load}
-    if [[ $l -gt 0 ]]; then
-        local filled=$((l / 10))
-        if [[ $filled -gt 10 ]]; then filled=10; fi
-        local empty=$((10 - filled))
-        load_bars=$(printf '\\e[38;5;48m▓%.0s' $(seq 1 $filled))
-        load_bars+=$(printf '\\e[38;5;239m░%.0s' $(seq 1 $empty))
-    fi
-    load_bars+=" \\e[38;5;246m${load}%\\e[0m"
-
-    # Build the prompt
-    local reset="\\e[0m"
-
-    PS1=""
-    # Line 1: Header bar
-    PS1+="\\[\\e[${c1}m\\]┌──(\\[\\e[${c2}m\\]${mode_glyph} ZOTHOS 🜄\\[\\e[${c1}m\\])──[\\[\\e[${c3}m\\]\\u@\\h\\[\\e[${c1}m\\]]──\\[\\e[${c3}m\\]\\w${git_info}\\[\\e[${c1}m\\]\\]\\[${reset}\\]\n"
-    PS1+="\\[\\e[${c1}m\\]└─➤ \\[\\e[${c3}m\\]\\$ \\[${reset}\\]"
+    local reset="\e[0m"
+    PS1="\[\e[${c1}m\]┌──(\[\e[${c2}m\]ZOTHOS:${mode_tag}\[\e[${c1}m\])─[\[\e[${c3}m\]\u@\h\[\e[${c1}m\]]─[\[\e[${c3}m\]\w${git_info}\[\e[${c1}m\]]\n\[\e[${c1}m\]└──>> \[\e[${c3}m\]\$ \[${reset}\]"
 }
 
 PROMPT_COMMAND="_build_prompt"

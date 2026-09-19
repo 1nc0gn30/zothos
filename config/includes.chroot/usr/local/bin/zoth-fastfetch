@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-#  🜂 ZOTHOS FASTFETCH HUD v3.0 — Hermetic Telemetry Deck 🜄
+#  * ZOTHOS FASTFETCH HUD v3.0 — Hermetic Telemetry Deck *
 #  Living system dashboard with mode-reactive colors, live metrics, aurora glow
 # ==============================================================================
 
@@ -28,7 +28,7 @@ get_mode_colors() {
     esac
 }
 
-read -r E C G B D F A <<< "$(get_mode_colors)"
+IFS=":" read -r E C G B D F A <<< "$(get_mode_colors)"
 RESET="\e[0m"
 BOLD="\e[1m"
 
@@ -71,7 +71,7 @@ if curl -s --max-time 2 http://127.0.0.1:8188 >/dev/null 2>&1; then
 fi
 
 # ── Planetary hour ─────────────────────────────────────────────────────────
-PLANETS=("☉ Sol" "♀ Venus" "☿ Mercury" "☽ Luna" "♄ Saturn" "♃ Jupiter" "♂ Mars")
+PLANETS=("* Sol" "+ Venus" "+ Mercury" "~ Luna" "+ Saturn" "+ Jupiter" "+ Mars")
 H=$(date +%H)
 P_IDX=$(( 10#$H % 7 ))
 PLANETARY_HOUR="\e[${G}m${PLANETS[$P_IDX]}\e[0m"
@@ -83,42 +83,34 @@ UPTIME=$(uptime -p 2>/dev/null | sed 's/up //' || uptime | awk -F',' '{print $1}
 # Memory
 MEM_USED=$(free -m | awk '/Mem:/ {printf "%.0f", $3}')
 MEM_TOTAL=$(free -m | awk '/Mem:/ {printf "%.0f", $2}')
-MEM_PCT=$(( MEM_USED * 100 / MEM_TOTAL ))
-MEM_BARS=""
+MEM_PCT=$(( MEM_USED * 100 / (MEM_TOTAL > 0 ? MEM_TOTAL : 1) ))
 local_filled=$((MEM_PCT / 10))
 if [[ $local_filled -gt 10 ]]; then local_filled=10; fi
 local_empty=$((10 - local_filled))
-MEM_BARS=$(printf '\\e[${E}m▓%.0s' $(seq 1 $local_filled))
-MEM_BARS+=$(printf '\\e[${D}m░%.0s' $(seq 1 $local_empty))
-MEM_BARS+=" \\e[${D}m${MEM_PCT}%\e[0m"
+MEM_BARS="[$(printf '▓%.0s' $(seq 1 $local_filled 2>/dev/null || true))$(printf '░%.0s' $(seq 1 $local_empty 2>/dev/null || true))] ${MEM_PCT}%"
 
 # CPU
 CPU_PCT=$(top -bn1 2>/dev/null | grep "Cpu(s)" | awk '{print int($2)}' || echo "0")
-CPU_BARS=""
 cpu_filled=$((CPU_PCT / 10))
 if [[ $cpu_filled -gt 10 ]]; then cpu_filled=10; fi
 cpu_empty=$((10 - cpu_filled))
-CPU_BARS=$(printf '\\e[${G}m▓%.0s' $(seq 1 $cpu_filled))
-CPU_BARS+=$(printf '\\e[${D}m░%.0s' $(seq 1 $cpu_empty))
-CPU_BARS+=" \\e[${D}m${CPU_PCT}%\e[0m"
+CPU_BARS="[$(printf '▓%.0s' $(seq 1 $cpu_filled 2>/dev/null || true))$(printf '░%.0s' $(seq 1 $cpu_empty 2>/dev/null || true))] ${CPU_PCT}%"
 
 # ── Build the HUD ──────────────────────────────────────────────────────────
-cat <<EOF
+echo -e "\n\
+\e[${E}m       ▲             \e[${G}mZOTHOS Linux 1.0 [Codename: Azoth]${RESET}\n\
+\e[${E}m      ▲ ▲            \e[${D}m───────────────────────────────────────────────────────────${RESET}\n\
+\e[${E}m     ▲   ▲           \e[1;${B}mOS Reality:\e[0m        ${MODE}\n\
+\e[${E}m    ▲  \e[${G}m*\e[${E}m  ▲          \e[1;${B}mKernel:\e[0m           \e[${C}m${KERNEL}${RESET}\n\
+\e[${E}m   ▲   |   ▲         \e[1;${B}mPlanetary Hour:\e[0m   ${PLANETARY_HOUR}\n\
+\e[${E}m  ▲ \e[${D}m*\e[${E}m  \e[${C}m+\e[${E}m  \e[${D}m*\e[${E}m ▲        \e[1;${B}mDesktop Surface:\e[0m  \e[${C}mXFCE 4.18 + Picom (Matrix Glass)${RESET}\n\
+\e[${E}m ▲             ▲       \e[1;${B}mShell & Prompt:\e[0m   \e[${C}m${SHELL_NAME} (Living Powerline HUD)${RESET}\n\
+\e[${E}m▲═══════\e[${B}m^\e[${E}m═══════▲      \e[1;${B}mMemory / Vitals:\e[0m  \e[${E}m${MEM_USED}M / ${MEM_TOTAL}M${RESET}  ${MEM_BARS}\n\
+\e[${E}m  \\\\   \e[${D}mv\e[${E}m     /        \e[1;${B}mCPU Load:\e[0m        \e[${G}m${CPU_PCT}%${RESET}  ${CPU_BARS}\n\
+\e[${E}m   \\\\   |   /         \e[1;${B}mSecurity Arsenal:\e[0m \e[${E}mKali + Parrot Dual Repos [Active]${RESET}\n\
+\e[${E}m    \\\\  \e[${G}m#\e[${E}m  /          \e[1;${B}mNetwork Route:\e[0m   ${TOR_STATUS}\n\
+\e[${E}m     \\\\   /           \e[1;${B}mFrontier AI:\e[0m      ${AI_STATUS}\n\
+\e[${E}m      ▼              \e[1;${B}mWeb Interfaces:\e[0m    ${WEBUI_STATUS}\n\
+\e[${E}m                     \e[1;${B}mZoth Studio:\e[0m      \e[${G}m[+] Sovereign Cockpit [Linked]${RESET}\n\
+\e[${E}m                     \e[1;${B}Hermetic Axiom:\e[0m   \e[${D}m\"As above, so below; as code, so mind.\"${RESET}\n"
 
-\e[${E}m       ▲             \e[${G}mZOTHOS Linux 1.0 [Codename: Azoth]\e[${RESET}]
-\e[${E}m      ▲ ▲            \e[${D}m───────────────────────────────────────────────────────────${RESET}
-\e[${E}m     ▲   ▲           \e[1;${B}mOS Reality:\e[0m        ${MODE}
-\e[${E}m    ▲  \e[${G}m☉\e[${E}m  ▲          \e[1;${B}mKernel:\e[0m           \e[${C}m${KERNEL}\e[${RESET}]
-\e[${E}m   ▲   |   ▲         \e[1;${B}mPlanetary Hour:\e[0m   ${PLANETARY_HOUR}
-\e[${E}m  ▲ \e[${D}m🜂\e[${E}m  \e[${C}m☿\e[${E}m  \e[${D}m🜄\e[${E}m ▲        \e[1;${B}mDesktop Surface:\e[0m  \e[${C}mXFCE 4.18 + Picom (Matrix Glass)\e[${RESET}]
-\e[${E}m ▲             ▲       \e[1;${B}mShell & Prompt:\e[0m   \e[${C}m${SHELL_NAME} (Living Powerline HUD)\e[${RESET}]
-\e[${E}m▲═══════\e[${B}m🜁\e[${E}m═══════▲      \e[1;${B}mMemory / Vitals:\e[0m  \e[${E}m${MEM_USED}M / ${MEM_TOTAL}M${RESET}  ${MEM_BARS}
-\e[${E}m  \\\\   \e[${D}m🜃\e[${E}m     /        \e[1;${B}mCPU Load:\e[0m        \e[${G}m${CPU_PCT}%\e[${RESET}]  ${CPU_BARS}
-\e[${E}m   \\\\   |   /         \e[1;${B}mSecurity Arsenal:\e[0m \e[${E}mKali + Parrot Dual Repos [Active]\e[${RESET}]
-\e[${E}m    \\\\  \e[${G}m🝘\e[${E}m  /          \e[1;${B}mNetwork Route:\e[0m   ${TOR_STATUS}
-\e[${E}m     \\\\   /           \e[1;${B}mFrontier AI:\e[0m      ${AI_STATUS}
-\e[${E}m      ▼              \e[1;${B}mWeb Interfaces:\e[0m    ${WEBUI_STATUS}
-\e[${E}m                     \e[1;${B}mZoth Studio:\e[0m      \e[${G}m⚡ Sovereign Cockpit [Linked]\e[${RESET}]
-\e[${E}m                     \e[1;${B}Hermetic Axiom:\e[0m   \e[${D}m"As above, so below; as code, so mind."\e[${RESET}]
-
-EOF
