@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # =============================================================================
-#  ZOTHOS Apex Desktop Initialization Engine v2
-#  Applies theme, wallpaper, compositor, HUD, and panel on every session start
+#  ZOTHOS Apex Desktop Initialization Engine v3
+#  Applies theme, wallpaper, compositor, HUD, hotkeys, notifications, and panel
 # =============================================================================
 
 log() { echo "[zoth-desktop-init] $*"; }
@@ -39,7 +39,16 @@ xfconf-query -c xsettings -p /Xft/Antialias       -s 1                      2>/d
 xfconf-query -c xsettings -p /Xft/HintStyle       -s "hintfull"             2>/dev/null || true
 xfconf-query -c xsettings -p /Xft/RGBA            -s "rgb"                  2>/dev/null || true
 
-# ── 4. Wallpaper across all monitors ──────────────────────────────────────
+# ── 4. Set Custom Sovereign Hotkeys ────────────────────────────────────────
+log "Configuring sovereign hotkeys..."
+xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/<Super>h" -n -t string -s "xfce4-terminal -T 'Hermes Agent Sovereign Workstation' --geometry=110x35 -e hermes" 2>/dev/null || true
+xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/<Super>n" -n -t string -s "xfce4-terminal -T 'ZOTHOS Tool Nexus' --geometry=110x35 -e zoth-tool-nexus" 2>/dev/null || true
+xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/<Super>g" -n -t string -s "xfce4-terminal -T 'NullAI Ghostmode' --geometry=100x30 -e zoth-ghost" 2>/dev/null || true
+xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/<Super>o" -n -t string -s "xfce4-terminal -T 'OpenCode AI' --geometry=100x30 -e opencode" 2>/dev/null || true
+xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/<Super>m" -n -t string -s "xfce4-terminal -T 'Reality Switcher' --geometry=90x25 -e zoth-mode" 2>/dev/null || true
+xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/<Super>s" -n -t string -s "xfce4-terminal -T 'ZOTHOS Security Arsenal' --geometry=100x30 -e zoth-sec" 2>/dev/null || true
+
+# ── 5. Wallpaper across all monitors ──────────────────────────────────────
 log "Setting wallpaper..."
 WALLPAPER="/usr/share/backgrounds/zothos/hermetic-matrix.png"
 if [[ ! -f "$WALLPAPER" ]]; then
@@ -47,18 +56,16 @@ if [[ ! -f "$WALLPAPER" ]]; then
 fi
 
 if [[ -f "$WALLPAPER" ]]; then
-    # xfconf approach
     for prop in $(xfconf-query -c xfce4-desktop -l 2>/dev/null | grep "last-image"); do
         xfconf-query -c xfce4-desktop -p "$prop" -s "$WALLPAPER" 2>/dev/null || true
     done
     for prop in $(xfconf-query -c xfce4-desktop -l 2>/dev/null | grep "image-style"); do
         xfconf-query -c xfce4-desktop -p "$prop" -s 5 2>/dev/null || true
     done
-    # feh fallback (instant, reliable)
     feh --bg-fill "$WALLPAPER" 2>/dev/null || true
 fi
 
-# ── 5. Start picom compositor ──────────────────────────────────────────────
+# ── 6. Start picom compositor ──────────────────────────────────────────────
 log "Starting compositor..."
 if ! pgrep -x picom &>/dev/null && ! pgrep -x compton &>/dev/null; then
     PICOM_CONF="/etc/xdg/picom/picom-matrix.conf"
@@ -71,19 +78,23 @@ if ! pgrep -x picom &>/dev/null && ! pgrep -x compton &>/dev/null; then
     fi
 fi
 
-# ── 6. Launch HUD if not running ──────────────────────────────────────────
+# ── 7. Launch HUD if not running ──────────────────────────────────────────
 log "Starting Desktop HUD..."
 if ! pgrep -f "zoth-desktop-hud" &>/dev/null; then
     DISPLAY="${DISPLAY:-:0}" /usr/local/bin/zoth-desktop-hud &
     disown
 fi
 
-# ── 7. Reload xfdesktop & panel ────────────────────────────────────────────
+# ── 8. Reload xfdesktop & panel ────────────────────────────────────────────
 log "Reloading XFCE desktop..."
 sleep 1
 xfdesktop --reload 2>/dev/null || true
 sleep 0.5
 
+# ── 9. Live System Notification ────────────────────────────────────────────
+notify-send -i /usr/share/pixmaps/zothos.png -u normal \
+  "⚡ ZOTHOS APEX ONLINE" \
+  "Sovereign Operating System Initialized.\n• 175+ Tool Nexus: PRIMED\n• Nous Research Hermes: READY\n• Telemetry Cockpit: LIVE" 2>/dev/null || true
 
 log "ZOTHOS desktop initialization complete ✓"
 exit 0

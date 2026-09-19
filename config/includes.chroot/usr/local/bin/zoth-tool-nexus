@@ -125,9 +125,9 @@ DOMAINS = {
         "tools": [
             ("solana", "Solana blockchain CLI & validator interaction tool", "solana --version", "custom:solana"),
             ("foundry", "Ethereum application development toolkit (forge, cast, anvil)", "forge --version", "custom:foundry"),
-            ("slither", "Static analysis framework for Solidity smart contracts", "slither --version", "pip:slither-analyzer"),
-            ("mythril", "Security analysis tool for EVM bytecode", "myth version", "pip:mythril"),
-            ("ipfs", "InterPlanetary File System peer-to-peer hypermedia", "ipfs --version", "apt:ipfs"),
+            ("slither", "Static analysis framework for Solidity smart contracts", "slither --version", "custom:slither"),
+            ("mythril", "Security analysis tool for EVM bytecode", "myth version", "custom:mythril"),
+            ("ipfs", "InterPlanetary File System peer-to-peer hypermedia (Kubo)", "ipfs --version", "custom:ipfs"),
         ]
     },
     "8": {
@@ -220,16 +220,62 @@ def execute_single_package_install(pkg):
     elif pkg.startswith("custom:"):
         target = pkg[7:]
         print(f"{GRAY}Executing authentic vendor installer for:{RESET} {target}")
-        if target == "ollama":
+        
+        if target == "solana":
+            cmd = """
+            sh -c "$(curl -sSfL https://release.anza.xyz/stable/install)"
+            if [[ -d "$HOME/.local/share/solana/install/active_release/bin" ]]; then
+                sudo ln -sf "$HOME/.local/share/solana/install/active_release/bin/"* /usr/local/bin/ 2>/dev/null || true
+            fi
+            """
+        elif target == "foundry":
+            cmd = """
+            curl -L https://foundry.paradigm.xyz | bash
+            if [[ -x "$HOME/.foundry/bin/foundryup" ]]; then
+                "$HOME/.foundry/bin/foundryup"
+            fi
+            if [[ -d "$HOME/.foundry/bin" ]]; then
+                sudo ln -sf "$HOME/.foundry/bin/"* /usr/local/bin/ 2>/dev/null || true
+            fi
+            """
+        elif target == "ipfs":
+            cmd = """
+            curl -fsSL https://dist.ipfs.tech/kubo/v0.26.0/kubo_v0.26.0_linux-amd64.tar.gz -o /tmp/kubo.tar.gz
+            tar -xzf /tmp/kubo.tar.gz -C /tmp
+            sudo /tmp/kubo/install.sh 2>/dev/null || sudo cp /tmp/kubo/ipfs /usr/local/bin/
+            rm -rf /tmp/kubo*
+            """
+        elif target == "slither":
+            cmd = """
+            /opt/zothos-ai-env/bin/pip install slither-analyzer solc-select 2>/dev/null || pip3 install --break-system-packages slither-analyzer solc-select
+            if [[ -f "/opt/zothos-ai-env/bin/slither" ]]; then
+                sudo ln -sf /opt/zothos-ai-env/bin/slither /usr/local/bin/slither
+            fi
+            """
+        elif target == "mythril":
+            cmd = """
+            /opt/zothos-ai-env/bin/pip install mythril 2>/dev/null || pip3 install --break-system-packages mythril
+            if [[ -f "/opt/zothos-ai-env/bin/myth" ]]; then
+                sudo ln -sf /opt/zothos-ai-env/bin/myth /usr/local/bin/myth
+            fi
+            """
+        elif target == "obsidian":
+            cmd = """
+            curl -fsSL -L -o /tmp/obsidian.deb "https://github.com/obsidianmd/obsidian-releases/releases/download/v1.6.7/obsidian_1.6.7_amd64.deb" 2>/dev/null || \
+            curl -fsSL -L -o /tmp/obsidian.deb "https://github.com/obsidianmd/obsidian-releases/releases/download/v1.5.12/obsidian_1.5.12_amd64.deb" 2>/dev/null
+            sudo dpkg -i /tmp/obsidian.deb 2>/dev/null || sudo apt-get -f install -y
+            rm -f /tmp/obsidian.deb
+            if [[ ! -f "/usr/local/bin/obsidian" ]] && [[ -f "/opt/Obsidian/obsidian" ]]; then
+                echo -e '#!/usr/bin/env bash\\nexec /opt/Obsidian/obsidian --no-sandbox "$@"' | sudo tee /usr/local/bin/obsidian >/dev/null
+                sudo chmod +x /usr/local/bin/obsidian
+            fi
+            """
+        elif target == "ollama":
             cmd = "curl -fsSL https://ollama.com/install.sh | sh"
         elif target == "uv":
             cmd = "curl -LsSf https://astral.sh/uv/install.sh | sh || pip3 install --break-system-packages uv"
         elif target == "starship":
             cmd = 'curl -sS https://starship.rs/install.sh | sh -s -- -y'
-        elif target == "solana":
-            cmd = 'sh -c "$(curl -sSfL https://release.anza.xyz/stable/install)"'
-        elif target == "foundry":
-            cmd = 'curl -L https://foundry.paradigm.xyz | bash'
         elif target == "tailscale":
             cmd = 'curl -fsSL https://tailscale.com/install.sh | sh'
         elif target == "rustscan":
@@ -242,8 +288,6 @@ def execute_single_package_install(pkg):
             cmd = 'cargo install typst-cli 2>/dev/null || sudo apt-get install -y typst 2>/dev/null'
         elif target == "cloudflared":
             cmd = 'curl -L --output /tmp/cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb && sudo dpkg -i /tmp/cloudflared.deb 2>/dev/null'
-        elif target == "obsidian":
-            cmd = 'curl -L -o /tmp/obsidian.deb https://github.com/obsidianmd/obsidian-releases/releases/download/v1.5.12/obsidian_1.5.12_amd64.deb && sudo dpkg -i /tmp/obsidian.deb 2>/dev/null'
         elif target == "hermes":
             cmd = 'echo "[Nous Research] Hermes Agent workstation active. Run: hermes to pull Hermes-3 weights."'
         else:
@@ -253,8 +297,6 @@ def execute_single_package_install(pkg):
         return ret.returncode == 0
 
     else:
-        # Auto-detect apt vs pip
-        # Check if available in apt
         check_apt = subprocess.run(f"apt-cache show {pkg} >/dev/null 2>&1", shell=True)
         if check_apt.returncode == 0:
             print(f"{GRAY}Auto-detected Debian system package:{RESET} apt-get install -y {pkg}")
