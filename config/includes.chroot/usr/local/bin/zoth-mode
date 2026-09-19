@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 # ==============================================================================
-#  ⚡ ZOTHOS REALITY SWITCHER v2.0
-#  Seamlessly shifts desktop reality between:
-#    1. [Hermetic Matrix] - Emerald Neon Phosphor, Azoth Glyphs, Matrix Rain
-#    2. [NullAI Ghostmode] - Amnesic Stealth, Tor Routing, Anti-Forensics
-#    3. [Incognito Win11]  - Corporate Chameleon disguise
+#  ⚡ ZOTHOS REALITY SWITCHER v3.0 - POWERED BY ZOTH STUDIO
+#  Seamlessly shifts desktop reality between authentic Zoth Studio themes:
+#    1. [Zoth Studio Hero Deck]  - Master Alchemical Void & Hero Artwork
+#    2. [Hermetic Matrix]       - Emerald Phosphor #00FF9D & Matrix Glyphs
+#    3. [Zoth Studio 2026]      - Cyberpunk Alchemical Citadel Banner
+#    4. [Neural City Matrix]    - Neon Skyline & Cybernetic Infrastructure
+#    5. [Azoth Gold Sanctum]    - Radiant Gold #FFD700 & Solar Orbs
+#    6. [NullAI Ghostmode]      - Amnesic Stealth, Tor Routing & OpSec
+#    7. [Incognito Win11]       - Corporate Chameleon Disguise
 # ==============================================================================
 
 set -euo pipefail
@@ -23,121 +27,142 @@ RESET="\e[0m"
 notify() {
     local title="$1"
     local msg="$2"
-    local icon="${3:-dialog-information}"
+    local icon="${3:-/usr/share/pixmaps/zothos.png}"
     if command -v notify-send >/dev/null 2>&1; then
-        notify-send -a "ZOTHOS" -i "$icon" "$title" "$msg" 2>/dev/null || true
+        notify-send -a "Zoth Studio" -i "$icon" "$title" "$msg" 2>/dev/null || true
     fi
-    echo -e "${GREEN}[*] ZOTHOS:${RESET} ${BOLD}$title${RESET} - $msg"
+    echo -e "${GREEN}[*] Zoth Studio:${RESET} ${BOLD}$title${RESET} - $msg"
+}
+
+set_wallpaper() {
+    local wp="$1"
+    if [[ -f "$wp" ]]; then
+        if command -v xfconf-query >/dev/null 2>&1; then
+            for prop in $(xfconf-query -c xfce4-desktop -l 2>/dev/null | grep "last-image" || true); do
+                xfconf-query -c xfce4-desktop -p "$prop" -s "$wp" 2>/dev/null || true
+            done
+            for prop in $(xfconf-query -c xfce4-desktop -l 2>/dev/null | grep "image-style" || true); do
+                xfconf-query -c xfce4-desktop -p "$prop" -s 5 2>/dev/null || true
+            done
+        fi
+        if command -v feh >/dev/null 2>&1; then
+            feh --bg-fill "$wp" 2>/dev/null || true
+        fi
+    fi
 }
 
 get_current_mode() {
     if [[ -f "$STATE_FILE" ]]; then
         cat "$STATE_FILE"
     else
-        echo "matrix"
+        echo "zoth-hero"
     fi
 }
 
-apply_matrix_mode() {
-    echo -e "${GREEN}[+] Engaging Hermetic Matrix Reality (Emerald Void)...${RESET}"
-    
-    local wp="/usr/share/backgrounds/zothos/hermetic-matrix.png"
-    if [[ ! -f "$wp" ]]; then
-        wp=$(ls /usr/share/backgrounds/zothos/*.png /usr/share/backgrounds/zothos/*.jpg 2>/dev/null | head -1)
-    fi
-
-    if [[ -f "$wp" ]]; then
-        if command -v xfconf-query >/dev/null 2>&1; then
-            for prop in $(xfconf-query -c xfce4-desktop -l 2>/dev/null | grep "last-image" || true); do
-                xfconf-query -c xfce4-desktop -p "$prop" -s "$wp" 2>/dev/null || true
-            done
-        fi
-        if command -v feh >/dev/null 2>&1; then
-            feh --bg-fill "$wp" 2>/dev/null || true
-        fi
-    fi
-
+apply_zoth_hero() {
+    echo -e "${GOLD}[+] Engaging Zoth Studio Master Hero Reality...${RESET}"
+    set_wallpaper "/usr/share/backgrounds/zothos/zoth-studio-hero.jpg"
     if command -v xfconf-query >/dev/null 2>&1; then
         xfconf-query -c xsettings -p /Net/ThemeName -s "Zoth-Hermetic-Matrix" 2>/dev/null || true
         xfconf-query -c xsettings -p /Net/IconThemeName -s "Zoth-Hermetic" 2>/dev/null || true
         xfconf-query -c xfwm4 -p /general/theme -s "Zoth-Hermetic-Matrix" 2>/dev/null || true
     fi
+    echo "zoth-hero" > "$STATE_FILE"
+    notify "Zoth Studio Master" "Master Alchemical Hero deck active." "/usr/share/pixmaps/zoth-studio.png"
+}
 
+apply_matrix_mode() {
+    echo -e "${GREEN}[+] Engaging Hermetic Matrix Reality (Emerald Void)...${RESET}"
+    set_wallpaper "/usr/share/backgrounds/zothos/hermetic-matrix.png"
+    if command -v xfconf-query >/dev/null 2>&1; then
+        xfconf-query -c xsettings -p /Net/ThemeName -s "Zoth-Hermetic-Matrix" 2>/dev/null || true
+        xfconf-query -c xsettings -p /Net/IconThemeName -s "Zoth-Hermetic" 2>/dev/null || true
+        xfconf-query -c xfwm4 -p /general/theme -s "Zoth-Hermetic-Matrix" 2>/dev/null || true
+    fi
     echo "matrix" > "$STATE_FILE"
-    notify "Reality Shift" "Hermetic Matrix reality engaged. Emerald phosphor active." "dialog-information"
+    notify "Hermetic Matrix" "Phosphor emerald matrix reality engaged." "/usr/share/pixmaps/zoth-mode.png"
+}
+
+apply_zoth_banner() {
+    echo -e "${CYAN}[+] Engaging Zoth Studio 2026 Alchemical Citadel Reality...${RESET}"
+    set_wallpaper "/usr/share/backgrounds/zothos/zoth-studio-banner.jpg"
+    echo "zoth-banner" > "$STATE_FILE"
+    notify "Zoth Studio 2026" "Alchemical Citadel banner active." "/usr/share/pixmaps/zothos.png"
+}
+
+apply_neural_city() {
+    echo -e "${CYAN}[+] Engaging Neural City Cybernetic Reality...${RESET}"
+    set_wallpaper "/usr/share/backgrounds/zothos/project-neural-city.jpg"
+    echo "neural-city" > "$STATE_FILE"
+    notify "Neural City" "Cybernetic skyline reality engaged." "/usr/share/pixmaps/opencode.png"
+}
+
+apply_gold_mode() {
+    echo -e "${GOLD}[+] Engaging Azoth Gold Sanctum Reality...${RESET}"
+    set_wallpaper "/usr/share/backgrounds/zothos/alchemical-gold.png"
+    echo "gold" > "$STATE_FILE"
+    notify "Azoth Gold Sanctum" "Radiant gold alchemy reality active." "/usr/share/pixmaps/distributor-logo.png"
 }
 
 apply_ghost_mode() {
     echo -e "${CYAN}[+] Engaging NullAI Ghostmode Reality (Amnesic Stealth)...${RESET}"
-    
-    local wp="/usr/share/backgrounds/zothos/ghostmode-nullai.png"
-    if [[ ! -f "$wp" ]]; then
-        wp="/usr/share/backgrounds/zothos/hermetic-matrix.png"
-    fi
-
-    if [[ -f "$wp" ]]; then
-        if command -v xfconf-query >/dev/null 2>&1; then
-            for prop in $(xfconf-query -c xfce4-desktop -l 2>/dev/null | grep "last-image" || true); do
-                xfconf-query -c xfce4-desktop -p "$prop" -s "$wp" 2>/dev/null || true
-            done
-        fi
-        if command -v feh >/dev/null 2>&1; then
-            feh --bg-fill "$wp" 2>/dev/null || true
-        fi
-    fi
-
+    set_wallpaper "/usr/share/backgrounds/zothos/project-nullai.jpg"
     if command -v zoth-ghost >/dev/null 2>&1; then
         sudo zoth-ghost start 2>/dev/null || true
     fi
-
     echo "ghost" > "$STATE_FILE"
-    notify "Ghostmode Activated" "Anti-forensics active. Tor routed, MAC cloaked, traces zeroed." "security-high"
+    notify "NullAI Ghostmode" "Tor routed, MAC spoofed, traces amnesic." "/usr/share/pixmaps/nullai-ghostmode.png"
 }
 
 apply_incognito_mode() {
     echo -e "${GOLD}[+] Engaging Corporate Chameleon (Windows 11 Guise)...${RESET}"
-
     if command -v zoth-undercover >/dev/null 2>&1; then
         zoth-undercover on 2>/dev/null || true
     fi
-
     echo "incognito" > "$STATE_FILE"
-    notify "Incognito Mode" "Corporate Windows 11 disguise active. Stay hidden in plain sight." "security-medium"
+    notify "Incognito Chameleon" "Corporate Windows 11 disguise active." "/usr/share/pixmaps/security-high.png"
 }
 
 interactive_menu() {
     while true; do
         clear
         local cur=$(get_current_mode)
-        echo -e "${GREEN}${BOLD}══════════════════════════════════════════════════════════════════════${RESET}"
-        echo -e "${GOLD}${BOLD}              ⚡ ZOTHOS REALITY & CHAMELEON SWITCHER ⚡${RESET}"
-        echo -e "${CYAN}             Active Reality Surface: [${BOLD}${cur^^}${RESET}${CYAN}]${RESET}"
-        echo -e "${GREEN}${BOLD}══════════════════════════════════════════════════════════════════════${RESET}"
+        echo -e "${GREEN}${BOLD}══════════════════════════════════════════════════════════════════════════════${RESET}"
+        echo -e "${GOLD}${BOLD}              ⚡ ZOTH STUDIO REALITY & THEME SWITCHER ⚡${RESET}"
+        echo -e "${CYAN}                  Active Reality Surface: [${BOLD}${cur^^}${RESET}${CYAN}]${RESET}"
+        echo -e "${GREEN}${BOLD}══════════════════════════════════════════════════════════════════════════════${RESET}"
         echo ""
-        echo -e "  ${BOLD}${GREEN}[1]${RESET} 🪐  ${BOLD}Hermetic Matrix Reality${RESET}  ${GRAY}(Emerald Phosphor, Alchemical Void)${RESET}"
-        echo -e "  ${BOLD}${CYAN}[2]${RESET} 👻  ${BOLD}NullAI Ghostmode Stealth${RESET}  ${GRAY}(Tor Routed, Amnesic RAM, MAC Spoofed)${RESET}"
-        echo -e "  ${BOLD}${GOLD}[3]${RESET} 🪟  ${BOLD}Incognito Windows 11${RESET}      ${GRAY}(Corporate Chameleon Disguise)${RESET}"
-        echo -e "  ${BOLD}${RED}[4]${RESET} 🔄  ${BOLD}Toggle to Next Reality${RESET}"
-        echo -e "  ${BOLD}${GRAY}[5]${RESET} 📊  ${BOLD}View Telemetry / Status${RESET}"
-        echo -e "  ${BOLD}${GRAY}[0]${RESET} 🚪  ${BOLD}Exit${RESET}"
+        echo -e "  ${BOLD}${GOLD}[1]${RESET} 🏛️   ${BOLD}Zoth Studio Master Hero${RESET}   ${GRAY}(Official Zoth Studio Hero Artwork)${RESET}"
+        echo -e "  ${BOLD}${GREEN}[2]${RESET} 🪐  ${BOLD}Hermetic Matrix Reality${RESET}   ${GRAY}(Emerald Phosphor, Alchemical Rain)${RESET}"
+        echo -e "  ${BOLD}${CYAN}[3]${RESET} ⚡  ${BOLD}Zoth Studio 2026 Citadel${RESET}  ${GRAY}(Cyberpunk Alchemical Citadel Banner)${RESET}"
+        echo -e "  ${BOLD}${CYAN}[4]${RESET} 🌆  ${BOLD}Neural City Cybernetic${RESET}    ${GRAY}(Neon Skyline & Deep Neural Grid)${RESET}"
+        echo -e "  ${BOLD}${GOLD}[5]${RESET} 👑  ${BOLD}Azoth Gold Sanctum${RESET}        ${GRAY}(Radiant Gold #FFD700 & Solar Orbs)${RESET}"
+        echo -e "  ${BOLD}${RED}[6]${RESET} 👻  ${BOLD}NullAI Ghostmode Stealth${RESET}  ${GRAY}(Tor Routed, Amnesic RAM, MAC Cloaked)${RESET}"
+        echo -e "  ${BOLD}${GRAY}[7]${RESET} 🪟  ${BOLD}Incognito Windows 11${RESET}      ${GRAY}(Corporate Chameleon Disguise)${RESET}"
+        echo -e "  ${BOLD}${GREEN}[8]${RESET} 🔄  ${BOLD}Cycle to Next Theme${RESET}"
+        echo -e "  ${BOLD}${GRAY}[0]${RESET} 🚪  ${BOLD}Exit Switcher${RESET}"
         echo ""
-        echo -e "${GREEN}${BOLD}══════════════════════════════════════════════════════════════════════${RESET}"
-        read -p "Select reality shift [0-5]: " choice
+        echo -e "${GREEN}${BOLD}══════════════════════════════════════════════════════════════════════════════${RESET}"
+        read -p "Select reality shift [0-8]: " choice
         case "$choice" in
-            1) apply_matrix_mode; sleep 1 ;;
-            2) apply_ghost_mode; sleep 1 ;;
-            3) apply_incognito_mode; sleep 1 ;;
-            4) 
-                if [[ "$cur" == "matrix" ]]; then apply_ghost_mode;
-                elif [[ "$cur" == "ghost" ]]; then apply_incognito_mode;
-                else apply_matrix_mode; fi
+            1) apply_zoth_hero; sleep 1 ;;
+            2) apply_matrix_mode; sleep 1 ;;
+            3) apply_zoth_banner; sleep 1 ;;
+            4) apply_neural_city; sleep 1 ;;
+            5) apply_gold_mode; sleep 1 ;;
+            6) apply_ghost_mode; sleep 1 ;;
+            7) apply_incognito_mode; sleep 1 ;;
+            8) 
+                case "$cur" in
+                    zoth-hero) apply_matrix_mode ;;
+                    matrix) apply_zoth_banner ;;
+                    zoth-banner) apply_neural_city ;;
+                    neural-city) apply_gold_mode ;;
+                    gold) apply_ghost_mode ;;
+                    ghost) apply_incognito_mode ;;
+                    *) apply_zoth_hero ;;
+                esac
                 sleep 1 ;;
-            5)
-                echo ""
-                echo -e "${BOLD}Current State:${RESET} $cur"
-                echo -e "${BOLD}Desktop Manager:${RESET} XFCE 4.18 + Picom Matrix Glass"
-                read -p "Press Enter to continue..." _
-                ;;
             0|q|Q) break ;;
             *) echo -e "${RED}Invalid option${RESET}"; sleep 1 ;;
         esac
@@ -147,34 +172,24 @@ interactive_menu() {
 target="${1:-interactive}"
 
 case "$target" in
-    matrix)
-        apply_matrix_mode
-        ;;
-    ghost)
-        apply_ghost_mode
-        ;;
-    incognito|windows|undercover)
-        apply_incognito_mode
-        ;;
-    toggle)
+    zoth-hero|hero) apply_zoth_hero ;;
+    matrix) apply_matrix_mode ;;
+    zoth-banner|banner) apply_zoth_banner ;;
+    neural-city|city) apply_neural_city ;;
+    gold) apply_gold_mode ;;
+    ghost) apply_ghost_mode ;;
+    incognito|win11) apply_incognito_mode ;;
+    next|toggle)
         cur=$(get_current_mode)
-        if [[ "$cur" == "matrix" ]]; then
-            apply_ghost_mode
-        elif [[ "$cur" == "ghost" ]]; then
-            apply_incognito_mode
-        else
-            apply_matrix_mode
-        fi
+        case "$cur" in
+            zoth-hero) apply_matrix_mode ;;
+            matrix) apply_zoth_banner ;;
+            zoth-banner) apply_neural_city ;;
+            neural-city) apply_gold_mode ;;
+            gold) apply_ghost_mode ;;
+            ghost) apply_incognito_mode ;;
+            *) apply_zoth_hero ;;
+        esac
         ;;
-    status)
-        cur=$(get_current_mode)
-        echo -e "${GREEN}ZOTHOS Active Reality:${RESET} ${CYAN}${cur^^}${RESET}"
-        ;;
-    interactive|"")
-        interactive_menu
-        ;;
-    *)
-        echo "Usage: zoth-mode {matrix|ghost|incognito|toggle|status}"
-        exit 1
-        ;;
+    interactive|*) interactive_menu ;;
 esac
