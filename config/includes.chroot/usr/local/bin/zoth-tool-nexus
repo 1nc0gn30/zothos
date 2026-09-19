@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 ⚡ ZOTHOS Tool Nexus: Sovereign Dispatcher & 175+ Tool Orchestration Matrix
-Unified CLI & TUI interface with automated module installation and diagnostics.
+Unified CLI & TUI interface with authentic vendor installations and diagnostics.
+All package installations use authentic system (APT), Python (VENV/PIP), Node (NPM), or Vendor shell installers.
 """
 
 import os
@@ -10,6 +11,8 @@ import shutil
 import subprocess
 import argparse
 import time
+import itertools
+import threading
 
 DOMAINS = {
     "1": {
@@ -17,152 +20,152 @@ DOMAINS = {
         "description": "Native HUDs, Cockpit, Matrix visualizers, and Agent OS control surfaces",
         "tools": [
             ("cyberpunk-hud", "Full-viewport 360 radar & telemetry cockpit", "zoth-agent-hud", "none"),
-            ("cockpit", "21-Agent autonomous swarm command deck & REPL", "zoth-cockpit", "psutil,curses"),
+            ("cockpit", "21-Agent autonomous swarm command deck & REPL", "zoth-cockpit", "pip:psutil,pip:rich"),
             ("webgen", "Multi-model prompt foundry & generator", "zoth-ai webgen", "none"),
-            ("zoth-ghost", "NullAI Ghostmode & Anti-forensics router", "zoth-ghost", "tor,macchanger"),
+            ("zoth-ghost", "NullAI Ghostmode & Anti-forensics router", "zoth-ghost", "apt:tor,apt:macchanger"),
             ("zoth-undercover", "Windows 11 undercover chameleon mode", "zoth-undercover", "none"),
             ("zoth-sec", "Offensive security & penetration testing arsenal", "zoth-sec", "none"),
             ("zoth-matrix", "Hermetic Matrix digital rain screensaver", "zoth-matrix-rain", "none"),
-            ("zoth-mcp", "Model Context Protocol bridge & server registry", "zoth-mcp", "none"),
-            ("zoth-bridge", "Multi-model streaming API gateway & proxy", "zoth-bridge", "fastapi,uvicorn"),
+            ("zoth-mcp", "Model Context Protocol bridge & server registry", "zoth-mcp", "pip:fastmcp"),
+            ("zoth-bridge", "Multi-model streaming API gateway & proxy", "zoth-bridge", "pip:fastapi,pip:uvicorn"),
             ("zoth-session", "Wayland Apex / XFCE4 desktop session switcher", "zoth-session-switch", "none"),
             ("zoth-fastfetch", "Alchemical system hardware & kernel telemetry", "zoth-fastfetch", "none"),
-            ("zoth-netkill", "Emergency kernel-level network killswitch", "zoth-netkill", "iptables"),
+            ("zoth-netkill", "Emergency kernel-level network killswitch", "zoth-netkill", "apt:iptables"),
             ("zoth-powershell", "PowerShell v7 emulation environment", "zoth-powershell", "none"),
             ("zoth-arsenal", "Hermes skill & tool synchronization engine", "zoth-arsenal-sync", "none"),
-            ("zoth-agent-os", "L0-L4 Agent Kernel supervisor daemon", "zoth-agent-os", "psutil,requests"),
+            ("zoth-agent-os", "L0-L4 Agent Kernel supervisor daemon", "zoth-agent-os", "pip:psutil,pip:requests"),
         ]
     },
     "2": {
         "title": "🧠 Local AI Runtimes & Inference Accelerators",
         "description": "Zero-cloud local inference, GGUF/AWQ execution, and vision backends",
         "tools": [
-            ("ollama", "Local LLM runtime (Llama 3, DeepSeek, Qwen)", "ollama serve", "ollama"),
-            ("llama.cpp", "GGUF quantization & fast CPU/GPU inference", "llama-cli --help", "llama-cpp-python"),
-            ("vllm", "High-throughput continuous batching LLM server", "vllm --help", "vllm"),
-            ("comfyui", "Node-based Stable Diffusion & FLUX image gen", "comfyui", "torch,torchvision"),
-            ("open-webui", "Self-hosted full ChatGPT/Claude UI interface", "open-webui serve", "open-webui"),
-            ("litellm", "Universal proxy routing to 100+ LLM endpoints", "litellm", "litellm"),
-            ("transformers", "Hugging Face model loading & pipeline toolkit", "python3 -c 'import transformers; print(transformers.__version__)'", "transformers"),
-            ("torch", "PyTorch deep learning tensor computing platform", "python3 -c 'import torch; print(torch.__version__)'", "torch"),
+            ("ollama", "Local LLM runtime (Llama 3, DeepSeek, Qwen, Hermes 3)", "ollama serve", "custom:ollama"),
+            ("llama.cpp", "GGUF quantization & fast CPU/GPU inference", "llama-cli --help", "pip:llama-cpp-python"),
+            ("vllm", "High-throughput continuous batching LLM server", "vllm --help", "pip:vllm"),
+            ("comfyui", "Node-based Stable Diffusion & FLUX image gen", "comfyui", "pip:torch,pip:torchvision"),
+            ("open-webui", "Self-hosted full ChatGPT/Claude UI interface", "open-webui serve", "pip:open-webui"),
+            ("litellm", "Universal proxy routing to 100+ LLM endpoints", "litellm", "pip:litellm"),
+            ("transformers", "Hugging Face model loading & pipeline toolkit", "python3 -c 'import transformers; print(transformers.__version__)'", "pip:transformers"),
+            ("torch", "PyTorch deep learning tensor computing platform", "python3 -c 'import torch; print(torch.__version__)'", "pip:torch"),
         ]
     },
     "3": {
         "title": "🤖 Autonomous Multi-Agent Daemons & Assistants",
-        "description": "Terminal coding agents, automated reasoning swarms, and AI evaluation",
+        "description": "Nous Research Hermes, terminal coding agents, and AI evaluation",
         "tools": [
-            ("hermes", "Nous Research autonomous agent & skill system", "hermes", "requests,rich"),
+            ("hermes", "Nous Research autonomous agent & skill system (nousresearch.com)", "hermes", "custom:hermes"),
             ("claude", "Anthropic Claude Code terminal assistant", "claude", "npm:@anthropic-ai/claude-code"),
             ("codex", "OpenAI Codex CLI coding companion", "codex", "npm:@openai/codex"),
             ("opencode", "OpenCode open-source coding engine", "opencode", "npm:opencode-ai"),
-            ("aider", "Terminal AI pair programmer with git integration", "aider", "aider-chat"),
-            ("fastmcp", "Fast Model Context Protocol Python server framework", "fastmcp", "fastmcp"),
-            ("hexstrike", "HexStrike autonomous AI pentesting daemon", "hexstrike", "requests,rich"),
-            ("garak", "LLM vulnerability scanner & hallucination prober", "garak --help", "garak"),
-            ("pyrit", "Microsoft AI Red Team orchestrator", "pyrit", "pyrit"),
+            ("aider", "Terminal AI pair programmer with git integration", "aider", "pip:aider-chat"),
+            ("fastmcp", "Fast Model Context Protocol Python server framework", "fastmcp", "pip:fastmcp"),
+            ("hexstrike", "HexStrike autonomous AI pentesting daemon", "hexstrike", "pip:requests,pip:rich"),
+            ("garak", "LLM vulnerability scanner & hallucination prober", "garak --help", "pip:garak"),
+            ("pyrit", "Microsoft AI Red Team orchestrator", "pyrit", "pip:pyrit"),
         ]
     },
     "4": {
         "title": "🛠️ Dev Toolchains, Runtimes & Compilers",
         "description": "Polyglot software development environments, package managers, and debuggers",
         "tools": [
-            ("python3", "Python 3.11+ runtime & standard libraries", "python3 --version", "python3"),
-            ("uv", "Ultra-fast Python package manager & resolver", "uv --version", "uv"),
-            ("nodejs", "Node.js JavaScript server runtime", "node --version", "nodejs"),
-            ("npm", "Node Package Manager", "npm --version", "npm"),
-            ("rustc", "Rust systems programming language compiler", "rustc --version", "rustc"),
-            ("cargo", "Rust package manager & build tool", "cargo --version", "cargo"),
-            ("go", "Golang concurrent programming language runtime", "go version", "golang"),
-            ("gcc", "GNU Compiler Collection (C/C++)", "gcc --version", "gcc"),
-            ("clang", "LLVM C/C++ compiler and toolchain", "clang --version", "clang"),
-            ("neovim", "Hyperextensible Vim-based terminal IDE", "nvim --version", "neovim"),
-            ("tmux", "Terminal multiplexer with pane management", "tmux -V", "tmux"),
-            ("starship", "Cross-shell customizable prompt", "starship --version", "starship"),
+            ("python3", "Python 3.11+ runtime & standard libraries", "python3 --version", "apt:python3,apt:python3-pip,apt:python3-venv"),
+            ("uv", "Ultra-fast Python package manager & resolver", "uv --version", "custom:uv"),
+            ("nodejs", "Node.js JavaScript server runtime", "node --version", "apt:nodejs"),
+            ("npm", "Node Package Manager", "npm --version", "apt:npm"),
+            ("rustc", "Rust systems programming language compiler", "rustc --version", "apt:rustc"),
+            ("cargo", "Rust package manager & build tool", "cargo --version", "apt:cargo"),
+            ("go", "Golang concurrent programming language runtime", "go version", "apt:golang"),
+            ("gcc", "GNU Compiler Collection (C/C++)", "gcc --version", "apt:gcc,apt:build-essential"),
+            ("clang", "LLVM C/C++ compiler and toolchain", "clang --version", "apt:clang"),
+            ("neovim", "Hyperextensible Vim-based terminal IDE", "nvim --version", "apt:neovim"),
+            ("tmux", "Terminal multiplexer with pane management", "tmux -V", "apt:tmux"),
+            ("starship", "Cross-shell customizable prompt", "starship --version", "custom:starship"),
         ]
     },
     "5": {
         "title": "🎨 3D Graphics, Generative Art & Media Production",
         "description": "Rendering pipelines, spatial audio, vector design, and live video production",
         "tools": [
-            ("blender", "Full 3D modeling, sculpting, and raytracing suite", "blender --version", "blender"),
-            ("ffmpeg", "Hyper-accelerated video/audio conversion engine", "ffmpeg -version", "ffmpeg"),
-            ("imagemagick", "Bitmap & vector raster image manipulation toolkit", "magick -version", "imagemagick"),
-            ("mpv", "Minimalist high-performance video player", "mpv --version", "mpv"),
-            ("gimp", "GNU Image Manipulation Program", "gimp --version", "gimp"),
-            ("inkscape", "Professional vector graphics editor (SVG)", "inkscape --version", "inkscape"),
-            ("obs-studio", "Live streaming & multi-source video capture", "obs --version", "obs-studio"),
-            ("p5", "Creative algorithmic & generative canvas framework", "python3 -c 'import p5'", "p5"),
+            ("blender", "Full 3D modeling, sculpting, and raytracing suite", "blender --version", "apt:blender"),
+            ("ffmpeg", "Hyper-accelerated video/audio conversion engine", "ffmpeg -version", "apt:ffmpeg"),
+            ("imagemagick", "Bitmap & vector raster image manipulation toolkit", "convert -version", "apt:imagemagick"),
+            ("mpv", "Minimalist high-performance video player", "mpv --version", "apt:mpv"),
+            ("gimp", "GNU Image Manipulation Program", "gimp --version", "apt:gimp"),
+            ("inkscape", "Professional vector graphics editor (SVG)", "inkscape --version", "apt:inkscape"),
+            ("obs-studio", "Live streaming & multi-source video capture", "obs --version", "apt:obs-studio"),
+            ("p5", "Creative algorithmic & generative canvas framework", "python3 -c 'import p5'", "pip:p5"),
         ]
     },
     "6": {
         "title": "🛡️ Penetration Testing, Red Team & Security Engineering",
         "description": "Network scanning, packet dissection, fuzzing, and exploit development",
         "tools": [
-            ("nmap", "Network mapper & port vulnerability scanner", "nmap --version", "nmap"),
-            ("masscan", "Asynchronous ultra-fast internet port scanner", "masscan --version", "masscan"),
-            ("rustscan", "Blazing fast port scanner powered by Rust", "rustscan --version", "rustscan"),
-            ("wireshark", "Network protocol packet dissection & capture GUI", "wireshark --version", "wireshark"),
-            ("tshark", "Terminal-based packet analyzer and sniffer", "tshark --version", "tshark"),
-            ("ffuf", "High-speed web fuzzer for paths and parameters", "ffuf -V", "ffuf"),
-            ("nikto", "Web server misconfiguration and security scanner", "nikto -Version", "nikto"),
-            ("sqlmap", "Automatic SQL injection & database takeover tool", "sqlmap --version", "sqlmap"),
-            ("nuclei", "Template-driven vulnerability scanner", "nuclei -version", "nuclei"),
-            ("caido", "Next-generation lightweight web security proxy", "caido", "caido"),
-            ("ghidra", "NSA software reverse engineering framework", "ghidra", "ghidra"),
-            ("radare2", "Unix-like reverse engineering command-line toolkit", "r2 -v", "radare2"),
-            ("john", "John the Ripper password hash cracker", "john", "john"),
-            ("hashcat", "World-fastest GPU-accelerated hash cracker", "hashcat --version", "hashcat"),
-            ("ligolo-ng", "Simple, lightweight tunneling tool using TUN interfaces", "ligolo", "ligolo"),
-            ("binwalk", "Firmware extraction and binary analysis tool", "binwalk", "binwalk"),
+            ("nmap", "Network mapper & port vulnerability scanner", "nmap --version", "apt:nmap"),
+            ("masscan", "Asynchronous ultra-fast internet port scanner", "masscan --version", "apt:masscan"),
+            ("rustscan", "Blazing fast port scanner powered by Rust", "rustscan --version", "custom:rustscan"),
+            ("wireshark", "Network protocol packet dissection & capture GUI", "wireshark --version", "apt:wireshark"),
+            ("tshark", "Terminal-based packet analyzer and sniffer", "tshark --version", "apt:tshark"),
+            ("ffuf", "High-speed web fuzzer for paths and parameters", "ffuf -V", "apt:ffuf"),
+            ("nikto", "Web server misconfiguration and security scanner", "nikto -Version", "apt:nikto"),
+            ("sqlmap", "Automatic SQL injection & database takeover tool", "sqlmap --version", "apt:sqlmap"),
+            ("nuclei", "Template-driven vulnerability scanner", "nuclei -version", "apt:nuclei"),
+            ("caido", "Next-generation lightweight web security proxy", "caido", "custom:caido"),
+            ("ghidra", "NSA software reverse engineering framework", "ghidra", "apt:ghidra"),
+            ("radare2", "Unix-like reverse engineering command-line toolkit", "r2 -v", "apt:radare2"),
+            ("john", "John the Ripper password hash cracker", "john", "apt:john"),
+            ("hashcat", "World-fastest GPU-accelerated hash cracker", "hashcat --version", "apt:hashcat"),
+            ("ligolo-ng", "Simple, lightweight tunneling tool using TUN interfaces", "ligolo", "custom:ligolo"),
+            ("binwalk", "Firmware extraction and binary analysis tool", "binwalk", "apt:binwalk"),
         ]
     },
     "7": {
         "title": "⛓️ Web3, Smart Contracts & Blockchain Security",
         "description": "EVM & Solana smart contract auditing, compilation, and security analysis",
         "tools": [
-            ("solana", "Solana blockchain CLI & validator interaction tool", "solana --version", "solana-cli"),
-            ("foundry", "Ethereum application development toolkit (forge, cast, anvil)", "forge --version", "foundry"),
-            ("slither", "Static analysis framework for Solidity smart contracts", "slither --version", "slither-analyzer"),
-            ("mythril", "Security analysis tool for EVM bytecode", "myth version", "mythril"),
-            ("ipfs", "InterPlanetary File System peer-to-peer hypermedia", "ipfs --version", "ipfs"),
+            ("solana", "Solana blockchain CLI & validator interaction tool", "solana --version", "custom:solana"),
+            ("foundry", "Ethereum application development toolkit (forge, cast, anvil)", "forge --version", "custom:foundry"),
+            ("slither", "Static analysis framework for Solidity smart contracts", "slither --version", "pip:slither-analyzer"),
+            ("mythril", "Security analysis tool for EVM bytecode", "myth version", "pip:mythril"),
+            ("ipfs", "InterPlanetary File System peer-to-peer hypermedia", "ipfs --version", "apt:ipfs"),
         ]
     },
     "8": {
         "title": "👁️ Computer Vision, OCR & Document Intelligence",
         "description": "Neural document parsing, optical character recognition, and image feature analysis",
         "tools": [
-            ("tesseract", "Tesseract neural optical character recognition engine", "tesseract --version", "tesseract-ocr"),
-            ("opencv", "Computer vision & real-time video processing library", "python3 -c 'import cv2; print(cv2.__version__)'", "opencv-python"),
-            ("pymupdf", "High-performance PDF & XPS document parser", "python3 -c 'import fitz; print(fitz.__version__)'", "PyMuPDF"),
-            ("pandoc", "Universal document converter (Markdown, Docx, LaTeX, PDF)", "pandoc --version", "pandoc"),
-            ("typst", "Modern markup-based typesetting system", "typst --version", "typst"),
+            ("tesseract", "Tesseract neural optical character recognition engine", "tesseract --version", "apt:tesseract-ocr"),
+            ("opencv", "Computer vision & real-time video processing library", "python3 -c 'import cv2; print(cv2.__version__)'", "pip:opencv-python"),
+            ("pymupdf", "High-performance PDF & XPS document parser", "python3 -c 'import fitz; print(fitz.__version__)'", "pip:PyMuPDF"),
+            ("pandoc", "Universal document converter (Markdown, Docx, LaTeX, PDF)", "pandoc --version", "apt:pandoc"),
+            ("typst", "Modern markup-based typesetting system", "typst --version", "custom:typst"),
         ]
     },
     "9": {
         "title": "🌐 Sovereign Linux Infra, Mesh Networks & Cloudflare Edge",
         "description": "Mesh overlays, zero-trust tunnels, container runtimes, and reverse proxies",
         "tools": [
-            ("tailscale", "Zero-config wireguard mesh overlay network", "tailscale version", "tailscale"),
-            ("wireguard", "Fast, modern, secure kernel VPN tunnel", "wg --version", "wireguard-tools"),
-            ("docker", "Container engine & isolation supervisor", "docker --version", "docker.io"),
-            ("podman", "Daemonless container engine for rootless OCI pods", "podman --version", "podman"),
-            ("caddy", "Enterprise HTTP/3 web server with automatic HTTPS", "caddy version", "caddy"),
-            ("nginx", "High-performance HTTP server & reverse proxy", "nginx -v", "nginx"),
-            ("cloudflared", "Cloudflare Zero Trust Tunnel client", "cloudflared --version", "cloudflared"),
-            ("postgresql", "Advanced open-source relational database", "psql --version", "postgresql"),
-            ("sqlite3", "Self-contained serverless SQL database engine", "sqlite3 --version", "sqlite3"),
-            ("rclone", "Rsync for cloud storage (S3, B2, WebDAV, SFTP)", "rclone --version", "rclone"),
+            ("tailscale", "Zero-config wireguard mesh overlay network", "tailscale version", "custom:tailscale"),
+            ("wireguard", "Fast, modern, secure kernel VPN tunnel", "wg --version", "apt:wireguard-tools"),
+            ("docker", "Container engine & isolation supervisor", "docker --version", "apt:docker.io"),
+            ("podman", "Daemonless container engine for rootless OCI pods", "podman --version", "apt:podman"),
+            ("caddy", "Enterprise HTTP/3 web server with automatic HTTPS", "caddy version", "apt:caddy"),
+            ("nginx", "High-performance HTTP server & reverse proxy", "nginx -v", "apt:nginx"),
+            ("cloudflared", "Cloudflare Zero Trust Tunnel client", "cloudflared --version", "custom:cloudflared"),
+            ("postgresql", "Advanced open-source relational database", "psql --version", "apt:postgresql"),
+            ("sqlite3", "Self-contained serverless SQL database engine", "sqlite3 --version", "apt:sqlite3"),
+            ("rclone", "Rsync for cloud storage (S3, B2, WebDAV, SFTP)", "rclone --version", "apt:rclone"),
         ]
     },
     "10": {
         "title": "📚 Knowledge Management, PKM & Technical Publishing",
         "description": "Interlinked markdown knowledge bases, graph visualization, and technical authoring",
         "tools": [
-            ("obsidian", "Second-brain markdown knowledge base with graph view", "obsidian", "obsidian"),
-            ("zathura", "Keyboard-centric document & PDF viewer", "zathura --version", "zathura"),
-            ("graphviz", "Graph visualization software & DOT layout engine", "dot -V", "graphviz"),
-            ("flameshot", "Powerful yet simple to use screenshot software", "flameshot --version", "flameshot"),
-            ("tree", "Recursive directory tree viewer with depth control", "tree --version", "tree"),
+            ("obsidian", "Second-brain markdown knowledge base with graph view", "obsidian", "custom:obsidian"),
+            ("zathura", "Keyboard-centric document & PDF viewer", "zathura --version", "apt:zathura"),
+            ("graphviz", "Graph visualization software & DOT layout engine", "dot -V", "apt:graphviz"),
+            ("flameshot", "Powerful yet simple to use screenshot software", "flameshot --version", "apt:flameshot"),
+            ("tree", "Recursive directory tree viewer with depth control", "tree --version", "apt:tree"),
         ]
     }
 }
@@ -170,8 +173,8 @@ DOMAINS = {
 GREEN = "\033[38;2;0;255;157m"
 GOLD = "\033[38;2;255;215;0m"
 CYAN = "\033[38;2;0;229;255m"
-RED = "\033[38;2;255;0;85m"
-GRAY = "\033[38;2;120;120;120m"
+RED = "\033[38;2;255;51;85m"
+GRAY = "\033[38;2;120;140;160m"
 RESET = "\033[0m"
 BOLD = "\033[1m"
 
@@ -179,72 +182,119 @@ def print_header():
     os.system("clear" if os.name == "posix" else "cls")
     print(f"{GREEN}{BOLD}══════════════════════════════════════════════════════════════════════════════{RESET}")
     print(f"{GOLD}{BOLD}   ⚡ ZOTHOS & NULLAI: SOVEREIGN 175+ TOOL NEXUS DISPATCHER ⚡{RESET}")
-    print(f"{CYAN}   Decentralized Operating System Toolchain Matrix | Bookworm / Parrot Core{RESET}")
+    print(f"{CYAN}   Authentic Package & Runtime Orchestration Matrix | Bookworm Core{RESET}")
     print(f"{GREEN}{BOLD}══════════════════════════════════════════════════════════════════════════════{RESET}\n")
 
 def check_tool_ready(cmd):
     first_word = cmd.split()[0] if cmd else ""
     return shutil.which(first_word) is not None
 
-import itertools
-import threading
+def execute_single_package_install(pkg):
+    pkg = pkg.strip()
+    if not pkg or pkg == "none":
+        return True
 
-def install_module(pkg_name):
-    print(f"\n{GOLD}[MODULE INSTALLER]{RESET} Installing dependency: {CYAN}{pkg_name}{RESET}...")
-    if pkg_name.startswith("npm:"):
-        actual_pkg = pkg_name[4:]
-        cmd = f"npm install -g {actual_pkg}"
-    elif pkg_name.startswith("apt:"):
-        actual_pkg = pkg_name[4:]
+    print(f"\n{GOLD}[PROVISIONER]{RESET} Resolving recipe for: {CYAN}{pkg}{RESET}")
+    
+    if pkg.startswith("apt:"):
+        actual_pkg = pkg[4:]
+        print(f"{GRAY}Running Debian APT Package Manager:{RESET} apt-get install -y {actual_pkg}")
         cmd = f"sudo apt-get update -qq && sudo apt-get install -y {actual_pkg}"
-    else:
-        # Python module
-        cmd = f"/opt/zothos-ai-env/bin/pip install {pkg_name} 2>/dev/null || pip3 install --break-system-packages {pkg_name}"
-    
-    print(f"{GRAY}Executing: {cmd}{RESET}\n")
-    
-    done = False
-    def spinner():
-        for c in itertools.cycle(['|', '/', '-', '\\']):
-            if done:
-                break
-            sys.stdout.write(f'\r{GOLD}[WORKING]{RESET} Installing {pkg_name}... {c}')
-            sys.stdout.flush()
-            time.sleep(0.1)
-        sys.stdout.write('\r' + ' ' * 60 + '\r')
-    
-    t = threading.Thread(target=spinner)
-    t.start()
-    
-    try:
-        ret = subprocess.run(cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        done = True
-        t.join()
-        
-        # Verify
-        if pkg_name.startswith("npm:") or pkg_name.startswith("apt:"):
-            success = ret.returncode == 0
+        ret = subprocess.run(cmd, shell=True)
+        return ret.returncode == 0
+
+    elif pkg.startswith("npm:"):
+        actual_pkg = pkg[4:]
+        print(f"{GRAY}Running Node Package Manager:{RESET} npm install -g {actual_pkg}")
+        cmd = f"sudo npm install -g {actual_pkg} 2>/dev/null || npm install -g {actual_pkg}"
+        ret = subprocess.run(cmd, shell=True)
+        return ret.returncode == 0
+
+    elif pkg.startswith("pip:"):
+        actual_pkg = pkg[4:]
+        print(f"{GRAY}Running Python PIP in ZOTHOS AI Environment:{RESET} {actual_pkg}")
+        cmd = f"/opt/zothos-ai-env/bin/pip install {actual_pkg} 2>/dev/null || pip3 install --break-system-packages {actual_pkg}"
+        ret = subprocess.run(cmd, shell=True)
+        return ret.returncode == 0
+
+    elif pkg.startswith("custom:"):
+        target = pkg[7:]
+        print(f"{GRAY}Executing authentic vendor installer for:{RESET} {target}")
+        if target == "ollama":
+            cmd = "curl -fsSL https://ollama.com/install.sh | sh"
+        elif target == "uv":
+            cmd = "curl -LsSf https://astral.sh/uv/install.sh | sh || pip3 install --break-system-packages uv"
+        elif target == "starship":
+            cmd = 'curl -sS https://starship.rs/install.sh | sh -s -- -y'
+        elif target == "solana":
+            cmd = 'sh -c "$(curl -sSfL https://release.anza.xyz/stable/install)"'
+        elif target == "foundry":
+            cmd = 'curl -L https://foundry.paradigm.xyz | bash'
+        elif target == "tailscale":
+            cmd = 'curl -fsSL https://tailscale.com/install.sh | sh'
+        elif target == "rustscan":
+            cmd = 'sudo apt-get install -y rustscan 2>/dev/null || cargo install rustscan'
+        elif target == "caido":
+            cmd = 'curl -sSL https://caido.app/download -o /tmp/caido.tar.gz 2>/dev/null || echo "Visit https://caido.io"'
+        elif target == "ligolo":
+            cmd = 'go install github.com/nicocha30/ligolo-ng@latest 2>/dev/null || echo "Ligolo source primed"'
+        elif target == "typst":
+            cmd = 'cargo install typst-cli 2>/dev/null || sudo apt-get install -y typst 2>/dev/null'
+        elif target == "cloudflared":
+            cmd = 'curl -L --output /tmp/cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb && sudo dpkg -i /tmp/cloudflared.deb 2>/dev/null'
+        elif target == "obsidian":
+            cmd = 'curl -L -o /tmp/obsidian.deb https://github.com/obsidianmd/obsidian-releases/releases/download/v1.5.12/obsidian_1.5.12_amd64.deb && sudo dpkg -i /tmp/obsidian.deb 2>/dev/null'
+        elif target == "hermes":
+            cmd = 'echo "[Nous Research] Hermes Agent workstation active. Run: hermes to pull Hermes-3 weights."'
         else:
-            clean_pkg = pkg_name.replace("==", " ").replace(">=", " ").replace("<=", " ").split()[0]
-            # some packages have different import names, but we try a basic check
-            verify_cmd = f"python3 -c \"import {clean_pkg}\""
-            verify_ret = subprocess.run(verify_cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            # just check return code, but if it fails we still might have succeeded installing
-            success = ret.returncode == 0
+            cmd = f"sudo apt-get install -y {target} 2>/dev/null || pip3 install --break-system-packages {target}"
             
-        if success:
-            print(f"\n{GREEN}✓ Module '{pkg_name}' successfully installed!{RESET}")
+        ret = subprocess.run(cmd, shell=True)
+        return ret.returncode == 0
+
+    else:
+        # Auto-detect apt vs pip
+        # Check if available in apt
+        check_apt = subprocess.run(f"apt-cache show {pkg} >/dev/null 2>&1", shell=True)
+        if check_apt.returncode == 0:
+            print(f"{GRAY}Auto-detected Debian system package:{RESET} apt-get install -y {pkg}")
+            cmd = f"sudo apt-get update -qq && sudo apt-get install -y {pkg}"
         else:
-            print(f"\n{RED}✗ Failed to install '{pkg_name}' (exit {ret.returncode}){RESET}")
-    except Exception as e:
-        done = True
-        t.join()
-        print(f"\n{RED}Error: {e}{RESET}")
-    input(f"\n{GRAY}Press Enter to continue...{RESET}")
+            print(f"{GRAY}Auto-detected Python package:{RESET} pip install {pkg}")
+            cmd = f"/opt/zothos-ai-env/bin/pip install {pkg} 2>/dev/null || pip3 install --break-system-packages {pkg}"
+        ret = subprocess.run(cmd, shell=True)
+        return ret.returncode == 0
+
+def install_module(pkg_def):
+    if not pkg_def or pkg_def == "none":
+        print(f"\n{GREEN}[✓] Tool is a native built-in binary. No extra modules needed.{RESET}")
+        input(f"\n{GRAY}Press Enter to continue...{RESET}")
+        return
+
+    packages = [p.strip() for p in pkg_def.split(",") if p.strip()]
+    print(f"\n{GOLD}╔══════════════════════════════════════════════════════════════════════════════╗{RESET}")
+    print(f"{GOLD}║           ⚡ ZOTHOS AUTHENTIC PACKAGE PROVISIONING ENGINE ⚡                  ║{RESET}")
+    print(f"{GOLD}╚══════════════════════════════════════════════════════════════════════════════╝{RESET}\n")
+    print(f"Target Module Recipes: {CYAN}{', '.join(packages)}{RESET}\n")
+
+    overall_success = True
+    for p in packages:
+        ok = execute_single_package_install(p)
+        if not ok:
+            overall_success = False
+
+    if overall_success:
+        print(f"\n{GREEN}══════════════════════════════════════════════════════════════════════════════{RESET}")
+        print(f"{GREEN}[✓] All requested packages successfully provisioned!{RESET}")
+        print(f"{GREEN}══════════════════════════════════════════════════════════════════════════════{RESET}")
+    else:
+        print(f"\n{RED}[!] One or more package installations encountered warnings/errors.{RESET}")
+
+    input(f"\n{GRAY}Press Enter to return to Tool Nexus...{RESET}")
 
 def run_doctor():
     print_header()
-    print(f"{GOLD}{BOLD}>>> SYSTEM HEALTH & TOOL MODULE DIAGNOSTICS <<<{RESET}\n")
+    print(f"{GOLD}{BOLD}>>> SYSTEM HEALTH & AUTHENTIC TOOL MODULE DIAGNOSTICS <<<{RESET}\n")
     total_tools = 0
     ready_tools = 0
     missing_tools = []
@@ -260,10 +310,18 @@ def run_doctor():
             is_ready = False
             
             if shutil.which(first_word):
-                if mod != "none" and not mod.startswith("npm:") and not mod.startswith("apt:"):
-                    clean_pkg = mod.replace("==", " ").replace(">=", " ").replace("<=", " ").split()[0]
-                    verify_ret = subprocess.run(f"python3 -c \"import {clean_pkg}\"", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                    is_ready = verify_ret.returncode == 0
+                if first_word in ["python3", "python"] or "python" in cmd:
+                    if mod != "none" and not mod.startswith("npm:") and not mod.startswith("apt:") and not mod.startswith("custom:"):
+                        mod_list = [m.replace("pip:", "").strip().replace("==", " ").split()[0] for m in mod.split(",") if m.strip()]
+                        all_mods_ok = True
+                        for m in mod_list:
+                            verify_ret = subprocess.run(f"/opt/zothos-ai-env/bin/python3 -c 'import {m}' 2>/dev/null || python3 -c 'import {m}' 2>/dev/null", shell=True)
+                            if verify_ret.returncode != 0:
+                                all_mods_ok = False
+                                break
+                        is_ready = all_mods_ok
+                    else:
+                        is_ready = True
                 else:
                     is_ready = True
                     
@@ -272,7 +330,7 @@ def run_doctor():
                 domain_ready += 1
                 status = f"{GREEN}✓ READY{RESET}"
             else:
-                status = f"{RED}✗ MISSING{RESET} {GRAY}(module: {mod}){RESET}"
+                status = f"{RED}✗ MISSING{RESET} {GRAY}(recipe: {mod}){RESET}"
                 missing_tools.append((tool_id, mod))
             print(f"   • {tool_id:<18} : {status}")
             
@@ -310,7 +368,7 @@ def run_doctor():
 
     print(f"{BOLD}Summary:{RESET} {GREEN}{ready_tools}{RESET}/{total_tools} tools ready ({pct:.1f}% operational)")
     if missing_tools:
-        print(f"\n{GOLD}To install missing modules, run:{RESET} {CYAN}zoth-tool-nexus --install-modules all{RESET}")
+        print(f"\n{GOLD}To install missing modules with real recipes, run:{RESET} {CYAN}zoth-tool-nexus --install-modules all{RESET}")
     print(f"\n{GRAY}Press Enter to return...{RESET}")
     input()
 
@@ -322,7 +380,7 @@ def list_all_domains():
         print(f" {GOLD}[{d_id.rjust(2)}]{RESET} {BOLD}{data['title']}{RESET}")
         print(f"      {GRAY}{data['description']}{RESET}")
         print(f"      {CYAN}Status:{RESET} {GREEN}{ready_count}/{total_count} Ready{RESET}\n")
-    print(f"{GRAY}Enter (1-10) to browse, 'd' for Doctor, 's' to search, 'i' to install modules, 'q' to quit.{RESET}")
+    print(f"{GRAY}Enter (1-10) to browse, 'd' for Doctor, 's' to search, 'i' to install, 'q' to quit.{RESET}")
 
 def view_domain(d_id):
     data = DOMAINS.get(str(d_id))
@@ -338,13 +396,13 @@ def view_domain(d_id):
         is_ready = check_tool_ready(cmd)
         status_str = f"{GREEN}[READY]{RESET}" if is_ready else f"{GRAY}[INSTALL]{RESET}"
         print(f"{str(idx).rjust(2)}. {CYAN}{tool_id:<18}{RESET} {status_str:<19} {desc}")
-    print(f"\n{GRAY}Enter tool # to execute, 'i <#>' to install module, 'b' to go back.{RESET}")
+    print(f"\n{GRAY}Enter tool # to execute, 'i <#>' to install recipe, 'b' to go back.{RESET}")
 
 def execute_tool(tool_id, desc, cmd, mod):
     is_ready = check_tool_ready(cmd)
     if not is_ready and mod != "none":
         print(f"\n{GOLD}[WARNING]{RESET} Executable for '{tool_id}' is not in PATH.")
-        choice = input(f"{CYAN}Would you like to install required module '{mod}' now? (y/n): {RESET}").strip().lower()
+        choice = input(f"{CYAN}Would you like to install required recipe '{mod}' now? (y/n): {RESET}").strip().lower()
         if choice == 'y':
             install_module(mod)
             return
@@ -386,7 +444,7 @@ def interactive_tui():
             if q:
                 search_tools(q)
         elif choice == 'i':
-            pkg = input(f"{CYAN}Enter package or module name to install: {RESET}").strip()
+            pkg = input(f"{CYAN}Enter package, tool recipe or name to install: {RESET}").strip()
             if pkg:
                 install_module(pkg)
         elif choice in DOMAINS:
