@@ -91,6 +91,11 @@ systemctl enable NetworkManager || true
 systemctl enable lightdm || true
 systemctl enable tor || true
 
+# Configure Plymouth default boot splash
+if command -v plymouth-set-default-theme >/dev/null 2>&1; then
+    plymouth-set-default-theme -R zothos-matrix 2>/dev/null || plymouth-set-default-theme -R zoth-matrix 2>/dev/null || true
+fi
+
 # Setup Fastfetch / Bash defaults
 cp -rf /etc/skel/. /home/neo/
 chown -R neo:neo /home/neo
@@ -100,7 +105,10 @@ EOF
 chmod +x config/hooks/normal/099-zothos-setup.hook.chroot
 
 echo -e "${CYAN}[5/6] Generating 4K wallpapers & 3D visual assets...${RESET}"
-# Execute master wallpaper and 3D glassmorphic icon synthesizers
+# Execute master wallpaper, 3D glassmorphic icon, and Plymouth theme synthesizers
+if [ -f "$PROJECT_DIR/tools/generate_plymouth_assets.py" ]; then
+    python3 "$PROJECT_DIR/tools/generate_plymouth_assets.py" 2>&1 | tail -5
+fi
 if [ -f "$PROJECT_DIR/generate_zoth_wallpapers.py" ]; then
     python3 "$PROJECT_DIR/generate_zoth_wallpapers.py" 2>&1 | tail -5
 fi
@@ -109,6 +117,7 @@ if [ -f "$PROJECT_DIR/generate_zoth_icons.py" ]; then
 fi
 cp -a "$PROJECT_DIR/config/includes.chroot/usr/share/backgrounds/zothos" config/includes.chroot/usr/share/backgrounds/ 2>/dev/null || true
 cp -a "$PROJECT_DIR/config/includes.chroot/usr/share/icons/." config/includes.chroot/usr/share/icons/ 2>/dev/null || true
+cp -a "$PROJECT_DIR/config/includes.chroot/usr/share/plymouth/themes/." config/includes.chroot/usr/share/plymouth/themes/ 2>/dev/null || true
 
 echo -e "${GREEN}[6/6] Starting Live-Build execution (lb build)...${RESET}"
 echo -e "${YELLOW}[*] This will bootstrap the Debian base, fetch security & AI packages, and compile the ISO.${RESET}"

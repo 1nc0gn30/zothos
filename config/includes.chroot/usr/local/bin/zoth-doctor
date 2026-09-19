@@ -1,29 +1,60 @@
 #!/usr/bin/env bash
 # ==============================================================================
-#  * ZOTHOS DOCTOR: SYSTEM ARSENAL & ENVIRONMENT DIAGNOSTIC ENGINE *
+#  * ZOTHOS SYSTEM DOCTOR & ENVIRONMENT DIAGNOSTIC ENGINE v3.0 *
+#  Comprehensive arsenal audit, GPU rendering state, MCP registry validation,
+#  systemd watchdog timer verification, and autonomous self-healing integration.
 # ==============================================================================
 
-set -eo pipefail
+set -uo pipefail
 
-GREEN="\e[38;2;0;255;157m"
+EMERALD="\e[38;2;0;255;157m"
 GOLD="\e[38;2;255;215;0m"
 CYAN="\e[38;2;0;229;255m"
-RED="\e[38;2;255;51;85m"
+CRIMSON="\e[38;2;255;51;85m"
 GRAY="\e[38;2;120;140;160m"
 BOLD="\e[1m"
+DIM="\e[2m"
 RESET="\e[0m"
 
-echo -e "${GREEN}${BOLD}"
+echo -e "${EMERALD}${BOLD}"
 echo "  ╔════════════════════════════════════════════════════════════════════╗"
-echo "  ║                  *  ZOTHOS SYSTEM DOCTOR  *                       ║"
-echo "  ║            Complete Arsenal Health & Diagnostic Suite              ║"
+echo "  ║             *  ZOTHOS SYSTEM DOCTOR & AUDITOR v3.0  *              ║"
+echo "  ║        Complete Arsenal, Hardware, MCP & Resilience Diagnostics    ║"
 echo "  ╚════════════════════════════════════════════════════════════════════╝"
 echo -e "${RESET}"
+
+# Repository & Chroot detection helper
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_CHROOT=""
+if [[ -d "$SCRIPT_DIR/../../../etc/zothos" ]]; then
+    REPO_CHROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+fi
+
+resolve_path() {
+    local target="$1"
+    if [[ -e "$target" ]]; then
+        echo "$target"
+        return 0
+    elif [[ -n "$REPO_CHROOT" && -e "$REPO_CHROOT$target" ]]; then
+        echo "$REPO_CHROOT$target"
+        return 0
+    fi
+    return 1
+}
 
 FIX_MODE=false
 if [[ "${1:-}" == "--fix" ]] || [[ "${1:-}" == "-f" ]]; then
     FIX_MODE=true
-    echo -e "${GOLD}[*] Auto-heal mode enabled (--fix)${RESET}\n"
+    echo -e "${GOLD}[*] Autonomous Auto-Heal Mode Enabled (--fix)${RESET}\n"
+    if command -v /usr/local/bin/zoth-heal >/dev/null 2>&1; then
+        echo -e "${CYAN}[*] Invoking ZothOS Self-Healing Subsystem (zoth-heal --all)...${RESET}"
+        /usr/local/bin/zoth-heal --all || true
+        echo -e "\n${EMERALD}[✓] Pre-diagnostic healing pass completed.${RESET}\n"
+    elif [[ -x "$SCRIPT_DIR/zoth-heal" ]]; then
+        echo -e "${CYAN}[*] Invoking Local ZothOS Self-Healing Subsystem ($SCRIPT_DIR/zoth-heal --all)...${RESET}"
+        "$SCRIPT_DIR/zoth-heal" --all || true
+        echo -e "\n${EMERALD}[✓] Pre-diagnostic healing pass completed.${RESET}\n"
+    fi
 fi
 
 HEALTHY=0
@@ -36,26 +67,35 @@ audit_tool() {
     local test_cmd="$3"
     local install_hint="$4"
 
-    if which "$name" >/dev/null 2>&1; then
-        local bin_path=$(which "$name")
-        echo -e "  ${GREEN}[✓ HEALTHY]${RESET} ${BOLD}${name}${RESET} (${GRAY}${category}${RESET}) -> ${CYAN}${bin_path}${RESET}"
+    local bin_path=""
+    if command -v "$name" >/dev/null 2>&1; then
+        bin_path=$(command -v "$name")
+    elif [[ -x "$SCRIPT_DIR/$name" ]]; then
+        bin_path="$SCRIPT_DIR/$name"
+    fi
+
+    if [[ -n "$bin_path" ]]; then
+        echo -e "  ${EMERALD}[✓ HEALTHY]${RESET} ${BOLD}${name}${RESET} (${GRAY}${category}${RESET}) -> ${CYAN}${bin_path}${RESET}"
         HEALTHY=$((HEALTHY + 1))
     else
         if [[ "$FIX_MODE" == "true" ]] && [[ -n "$install_hint" ]]; then
-            echo -e "  ${GOLD}[* HEALING]${RESET} ${BOLD}${name}${RESET} ... executing: ${install_hint}"
+            echo -e "  ${GOLD}[⚡ HEALING]${RESET} ${BOLD}${name}${RESET} ... executing: ${install_hint}"
             eval "$install_hint" >/dev/null 2>&1 || true
-            if which "$name" >/dev/null 2>&1; then
-                echo -e "  ${GREEN}[✓ FIXED]${RESET}   ${BOLD}${name}${RESET} -> $(which "$name")"
+            if command -v "$name" >/dev/null 2>&1; then
+                echo -e "  ${EMERALD}[✓ FIXED]${RESET}   ${BOLD}${name}${RESET} -> $(command -v "$name")"
                 HEALTHY=$((HEALTHY + 1))
                 return
             fi
         fi
-        echo -e "  ${RED}[✗ MISSING]${RESET} ${BOLD}${name}${RESET} (${category})"
+        echo -e "  ${CRIMSON}[✗ MISSING]${RESET} ${BOLD}${name}${RESET} (${category})"
         FAILED=$((FAILED + 1))
     fi
 }
 
-echo -e "${CYAN}${BOLD}[1/4] Auditing Offensive & Defensive Security Arsenal ...${RESET}"
+# ─────────────────────────────────────────────────────────────────────────────
+# 1. Offensive & Defensive Security Arsenal
+# ─────────────────────────────────────────────────────────────────────────────
+echo -e "${CYAN}${BOLD}[1/7] Auditing Offensive & Defensive Security Arsenal ...${RESET}"
 audit_tool nmap "Network Recon" "nmap --version" "sudo apt-get install -y nmap"
 audit_tool wireshark "Packet Analysis" "wireshark --version" "sudo apt-get install -y wireshark-qt"
 audit_tool tshark "CLI Packet Capture" "tshark --version" "sudo apt-get install -y tshark"
@@ -74,7 +114,10 @@ audit_tool binwalk "Firmware Extraction" "binwalk --help" "sudo apt-get install 
 audit_tool masscan "Mass IP Port Scanner" "masscan" "sudo apt-get install -y masscan"
 audit_tool aircrack-ng "Wireless Auditing" "aircrack-ng --help" "sudo apt-get install -y aircrack-ng"
 
-echo -e "\n${CYAN}${BOLD}[2/4] Auditing Frontier AI & Autonomous Agent Stack ...${RESET}"
+# ─────────────────────────────────────────────────────────────────────────────
+# 2. Frontier AI & Autonomous Agent Stack
+# ─────────────────────────────────────────────────────────────────────────────
+echo -e "\n${CYAN}${BOLD}[2/7] Auditing Frontier AI & Autonomous Agent Stack ...${RESET}"
 audit_tool hermes "Nous Research Agent" "hermes --version" ""
 audit_tool ollama "Local LLM Inference" "ollama --version" "curl -fsSL https://ollama.com/install.sh | sh"
 audit_tool uv "Astral Python Fast Pip" "uv --version" "curl -LsSf https://astral.sh/uv/install.sh | sh"
@@ -83,7 +126,10 @@ audit_tool garak "LLM Vulnerability Scanner" "garak --version" "uv pip install g
 audit_tool pyrit "AI Red-Teaming Toolkit" "pyrit --help" "uv pip install pyrit"
 audit_tool docker "Container Runtime" "docker --version" "sudo apt-get install -y docker.io"
 
-echo -e "\n${CYAN}${BOLD}[3/4] Auditing ZOTHOS Core CLI Wrappers ...${RESET}"
+# ─────────────────────────────────────────────────────────────────────────────
+# 3. ZOTHOS Core CLI & Resilience Wrappers
+# ─────────────────────────────────────────────────────────────────────────────
+echo -e "\n${CYAN}${BOLD}[3/7] Auditing ZOTHOS Core CLI & Resilience Engines ...${RESET}"
 audit_tool zoth "Zoth Studio Cockpit" "" ""
 audit_tool zoth-ai "AI Stack Controller" "" ""
 audit_tool zoth-sec "Security Suite Launcher" "" ""
@@ -91,11 +137,16 @@ audit_tool zoth-mcp "MCP Server Manager" "" ""
 audit_tool zoth-mode "Reality Transmutation" "" ""
 audit_tool zoth-ghost "Amnesic OPSEC Switcher" "" ""
 audit_tool zoth-agent-os "Ring-Gated OS Controller" "" ""
+audit_tool zoth-sentinel "Autonomous AI Sentinel" "" ""
+audit_tool zoth-heal "Self-Healing & Resilience Subsystem" "" ""
 audit_tool hexstrike "Autonomous AI Pentester" "" ""
 audit_tool maya "Maya Linux Studio" "" ""
 audit_tool zoth-live-wallpaper "3D Live Wallpaper Engine" "" ""
 
-echo -e "\n${CYAN}${BOLD}[4/5] Auditing Power Tools & Sovereign Secrets Vaults ...${RESET}"
+# ─────────────────────────────────────────────────────────────────────────────
+# 4. Power Tools & Sovereign Secrets Vaults
+# ─────────────────────────────────────────────────────────────────────────────
+echo -e "\n${CYAN}${BOLD}[4/7] Auditing Power Tools & Sovereign Secrets Vaults ...${RESET}"
 audit_tool bw "Bitwarden CLI" "bw --version" "sudo npm install -g @bitwarden/cli"
 audit_tool keepassxc "KeePassXC Password Vault" "keepassxc --version" "sudo apt-get install -y keepassxc"
 audit_tool btop "Resource & Process Monitor" "btop --version" "sudo apt-get install -y btop"
@@ -105,37 +156,112 @@ audit_tool bat "Syntax Highlighting Cat" "bat --version" "sudo apt-get install -
 audit_tool fd "Fast Directory Search" "fd --version" "sudo apt-get install -y fd-find"
 audit_tool duf "Disk Free & Usage Visualizer" "duf --version" "sudo apt-get install -y duf"
 
-echo -e "\n${CYAN}${BOLD}[5/5] Auditing Zoth Studio & Sovereign Cockpit Hub ...${RESET}"
-if [[ -f "/opt/zoth-studio/index.html" ]] && [[ -x "/opt/zoth-studio/launch.sh" ]]; then
-    echo -e "  ${GREEN}[✓ HEALTHY]${RESET} Zoth Studio Core -> ${CYAN}/opt/zoth-studio/launch.sh${RESET}"
+# ─────────────────────────────────────────────────────────────────────────────
+# 5. Hardware, GPU & Rendering Pipeline
+# ─────────────────────────────────────────────────────────────────────────────
+echo -e "\n${CYAN}${BOLD}[5/7] Auditing GPU & Rendering Acceleration ...${RESET}"
+GPU_RENDERER="Unknown"
+if command -v glxinfo >/dev/null 2>&1 && [[ -n "${DISPLAY:-}" ]]; then
+    GPU_RENDERER=$(glxinfo -B 2>/dev/null | grep "OpenGL renderer string" | cut -d: -f2 | xargs || echo "Software")
+    DIRECT_RENDERING=$(glxinfo -B 2>/dev/null | grep "direct rendering:" | cut -d: -f2 | xargs || echo "No")
+    if [[ "$DIRECT_RENDERING" == "Yes" ]]; then
+        echo -e "  ${EMERALD}[✓ HEALTHY]${RESET} Direct Rendering Active -> ${CYAN}${GPU_RENDERER}${RESET}"
+        HEALTHY=$((HEALTHY + 1))
+    else
+        echo -e "  ${GOLD}[⚠ WARN]${RESET}    Direct rendering disabled, falling back to ${GPU_RENDERER}"
+        WARNED=$((WARNED + 1))
+    fi
+elif [[ -d "/dev/dri" ]]; then
+    echo -e "  ${EMERALD}[✓ HEALTHY]${RESET} DRI Direct Rendering Interface present (/dev/dri)"
     HEALTHY=$((HEALTHY + 1))
 else
-    echo -e "  ${RED}[✗ MISSING]${RESET} Zoth Studio Hub at /opt/zoth-studio"
+    echo -e "  ${GOLD}[⚠ WARN]${RESET}    No active GUI display or /dev/dri acceleration device detected (Headless/Virtual)"
+    WARNED=$((WARNED + 1))
+fi
+
+# Disk Health & Mount State
+DISK_RO=$(touch /var/tmp/.zoth_rw_test 2>/dev/null && rm -f /var/tmp/.zoth_rw_test && echo "RW" || echo "RO")
+ROOT_AVAIL_MB=$(df -m / | awk 'NR==2 {print $4}')
+if [[ "$DISK_RO" == "RW" && "$ROOT_AVAIL_MB" -gt 500 ]]; then
+    echo -e "  ${EMERALD}[✓ HEALTHY]${RESET} Root Filesystem R/W (${ROOT_AVAIL_MB} MB free)"
+    HEALTHY=$((HEALTHY + 1))
+else
+    echo -e "  ${CRIMSON}[✗ ERROR]${RESET}   Root Filesystem Pressure: State=${DISK_RO}, Free=${ROOT_AVAIL_MB}MB"
     FAILED=$((FAILED + 1))
 fi
 
-if [[ -f "/etc/zothos/mcp-servers.json" ]] && jq empty /etc/zothos/mcp-servers.json 2>/dev/null; then
-    echo -e "  ${GREEN}[✓ HEALTHY]${RESET} MCP Server Registry -> ${CYAN}/etc/zothos/mcp-servers.json (Valid JSON)${RESET}"
+# ─────────────────────────────────────────────────────────────────────────────
+# 6. Network Latency & Resolver Health
+# ─────────────────────────────────────────────────────────────────────────────
+echo -e "\n${CYAN}${BOLD}[6/7] Auditing Network Connectivity & DNS Latency ...${RESET}"
+if getent hosts debian.org >/dev/null 2>&1 || getent hosts 1.1.1.1 >/dev/null 2>&1; then
+    echo -e "  ${EMERALD}[✓ HEALTHY]${RESET} DNS Resolution Operational"
     HEALTHY=$((HEALTHY + 1))
 else
-    echo -e "  ${RED}[✗ ERROR]${RESET}   MCP Server Registry missing or invalid JSON"
+    echo -e "  ${CRIMSON}[✗ ERROR]${RESET}   DNS Resolution Failed (Check /etc/resolv.conf or NetworkManager)"
     FAILED=$((FAILED + 1))
 fi
 
-if [[ -f "/etc/zothos/agent-permissions.json" ]] && jq empty /etc/zothos/agent-permissions.json 2>/dev/null; then
-    echo -e "  ${GREEN}[✓ HEALTHY]${RESET} Agent Permission Rings -> ${CYAN}/etc/zothos/agent-permissions.json (Valid JSON)${RESET}"
+if ping -c 1 -W 2 1.1.1.1 >/dev/null 2>&1; then
+    echo -e "  ${EMERALD}[✓ HEALTHY]${RESET} Internet Gateway Reachable (1.1.1.1 Ping OK)"
     HEALTHY=$((HEALTHY + 1))
 else
-    echo -e "  ${RED}[✗ ERROR]${RESET}   Agent Permission Rings missing or invalid JSON"
+    echo -e "  ${GOLD}[⚠ WARN]${RESET}    Internet ICMP Ping unreachable (may be firewalled or isolated)"
+    WARNED=$((WARNED + 1))
+fi
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 7. Zoth Studio, MCP Registry & Systemd Watchdogs
+# ─────────────────────────────────────────────────────────────────────────────
+echo -e "\n${CYAN}${BOLD}[7/7] Auditing Sovereign Hub, MCP Registry & Systemd Watchdogs ...${RESET}"
+
+# Zoth Studio Hub
+STUDIO_DIR=$(resolve_path "/opt/zoth-studio" || echo "")
+if [[ -n "$STUDIO_DIR" && -f "$STUDIO_DIR/index.html" && -x "$STUDIO_DIR/launch.sh" ]]; then
+    echo -e "  ${EMERALD}[✓ HEALTHY]${RESET} Zoth Studio Core -> ${CYAN}$STUDIO_DIR/launch.sh${RESET}"
+    HEALTHY=$((HEALTHY + 1))
+else
+    echo -e "  ${CRIMSON}[✗ MISSING]${RESET} Zoth Studio Hub at /opt/zoth-studio"
     FAILED=$((FAILED + 1))
+fi
+
+# Master MCP Server Registry
+MCP_PATH=$(resolve_path "/etc/zothos/mcp-servers.json" || echo "")
+if [[ -n "$MCP_PATH" && -f "$MCP_PATH" ]] && jq empty "$MCP_PATH" 2>/dev/null; then
+    MCP_COUNT=$(jq '.mcpServers | length' "$MCP_PATH" 2>/dev/null || echo "0")
+    echo -e "  ${EMERALD}[✓ HEALTHY]${RESET} Master MCP Registry -> ${CYAN}$MCP_PATH (${MCP_COUNT} servers defined)${RESET}"
+    HEALTHY=$((HEALTHY + 1))
+else
+    echo -e "  ${CRIMSON}[✗ ERROR]${RESET}   MCP Server Registry missing or invalid JSON"
+    FAILED=$((FAILED + 1))
+fi
+
+# Agent Permissions
+PERM_PATH=$(resolve_path "/etc/zothos/agent-permissions.json" || echo "")
+if [[ -n "$PERM_PATH" && -f "$PERM_PATH" ]] && jq empty "$PERM_PATH" 2>/dev/null; then
+    echo -e "  ${EMERALD}[✓ HEALTHY]${RESET} Agent Permission Rings -> ${CYAN}$PERM_PATH (Valid JSON)${RESET}"
+    HEALTHY=$((HEALTHY + 1))
+else
+    echo -e "  ${CRIMSON}[✗ ERROR]${RESET}   Agent Permission Rings missing or invalid JSON"
+    FAILED=$((FAILED + 1))
+fi
+
+# Systemd Watchdog Timer Check
+WATCHDOG_PATH=$(resolve_path "/etc/systemd/system/zoth-watchdog.timer" || echo "")
+if [[ -n "$WATCHDOG_PATH" ]] || systemctl list-unit-files zoth-watchdog.timer >/dev/null 2>&1; then
+    echo -e "  ${EMERALD}[✓ HEALTHY]${RESET} Autonomous Watchdog Timer -> ${CYAN}${WATCHDOG_PATH:-zoth-watchdog.timer} installed${RESET}"
+    HEALTHY=$((HEALTHY + 1))
+else
+    echo -e "  ${GOLD}[⚠ WARN]${RESET}    zoth-watchdog.timer unit file not registered in /etc/systemd/system"
+    WARNED=$((WARNED + 1))
 fi
 
 echo -e "\n----------------------------------------------------------------------"
-echo -e "  ${BOLD}Total Tools Audited:${RESET} $((HEALTHY + FAILED)) | ${GREEN}${BOLD}Healthy: ${HEALTHY}${RESET} | ${RED}${BOLD}Defects: ${FAILED}${RESET}"
+echo -e "  ${BOLD}Total Components Audited:${RESET} $((HEALTHY + WARNED + FAILED)) | ${EMERALD}${BOLD}Healthy: ${HEALTHY}${RESET} | ${GOLD}${BOLD}Warnings: ${WARNED}${RESET} | ${CRIMSON}${BOLD}Defects: ${FAILED}${RESET}"
 if [[ $FAILED -eq 0 ]]; then
-    echo -e "  ${GREEN}${BOLD}>>> ALL SYSTEMS NOMINAL: ZOTHOS IS 100% OPERATIONAL <<<\n${RESET}"
+    echo -e "  ${EMERALD}${BOLD}>>> ALL SYSTEMS NOMINAL: ZOTHOS IS 100% OPERATIONAL <<<\n${RESET}"
     exit 0
 else
-    echo -e "  ${RED}${BOLD}>>> ${FAILED} DEFECT(S) DETECTED. Run 'zoth-doctor --fix' to repair. <<<\n${RESET}"
+    echo -e "  ${CRIMSON}${BOLD}>>> ${FAILED} DEFECT(S) DETECTED. Run 'zoth-doctor --fix' to repair. <<<\n${RESET}"
     exit 1
 fi

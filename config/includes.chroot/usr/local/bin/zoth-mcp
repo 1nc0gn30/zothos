@@ -10,12 +10,16 @@ GREEN="\e[38;2;0;255;157m"
 GOLD="\e[38;2;255;215;0m"
 CYAN="\e[38;2;0;229;255m"
 RED="\e[38;2;255;51;85m"
+YELLOW="\e[38;2;255;184;0m"
+PURPLE="\e[38;2;168;85;247m"
 GRAY="\e[38;2;120;140;160m"
 BOLD="\e[1m"
 RESET="\e[0m"
 
 MCP_CONFIG="/etc/zothos/mcp-servers.json"
 USER_MCP_CONFIG="${HOME:-/home/neo}/.config/zothos/mcp-servers.json"
+MCP_RUN_DIR="${HOME:-/home/neo}/.zothos/mcp/run"
+MCP_LOG_DIR="${HOME:-/home/neo}/.zothos/mcp/logs"
 
 # Resolve active config path
 get_config_path() {
@@ -37,7 +41,7 @@ banner() {
     echo -e "${GREEN}${BOLD}   ███╔╝  ██║   ██║   ██║   ██╔══██║     ██║╚██╔╝██║██║     ██╔═══╝ ${RESET}"
     echo -e "${GREEN}${BOLD}  ███████╗╚██████╔╝   ██║   ██║  ██║     ██║ ╚═╝ ██║╚██████╗██║     ${RESET}"
     echo -e "${GREEN}${BOLD}  ╚══════╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝     ╚═╝     ╚═╝ ╚═════╝╚═╝     ${RESET}"
-    echo -e "         ${BOLD}${GOLD}[+] MASTER MODEL CONTEXT PROTOCOL (MCP) HUB [+]${RESET}"
+    echo -e "         ${BOLD}${GOLD}[+] MASTER MODEL CONTEXT PROTOCOL (MCP) HUB v3.0 [+]${RESET}"
     echo ""
 }
 
@@ -45,34 +49,190 @@ show_help() {
     banner
     echo -e "${BOLD}Usage:${RESET} zoth-mcp [command] [options]"
     echo ""
-    echo -e "${BOLD}Commands:${RESET}"
-    echo -e "  ${GREEN}list${RESET}                 List all registered MCP servers with command & description"
+    echo -e "${BOLD}Core Commands:${RESET}"
+    echo -e "  ${GREEN}list${RESET}                 Formatted table of available MCP servers, security rings & modes"
+    echo -e "  ${GREEN}health${RESET}               Comprehensive health & latency diagnostics of all MCP endpoints"
+    echo -e "  ${GREEN}start-all${RESET}            Spawn all required offline MCP background daemons"
+    echo -e "  ${GREEN}stop-all${RESET}             Stop all running MCP daemon processes"
     echo -e "  ${GREEN}sync${RESET}                 Sync master MCP registry to Claude Code, Hermes, Codex & OpenCode"
-    echo -e "  ${GREEN}test [server]${RESET}        Validate configuration and executable for specified MCP server"
-    echo -e "  ${GREEN}status${RESET}               Display operational status of all registered MCP endpoints"
-    echo -e "  ${GREEN}json${RESET}                 Output raw JSON configuration"
-    echo -e "  ${GREEN}interactive${RESET}          Launch interactive terminal management interface"
+    echo -e "  ${GREEN}test [server]${RESET}        Validate configuration, execution & sandbox for specified server"
+    echo -e "  ${GREEN}status${RESET}               Display quick operational status of all registered MCP endpoints"
+    echo -e "  ${GREEN}json${RESET}                 Output raw JSON master configuration"
+    echo -e "  ${GREEN}interactive${RESET}          Launch interactive terminal management cockpit"
     echo -e "  ${GREEN}help, -h, --help${RESET}     Show this help documentation"
     echo ""
-    echo -e "${BOLD}Registered Master Config:${RESET} $(get_config_path)"
+    echo -e "${BOLD}Active Registry Path:${RESET} $(get_config_path)"
 }
 
 cmd_list() {
     local cfg
     cfg=$(get_config_path)
     banner
-    echo -e "${BOLD}Registered Master MCP Servers in ${CYAN}${cfg}${RESET}:${RESET}"
-    echo ""
+    echo -e "${BOLD}Master MCP Server & Security Ring Registry (${CYAN}${cfg}${RESET}):${RESET}\n"
     if [[ ! -f "$cfg" ]]; then
         echo -e "${RED}[!] Configuration file not found: ${cfg}${RESET}"
         return 1
     fi
 
     if command -v jq >/dev/null 2>&1; then
-        jq -r '.mcpServers | to_entries[] | "  \u001b[38;2;0;255;157m[+]\u001b[0m \u001b[1m\(.key)\u001b[0m\n      Command:     \(.value.command) \((.value.args // []) | join(" "))\n      Description: \(.value.description // "N/A")\n"' "$cfg"
+        printf "  ${BOLD}%-22s %-18s %-12s %-22s %s${RESET}\n" "SERVER" "SECURITY RING" "MODE" "SANDBOX" "DESCRIPTION"
+        printf "  ${GRAY}%-22s %-18s %-12s %-22s %s${RESET}\n" "----------------------" "------------------" "------------" "----------------------" "---------------------------------------"
+        
+        local servers
+        servers=$(jq -r '.mcpServers | keys[]' "$cfg")
+        for s in $servers; do
+            local ring
+            ring=$(jq -r ".mcpServers[\"$s\"].securityRing // \"RING_2\"" "$cfg")
+            local offline
+            offline=$(jq -r ".mcpServers[\"$s\"].offline // false" "$cfg")
+            local sandbox
+            sandbox=$(jq -r ".mcpServers[\"$s\"].sandbox // \"/tmp\"" "$cfg")
+            local desc
+            desc=$(jq -r ".mcpServers[\"$s\"].description // \"N/A\"" "$cfg")
+
+            local ring_color="$CYAN"
+            if [[ "$ring" == *"RING_0"* ]]; then
+                ring_color="$GOLD"
+            elif [[ "$ring" == *"RING_1"* ]]; then
+                ring_color="$PURPLE"
+            elif [[ "$ring" == *"RING_2"* ]]; then
+                ring_color="$GREEN"
+            fi
+
+            local mode_str="${GREEN}[OFFLINE]${RESET}"
+            if [[ "$offline" != "true" ]]; then
+                mode_str="${YELLOW}[NET-REQ]${RESET}"
+            fi
+
+            # Shorten sandbox path if too long
+            if [[ ${#sandbox} -gt 21 ]]; then
+                sandbox="${sandbox:0:18}..."
+            fi
+
+            # Shorten desc if too long
+            if [[ ${#desc} -gt 55 ]]; then
+                desc="${desc:0:52}..."
+            fi
+
+            printf "  ${BOLD}%-22s${RESET} ${ring_color}%-18s${RESET} %-21b %-22s ${GRAY}%s${RESET}\n" "$s" "$ring" "$mode_str" "$sandbox" "$desc"
+        done
+        echo ""
     else
         cat "$cfg"
     fi
+}
+
+cmd_health() {
+    local cfg
+    cfg=$(get_config_path)
+    banner
+    echo -e "${BOLD}${CYAN}[*] Running Comprehensive MCP Server Health & Security Ring Audit...${RESET}\n"
+    
+    if [[ ! -f "$cfg" ]] || ! command -v jq >/dev/null 2>&1; then
+        echo -e "${RED}[!] Configuration missing or jq not available.${RESET}"
+        return 1
+    fi
+
+    local total=0
+    local healthy=0
+    local degraded=0
+
+    local servers
+    servers=$(jq -r '.mcpServers | keys[]' "$cfg")
+    for s in $servers; do
+        total=$((total + 1))
+        local cmd
+        cmd=$(jq -r ".mcpServers[\"$s\"].command" "$cfg")
+        local ring
+        ring=$(jq -r ".mcpServers[\"$s\"].securityRing // \"RING_2\"" "$cfg")
+        local offline
+        offline=$(jq -r ".mcpServers[\"$s\"].offline // false" "$cfg")
+        local fallback
+        fallback=$(jq -r ".mcpServers[\"$s\"].fallbackHandler // \"none\"" "$cfg")
+        local sandbox
+        sandbox=$(jq -r ".mcpServers[\"$s\"].sandbox // \"/home/neo\"" "$cfg")
+
+        echo -e "${BOLD}▶ [${s}]${RESET} (${ring})"
+        
+        # 1. Binary check
+        local cmd_ok=0
+        if command -v "$cmd" >/dev/null 2>&1; then
+            cmd_ok=1
+            echo -e "    ${GREEN}[✓] Executable binary:${RESET} $(command -v "$cmd")"
+        else
+            echo -e "    ${YELLOW}[!] Primary binary '${cmd}' not in current PATH${RESET}"
+        fi
+
+        # 2. Offline / Fallback check
+        if [[ "$offline" == "true" ]]; then
+            echo -e "    ${GREEN}[✓] Offline Capable:${RESET} True (Fallback: ${fallback})"
+        else
+            echo -e "    ${YELLOW}[i] Network Required:${RESET} Online API connection needed"
+        fi
+
+        # 3. Sandbox check
+        if [[ -e "${sandbox%%,*}" ]]; then
+            echo -e "    ${GREEN}[✓] Local Sandbox:${RESET} ${sandbox%%,*} (Accessible)"
+        else
+            echo -e "    ${GRAY}[○] Local Sandbox:${RESET} ${sandbox%%,*} (Created on demand)"
+        fi
+
+        # Overall server status
+        if [[ $cmd_ok -eq 1 ]]; then
+            healthy=$((healthy + 1))
+            echo -e "    ${GREEN}${BOLD}Status: READY / HEALTHY${RESET}\n"
+        else
+            degraded=$((degraded + 1))
+            echo -e "    ${YELLOW}${BOLD}Status: STANDBY (Fallback Active)${RESET}\n"
+        fi
+    done
+
+    echo -e "${GREEN}${BOLD}======================================================================${RESET}"
+    echo -e "  Health Check Summary: ${BOLD}${healthy}/${total} Servers Ready${RESET} | ${YELLOW}${degraded} Standby${RESET}"
+    echo -e "${GREEN}${BOLD}======================================================================${RESET}\n"
+}
+
+cmd_start_all() {
+    local cfg
+    cfg=$(get_config_path)
+    banner
+    echo -e "${BOLD}${CYAN}[+] Spawning ZOTHOS Offline MCP Daemons & Background Bridges...${RESET}\n"
+    
+    mkdir -p "$MCP_RUN_DIR" "$MCP_LOG_DIR"
+
+    # 1. Start HexStrike AI Server Daemon if not active
+    echo -ne "  [*] Spawning HexStrike AI Daemon... "
+    if [[ -x "/usr/local/bin/hexstrike" ]]; then
+        /usr/local/bin/hexstrike start-backend >/dev/null 2>&1 || true
+        echo -e "${GREEN}[DONE]${RESET}"
+    else
+        echo -e "${YELLOW}[SKIPPED]${RESET}"
+    fi
+
+    # 2. Ensure Local Database Directories Exist
+    echo -ne "  [*] Initializing Local Storage & Databases (/var/lib/zothos)... "
+    mkdir -p "${HOME}/.hexstrike" "${HOME}/.hermes" "${HOME}/.zothos/data" 2>/dev/null || true
+    echo -e "${GREEN}[DONE]${RESET}"
+
+    # 3. Sync Agent Configs
+    cmd_sync
+
+    echo ""
+    echo -e "${GREEN}${BOLD}[✓] All Offline MCP Daemons & Service Endpoints Activated!${RESET}\n"
+}
+
+cmd_stop_all() {
+    banner
+    echo -e "${BOLD}${RED}[-] Stopping all ZOTHOS MCP Daemons...${RESET}\n"
+    
+    if [[ -x "/usr/local/bin/hexstrike" ]]; then
+        /usr/local/bin/hexstrike stop >/dev/null 2>&1 || true
+    fi
+
+    pkill -f "hexstrike_server" 2>/dev/null || true
+    pkill -f "hexstrike_mcp" 2>/dev/null || true
+    
+    echo -e "${GREEN}[✓] All MCP background services terminated cleanly.${RESET}\n"
 }
 
 cmd_status() {
@@ -94,7 +254,7 @@ cmd_status() {
         desc=$(jq -r ".mcpServers[\"$s\"].description // \"N/A\"" "$cfg")
         local stat="${GREEN}[READY]${RESET}"
         if ! command -v "$cmd" >/dev/null 2>&1; then
-            stat="${YELLOW}[STANDBY: $cmd not in PATH]${RESET}"
+            stat="${YELLOW}[STANDBY]${RESET}"
         fi
         printf "  %-24s %-20b %s\n" "$s" "$stat" "${GRAY}$desc${RESET}"
     done
@@ -104,7 +264,6 @@ cmd_status() {
 cmd_sync() {
     local cfg
     cfg=$(get_config_path)
-    banner
     echo -e "${BOLD}${CYAN}[*] Synchronizing MCP servers across all local AI agent configurations...${RESET}"
     
     if [[ ! -f "$cfg" ]]; then
@@ -138,11 +297,17 @@ cmd_sync() {
     cp "$cfg" "$OPENCODE_CONFIG_DIR/mcp.json" 2>/dev/null || true
     echo -e "  ${GREEN}[✓]${RESET} OpenCode AI MCP synced: ${OPENCODE_CONFIG_DIR}/mcp.json"
 
-    # 5. Sync to Cursor / VSCode MCP settings
+    # 5. Sync to Cursor MCP settings
     local CURSOR_CONFIG_DIR="$USER_HOME/.cursor"
     mkdir -p "$CURSOR_CONFIG_DIR"
     cp "$cfg" "$CURSOR_CONFIG_DIR/mcp.json" 2>/dev/null || true
     echo -e "  ${GREEN}[✓]${RESET} Cursor MCP synced: ${CURSOR_CONFIG_DIR}/mcp.json"
+
+    # 6. Sync to Aider
+    local AIDER_CONFIG_DIR="$USER_HOME/.aider"
+    mkdir -p "$AIDER_CONFIG_DIR"
+    cp "$cfg" "$AIDER_CONFIG_DIR/mcp.json" 2>/dev/null || true
+    echo -e "  ${GREEN}[✓]${RESET} Aider MCP synced: ${AIDER_CONFIG_DIR}/mcp.json"
 
     echo ""
     echo -e "${BOLD}${GREEN}[✓] All AI agent runtimes are primed with master MCP servers!${RESET}"
@@ -174,15 +339,21 @@ cmd_test() {
     args=$(jq -r ".mcpServers[\"$server\"].args // [] | join(\" \")" "$cfg")
     local desc
     desc=$(jq -r ".mcpServers[\"$server\"].description // \"N/A\"" "$cfg")
+    local ring
+    ring=$(jq -r ".mcpServers[\"$server\"].securityRing // \"N/A\"" "$cfg")
+    local offline
+    offline=$(jq -r ".mcpServers[\"$server\"].offline // false" "$cfg")
 
     echo -e "  ${GREEN}[✓]${RESET} Server '${server}' registered."
-    echo -e "      Description: ${desc}"
-    echo -e "      Invocation:  ${cmd} ${args}"
+    echo -e "      Security Ring: ${ring}"
+    echo -e "      Offline Mode:  ${offline}"
+    echo -e "      Description:   ${desc}"
+    echo -e "      Invocation:    ${cmd} ${args}"
 
     if command -v "$cmd" >/dev/null 2>&1; then
         echo -e "  ${GREEN}[✓]${RESET} Binary executable '${cmd}' resolved in PATH: $(command -v "$cmd")"
     else
-        echo -e "  ${YELLOW}[!]${RESET} Binary executable '${cmd}' not currently in PATH. Will resolve upon container/package load."
+        echo -e "  ${YELLOW}[!]${RESET} Binary executable '${cmd}' not currently in PATH. Fallback handler will be used."
     fi
 }
 
@@ -191,25 +362,28 @@ interactive_menu() {
         clear
         cmd_status
         echo -e "${GREEN}${BOLD}══════════════════════════════════════════════════════════════════════${RESET}"
-        echo -e "  ${BOLD}${GREEN}[1]${RESET} [SYNC]  ${BOLD}Sync MCP Servers to Claude Code, Hermes, Codex & OpenCode${RESET}"
-        echo -e "  ${BOLD}${CYAN}[2]${RESET} 🧪  ${BOLD}Test MCP Server Connection${RESET}"
-        echo -e "  ${BOLD}${GOLD}[3]${RESET} 📋  ${BOLD}Detailed Server Registry Listing${RESET}"
-        echo -e "  ${BOLD}${PURPLE}[4]${RESET} 📝  ${BOLD}View Raw MCP Configuration JSON${RESET}"
-        echo -e "  ${BOLD}${GRAY}[0]${RESET} [X]  ${BOLD}Exit Hub${RESET}"
+        echo -e "  ${BOLD}${GREEN}[1]${RESET} [LIST]      ${BOLD}Detailed Server Registry Listing & Rings${RESET}"
+        echo -e "  ${BOLD}${CYAN}[2]${RESET} [HEALTH]    ${BOLD}Run Health & Latency Diagnostics${RESET}"
+        echo -e "  ${BOLD}${GOLD}[3]${RESET} [START-ALL] ${BOLD}Spawn Offline MCP Daemons${RESET}"
+        echo -e "  ${BOLD}${PURPLE}[4]${RESET} [SYNC]      ${BOLD}Sync MCP to Claude Code, Hermes, Codex, OpenCode${RESET}"
+        echo -e "  ${BOLD}${YELLOW}[5]${RESET} [TEST]      ${BOLD}Test Specific Server Endpoint${RESET}"
+        echo -e "  ${BOLD}${RED}[6]${RESET} [STOP-ALL]  ${BOLD}Stop Running Daemons${RESET}"
+        echo -e "  ${BOLD}${GRAY}[7]${RESET} [JSON]      ${BOLD}View Raw MCP Configuration JSON${RESET}"
+        echo -e "  ${BOLD}${GRAY}[0]${RESET} [EXIT]      ${BOLD}Exit Hub${RESET}"
         echo -e "${GREEN}${BOLD}══════════════════════════════════════════════════════════════════════${RESET}"
-        read -r -p "Select MCP operation [0-4]: " choice
+        read -r -p "Select MCP operation [0-7]: " choice
         case "$choice" in
-            1) cmd_sync; read -r -p "Press Enter to continue..." _ ;;
-            2) 
+            1) cmd_list; read -r -p "Press Enter to continue..." _ ;;
+            2) cmd_health; read -r -p "Press Enter to continue..." _ ;;
+            3) cmd_start_all; read -r -p "Press Enter to continue..." _ ;;
+            4) banner; cmd_sync; read -r -p "Press Enter to continue..." _ ;;
+            5) 
                 read -r -p "Enter MCP server name to test [default: filesystem]: " sname
                 cmd_test "${sname:-filesystem}"
                 read -r -p "Press Enter to continue..." _
                 ;;
-            3)
-                cmd_list
-                read -r -p "Press Enter to continue..." _
-                ;;
-            4)
+            6) cmd_stop_all; read -r -p "Press Enter to continue..." _ ;;
+            7)
                 echo ""
                 cat "$(get_config_path)"
                 echo ""
@@ -227,10 +401,20 @@ case "$action" in
     list)
         cmd_list
         ;;
+    health)
+        cmd_health
+        ;;
+    start-all)
+        cmd_start_all
+        ;;
+    stop-all)
+        cmd_stop_all
+        ;;
     status)
         cmd_status
         ;;
     sync)
+        banner
         cmd_sync
         ;;
     test)

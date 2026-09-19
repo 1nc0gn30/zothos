@@ -1,0 +1,240 @@
+/* =============================================================================
+   🜂 ZOTHOS APEX SOVEREIGN THEME — GTK 3.0 / 3.24
+   Reality: Azoth Gold Sanctum (Solar Alchemical Design System)
+   Obsidian Void + Radiant 24K Gold + Amber Glassmorphic Surfaces
+   ============================================================================= */
+
+/* ── Color Tokens ─────────────────────────────────────────────────────────── */
+@define-color void_black      #080602;
+@define-color base_bg         #0c0904;
+@define-color surface_0       #140f06;
+@define-color surface_1       #1c160a;
+@define-color surface_2       #261e0e;
+@define-color surface_3       #322814;
+@define-color card_bg         rgba(20, 15, 6, 0.94);
+@define-color overlay_bg      rgba(14, 10, 4, 0.96);
+@define-color glass_bg        rgba(18, 14, 6, 0.78);
+
+/* Solar Gold Core */
+@define-color gold            #ffd700;
+@define-color gold_bright     #fef08a;
+@define-color gold_dim        rgba(255, 215, 0, 0.40);
+@define-color gold_glow       rgba(255, 215, 0, 0.75);
+@define-color gold_faint      rgba(255, 215, 0, 0.12);
+@define-color gold_neon       rgba(255, 215, 0, 0.90);
+@define-color amber           #f59e0b;
+@define-color amber_dim       rgba(245, 158, 11, 0.40);
+
+/* Accent Cyan / Emerald */
+@define-color cyan            #00f3ff;
+@define-color cyan_dim        rgba(0, 243, 255, 0.40);
+@define-color emerald         #10b981;
+
+/* Danger & Warning */
+@define-color danger          #ef4444;
+@define-color danger_bright   #f87171;
+@define-color warning         #f59e0b;
+@define-color success         #ffd700;
+
+/* Text */
+@define-color text_primary    #fef9c3;
+@define-color text_bright     #ffffff;
+@define-color text_dim        #a8a29e;
+@define-color text_muted      #78716c;
+
+/* Borders */
+@define-color border_subtle   rgba(255, 215, 0, 0.14);
+@define-color border_active   rgba(255, 215, 0, 0.55);
+@define-color border_neon     rgba(255, 215, 0, 0.85);
+@define-color border_glass    rgba(255, 215, 0, 0.22);
+
+/* ── Global Reset & Window Surface ───────────────────────────────────────── */
+* {
+    -gtk-icon-shadow: none;
+    outline-color:    transparent;
+    outline-style:    none;
+    outline-width:    0;
+}
+
+window, .background, frame {
+    background-color: @base_bg;
+    color:            @text_primary;
+    font-family:      "JetBrains Mono", "Fira Code", "Cascadia Code", "Ubuntu", sans-serif;
+    font-size:        10.5pt;
+}
+
+/* ── Headerbar & Titlebar ─────────────────────────────────────────────────── */
+headerbar,
+.titlebar,
+headerbar.titlebar {
+    background:    linear-gradient(180deg,
+        rgba(255, 215, 0, 0.08) 0%,
+        @surface_1 40%,
+        @surface_0 100%);
+    border-bottom: 1px solid @border_glass;
+    color:         @gold;
+    min-height:    40px;
+    padding:       0 14px;
+    box-shadow:    0 1px 0 @border_subtle,
+                   0 2px 16px rgba(0, 0, 0, 0.7),
+                   inset 0 1px 0 rgba(255, 215, 0, 0.10);
+}
+
+headerbar .title,
+.titlebar .title {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size:   10.5pt;
+    color:       @gold;
+    text-shadow: 0 0 8px @gold_faint;
+}
+
+window:focus-within headerbar,
+window:focus-within .titlebar {
+    background: linear-gradient(180deg,
+        rgba(255, 215, 0, 0.14) 0%,
+        @surface_1 30%,
+        @surface_0 100%);
+    border-bottom-color: @border_neon;
+    box-shadow: 0 1px 0 @border_neon,
+                0 2px 20px rgba(255, 215, 0, 0.20),
+                inset 0 1px 0 rgba(255, 215, 0, 0.15);
+}
+
+window:focus-within headerbar .title,
+window:focus-within .titlebar .title {
+    color: @gold_bright;
+    text-shadow: 0 0 10px @gold_dim;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+button {
+    background:    @surface_1;
+    border:        1px solid @border_subtle;
+    border-radius: 8px;
+    color:         @text_primary;
+    padding:       7px 16px;
+    font-family:   "JetBrains Mono", monospace;
+    font-size:     10pt;
+    font-weight:   600;
+    min-height:    30px;
+    transition:    all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow:    0 1px 4px rgba(0, 0, 0, 0.5),
+                   inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+button:hover {
+    background:    @surface_2;
+    border-color:  @gold;
+    color:         @gold_bright;
+    box-shadow:    0 0 14px @gold_faint,
+                   0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+button:active,
+button:checked {
+    background:    @gold_faint;
+    border-color:  @gold;
+    color:         @gold_bright;
+    box-shadow:    0 0 18px @gold_dim;
+}
+
+button.suggested-action,
+button.default {
+    background:    linear-gradient(180deg, rgba(255, 215, 0, 0.22) 0%, rgba(255, 215, 0, 0.12) 100%);
+    border-color:  @gold;
+    color:         @gold_bright;
+    font-weight:   700;
+    box-shadow:    0 0 10px @gold_dim;
+}
+
+button.suggested-action:hover,
+button.default:hover {
+    background:    linear-gradient(180deg, rgba(255, 215, 0, 0.35) 0%, rgba(255, 215, 0, 0.20) 100%);
+    box-shadow:    0 0 24px rgba(255, 215, 0, 0.55);
+}
+
+/* ── Text Entries & Inputs ────────────────────────────────────────────────── */
+entry,
+spinbutton entry,
+searchentry,
+.entry {
+    background:    @glass_bg;
+    border:        1px solid @border_subtle;
+    border-radius: 8px;
+    color:         @text_primary;
+    padding:       8px 12px;
+    font-family:   "JetBrains Mono", monospace;
+    font-size:     10pt;
+    caret-color:   @gold;
+    transition:    border-color 130ms ease, box-shadow 130ms ease;
+    box-shadow:    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+                   0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+entry:focus,
+spinbutton entry:focus,
+searchentry:focus,
+.entry:focus {
+    border-color: @gold;
+    box-shadow:   0 0 0 3px @gold_faint,
+                  0 0 16px @gold_dim;
+    color:        @text_bright;
+}
+
+/* ── Progress Bars & Sliders ──────────────────────────────────────────────── */
+progressbar progress {
+    background: linear-gradient(90deg, @amber, @gold, @gold_bright);
+    border-radius: 5px;
+    box-shadow:  0 0 10px @gold_dim;
+}
+
+progressbar trough,
+scale trough {
+    background: @surface_1;
+    border: 1px solid @border_subtle;
+    border-radius: 6px;
+}
+
+scale highlight {
+    background: linear-gradient(90deg, @amber, @gold);
+    border-radius: 5px;
+    box-shadow: 0 0 8px @gold_dim;
+}
+
+scale slider {
+    background: @surface_2;
+    border: 2px solid @gold;
+    border-radius: 50%;
+    min-width: 20px;
+    min-height: 20px;
+    box-shadow: 0 0 12px @gold_dim;
+}
+
+/* ── Menus, Dialogs & Popovers ────────────────────────────────────────────── */
+menu,
+.menu,
+popover,
+dialog {
+    background:    @overlay_bg;
+    border:        1px solid @gold;
+    border-radius: 14px;
+    box-shadow:    0 12px 40px rgba(0, 0, 0, 0.88),
+                   0 0 18px @gold_faint;
+}
+
+menuitem:hover,
+menuitem:focus {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.22), rgba(245, 158, 11, 0.12));
+    color:      @gold_bright;
+    box-shadow: 0 0 12px @gold_dim;
+}
+
+/* ── Notebook Tabs ────────────────────────────────────────────────────────── */
+notebook header tab:checked,
+notebook header tab:active {
+    background: @gold_faint;
+    border-bottom-color: @gold;
+    color: @gold_bright;
+    box-shadow: 0 0 8px @gold_faint;
+}

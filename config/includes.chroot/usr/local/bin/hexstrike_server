@@ -1,3 +1,11 @@
 #!/usr/bin/env bash
 # HexStrike AI Server Entrypoint
-cd /usr/share/hexstrike-ai && exec python3 hexstrike_server.py "$@"
+DIR="/usr/share/hexstrike-ai"
+if [[ ! -d "$DIR" ]]; then
+    if [[ -d "/home/neo/zothos/config/includes.chroot/usr/share/hexstrike-ai" ]]; then
+        DIR="/home/neo/zothos/config/includes.chroot/usr/share/hexstrike-ai"
+    elif [[ -d "/opt/hexstrike-ai" ]]; then
+        DIR="/opt/hexstrike-ai"
+    fi
+fi
+cd "$DIR" && exec python3 hexstrike_server.py "$@"

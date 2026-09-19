@@ -77,6 +77,12 @@ SCRIPTS=(
     "$CHROOT/usr/local/bin/zoth-netkill"
     "$CHROOT/usr/local/bin/zoth-cockpit"
     "$CHROOT/usr/local/bin/zoth-mcp"
+    "$CHROOT/usr/local/bin/zoth-doctor"
+    "$CHROOT/usr/local/bin/zoth-sentinel"
+    "$CHROOT/usr/local/bin/zoth-sentinel-hud"
+    "$CHROOT/usr/local/bin/zoth-desktop-hud"
+    "$CHROOT/usr/local/bin/zoth-heal"
+    "$CHROOT/usr/local/bin/zoth-studio"
     "$CHROOT/usr/local/bin/hexstrike"
     "$CHROOT/usr/local/bin/hexstrike_mcp"
     "$CHROOT/usr/local/bin/hexstrike_server"
@@ -98,11 +104,20 @@ done
 
 echo -e "\n${BOLD}${YELLOW}[1b/5] Auditing Systemd Units & Udev Rules ...${RESET}"
 check_file "$CHROOT/etc/systemd/system/zoth-ghost-amnesic.service" "Amnesic Systemd Unit"
+check_file "$CHROOT/etc/systemd/system/zoth-sentinel.service" "Sentinel AI Systemd Unit"
+check_file "$CHROOT/etc/systemd/system/zoth-watchdog.service" "Self-Healing Watchdog Service"
+check_file "$CHROOT/etc/systemd/system/zoth-watchdog.timer" "Self-Healing Watchdog Timer"
 check_file "$CHROOT/etc/udev/rules.d/99-zoth-panic.rules" "Panic Udev Rules"
 check_file "$CHROOT/etc/xdg/picom/picom-matrix.conf" "Matrix Picom Config"
+check_file "$CHROOT/etc/xdg/picom/picom-ghost.conf" "Ghost Picom Config"
+check_file "$CHROOT/etc/xdg/picom/picom-gold.conf" "Gold Picom Config"
 check_file "$CHROOT/etc/xdg/picom/picom-win11.conf" "Win11 Picom Config"
 check_file "$ROOT_DIR/installer/calamares/settings.conf" "Calamares Settings"
 check_file "$CHROOT/etc/skel/.config/xfce4/panel/whiskermenu-win11.rc" "Win11 Whisker Menu"
+check_file "$CHROOT/etc/lightdm/lightdm-gtk-greeter.conf" "LightDM GTK Greeter Config"
+check_file "$CHROOT/etc/lightdm/slick-greeter.conf" "LightDM Slick Greeter Config"
+check_file "$CHROOT/etc/skel/.bashrc" "Skel Bashrc"
+check_file "$CHROOT/etc/skel/.zshrc" "Skel Zshrc"
 
 echo -e "\n${BOLD}${YELLOW}[2/5] Auditing Visual Themes & Generated Wallpapers ...${RESET}"
 WALLPAPERS=(
@@ -119,10 +134,23 @@ done
 THEMES=(
     "$CHROOT/usr/share/themes/Zoth-Hermetic-Matrix/gtk-3.0/gtk.css"
     "$CHROOT/usr/share/themes/Zoth-Ghost-NullAI/gtk-3.0/gtk.css"
+    "$CHROOT/usr/share/themes/Zoth-Azoth-Gold/gtk-3.0/gtk.css"
     "$CHROOT/usr/share/themes/Zoth-Incognito-Win11/gtk-3.0/gtk.css"
 )
 for t in "${THEMES[@]}"; do
     check_file "$t" "GTK-3.0 Theme CSS"
+done
+
+PLYMOUTH_FILES=(
+    "$CHROOT/usr/share/plymouth/themes/zothos-matrix/zothos-matrix.plymouth"
+    "$CHROOT/usr/share/plymouth/themes/zothos-matrix/zothos-matrix.script"
+    "$CHROOT/usr/share/plymouth/themes/zothos-matrix/seal.png"
+    "$CHROOT/usr/share/plymouth/themes/zothos-matrix/ring.png"
+    "$CHROOT/usr/share/plymouth/themes/zothos-matrix/glow.png"
+    "$CHROOT/etc/plymouth/plymouthd.conf"
+)
+for p in "${PLYMOUTH_FILES[@]}"; do
+    check_file "$p" "Plymouth Boot Asset"
 done
 
 echo -e "\n${BOLD}${YELLOW}[3/5] Auditing APT Repositories & Pinning Policies ...${RESET}"
@@ -144,10 +172,18 @@ check_executable "$ROOT_DIR/build/build-iso.sh"
 check_syntax_bash "$ROOT_DIR/build/build-iso.sh"
 check_file "$ROOT_DIR/build/docker/Dockerfile.builder" "Docker Builder"
 
-echo -e "\n${BOLD}${YELLOW}[5/5] Auditing Zoth Studio Integration ...${RESET}"
+echo -e "\n${BOLD}${YELLOW}[5/5] Auditing Zoth Studio & HexStrike Integration ...${RESET}"
 check_file "$CHROOT/opt/zoth-studio/launch.sh" "Zoth Studio Launcher"
 check_executable "$CHROOT/opt/zoth-studio/launch.sh"
+check_syntax_bash "$CHROOT/opt/zoth-studio/launch.sh"
 check_file "$CHROOT/opt/zoth-studio/index.html" "Zoth Studio UI Hub"
+check_file "$ROOT_DIR/tools/build-zoth-studio-appimage.sh" "Zoth Studio AppImage Builder"
+check_executable "$ROOT_DIR/tools/build-zoth-studio-appimage.sh"
+check_syntax_bash "$ROOT_DIR/tools/build-zoth-studio-appimage.sh"
+check_file "$CHROOT/usr/share/hexstrike-ai/hexstrike_mcp.py" "HexStrike MCP Server"
+check_syntax_python "$CHROOT/usr/share/hexstrike-ai/hexstrike_mcp.py"
+check_file "$CHROOT/usr/share/hexstrike-ai/hexstrike_server.py" "HexStrike Backend Server"
+check_syntax_python "$CHROOT/usr/share/hexstrike-ai/hexstrike_server.py"
 
 echo -e "\n------------------------------------------------------"
 if [[ $ERRORS -eq 0 ]]; then

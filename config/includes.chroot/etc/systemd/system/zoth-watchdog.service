@@ -1,0 +1,17 @@
+[Unit]
+Description=ZothOS Autonomous Watchdog & Self-Healing Resilience Service
+Documentation=man:zoth-heal(1)
+After=network.target local-fs.target
+Wants=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/zoth-heal --quick --quiet
+Nice=19
+IOSchedulingClass=idle
+IOSchedulingPriority=7
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

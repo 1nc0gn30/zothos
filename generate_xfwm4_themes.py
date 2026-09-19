@@ -121,6 +121,61 @@ popup_opacity=100
                 with open(fpath, "w") as f:
                     f.write(content)
 
+def generate_gold_theme(dest_dir):
+    os.makedirs(dest_dir, exist_ok=True)
+    themerc = """# Zoth Azoth Gold xfwm4 theme
+button_offset=8
+button_spacing=4
+full_width_title=true
+title_horizontal_offset=0
+title_vertical_offset_active=2
+title_vertical_offset_inactive=2
+active_text_color=#ffd700
+active_text_shadow_color=#0a0802
+inactive_text_color=#78716c
+inactive_text_shadow_color=#0a0802
+title_shadow_active=false
+title_shadow_inactive=false
+show_frame_shadow=true
+show_popup_shadow=true
+shadow_delta_height=2
+shadow_delta_width=0
+shadow_delta_x=0
+shadow_delta_y=2
+shadow_opacity=65
+resize_opacity=100
+move_opacity=100
+popup_opacity=100
+"""
+    with open(os.path.join(dest_dir, "themerc"), "w") as f:
+        f.write(themerc)
+
+    src_xfwm = "/usr/share/themes/ARK-Dark/xfwm4"
+    if os.path.exists(src_xfwm):
+        for f in os.listdir(src_xfwm):
+            shutil.copy(os.path.join(src_xfwm, f), os.path.join(dest_dir, f))
+    
+    for root, _, files in os.walk(dest_dir):
+        for fname in files:
+            if fname.endswith(".xpm"):
+                fpath = os.path.join(root, fname)
+                with open(fpath, "r") as f:
+                    content = f.read()
+                
+                if "active" in fname:
+                    content = content.replace("#21252B", "#0E0B04")
+                    content = content.replace("#2F343F", "#0E0B04")
+                    content = content.replace("#353B48", "#FBBF24")
+                    content = content.replace("#afb8c5", "#FFD700")
+                else:
+                    content = content.replace("#21252B", "#140F06")
+                    content = content.replace("#2F343F", "#140F06")
+                    content = content.replace("#353B48", "#332408")
+                    content = content.replace("#808791", "#78716C")
+                
+                with open(fpath, "w") as f:
+                    f.write(content)
+
 def generate_win11_theme(dest_dir):
     os.makedirs(dest_dir, exist_ok=True)
     src_xfwm = "/usr/share/themes/Windows 10 Dark/xfwm4"
@@ -131,5 +186,6 @@ def generate_win11_theme(dest_dir):
 if __name__ == "__main__":
     generate_matrix_theme("/home/neo/zothos/config/includes.chroot/usr/share/themes/Zoth-Hermetic-Matrix/xfwm4")
     generate_ghost_theme("/home/neo/zothos/config/includes.chroot/usr/share/themes/Zoth-Ghost-NullAI/xfwm4")
+    generate_gold_theme("/home/neo/zothos/config/includes.chroot/usr/share/themes/Zoth-Azoth-Gold/xfwm4")
     generate_win11_theme("/home/neo/zothos/config/includes.chroot/usr/share/themes/Zoth-Incognito-Win11/xfwm4")
     print("XFWM4 themes successfully generated!")

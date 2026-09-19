@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
 ==============================================================================
- * ZOTHOS AI SENTINEL DAEMON & OS EXECUTOR v3.0 *
- Ultra-lightweight, multi-model autonomous OS supervisor and execution engine.
+ * ZOTHOS AI SENTINEL DAEMON & AUTONOMOUS RESILIENCE EXECUTOR v3.5 *
+ Ultra-lightweight, multi-model autonomous OS supervisor, memory auditor,
+ zombie process sweeper, and auto-healing execution engine.
  Supports: Ollama, OpenAI, Anthropic, DeepSeek, Groq, Grok/xAI, Gemini, OpenRouter.
 ==============================================================================
 """
@@ -11,6 +12,7 @@ import sys
 import os
 import time
 import json
+import signal
 import socket
 import asyncio
 import argparse
@@ -19,27 +21,33 @@ import urllib.request
 import urllib.error
 import urllib.parse
 from datetime import datetime
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
 
 # --- Constants & Paths ---
 CONFIG_PATH_SYSTEM = "/etc/zothos/sentinel.json"
 CONFIG_PATH_USER = os.path.expanduser("~/.config/zothos/sentinel.json")
-SOCKET_PATH = "/tmp/zoth-sentinel.sock"
+SOCKET_PATHS = ["/tmp/zoth-sentinel.sock", "/run/zoth-sentinel.sock"]
 LOG_PATH = os.path.expanduser("~/.local/share/zothos/sentinel.log")
 STATE_PATH = os.path.expanduser("~/.config/zothos/sentinel_state.json")
+HEAL_BIN = "/usr/local/bin/zoth-heal"
 
 os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
 os.makedirs(os.path.dirname(STATE_PATH), exist_ok=True)
 
-# ANSI Colors
+# ANSI Cyber-Alchemical Palette
 EMERALD = "\033[38;2;0;255;157m"
 GOLD = "\033[38;2;255;215;0m"
 CYAN = "\033[38;2;0;229;255m"
 CRIMSON = "\033[38;2;255;51;85m"
 GRAY = "\033[38;2;140;160;180m"
+WHITE = "\033[38;2;240;245;255m"
 BOLD = "\033[1m"
 DIM = "\033[2m"
 RESET = "\033[0m"
+
+# Auto-heal cooldown tracking (to avoid thundering herds)
+LAST_HEAL_TRIGGERS: Dict[str, float] = {}
+HEAL_COOLDOWN_SEC = 120.0
 
 
 def log(msg: str, level: str = "INFO"):
@@ -63,11 +71,15 @@ def load_config() -> Dict[str, Any]:
         "custom_api_key": "",
         "safety_ring": "ring-1",
         "auto_execute": True,
+        "autonomous_remediation": True,
         "telemetry": {
             "interval_seconds": 10,
             "cpu_threshold_percent": 90,
             "ram_threshold_percent": 90,
-            "disk_threshold_percent": 92
+            "disk_threshold_percent": 92,
+            "process_mem_threshold_mb": 1500,
+            "sweep_zombies": True,
+            "monitor_failed_services": True
         }
     }
     if os.path.exists(CONFIG_PATH_SYSTEM):
@@ -91,7 +103,139 @@ def save_user_config(cfg: Dict[str, Any]):
         json.dump(cfg, f, indent=2)
 
 
-# --- System Telemetry & Probes ---
+def get_active_socket_path() -> str:
+    # Prefer existing socket or default to first
+    for sp in SOCKET_PATHS:
+        if os.path.exists(sp):
+            return sp
+    return SOCKET_PATHS[0]
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# RESILIENCE & HEALTH AUDIT HELPERS (Memory Leaks, Zombies, Compositors)
+# ─────────────────────────────────────────────────────────────────────────────
+def detect_memory_leaks(threshold_mb: int = 1500) -> List[Dict[str, Any]]:
+    """Identifies processes consuming abnormal or threshold-exceeding RSS memory."""
+    leaks = []
+    try:
+        res = subprocess.run(
+            ["ps", "-eo", "pid,ppid,user,%mem,rss,comm", "--sort=-rss", "--no-headers"],
+            capture_output=True, text=True, timeout=2
+        )
+        for line in res.stdout.strip().splitlines():
+            parts = line.split()
+            if len(parts) >= 6:
+                pid = int(parts[0])
+                ppid = int(parts[1])
+                user = parts[2]
+                mem_pct = float(parts[3])
+                rss_kb = int(parts[4])
+                comm = parts[5]
+                rss_mb = rss_kb // 1024
+
+                if rss_mb >= threshold_mb:
+                    leaks.append({
+                        "pid": pid,
+                        "ppid": ppid,
+                        "user": user,
+                        "mem_percent": mem_pct,
+                        "rss_mb": rss_mb,
+                        "command": comm
+                    })
+    except Exception as e:
+        log(f"Error checking memory leaks: {e}", "WARN")
+    return leaks
+
+
+def sweep_zombies(reap: bool = False) -> List[Dict[str, Any]]:
+    """Scans and optionally purges defunct / zombie processes by signaling parent processes."""
+    zombies = []
+    try:
+        res = subprocess.run(
+            ["ps", "-eo", "pid,ppid,stat,comm", "--no-headers"],
+            capture_output=True, text=True, timeout=2
+        )
+        for line in res.stdout.strip().splitlines():
+            parts = line.split()
+            if len(parts) >= 4:
+                pid = int(parts[0])
+                ppid = int(parts[1])
+                stat = parts[2]
+                comm = parts[3]
+
+                if "Z" in stat:
+                    z_info = {"pid": pid, "ppid": ppid, "stat": stat, "command": comm, "reaped": False}
+                    if reap:
+                        try:
+                            # Send SIGCHLD to parent process to trigger waitpid reap
+                            os.kill(ppid, signal.SIGCHLD)
+                            z_info["reaped"] = True
+                            log(f"Sent SIGCHLD to parent {ppid} to reap zombie process {pid} ({comm})", "PURGE")
+                        except Exception as ex:
+                            z_info["reap_error"] = str(ex)
+                    zombies.append(z_info)
+    except Exception as e:
+        log(f"Error sweeping zombie processes: {e}", "WARN")
+    return zombies
+
+
+def check_compositor_and_desktop_health() -> Dict[str, Any]:
+    """Inspects X11 window manager, compositor, and panel daemons."""
+    status = {
+        "x11_active": False,
+        "picom_running": False,
+        "xfwm4_running": False,
+        "xfdesktop_running": False,
+        "xfce4_panel_running": False
+    }
+    disp = os.environ.get("DISPLAY", ":0")
+    try:
+        x_check = subprocess.run(["xset", "q", "-display", disp], capture_output=True, timeout=1)
+        status["x11_active"] = (x_check.returncode == 0)
+    except Exception:
+        status["x11_active"] = False
+
+    if status["x11_active"]:
+        status["picom_running"] = (subprocess.run(["pgrep", "-x", "picom"], capture_output=True).returncode == 0)
+        status["xfwm4_running"] = (subprocess.run(["pgrep", "-x", "xfwm4"], capture_output=True).returncode == 0)
+        status["xfdesktop_running"] = (subprocess.run(["pgrep", "-x", "xfdesktop"], capture_output=True).returncode == 0)
+        status["xfce4_panel_running"] = (subprocess.run(["pgrep", "-x", "xfce4-panel"], capture_output=True).returncode == 0)
+
+    return status
+
+
+def trigger_auto_healing(target: str = "all") -> Dict[str, Any]:
+    """Invokes zoth-heal with cooldown protection."""
+    now = time.time()
+    last_trigger = LAST_HEAL_TRIGGERS.get(target, 0.0)
+    if now - last_trigger < HEAL_COOLDOWN_SEC:
+        log(f"Skipping auto-healing for '{target}' (cooldown: {int(HEAL_COOLDOWN_SEC - (now - last_trigger))}s remaining)", "INFO")
+        return {"status": "cooldown_throttled", "target": target}
+
+    LAST_HEAL_TRIGGERS[target] = now
+    log(f"Triggering auto-healing module: {target}", "HEAL")
+
+    cmd = [HEAL_BIN, f"--{target}", "--json"] if target != "all" else [HEAL_BIN, "--all", "--json"]
+    if not os.path.exists(HEAL_BIN):
+        # Fallback if binary not in /usr/local/bin yet
+        cmd[0] = os.path.abspath(os.path.join(os.path.dirname(__file__), "zoth-heal"))
+
+    try:
+        res = subprocess.run(cmd, capture_output=True, text=True, timeout=90)
+        if res.stdout.strip().startswith("{"):
+            try:
+                return json.loads(res.stdout.strip())
+            except Exception:
+                pass
+        return {"status": "completed", "target": target, "stdout": res.stdout, "stderr": res.stderr}
+    except Exception as e:
+        log(f"Auto-healing execution error: {e}", "ERROR")
+        return {"status": "error", "message": str(e)}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SYSTEM TELEMETRY & PROBES
+# ─────────────────────────────────────────────────────────────────────────────
 def get_system_telemetry() -> Dict[str, Any]:
     telemetry = {
         "timestamp": time.time(),
@@ -103,7 +247,9 @@ def get_system_telemetry() -> Dict[str, Any]:
         "active_processes": 0,
         "failed_services": [],
         "tor_active": False,
-        "open_ports": []
+        "zombies_count": 0,
+        "memory_leaks_count": 0,
+        "desktop_health": {}
     }
     try:
         # CPU
@@ -159,6 +305,16 @@ def get_system_telemetry() -> Dict[str, Any]:
     except Exception:
         pass
 
+    # Zombies & Memory leaks count
+    zombies = sweep_zombies(reap=False)
+    telemetry["zombies_count"] = len(zombies)
+
+    mem_leaks = detect_memory_leaks(1500)
+    telemetry["memory_leaks_count"] = len(mem_leaks)
+
+    # Desktop compositor health
+    telemetry["desktop_health"] = check_compositor_and_desktop_health()
+
     try:
         # Network Identities (IP & MAC)
         def iface_priority(name):
@@ -203,7 +359,9 @@ def get_system_telemetry() -> Dict[str, Any]:
     return telemetry
 
 
-# --- AI Engine Client (Provider Agnostic) ---
+# ─────────────────────────────────────────────────────────────────────────────
+# AI ENGINE CLIENT
+# ─────────────────────────────────────────────────────────────────────────────
 def call_llm(prompt: str, system_context: Optional[str] = None) -> str:
     cfg = load_config()
     provider = cfg.get("provider", "ollama").lower()
@@ -213,20 +371,19 @@ def call_llm(prompt: str, system_context: Optional[str] = None) -> str:
     key_env = cfg.get("api_key_env", "OPENAI_API_KEY")
     api_key = custom_key or os.environ.get(key_env, "")
 
-    # Telemetry snapshot for context
     telem = get_system_telemetry()
     default_sys = (
         f"You are ZOTH-SENTINEL, the supreme sovereign AI supervisor for ZOTHOS Linux. "
-        f"You have full autonomous access to inspect and execute commands on this system.\n"
+        f"You have autonomous access to inspect, heal, and execute commands on this system.\n"
         f"Current Telemetry: CPU={telem['cpu_usage']}%, RAM={telem['ram_percent']}% ({telem['ram_used_mb']}/{telem['ram_total_mb']}MB), "
-        f"Disk={telem['disk_percent']}%, TorStealth={telem['tor_active']}, FailedUnits={telem['failed_services']}.\n"
+        f"Disk={telem['disk_percent']}%, TorStealth={telem['tor_active']}, FailedUnits={telem['failed_services']}, "
+        f"Zombies={telem['zombies_count']}, MemoryLeaks={telem['memory_leaks_count']}.\n"
         f"When asked to perform system actions, return the EXACT executable bash command inside a fenced block like:\n"
         f"```bash\n<command>\n```\n"
         f"Keep explanations sharp, concise, and hacker-grade."
     )
     sys_prompt = system_context or default_sys
 
-    # Anthropic direct API format
     if provider == "anthropic":
         url = "https://api.anthropic.com/v1/messages"
         headers = {
@@ -248,7 +405,7 @@ def call_llm(prompt: str, system_context: Optional[str] = None) -> str:
         except Exception as e:
             return f"[SENTINEL ERROR: Anthropic API failed: {e}]"
 
-    # OpenAI-compatible format (Ollama, OpenAI, Groq, DeepSeek, Grok, vLLM, OpenRouter, Gemini OpenAI bridge)
+    # OpenAI-compatible format
     endpoint = f"{base_url.rstrip('/')}/chat/completions"
     headers = {"Content-Type": "application/json"}
     if api_key:
@@ -268,7 +425,6 @@ def call_llm(prompt: str, system_context: Optional[str] = None) -> str:
             data = json.loads(resp.read().decode("utf-8"))
             return data["choices"][0]["message"]["content"]
     except urllib.error.URLError as e:
-        # Fallback heuristic if local Ollama or server is currently offline
         return (
             f"[SENTINEL LOCAL AGENT] (LLM provider '{provider}' at {base_url} unreachable: {e.reason})\n"
             f"Autonomous Rule-Engine Fallback: Query parsed for '{prompt}'.\n"
@@ -278,7 +434,9 @@ def call_llm(prompt: str, system_context: Optional[str] = None) -> str:
         return f"[SENTINEL ERROR: {e}]"
 
 
-# --- Command Execution Engine ---
+# ─────────────────────────────────────────────────────────────────────────────
+# COMMAND EXECUTION ENGINE
+# ─────────────────────────────────────────────────────────────────────────────
 def execute_system_command(cmd: str) -> Dict[str, Any]:
     log(f"Executing OS command: {cmd}", "EXEC")
     t0 = time.time()
@@ -305,18 +463,21 @@ def execute_system_command(cmd: str) -> Dict[str, Any]:
         return {"success": False, "returncode": -1, "stdout": "", "stderr": str(e), "duration_sec": 0.0}
 
 
-# --- Background Monitoring Loop ---
+# ─────────────────────────────────────────────────────────────────────────────
+# BACKGROUND MONITORING & PROACTIVE HEALING LOOP
+# ─────────────────────────────────────────────────────────────────────────────
 async def telemetry_monitor_loop():
     while True:
         try:
             cfg = load_config()
             interval = cfg.get("telemetry", {}).get("interval_seconds", 10)
+            auto_remediate = cfg.get("autonomous_remediation", True)
             telem = get_system_telemetry()
-            
-            # Check thresholds
+
             cpu_th = cfg.get("telemetry", {}).get("cpu_threshold_percent", 90)
             ram_th = cfg.get("telemetry", {}).get("ram_threshold_percent", 90)
             disk_th = cfg.get("telemetry", {}).get("disk_threshold_percent", 92)
+            mem_th_mb = cfg.get("telemetry", {}).get("process_mem_threshold_mb", 1500)
 
             anomalies = []
             if telem["cpu_usage"] > cpu_th:
@@ -325,19 +486,49 @@ async def telemetry_monitor_loop():
                 anomalies.append(f"High RAM: {telem['ram_percent']}% ({telem['ram_used_mb']}MB) > {ram_th}%")
             if telem["disk_percent"] > disk_th:
                 anomalies.append(f"High Disk: {telem['disk_percent']}% > {disk_th}%")
+                if auto_remediate:
+                    trigger_auto_healing("disk")
+
             if telem["failed_services"]:
                 anomalies.append(f"Failed Services: {', '.join(telem['failed_services'])}")
+                if auto_remediate:
+                    trigger_auto_healing("all")
+
+            # Check Desktop & Compositor crashes
+            dh = telem.get("desktop_health", {})
+            if dh.get("x11_active"):
+                if not dh.get("picom_running") or not dh.get("xfwm4_running") or not dh.get("xfce4_panel_running"):
+                    anomalies.append("Desktop/Compositor components offline")
+                    if auto_remediate:
+                        trigger_auto_healing("display")
+
+            # Check & sweep zombies
+            if telem.get("zombies_count", 0) > 0:
+                if cfg.get("telemetry", {}).get("sweep_zombies", True):
+                    reaped = sweep_zombies(reap=True)
+                    anomalies.append(f"Swept {len(reaped)} zombie process(es)")
+
+            # Check memory leaks
+            leaks = detect_memory_leaks(mem_th_mb)
+            if leaks:
+                leak_descs = [f"{l['command']}(PID:{l['pid']})={l['rss_mb']}MB" for l in leaks]
+                anomalies.append(f"Memory runaway detected: {', '.join(leak_descs)}")
+                log(f"Rogue high-memory process alert: {leak_descs}", "WARN")
 
             if anomalies:
                 alert_msg = " | ".join(anomalies)
-                log(f"Anomaly detected: {alert_msg}", "ALERT")
+                log(f"Telemetry Alert: {alert_msg}", "ALERT")
                 if cfg.get("auto_execute", True):
-                    # Proactive AI remediation or notification
                     subprocess.run(["notify-send", "-a", "Zoth Sentinel AI", "-u", "critical", "System Telemetry Alert", alert_msg], check=False)
 
             # Persist state
             with open(STATE_PATH, "w") as f:
-                json.dump({"telemetry": telem, "anomalies": anomalies, "last_sweep": time.time()}, f, indent=2)
+                json.dump({
+                    "telemetry": telem,
+                    "anomalies": anomalies,
+                    "memory_leaks": leaks,
+                    "last_sweep": time.time()
+                }, f, indent=2)
 
         except Exception as e:
             log(f"Monitor loop error: {e}", "ERROR")
@@ -345,20 +536,87 @@ async def telemetry_monitor_loop():
         await asyncio.sleep(interval)
 
 
-# --- IPC Server ---
+# ─────────────────────────────────────────────────────────────────────────────
+# SOCKET IPC PROTOCOL & HANDLER
+# ─────────────────────────────────────────────────────────────────────────────
 async def handle_ipc_client(reader, writer):
     try:
         data = await reader.read(65536)
         if not data:
             writer.close()
             return
-        req = json.loads(data.decode("utf-8"))
-        action = req.get("action", "")
+        raw_text = data.decode("utf-8").strip()
 
-        if action == "status":
+        # Support both JSON payload and raw string command formats
+        if raw_text.startswith("{"):
+            try:
+                req = json.loads(raw_text)
+                action = req.get("action", "").lower()
+            except Exception:
+                req = {}
+                action = raw_text.lower()
+        else:
+            action = raw_text.lower()
+            req = {"action": action}
+
+        # Handle Commands
+        if action in ["status", "stat"]:
             cfg = load_config()
             telem = get_system_telemetry()
-            resp = {"status": "active", "config": cfg, "telemetry": telem}
+            zombies = sweep_zombies(reap=False)
+            leaks = detect_memory_leaks(cfg.get("telemetry", {}).get("process_mem_threshold_mb", 1500))
+            resp = {
+                "status": "active",
+                "config": cfg,
+                "telemetry": telem,
+                "zombies": zombies,
+                "memory_leaks": leaks
+            }
+
+        elif action in ["diagnose", "diag"]:
+            telem = get_system_telemetry()
+            zombies = sweep_zombies(reap=False)
+            leaks = detect_memory_leaks(1000)
+            dh = telem.get("desktop_health", {})
+            issues = []
+
+            if telem["cpu_usage"] > 85:
+                issues.append(f"CPU utilization high: {telem['cpu_usage']}%")
+            if telem["ram_percent"] > 85:
+                issues.append(f"RAM utilization high: {telem['ram_percent']}% ({telem['ram_used_mb']}MB used)")
+            if telem["disk_percent"] > 88:
+                issues.append(f"Root disk nearly full: {telem['disk_percent']}%")
+            if telem["failed_services"]:
+                issues.append(f"Failed systemd services: {', '.join(telem['failed_services'])}")
+            if zombies:
+                issues.append(f"Found {len(zombies)} zombie process(es)")
+            if leaks:
+                issues.append(f"Found {len(leaks)} process(es) exceeding 1GB RSS")
+            if dh.get("x11_active") and not dh.get("picom_running"):
+                issues.append("Compositor (picom) offline")
+
+            resp = {
+                "status": "ok",
+                "healthy": len(issues) == 0,
+                "issues": issues,
+                "telemetry": telem,
+                "zombies": zombies,
+                "memory_leaks": leaks
+            }
+
+        elif action in ["heal", "repair"]:
+            target = req.get("target", "all")
+            result = trigger_auto_healing(target)
+            resp = {"status": "ok", "action": "heal", "target": target, "result": result}
+
+        elif action in ["purge_zombies", "purge-zombies", "zombies"]:
+            reaped = sweep_zombies(reap=True)
+            resp = {"status": "ok", "action": "purge_zombies", "reaped_count": len(reaped), "zombies": reaped}
+
+        elif action in ["reset_desktop", "reset-desktop", "desktop"]:
+            result = trigger_auto_healing("display")
+            cfg_res = trigger_auto_healing("desktop")
+            resp = {"status": "ok", "action": "reset_desktop", "display_result": result, "desktop_result": cfg_res}
 
         elif action == "ask":
             prompt = req.get("prompt", "")
@@ -367,14 +625,12 @@ async def handle_ipc_client(reader, writer):
 
         elif action == "exec":
             task = req.get("task", "")
-            # Query LLM to generate precise command or execute directly if script
             if task.startswith("!"):
                 cmd_to_run = task[1:].strip()
                 result = execute_system_command(cmd_to_run)
                 resp = {"status": "ok", "command": cmd_to_run, "result": result}
             else:
                 ai_out = call_llm(f"Generate the exact bash command to accomplish this task on ZothOS: {task}")
-                # Extract code block if present
                 cmd_to_run = ""
                 if "```bash" in ai_out:
                     cmd_to_run = ai_out.split("```bash")[1].split("```")[0].strip()
@@ -419,31 +675,76 @@ async def handle_ipc_client(reader, writer):
 
 
 async def run_daemon_server():
-    if os.path.exists(SOCKET_PATH):
+    sock_path = SOCKET_PATHS[0]
+    if os.path.exists(sock_path):
         try:
-            os.remove(SOCKET_PATH)
+            os.remove(sock_path)
         except OSError:
             pass
-    server = await asyncio.start_unix_server(handle_ipc_client, path=SOCKET_PATH)
-    log(f"Zoth Sentinel AI Daemon started on socket {SOCKET_PATH}", "START")
-    os.chmod(SOCKET_PATH, 0o666)
-    
-    # Run both IPC server and Telemetry loop
+    server = await asyncio.start_unix_server(handle_ipc_client, path=sock_path)
+    log(f"Zoth Sentinel AI Daemon started on socket {sock_path}", "START")
+    os.chmod(sock_path, 0o666)
+
+    # Link /run socket if directory is writable
+    if os.path.isdir("/run") and os.access("/run", os.W_OK):
+        try:
+            if os.path.exists(SOCKET_PATHS[1]):
+                os.remove(SOCKET_PATHS[1])
+            os.symlink(sock_path, SOCKET_PATHS[1])
+        except Exception:
+            pass
+
+    banner()
+    print(f"{EMERALD}[✓] Zoth Sentinel AI Daemon listening on {sock_path}{RESET}")
+
     await asyncio.gather(
         server.serve_forever(),
         telemetry_monitor_loop()
     )
 
 
-# --- Client IPC Helper ---
+# ─────────────────────────────────────────────────────────────────────────────
+# CLIENT IPC HELPER & STANDALONE FALLBACK
+# ─────────────────────────────────────────────────────────────────────────────
 def send_ipc_request(payload: Dict[str, Any]) -> Dict[str, Any]:
-    if not os.path.exists(SOCKET_PATH):
+    active_sock = None
+    for sp in SOCKET_PATHS:
+        if os.path.exists(sp):
+            active_sock = sp
+            break
+
+    if not active_sock:
         # Daemon not running, run in direct standalone mode
-        action = payload.get("action")
+        action = payload.get("action", "").lower()
         if action == "ask":
             return {"status": "standalone", "response": call_llm(payload.get("prompt", ""))}
         elif action == "status":
-            return {"status": "stopped", "config": load_config(), "telemetry": get_system_telemetry()}
+            return {
+                "status": "stopped",
+                "config": load_config(),
+                "telemetry": get_system_telemetry(),
+                "zombies": sweep_zombies(reap=False),
+                "memory_leaks": detect_memory_leaks(1500)
+            }
+        elif action == "diagnose":
+            telem = get_system_telemetry()
+            return {
+                "status": "standalone",
+                "healthy": len(telem["failed_services"]) == 0,
+                "issues": [f"Failed service: {s}" for s in telem["failed_services"]],
+                "telemetry": telem,
+                "zombies": sweep_zombies(reap=False),
+                "memory_leaks": detect_memory_leaks(1000)
+            }
+        elif action == "heal":
+            return {"status": "standalone", "result": trigger_auto_healing(payload.get("target", "all"))}
+        elif action == "purge_zombies":
+            reaped = sweep_zombies(reap=True)
+            return {"status": "standalone", "reaped_count": len(reaped), "zombies": reaped}
+        elif action == "reset_desktop":
+            d_res = trigger_auto_healing("display")
+            c_res = trigger_auto_healing("desktop")
+            return {"status": "standalone", "display_result": d_res, "desktop_result": c_res}
         elif action == "exec":
             task = payload.get("task", "")
             if task.startswith("!"):
@@ -462,7 +763,7 @@ def send_ipc_request(payload: Dict[str, Any]) -> Dict[str, Any]:
 
     s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     try:
-        s.connect(SOCKET_PATH)
+        s.connect(active_sock)
         s.sendall(json.dumps(payload).encode("utf-8"))
         resp_data = s.recv(65536)
         return json.loads(resp_data.decode("utf-8"))
@@ -472,11 +773,13 @@ def send_ipc_request(payload: Dict[str, Any]) -> Dict[str, Any]:
         s.close()
 
 
-# --- CLI Commands & Renderers ---
+# ─────────────────────────────────────────────────────────────────────────────
+# CLI COMMANDS & RENDERERS
+# ─────────────────────────────────────────────────────────────────────────────
 def banner():
     print(f"{EMERALD}{BOLD}======================================================================{RESET}")
-    print(f"{GOLD}{BOLD}   * *  ZOTHOS AUTONOMOUS AI SENTINEL & OS EXECUTOR v3.0  ~ *{RESET}")
-    print(f"{CYAN}   Continuous System Telemetry • Multi-Model Engine • Root Execution{RESET}")
+    print(f"{GOLD}{BOLD}   * *  ZOTHOS AUTONOMOUS AI SENTINEL & RESILIENCE DAEMON v3.5  * *{RESET}")
+    print(f"{CYAN}   Telemetry • Memory Auditor • Zombie Sweeper • Self-Healing Engine{RESET}")
     print(f"{EMERALD}{BOLD}======================================================================{RESET}")
 
 
@@ -486,13 +789,15 @@ def cmd_status():
     cfg = res.get("config", {})
     telem = res.get("telemetry", {})
     daemon_st = res.get("status", "unknown").upper()
-    
-    color_st = EMERALD if daemon_st == "ACTIVE" else CRIMSON
+    zombies = res.get("zombies", [])
+    leaks = res.get("memory_leaks", [])
+
+    color_st = EMERALD if daemon_st == "ACTIVE" else (GOLD if daemon_st == "STANDALONE" else CRIMSON)
     print(f"\n{BOLD}Sentinel Daemon State:{RESET} {color_st}[ {daemon_st} ]{RESET}")
     print(f"{BOLD}Configured AI Model:  {RESET}{GOLD}{cfg.get('model')}{RESET} ({CYAN}{cfg.get('provider')}{RESET})")
     print(f"{BOLD}API Endpoint:         {RESET}{GRAY}{cfg.get('base_url')}{RESET}")
-    print(f"{BOLD}Safety Execution Ring:{RESET} {EMERALD}{cfg.get('safety_ring')}{RESET} (Auto-exec: {cfg.get('auto_execute')})")
-    
+    print(f"{BOLD}Safety Execution Ring:{RESET} {EMERALD}{cfg.get('safety_ring')}{RESET} (Auto-exec: {cfg.get('auto_execute')}, Auto-heal: {cfg.get('autonomous_remediation', True)})")
+
     print(f"\n{BOLD}--- Live OS Telemetry ---{RESET}")
     print(f"  CPU Usage:       {EMERALD if telem.get('cpu_usage', 0) < 80 else CRIMSON}{telem.get('cpu_usage')}%{RESET}")
     print(f"  RAM Usage:       {EMERALD if telem.get('ram_percent', 0) < 80 else CRIMSON}{telem.get('ram_percent')}%{RESET} ({telem.get('ram_used_mb')}MB / {telem.get('ram_total_mb')}MB)")
@@ -500,13 +805,91 @@ def cmd_status():
     print(f"  Primary IP:      {GOLD}{telem.get('primary_ip', '127.0.0.1')}{RESET}")
     print(f"  Primary MAC:     {CYAN}{telem.get('primary_mac', '00:00:00:00:00:00')}{RESET}")
     print(f"  Tor Stealth:     {EMERALD if telem.get('tor_active') else GRAY}{'ENABLED (Ghostmode)' if telem.get('tor_active') else 'DISABLED (Clear)'}{RESET}")
-    
+
+    # Desktop Health
+    dh = telem.get("desktop_health", {})
+    comp_str = f"{EMERALD}Active (picom){RESET}" if dh.get("picom_running") else f"{GOLD}XRender / Off{RESET}"
+    wm_str = f"{EMERALD}xfwm4 ok{RESET}" if dh.get("xfwm4_running") else f"{CRIMSON}xfwm4 dead{RESET}"
+    panel_str = f"{EMERALD}panel ok{RESET}" if dh.get("xfce4_panel_running") else f"{CRIMSON}panel dead{RESET}"
+    print(f"  Desktop Display: {comp_str} | {wm_str} | {panel_str}")
+
+    # Resilience Probes
+    z_color = EMERALD if len(zombies) == 0 else CRIMSON
+    print(f"  Zombie Sweeper:  {z_color}{len(zombies)} defunct process(es){RESET}")
+
+    l_color = EMERALD if len(leaks) == 0 else CRIMSON
+    print(f"  Memory Auditor:  {l_color}{len(leaks)} high-RSS process(es){RESET}")
+    if leaks:
+        for lk in leaks:
+            print(f"    ↳ {GOLD}{lk['command']}{RESET} (PID {lk['pid']}): {lk['rss_mb']}MB RSS ({lk['mem_percent']}%)")
+
     failed = telem.get("failed_services", [])
     if failed:
         print(f"  Failed Services: {CRIMSON}{', '.join(failed)}{RESET}")
     else:
         print(f"  Systemd Status:  {EMERALD}All units operational (0 failed){RESET}")
     print("")
+
+
+def cmd_diagnose():
+    banner()
+    print(f"{CYAN}[*] Executing deep sentinel diagnostic sweep...{RESET}\n")
+    res = send_ipc_request({"action": "diagnose"})
+    telem = res.get("telemetry", {})
+    issues = res.get("issues", [])
+    zombies = res.get("zombies", [])
+    leaks = res.get("memory_leaks", [])
+
+    print(f"{BOLD}Diagnostic Summary:{RESET}")
+    if issues:
+        print(f"  {CRIMSON}[⚠ {len(issues)} ISSUE(S) DETECTED]{RESET}")
+        for iss in issues:
+            print(f"   • {GOLD}{iss}{RESET}")
+    else:
+        print(f"  {EMERALD}[✓ ALL SUBSYSTEMS NOMINAL - ZERO DEFECTS]{RESET}")
+
+    print(f"\n{BOLD}Resource Status:{RESET}")
+    print(f"  • CPU: {telem.get('cpu_usage')}% | RAM: {telem.get('ram_percent')}% | Disk: {telem.get('disk_percent')}%")
+    print(f"  • Zombies: {len(zombies)} | Memory Leaks (>1GB): {len(leaks)}")
+    print(f"  • Primary IP: {telem.get('primary_ip', '127.0.0.1')}")
+    print("")
+
+
+def cmd_heal(target: str = "all"):
+    banner()
+    print(f"{CYAN}[*] Dispatching self-healing request for target: {GOLD}{target}{RESET}...")
+    res = send_ipc_request({"action": "heal", "target": target})
+    result = res.get("result", {})
+    print(f"\n{EMERALD}{BOLD}[HEAL OUTCOME]{RESET}")
+    if isinstance(result, dict):
+        status = result.get("status", "completed")
+        healed = result.get("healed_items", 0)
+        warns = result.get("warnings", 0)
+        fails = result.get("failures", 0)
+        print(f"  Status:       {EMERALD if status == 'healthy' or status == 'completed' else CRIMSON}{status.upper()}{RESET}")
+        print(f"  Healed Items: {GOLD}{healed}{RESET}")
+        print(f"  Warnings:     {GOLD}{warns}{RESET}")
+        print(f"  Failures:     {CRIMSON}{fails}{RESET}")
+        for act in result.get("actions", []):
+            print(f"    ↳ [{act.get('domain')}]: {act.get('details')}")
+    else:
+        print(result)
+    print("")
+
+
+def cmd_purge_zombies():
+    banner()
+    print(f"{CYAN}[*] Sweeping and purging zombie processes...{RESET}")
+    res = send_ipc_request({"action": "purge_zombies"})
+    count = res.get("reaped_count", 0)
+    print(f"{EMERALD}[✓] Successfully signaled and reaped {GOLD}{count}{EMERALD} zombie process(es).{RESET}\n")
+
+
+def cmd_reset_desktop():
+    banner()
+    print(f"{CYAN}[*] Resetting X11 compositor, window manager, and desktop hierarchy...{RESET}")
+    res = send_ipc_request({"action": "reset_desktop"})
+    print(f"{EMERALD}[✓] Desktop and compositor reset routines executed successfully.{RESET}\n")
 
 
 def cmd_ask(prompt: str):
@@ -522,7 +905,7 @@ def cmd_exec(task: str):
     res = send_ipc_request({"action": "exec", "task": task})
     cmd = res.get("command", "")
     result = res.get("result", {})
-    
+
     print(f"\n{GOLD}{BOLD}[TARGET COMMAND]{RESET}: {EMERALD}{cmd}{RESET}")
     if result:
         success = result.get("success", False)
@@ -550,6 +933,7 @@ def cmd_monitor():
                 f"\r{EMERALD}CPU: {telem['cpu_usage']}%{RESET} | "
                 f"{CYAN}RAM: {telem['ram_percent']}% ({telem['ram_used_mb']}MB){RESET} | "
                 f"{GOLD}DISK: {telem['disk_percent']}%{RESET} | "
+                f"ZOMBIES: {telem['zombies_count']} | "
                 f"{'TOR: ON' if telem['tor_active'] else 'TOR: OFF'} | "
                 f"FAIL: {len(telem['failed_services'])} units   "
             )
@@ -560,13 +944,19 @@ def cmd_monitor():
 
 
 def main():
-    parser = argparse.ArgumentParser(description="ZOTHOS Autonomous AI Sentinel & OS Execution Engine")
+    parser = argparse.ArgumentParser(description="ZOTHOS Autonomous AI Sentinel & Resilience OS Engine")
     subparsers = parser.add_subparsers(dest="command", help="Command to run")
 
-    subparsers.add_parser("daemon", help="Run the background sentinel supervisor & IPC daemon")
-    subparsers.add_parser("status", help="Display live sentinel status and OS telemetry")
+    subparsers.add_parser("daemon", help="Run the background sentinel supervisor, IPC server & healing daemon")
+    subparsers.add_parser("status", help="Display live sentinel status, OS telemetry, memory leaks & zombies")
+    subparsers.add_parser("diagnose", help="Execute deep system diagnostic sweep across all subsystems")
+    subparsers.add_parser("purge-zombies", help="Sweep and purge zombie / defunct processes")
+    subparsers.add_parser("reset-desktop", help="Reset X11 compositor, window manager, and desktop panels")
     subparsers.add_parser("monitor", help="Stream live terminal telemetry HUD")
-    
+
+    heal_p = subparsers.add_parser("heal", help="Trigger autonomous self-healing routines")
+    heal_p.add_argument("target", nargs="?", default="all", choices=["all", "quick", "packages", "display", "network", "disk", "desktop", "audio", "python"], help="Healing target domain")
+
     ask_p = subparsers.add_parser("ask", help="Query the AI model with system awareness")
     ask_p.add_argument("prompt", nargs="+", help="Prompt or question")
 
@@ -583,6 +973,14 @@ def main():
         asyncio.run(run_daemon_server())
     elif args.command == "status":
         cmd_status()
+    elif args.command == "diagnose":
+        cmd_diagnose()
+    elif args.command == "heal":
+        cmd_heal(args.target)
+    elif args.command == "purge-zombies":
+        cmd_purge_zombies()
+    elif args.command == "reset-desktop":
+        cmd_reset_desktop()
     elif args.command == "monitor":
         cmd_monitor()
     elif args.command == "ask":
