@@ -1,0 +1,209 @@
+#!/usr/bin/env python3
+"""
+==============================================================================
+ * ZOTH STUDIO PRO — NATIVE DESKTOP APPLICATION RUNTIME v3.0 *
+ Hardware-Accelerated 3D WebGL Alchemical Cockpit & OS Orchestrator.
+ Pure Native Linux Gtk3 + WebKit2GTK 4.1 Architecture (Zero Browser Chrome).
+==============================================================================
+"""
+
+import sys
+import os
+import json
+import time
+import signal
+import threading
+import subprocess
+import http.server
+import socketserver
+
+import gi
+gi.require_version('Gtk', '3.0')
+gi.require_version('Gdk', '3.0')
+gi.require_version('WebKit2', '4.1')
+from gi.repository import Gtk, Gdk, GLib, WebKit2, Gio
+
+STUDIO_ROOT = "/opt/zoth-studio"
+STUDIO_PUBLIC = os.path.join(STUDIO_ROOT, "public")
+STUDIO_INDEX = os.path.join(STUDIO_ROOT, "index.html")
+ICON_PATH = "/usr/share/pixmaps/zoth-studio.png"
+DEFAULT_PORT = 8088
+
+
+class QuietHTTPHandler(http.server.SimpleHTTPRequestHandler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, directory=STUDIO_ROOT if os.path.exists(STUDIO_ROOT) else "/tmp", **kwargs)
+
+    def log_message(self, format, *args):
+        # Silence access logs for zero terminal noise
+        pass
+
+    def end_headers(self):
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Cache-Control', 'no-cache')
+        super().end_headers()
+
+
+def start_local_asset_server(port=DEFAULT_PORT):
+    # Try binding to port, if busy use existing or increment
+    for p in range(port, port + 10):
+        try:
+            httpd = socketserver.TCPServer(("127.0.0.1", p), QuietHTTPHandler)
+            t = threading.Thread(target=httpd.serve_forever, daemon=True)
+            t.start()
+            return p
+        except OSError:
+            # Port in use, check if it's already serving
+            try:
+                import urllib.request
+                urllib.request.urlopen(f"http://127.0.0.1:{p}/", timeout=0.5)
+                return p
+            except Exception:
+                continue
+    return DEFAULT_PORT
+
+
+class ZothStudioApp(Gtk.Window):
+    def __init__(self, server_port):
+        super().__init__(type=Gtk.WindowType.TOPLEVEL)
+        self.server_port = server_port
+        self.set_title("ZOTH STUDIO PRO // SOVEREIGN CYBER-ALCHEMICAL HUB")
+        self.set_default_size(1360, 860)
+        self.set_position(Gtk.WindowPosition.CENTER)
+
+        # Set App Icon
+        if os.path.exists(ICON_PATH):
+            try:
+                self.set_icon_from_file(ICON_PATH)
+            except Exception:
+                pass
+
+        # Dark Obsidian Window Background
+        self.override_background_color(Gtk.StateFlags.NORMAL, Gdk.RGBA(0.02, 0.03, 0.05, 1.0))
+
+        # WebKit Setup
+        self.ucm = WebKit2.UserContentManager()
+        self.ucm.connect("script-message-received::zoth", self._on_script_message)
+        self.ucm.register_script_message_handler("zoth")
+
+        # Inject Bridge JavaScript
+        bridge_js = """
+        window.zothBridge = {
+            exec: function(cmd) {
+                window.webkit.messageHandlers.zoth.postMessage(JSON.stringify({action: 'exec', command: cmd}));
+            },
+            launchTool: function(tool) {
+                window.webkit.messageHandlers.zoth.postMessage(JSON.stringify({action: 'launch', tool: tool}));
+            },
+            toggleTor: function() {
+                window.webkit.messageHandlers.zoth.postMessage(JSON.stringify({action: 'toggle_tor'}));
+            },
+            sentinelPrompt: function(prompt) {
+                window.webkit.messageHandlers.zoth.postMessage(JSON.stringify({action: 'sentinel', prompt: prompt}));
+            }
+        };
+        console.log('[ZOTH NATIVE] Native Linux OS Bridge initialized.');
+        """
+        user_script = WebKit2.UserScript(
+            bridge_js,
+            WebKit2.UserContentInjectedFrames.ALL_FRAMES,
+            WebKit2.UserScriptInjectionTime.START,
+            None, None
+        )
+        self.ucm.add_script(user_script)
+
+        # Web Context & Settings
+        self.webview = WebKit2.WebView.new_with_user_content_manager(self.ucm)
+        settings = self.webview.get_settings()
+        settings.set_enable_webgl(True)
+        settings.set_enable_accelerated_2d_canvas(True)
+        settings.set_enable_smooth_scrolling(True)
+        settings.set_enable_javascript(True)
+        settings.set_enable_developer_extras(True)
+        settings.set_enable_page_cache(True)
+        settings.set_javascript_can_access_clipboard(True)
+        settings.set_enable_write_console_messages_to_stdout(False)
+
+        # Embed WebView
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        self.add(box)
+        box.pack_start(self.webview, True, True, 0)
+
+        # Load Local Studio Hub URL
+        studio_url = f"http://127.0.0.1:{self.server_port}/index.html"
+        self.webview.load_uri(studio_url)
+
+        # Key Bindings (F11 Fullscreen, F12 DevTools, F5 Reload, Ctrl+Q Quit)
+        self.connect("key-press-event", self._on_key_press)
+        self.connect("delete-event", Gtk.main_quit)
+
+    def _on_key_press(self, widget, event):
+        keyval = event.keyval
+        state = event.state & Gtk.accelerator_get_default_mod_mask()
+
+        if keyval == Gdk.KEY_F11:
+            if self.get_window().get_state() & Gdk.WindowState.FULLSCREEN:
+                self.unfullscreen()
+            else:
+                self.fullscreen()
+            return True
+        elif keyval == Gdk.KEY_F12:
+            inspector = self.webview.get_inspector()
+            inspector.show()
+            return True
+        elif keyval == Gdk.KEY_F5 or (state == Gdk.ModifierType.CONTROL_MASK and keyval == Gdk.KEY_r):
+            self.webview.reload()
+            return True
+        elif state == Gdk.ModifierType.CONTROL_MASK and keyval == Gdk.KEY_q:
+            Gtk.main_quit()
+            return True
+        return False
+
+    def _on_script_message(self, ucm, js_result):
+        try:
+            msg_str = js_result.get_js_value().to_string()
+            msg = json.loads(msg_str)
+            action = msg.get("action")
+
+            if action == "exec":
+                cmd = msg.get("command")
+                if cmd:
+                    subprocess.Popen(cmd, shell=True)
+
+            elif action == "launch":
+                tool = msg.get("tool")
+                tools_map = {
+                    "hexstrike": "/usr/local/bin/hexstrike",
+                    "maya": "/usr/local/bin/maya",
+                    "hermes": "/usr/local/bin/hermes",
+                    "ghost": "/usr/local/bin/zoth-ghost toggle",
+                    "sentinel": "/usr/local/bin/zoth-sentinel-hud",
+                    "obsidian": "obsidian"
+                }
+                if tool in tools_map:
+                    subprocess.Popen(tools_map[tool], shell=True)
+
+            elif action == "toggle_tor":
+                subprocess.Popen("/usr/local/bin/zoth-ghost toggle", shell=True)
+
+            elif action == "sentinel":
+                prompt = msg.get("prompt")
+                if prompt:
+                    subprocess.Popen(["/usr/local/bin/zoth-sentinel", "exec", prompt])
+
+        except Exception as e:
+            print(f"[ZOTH NATIVE ERROR] {e}", file=sys.stderr)
+
+
+def main():
+    signal.signal(signal.SIGINT, lambda *a: Gtk.main_quit())
+    signal.signal(signal.SIGTERM, lambda *a: Gtk.main_quit())
+
+    port = start_local_asset_server(DEFAULT_PORT)
+    app = ZothStudioApp(port)
+    app.show_all()
+    Gtk.main()
+
+
+if __name__ == "__main__":
+    main()
