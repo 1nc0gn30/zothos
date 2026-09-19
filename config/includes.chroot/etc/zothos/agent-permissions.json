@@ -1,12 +1,326 @@
 {
-  "version": "2.0.0",
-  "name": "ZOTHOS Autonomous OS Agent Permission Ring Framework",
+  "version": "3.0.0",
+  "name": "ZOTHOS Autonomous OS Agent Permission & Security Ring Architecture",
+  "active_ring": 2,
   "active_layer": 2,
   "default_engine": "ollama",
   "autonomous_timeout_seconds": 120,
-  "require_confirmation_above_layer": 3,
+  "require_confirmation_above_ring": 1,
+  "security_rings": {
+    "0": {
+      "codename": "SOVEREIGN",
+      "title": "Ring 0: Root, Kernel & Amnesic Authority",
+      "color": "#fbbf24",
+      "description": "Unrestricted OS control: execute root/sudo commands, modify system services, configure iptables firewalls, manage kernel modules, and trigger emergency amnesic RAM purges.",
+      "allowed_actions": [
+        "*"
+      ],
+      "denied_actions": [],
+      "filesystem_policy": {
+        "read_paths": [
+          "*"
+        ],
+        "write_paths": [
+          "*"
+        ],
+        "forbidden_paths": []
+      },
+      "network_egress_policy": {
+        "mode": "unrestricted",
+        "allowed_ports": [
+          "*"
+        ],
+        "tor_enforced": false,
+        "allow_raw_sockets": true,
+        "allow_packet_capture": true
+      },
+      "token_budget": {
+        "max_tokens_per_request": 128000,
+        "hourly_token_limit": 10000000,
+        "max_context_window": 128000,
+        "timeout_seconds": 600
+      },
+      "resource_limits": {
+        "max_cpu_percent": 100,
+        "max_memory_mb": 0,
+        "sandbox_isolation": "none"
+      }
+    },
+    "1": {
+      "codename": "SYSADMIN",
+      "title": "Ring 1: System Admin & Privileged Operations",
+      "color": "#a855f7",
+      "description": "Privileged administration: manage user-space daemons, configure networking, query package databases, run security auditing, and orchestrate agent workers.",
+      "allowed_actions": [
+        "read_file",
+        "write_file",
+        "delete_file",
+        "run_shell",
+        "system_status",
+        "inspect_process",
+        "list_directory",
+        "search_filesystem",
+        "network_info",
+        "view_logs",
+        "git_operations",
+        "package_query",
+        "systemd_query",
+        "run_sec_tool",
+        "toggle_ghostmode",
+        "mac_randomize",
+        "tor_routing_control",
+        "mcp_invoke",
+        "db_query",
+        "browser_automate",
+        "gui_automation"
+      ],
+      "denied_actions": [
+        "run_root_command",
+        "disk_format",
+        "kernel_module_load",
+        "panic_kill",
+        "amnesic_purge"
+      ],
+      "filesystem_policy": {
+        "read_paths": [
+          "/home/neo",
+          "/etc",
+          "/var/log",
+          "/usr/share/zothos",
+          "/opt",
+          "/tmp",
+          "/proc",
+          "/sys"
+        ],
+        "write_paths": [
+          "/home/neo",
+          "/var/lib/zothos",
+          "/tmp",
+          "/etc/zothos"
+        ],
+        "forbidden_paths": [
+          "/root",
+          "/boot",
+          "/dev/sd*",
+          "/dev/nvme*",
+          "/etc/shadow",
+          "/etc/gshadow"
+        ]
+      },
+      "network_egress_policy": {
+        "mode": "proxied_and_lan",
+        "allowed_ports": [
+          22,
+          53,
+          80,
+          443,
+          8000,
+          8080,
+          8188,
+          8199,
+          8888,
+          8989,
+          9050,
+          11434
+        ],
+        "tor_enforced": false,
+        "allow_raw_sockets": false,
+        "allow_packet_capture": true
+      },
+      "token_budget": {
+        "max_tokens_per_request": 64000,
+        "hourly_token_limit": 1000000,
+        "max_context_window": 64000,
+        "timeout_seconds": 300
+      },
+      "resource_limits": {
+        "max_cpu_percent": 90,
+        "max_memory_mb": 16384,
+        "sandbox_isolation": "cgroups_standard"
+      }
+    },
+    "2": {
+      "codename": "TOOLMASTER",
+      "title": "Ring 2: Agent Tools & MCP Runtime",
+      "color": "#3b82f6",
+      "description": "Standard agent operations: full Model Context Protocol (MCP) server integration, host file operations within user workspace, desktop GUI automation, Puppeteer browser control, SQLite/DuckDB queries, and HexStrike pentesting tools.",
+      "allowed_actions": [
+        "read_file",
+        "write_file",
+        "delete_file",
+        "run_shell",
+        "system_status",
+        "inspect_process",
+        "list_directory",
+        "search_filesystem",
+        "network_info",
+        "view_logs",
+        "git_operations",
+        "package_query",
+        "gui_click",
+        "gui_type",
+        "gui_press_key",
+        "gui_screenshot",
+        "gui_drag_window",
+        "gui_open_app",
+        "browser_automate",
+        "run_sec_tool",
+        "hexstrike_orchestrate",
+        "mcp_invoke",
+        "mcp_filesystem",
+        "mcp_memory",
+        "mcp_puppeteer",
+        "mcp_sqlite",
+        "mcp_duckdb",
+        "mcp_hermes",
+        "mcp_sectools",
+        "db_query"
+      ],
+      "denied_actions": [
+        "run_root_command",
+        "systemd_manage",
+        "toggle_ghostmode",
+        "mac_randomize",
+        "tor_routing_control",
+        "disk_format",
+        "panic_kill",
+        "amnesic_purge"
+      ],
+      "filesystem_policy": {
+        "read_paths": [
+          "/home/neo",
+          "/usr/share/zothos",
+          "/opt",
+          "/etc/zothos",
+          "/var/lib/zothos",
+          "/tmp"
+        ],
+        "write_paths": [
+          "/home/neo",
+          "/var/lib/zothos",
+          "/tmp"
+        ],
+        "forbidden_paths": [
+          "/root",
+          "/boot",
+          "/etc/shadow",
+          "/etc/sudoers",
+          "/home/neo/.ssh/id_rsa",
+          "/home/neo/.ssh/id_ed25519"
+        ]
+      },
+      "network_egress_policy": {
+        "mode": "standard_egress",
+        "allowed_ports": [
+          53,
+          80,
+          443,
+          8000,
+          8080,
+          8188,
+          8199,
+          8888,
+          8989,
+          11434
+        ],
+        "tor_enforced": false,
+        "allow_raw_sockets": false,
+        "allow_packet_capture": false
+      },
+      "token_budget": {
+        "max_tokens_per_request": 32000,
+        "hourly_token_limit": 250000,
+        "max_context_window": 32000,
+        "timeout_seconds": 180
+      },
+      "resource_limits": {
+        "max_cpu_percent": 80,
+        "max_memory_mb": 8192,
+        "sandbox_isolation": "user_namespace"
+      }
+    },
+    "3": {
+      "codename": "SPECTRE",
+      "title": "Ring 3: Sandboxed LLM Execution & Untrusted Code",
+      "color": "#00f3ff",
+      "description": "Sandboxed / Restricted Execution: ephemeral isolated container/firejail environment for executing untrusted models and generated code, read-only telemetry, and loopback-only network access.",
+      "allowed_actions": [
+        "read_file",
+        "system_status",
+        "inspect_process",
+        "list_directory",
+        "search_filesystem",
+        "network_info",
+        "view_logs",
+        "run_sandboxed_code"
+      ],
+      "denied_actions": [
+        "write_file",
+        "delete_file",
+        "run_shell",
+        "gui_click",
+        "gui_type",
+        "gui_press_key",
+        "gui_screenshot",
+        "gui_drag_window",
+        "gui_open_app",
+        "browser_automate",
+        "run_sec_tool",
+        "toggle_ghostmode",
+        "mac_randomize",
+        "hexstrike_orchestrate",
+        "run_root_command",
+        "systemd_manage",
+        "disk_format",
+        "panic_kill",
+        "amnesic_purge"
+      ],
+      "filesystem_policy": {
+        "read_paths": [
+          "/tmp/zothos-sandbox",
+          "/home/neo/sandbox",
+          "/proc/stat",
+          "/proc/meminfo"
+        ],
+        "write_paths": [
+          "/tmp/zothos-sandbox"
+        ],
+        "forbidden_paths": [
+          "/home/neo/.ssh",
+          "/home/neo/.config/zothos/env",
+          "/etc",
+          "/var",
+          "/root",
+          "/boot",
+          "/opt"
+        ]
+      },
+      "network_egress_policy": {
+        "mode": "isolated_loopback_only",
+        "allowed_ports": [
+          11434,
+          8000
+        ],
+        "tor_enforced": false,
+        "allow_raw_sockets": false,
+        "allow_packet_capture": false
+      },
+      "token_budget": {
+        "max_tokens_per_request": 8000,
+        "hourly_token_limit": 50000,
+        "max_context_window": 8000,
+        "timeout_seconds": 45
+      },
+      "resource_limits": {
+        "max_cpu_percent": 50,
+        "max_memory_mb": 2048,
+        "sandbox_isolation": "firejail_strict"
+      }
+    }
+  },
   "layers": {
     "0": {
+      "ring_equivalent": 3,
       "codename": "SPECTRE",
       "title": "Observer / Read-Only Telemetry",
       "color": "#00f3ff",
@@ -32,6 +346,7 @@
       ]
     },
     "1": {
+      "ring_equivalent": 2,
       "codename": "RUNECRAFTER",
       "title": "User-Space Shell & Code Execution",
       "color": "#00ff88",
@@ -60,10 +375,11 @@
       ]
     },
     "2": {
+      "ring_equivalent": 2,
       "codename": "CYBERPUPPET",
-      "title": "GUI, Mouse & Keyboard Computer Use",
+      "title": "GUI, Mouse, Keyboard & MCP Tools",
       "color": "#3b82f6",
-      "description": "Full desktop environment interaction: move and click mouse, simulate keystrokes, focus and drag windows, capture and visually analyze screenshots, and automate web browsers via CDP / Puppeteer.",
+      "description": "Full desktop environment interaction and MCP execution: mouse click, simulate typing, window control, screenshot analysis, browser automation, and MCP tool invokers.",
       "allowed_actions": [
         "read_file",
         "system_status",
@@ -83,7 +399,8 @@
         "gui_screenshot",
         "gui_drag_window",
         "gui_open_app",
-        "browser_automate"
+        "browser_automate",
+        "mcp_invoke"
       ],
       "denied_actions": [
         "run_sec_tool",
@@ -94,6 +411,7 @@
       ]
     },
     "3": {
+      "ring_equivalent": 1,
       "codename": "WARLOCK",
       "title": "Security & Offensive Arsenal",
       "color": "#a855f7",
@@ -122,7 +440,8 @@
         "toggle_ghostmode",
         "mac_randomize",
         "hexstrike_orchestrate",
-        "tor_routing_control"
+        "tor_routing_control",
+        "mcp_invoke"
       ],
       "denied_actions": [
         "run_root_command",
@@ -132,40 +451,13 @@
       ]
     },
     "4": {
+      "ring_equivalent": 0,
       "codename": "SOVEREIGN",
       "title": "Root, Kernel & Amnesic Authority",
       "color": "#fbbf24",
       "description": "Total unrestricted OS control: execute root/sudo commands, modify system services, configure iptables firewalls, manage kernel modules, and trigger emergency amnesic RAM purges.",
       "allowed_actions": [
-        "read_file",
-        "system_status",
-        "inspect_process",
-        "list_directory",
-        "search_filesystem",
-        "network_info",
-        "view_logs",
-        "write_file",
-        "delete_file",
-        "run_shell",
-        "git_operations",
-        "package_query",
-        "gui_click",
-        "gui_type",
-        "gui_press_key",
-        "gui_screenshot",
-        "gui_drag_window",
-        "gui_open_app",
-        "browser_automate",
-        "run_sec_tool",
-        "toggle_ghostmode",
-        "mac_randomize",
-        "hexstrike_orchestrate",
-        "tor_routing_control",
-        "run_root_command",
-        "systemd_manage",
-        "apt_install",
-        "panic_kill",
-        "amnesic_purge"
+        "*"
       ],
       "denied_actions": []
     }

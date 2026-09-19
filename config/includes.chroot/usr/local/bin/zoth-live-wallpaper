@@ -1,0 +1,297 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#  🜂 ZOTHOS LIVE WALLPAPER & VISUAL FX CONTROLLER v2.5 🜄
+#  Interactive Sacred Geometry, Hermetic Matrix & Alchemical Phosphor Engine
+# ==============================================================================
+
+set -eo pipefail
+
+STATE_DIR="$HOME/.config/zothos"
+PID_FILE="$STATE_DIR/live-wallpaper.pid"
+CONFIG_FILE="$STATE_DIR/live-wallpaper.conf"
+LOG_FILE="$STATE_DIR/live-wallpaper.log"
+
+mkdir -p "$STATE_DIR"
+
+# ZothOS Color Palette
+GREEN="\e[38;2;0;255;157m"
+GOLD="\e[38;2;255;215;0m"
+CYAN="\e[38;2;0;229;255m"
+RED="\e[38;2;255;51;85m"
+GRAY="\e[38;2;120;140;160m"
+BOLD="\e[1m"
+DIM="\e[2m"
+RESET="\e[0m"
+
+# Locate Live Wallpaper HTML
+resolve_engine_path() {
+    local candidate_paths=(
+        "/usr/share/zothos/live-wallpaper/index.html"
+        "$(dirname "$(readlink -f "$0")")/../share/zothos/live-wallpaper/index.html"
+        "/home/neo/zothos/config/includes.chroot/usr/share/zothos/live-wallpaper/index.html"
+        "$HOME/.local/share/zothos/live-wallpaper/index.html"
+    )
+    for p in "${candidate_paths[@]}"; do
+        if [[ -f "$p" ]]; then
+            readlink -f "$p"
+            return 0
+        fi
+    done
+    echo "/usr/share/zothos/live-wallpaper/index.html"
+}
+
+ENGINE_HTML="$(resolve_engine_path)"
+
+banner() {
+    echo -e "${GREEN}${BOLD}======================================================================${RESET}"
+    echo -e "${GOLD}${BOLD}   🜂 ☉  ZOTHOS INTERACTIVE LIVE WALLPAPER ENGINE v2.5  ☽ 🜄${RESET}"
+    echo -e "${CYAN}   Hermetic Matrix • Sacred Geometry • Alchemical Phosphor FX${RESET}"
+    echo -e "${GREEN}${BOLD}======================================================================${RESET}"
+}
+
+notify() {
+    local title="$1"
+    local msg="$2"
+    if command -v notify-send >/dev/null 2>&1; then
+        notify-send -a "ZothOS Live Wallpaper" -i "/usr/share/pixmaps/zothos.png" "$title" "$msg" 2>/dev/null || true
+    fi
+    echo -e "${GREEN}[*]${RESET} ${BOLD}$title:${RESET} $msg"
+}
+
+is_running() {
+    if [[ -f "$PID_FILE" ]]; then
+        local pid
+        pid=$(cat "$PID_FILE" 2>/dev/null || true)
+        if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
+            return 0
+        fi
+    fi
+    # Also check process table for background browser/window instances
+    if pgrep -f "zothos/live-wallpaper/index.html" >/dev/null 2>&1; then
+        return 0
+    fi
+    return 1
+}
+
+stop_wallpaper() {
+    echo -e "${GRAY}[*] Stopping existing ZothOS Live Wallpaper instances...${RESET}"
+    if [[ -f "$PID_FILE" ]]; then
+        local pid
+        pid=$(cat "$PID_FILE" 2>/dev/null || true)
+        if [[ -n "$pid" ]]; then
+            kill "$pid" 2>/dev/null || true
+            pkill -P "$pid" 2>/dev/null || true
+        fi
+        rm -f "$PID_FILE"
+    fi
+    pkill -f "zothos/live-wallpaper/index.html" 2>/dev/null || true
+    pkill -f "xwinwrap.*live-wallpaper" 2>/dev/null || true
+    sleep 0.5
+    notify "Live Wallpaper Stopped" "Reverted to static background layer."
+}
+
+start_wallpaper() {
+    local mode="${1:-matrix}"
+    local theme="${2:-emerald}"
+
+    if is_running; then
+        echo -e "${YELLOW}[!] Live wallpaper is already running (PID: $(cat "$PID_FILE" 2>/dev/null || echo "active")).${RESET}"
+        echo -e "${CYAN}[i] Use 'zoth-live-wallpaper stop' or 'zoth-live-wallpaper restart' to restart.${RESET}"
+        return 0
+    fi
+
+    if [[ ! -f "$ENGINE_HTML" ]]; then
+        echo -e "${RED}[✗] Error: Live Wallpaper engine HTML not found at: $ENGINE_HTML${RESET}"
+        exit 1
+    fi
+
+    echo -e "${GREEN}[+] Launching ZothOS Live Wallpaper Engine...${RESET}"
+    echo -e "    ${GRAY}Engine:${RESET} ${CYAN}$ENGINE_HTML${RESET}"
+    echo -e "    ${GRAY}Preset Mode:${RESET} ${GOLD}$mode ($theme)${RESET}"
+
+    # Target URL with query params
+    local target_url="file://${ENGINE_HTML}?mode=${mode}&theme=${theme}"
+
+    # Strategy 1: xwinwrap + browser/electron if in X11 session
+    # Detect screen dimensions
+    local screen_w=1920
+    local screen_h=1080
+    if command -v xrandr >/dev/null 2>&1; then
+        local res
+        res=$(xrandr --current 2>/dev/null | grep '\*' | uniq | awk '{print $1}' | head -n1 || true)
+        if [[ -n "$res" && "$res" =~ ([0-9]+)x([0-9]+) ]]; then
+            screen_w="${BASH_REMATCH[1]}"
+            screen_h="${BASH_REMATCH[2]}"
+        fi
+    fi
+
+    # Determine best available backend
+    local launched=0
+
+    # 1. Check if chromium/chrome/brave exists for dedicated app window
+    local browser_bin=""
+    for b in chromium chromium-browser google-chrome google-chrome-stable brave-browser firefox; do
+        if command -v "$b" >/dev/null 2>&1; then
+            browser_bin="$b"
+            break
+        fi
+    done
+
+    # 2. Check if xwinwrap is present for true root window rendering
+    if command -v xwinwrap >/dev/null 2>&1 && [[ -n "$browser_bin" && "$browser_bin" != "firefox" ]]; then
+        echo -e "    ${GRAY}Backend:${RESET} ${GREEN}xwinwrap + $browser_bin (Desktop Root Window Layer)${RESET}"
+        nohup xwinwrap -ov -g "${screen_w}x${screen_h}+0+0" -- \
+            "$browser_bin" \
+            --app="$target_url" \
+            --window-size="${screen_w},${screen_h}" \
+            --window-position=0,0 \
+            --kiosk \
+            --no-first-run \
+            --no-default-browser-check \
+            --disable-infobars \
+            --disable-session-crashed-bubble \
+            --user-data-dir="$STATE_DIR/browser-profile" \
+            --autoplay-policy=no-user-gesture-required \
+            >/dev/null 2>&1 &
+        echo $! > "$PID_FILE"
+        launched=1
+    elif [[ -n "$browser_bin" ]]; then
+        echo -e "    ${GRAY}Backend:${RESET} ${GREEN}$browser_bin (Kiosk Display Engine)${RESET}"
+        if [[ "$browser_bin" == "firefox" ]]; then
+            nohup firefox --kiosk "$target_url" >/dev/null 2>&1 &
+        else
+            nohup "$browser_bin" \
+                --app="$target_url" \
+                --start-maximized \
+                --window-size="${screen_w},${screen_h}" \
+                --window-position=0,0 \
+                --no-first-run \
+                --disable-infobars \
+                --user-data-dir="$STATE_DIR/browser-profile" \
+                --autoplay-policy=no-user-gesture-required \
+                >/dev/null 2>&1 &
+        fi
+        echo $! > "$PID_FILE"
+        launched=1
+    elif command -v python3 >/dev/null 2>&1; then
+        echo -e "    ${GRAY}Backend:${RESET} ${GREEN}Python3 Web Engine Fallback${RESET}"
+        nohup python3 -c "
+import sys
+try:
+    import webview
+    webview.create_window('ZothOS Live Wallpaper', '$target_url', fullscreen=True, background_color='#000000')
+    webview.start()
+except ImportError:
+    import webbrowser
+    webbrowser.open('$target_url')
+" >/dev/null 2>&1 &
+        echo $! > "$PID_FILE"
+        launched=1
+    fi
+
+    if [[ $launched -eq 1 ]]; then
+        notify "ZothOS Live Wallpaper Active" "Mode: $mode | Engine: Online"
+        echo -e "${GREEN}[✓] Live Wallpaper running successfully!${RESET}"
+    else
+        echo -e "${RED}[✗] Could not find a suitable graphical renderer (Chromium/Firefox/Python).${RESET}"
+        exit 1
+    fi
+}
+
+status_wallpaper() {
+    banner
+    echo ""
+    if is_running; then
+        local pid
+        pid=$(cat "$PID_FILE" 2>/dev/null || pgrep -f "zothos/live-wallpaper/index.html" | head -n1 || echo "Unknown")
+        echo -e "Status:   ${GREEN}${BOLD}ACTIVE & RUNNING${RESET} (PID: ${CYAN}$pid${RESET})"
+        echo -e "Engine:   ${CYAN}$ENGINE_HTML${RESET}"
+        echo -e "Controls: Press ${GOLD}[Space]${RESET} in engine to pause, ${GOLD}[M]${RESET} to cycle themes, ${GOLD}[H]${RESET} for HUD."
+    else
+        echo -e "Status:   ${RED}${BOLD}STOPPED${RESET}"
+        echo -e "Engine:   ${CYAN}$ENGINE_HTML${RESET}"
+        echo -e "Run ${GREEN}'zoth-live-wallpaper start'${RESET} to launch."
+    fi
+}
+
+toggle_wallpaper() {
+    if is_running; then
+        stop_wallpaper
+    else
+        start_wallpaper "${1:-matrix}" "${2:-emerald}"
+    fi
+}
+
+show_help() {
+    banner
+    echo -e "
+${BOLD}USAGE:${RESET}
+    zoth-live-wallpaper [COMMAND] [OPTIONS]
+
+${BOLD}COMMANDS:${RESET}
+    ${GREEN}start${RESET} [mode] [theme]    Launch live wallpaper (Default: matrix emerald)
+    ${GREEN}stop${RESET}                   Terminate running live wallpaper
+    ${GREEN}restart${RESET}                Restart wallpaper engine
+    ${GREEN}toggle${RESET}                 Toggle live wallpaper ON/OFF
+    ${GREEN}status${RESET}                 Check execution status & PID
+    ${GREEN}preview${RESET}                Open live wallpaper in standalone interactive window
+    ${GREEN}help${RESET}, ${GREEN}-h${RESET}, ${GREEN}--help${RESET}      Show this manual
+
+${BOLD}PRESET THEMES:${RESET}
+    ${CYAN}matrix${RESET}                 Hermetic emerald phosphor digital rain & runes
+    ${GOLD}gold${RESET}                   Azoth golden sanctum solar glyphs
+    ${CYAN}void${RESET}                   Amnesic cyber deep-blue starry geometry
+    ${RED}blood${RESET}                  Crimson alchemy flame & red digital rain
+    ${GRAY}neon${RESET}                   Synthwave violet-cyan high-speed flux
+
+${BOLD}KEYBOARD SHORTCUTS IN ENGINE:${RESET}
+    ${GOLD}[Space]${RESET}                Pause / Resume particle simulation
+    ${GOLD}[M]${RESET}                    Cycle through visual color themes
+    ${GOLD}[A]${RESET}                    Toggle ambient alchemical audio drone
+    ${GOLD}[C]${RESET}                    Trigger Alchemical Nova particle burst
+    ${GOLD}[H]${RESET}                    Toggle on-screen control HUD
+    ${GOLD}[F]${RESET}                    Toggle full-screen mode
+    ${GOLD}[ESC / Q]${RESET}              Close / Exit
+"
+}
+
+# Subcommand routing
+CMD="${1:-start}"
+shift || true
+
+case "$CMD" in
+    start)
+        start_wallpaper "$@"
+        ;;
+    stop)
+        stop_wallpaper
+        ;;
+    restart)
+        stop_wallpaper
+        sleep 0.5
+        start_wallpaper "$@"
+        ;;
+    toggle)
+        toggle_wallpaper "$@"
+        ;;
+    status)
+        status_wallpaper
+        ;;
+    preview)
+        if command -v x-www-browser >/dev/null 2>&1; then
+            x-www-browser "file://$ENGINE_HTML" 2>/dev/null &
+        elif command -v chromium >/dev/null 2>&1; then
+            chromium --app="file://$ENGINE_HTML" 2>/dev/null &
+        elif command -v firefox >/dev/null 2>&1; then
+            firefox "file://$ENGINE_HTML" 2>/dev/null &
+        fi
+        ;;
+    help|-h|--help)
+        show_help
+        ;;
+    *)
+        echo -e "${RED}[✗] Unknown command: $CMD${RESET}"
+        show_help
+        exit 1
+        ;;
+esac
