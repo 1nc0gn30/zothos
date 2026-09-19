@@ -57,7 +57,7 @@ lb config \
     --bootloader grub-efi \
     --binary-images iso-hybrid \
     --iso-application "ZOTHOS Linux 1.0 (Azoth)" \
-    --iso-publisher "Zoth Studio & NullAI <https://zothos.org>" \
+    --iso-publisher "Zoth Studio & NullAI <https://zoth.nullai.tech>" \
     --iso-volume "ZOTHOS_1.0" \
     --memtest none \
     --win32-loader false
@@ -67,7 +67,8 @@ mkdir -p config/package-lists
 cp "$PROJECT_DIR/package-lists/"*.list.chroot config/package-lists/
 
 mkdir -p config/includes.chroot
-cp -r "$PROJECT_DIR/config/includes.chroot/"* config/includes.chroot/
+# Copy ALL chroot overlay files recursively preserving permissions and hierarchy
+cp -a "$PROJECT_DIR/config/includes.chroot/." config/includes.chroot/
 
 # Ensure all scripts inside /usr/local/bin have execution bit set
 chmod +x config/includes.chroot/usr/local/bin/* 2>/dev/null || true
@@ -98,13 +99,20 @@ echo "[ZOTHOS HOOK] Complete."
 EOF
 chmod +x config/hooks/normal/099-zothos-setup.hook.chroot
 
-echo -e "${CYAN}[5/6] Generating wallpapers...${RESET}"
-python3 "$PROJECT_DIR/tools/generate-wallpapers.py"
-cp -r "$PROJECT_DIR/config/includes.chroot/usr/share/backgrounds/zothos" config/includes.chroot/usr/share/backgrounds/
+echo -e "${CYAN}[5/6] Generating 4K wallpapers & 3D visual assets...${RESET}"
+# Execute master wallpaper and 3D glassmorphic icon synthesizers
+if [ -f "$PROJECT_DIR/generate_zoth_wallpapers.py" ]; then
+    python3 "$PROJECT_DIR/generate_zoth_wallpapers.py" 2>&1 | tail -5
+fi
+if [ -f "$PROJECT_DIR/generate_zoth_icons.py" ]; then
+    python3 "$PROJECT_DIR/generate_zoth_icons.py" 2>&1 | tail -5
+fi
+cp -a "$PROJECT_DIR/config/includes.chroot/usr/share/backgrounds/zothos" config/includes.chroot/usr/share/backgrounds/ 2>/dev/null || true
+cp -a "$PROJECT_DIR/config/includes.chroot/usr/share/icons/." config/includes.chroot/usr/share/icons/ 2>/dev/null || true
 
 echo -e "${GREEN}[6/6] Starting Live-Build execution (lb build)...${RESET}"
 echo -e "${YELLOW}[*] This will bootstrap the Debian base, fetch security & AI packages, and compile the ISO.${RESET}"
-lb build
+lb build 2>&1 | tee /tmp/lb-build.log
 
 if [[ -f live-image-amd64.hybrid.iso ]]; then
     mv live-image-amd64.hybrid.iso "$PROJECT_DIR/build/zothos-1.0-amd64.iso"
