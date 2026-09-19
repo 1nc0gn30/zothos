@@ -1,133 +1,164 @@
-#!/usr/bin/env bash
-# ==============================================================================
-#  :: NullAI HexStrike AI Terminal — Sovereign Red Teaming Workstation
-#  Official Repository: https://github.com/NullAITech/NullAI-HexStrike-AI-Terminal
-# ==============================================================================
+#!/usr/bin/env python3
+"""
+==============================================================================
+ * NULLAI HEXSTRIKE AI TERMINAL — NATIVE DESKTOP RUNTIME v3.0 *
+ Sovereign Red Teaming Workstation & Autonomous Attack Matrix.
+ Unified FastAPI Neural Backend + Native 3D Glass UI.
+==============================================================================
+"""
 
-set -e
+import sys
+import os
+import time
+import signal
+import socket
+import threading
+import subprocess
+import urllib.request
+import urllib.error
 
-HEXSTRIKE_DIR="/usr/share/hexstrike-ai"
-if [[ ! -d "$HEXSTRIKE_DIR" ]] && [[ -d "/opt/hexstrike-ai" ]]; then
-    HEXSTRIKE_DIR="/opt/hexstrike-ai"
-fi
-if [[ ! -d "$HEXSTRIKE_DIR" ]] && [[ -d "$HOME/.hexstrike/NullAI-HexStrike-AI-Terminal" ]]; then
-    HEXSTRIKE_DIR="$HOME/.hexstrike/NullAI-HexStrike-AI-Terminal"
-fi
+HEXSTRIKE_DIR = "/usr/share/hexstrike-ai"
+if not os.path.exists(HEXSTRIKE_DIR) and os.path.exists("/opt/hexstrike-ai"):
+    HEXSTRIKE_DIR = "/opt/hexstrike-ai"
 
-PID_DIR="$HOME/.hexstrike/run"
-mkdir -p "$PID_DIR" "$HOME/.hexstrike"
+BACKEND_DIR = os.path.join(HEXSTRIKE_DIR, "backend")
+ICON_PATH = "/usr/share/pixmaps/hexstrike.png"
+PORT = 8000
+SERVER_URL = f"http://127.0.0.1:{PORT}"
+PID_FILE = os.path.expanduser("~/.hexstrike/run/backend.pid")
 
-RED="\033[38;2;255;51;85m"
-GREEN="\033[38;2;0;255;157m"
-GOLD="\033[38;2;255;215;0m"
-CYAN="\033[38;2;0;229;255m"
-GRAY="\033[38;2;120;140;160m"
-BOLD="\033[1m"
-RESET="\033[0m"
 
-banner() {
-    echo -e "${RED}${BOLD}"
-    echo -e "  ::  NullAI HexStrike AI Terminal  ::"
-    echo -e "  Sovereign Red Teaming Workstation & Neural Attack Matrix"
-    echo -e "${RESET}"
-}
+def is_backend_alive():
+    try:
+        with urllib.request.urlopen(f"{SERVER_URL}/docs", timeout=0.5) as resp:
+            return resp.status == 200
+    except Exception:
+        return False
 
-check_backend() {
-    curl -s http://127.0.0.1:8000/docs >/dev/null 2>&1
-}
 
-start_backend() {
-    if check_backend; then
-        echo -e "${GREEN}[✓] HexStrike backend is already running on http://127.0.0.1:8000${RESET}"
-        return 0
-    fi
+def start_backend():
+    if is_backend_alive():
+        return True
 
-    echo -e "${GOLD}[*] Starting NullAI HexStrike Neural Backend (Port 8000)...${RESET}"
-    cd "$HEXSTRIKE_DIR/backend"
+    os.makedirs(os.path.dirname(PID_FILE), exist_ok=True)
+    log_file = open(os.path.expanduser("~/.hexstrike/backend.log"), "a")
+
+    env = os.environ.copy()
+    env["PYTHONUNBUFFERED"] = "1"
     
-    # Run via python3
-    python3 main.py > "$HOME/.hexstrike/backend.log" 2>&1 &
-    local b_pid=$!
-    echo $b_pid > "$PID_DIR/backend.pid"
+    proc = subprocess.Popen(
+        [sys.executable, "main.py"],
+        cwd=BACKEND_DIR,
+        stdout=log_file,
+        stderr=log_file,
+        env=env
+    )
+    with open(PID_FILE, "w") as f:
+        f.write(str(proc.pid))
 
-    # Wait for startup
-    for i in {1..15}; do
-        if check_backend; then
-            echo -e "${GREEN}[✓] HexStrike Backend Online: http://127.0.0.1:8000${RESET}"
-            return 0
-        fi
-        sleep 0.5
-    done
-    echo -e "${RED}[!] Warning: Backend is initializing in background (check ~/.hexstrike/backend.log)${RESET}"
-}
+    for _ in range(30):
+        if is_backend_alive():
+            return True
+        time.sleep(0.2)
+    return False
 
-start_ui() {
-    start_backend
-    echo -e "${CYAN}[*] Launching NullAI HexStrike UI...${RESET}"
-    cd "$HEXSTRIKE_DIR/ui"
-    
-    if [[ ! -d "node_modules" ]] && [[ -f "package.json" ]]; then
-        echo -e "${GOLD}[*] First-time setup: installing UI packages...${RESET}"
-        npm install --silent >/dev/null 2>&1 || true
-    fi
 
-    if [[ -d "dist" ]]; then
-        # If static build exists, open browser or serve
-        xdg-open "http://127.0.0.1:8000" 2>/dev/null || x-www-browser "http://127.0.0.1:8000" 2>/dev/null &
-    fi
+def launch_gui():
+    # 1. Try WebKit2GTK native window
+    try:
+        import gi
+        gi.require_version('Gtk', '3.0')
+        gi.require_version('Gdk', '3.0')
+        gi.require_version('WebKit2', '4.1')
+        from gi.repository import Gtk, Gdk, WebKit2
 
-    # Launch dev server or interactive UI
-    npm run dev -- --host 127.0.0.1 --port 5173 > "$HOME/.hexstrike/ui.log" 2>&1 &
-    local ui_pid=$!
-    echo $ui_pid > "$PID_DIR/ui.pid"
-    
-    sleep 2
-    xdg-open "http://127.0.0.1:5173" 2>/dev/null || x-www-browser "http://127.0.0.1:5173" 2>/dev/null || true
-    echo -e "${GREEN}[✓] NullAI HexStrike Terminal is live at http://127.0.0.1:5173${RESET}"
-}
+        class HexStrikeWindow(Gtk.Window):
+            def __init__(self):
+                super().__init__(type=Gtk.WindowType.TOPLEVEL)
+                self.set_title("NullAI HexStrike AI Terminal // Red Team Autonomous Matrix")
+                self.set_default_size(1360, 860)
+                self.set_position(Gtk.WindowPosition.CENTER)
 
-stop_all() {
-    echo -e "${GOLD}[*] Stopping HexStrike services...${RESET}"
-    if [[ -f "$PID_DIR/backend.pid" ]]; then
-        kill $(cat "$PID_DIR/backend.pid") 2>/dev/null || true
-        rm -f "$PID_DIR/backend.pid"
-    fi
-    if [[ -f "$PID_DIR/ui.pid" ]]; then
-        kill $(cat "$PID_DIR/ui.pid") 2>/dev/null || true
-        rm -f "$PID_DIR/ui.pid"
-    fi
-    pkill -f "python3.*hexstrike.*main.py" 2>/dev/null || true
-    pkill -f "vite.*--port 5173" 2>/dev/null || true
-    echo -e "${GREEN}[✓] HexStrike stopped.${RESET}"
-}
+                if os.path.exists(ICON_PATH):
+                    try:
+                        self.set_icon_from_file(ICON_PATH)
+                    except Exception:
+                        pass
 
-case "${1:-ui}" in
-    ui|start)
-        banner
-        start_ui
-        ;;
-    backend)
-        banner
-        start_backend
-        ;;
-    stop)
-        stop_all
-        ;;
-    status)
-        banner
-        if check_backend; then
-            echo -e "${GREEN}[✓] Backend: ONLINE (http://127.0.0.1:8000)${RESET}"
-        else
-            echo -e "${RED}[✗] Backend: OFFLINE${RESET}"
-        fi
-        ;;
-    mcp)
-        # Direct MCP server bridge mode
-        exec python3 "$HEXSTRIKE_DIR/main.py" "$@"
-        ;;
-    *)
-        banner
-        echo -e "Usage: hexstrike [ui|backend|stop|status|mcp]"
-        start_ui
-        ;;
-esac
+                self.override_background_color(Gtk.StateFlags.NORMAL, Gdk.RGBA(0.02, 0.02, 0.04, 1.0))
+                self.webview = WebKit2.WebView()
+                settings = self.webview.get_settings()
+                settings.set_enable_webgl(True)
+                settings.set_enable_accelerated_2d_canvas(True)
+                settings.set_enable_smooth_scrolling(True)
+                settings.set_enable_javascript(True)
+
+                box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+                self.add(box)
+                box.pack_start(self.webview, True, True, 0)
+                self.webview.load_uri(SERVER_URL)
+                self.connect("delete-event", lambda *a: Gtk.main_quit())
+
+        signal.signal(signal.SIGINT, lambda *a: Gtk.main_quit())
+        signal.signal(signal.SIGTERM, lambda *a: Gtk.main_quit())
+        app = HexStrikeWindow()
+        app.show_all()
+        Gtk.main()
+        return
+    except Exception:
+        pass
+
+    # 2. Fallback to Chromium standalone app window mode
+    if subprocess.run(["which", "chromium"], capture_output=True).returncode == 0:
+        subprocess.run([
+            "chromium",
+            f"--app={SERVER_URL}",
+            "--start-maximized",
+            "--class=hexstrike-ai",
+            "--disable-extensions",
+            "--disable-default-apps"
+        ])
+    elif subprocess.run(["which", "google-chrome"], capture_output=True).returncode == 0:
+        subprocess.run([
+            "google-chrome",
+            f"--app={SERVER_URL}",
+            "--start-maximized"
+        ])
+    else:
+        # Fallback to default browser
+        subprocess.run(["xdg-open", SERVER_URL])
+
+
+def main():
+    if len(sys.argv) > 1:
+        cmd = sys.argv[1].lower()
+        if cmd == "start-backend":
+            if start_backend():
+                print("[✓] NullAI HexStrike Neural Backend active on http://127.0.0.1:8000")
+            else:
+                print("[!] Failed to initialize HexStrike Backend")
+            return
+        elif cmd == "status":
+            st = "ONLINE" if is_backend_alive() else "OFFLINE"
+            print(f"NullAI HexStrike Backend Status: [ {st} ] on http://127.0.0.1:8000")
+            return
+        elif cmd == "stop":
+            if os.path.exists(PID_FILE):
+                try:
+                    with open(PID_FILE) as f:
+                        pid = int(f.read().strip())
+                    os.kill(pid, signal.SIGTERM)
+                except Exception:
+                    pass
+                os.remove(PID_FILE)
+            subprocess.run(["pkill", "-f", "python3.*hexstrike.*main.py"])
+            print("[✓] NullAI HexStrike services stopped.")
+            return
+
+    print("[*] Initializing NullAI HexStrike Neural Engine...")
+    start_backend()
+    launch_gui()
+
+
+if __name__ == "__main__":
+    main()
