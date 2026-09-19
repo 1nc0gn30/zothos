@@ -14,44 +14,13 @@ if [[ ! -d "$MAYA_DIR" ]] && [[ -d "$HOME/maya-linux" ]]; then
     MAYA_DIR="$HOME/maya-linux"
 fi
 
-PID_DIR="$HOME/.maya/run"
-mkdir -p "$PID_DIR" "$HOME/.maya"
-
-CYAN="\033[38;2;0;229;255m"
-GREEN="\033[38;2;0;255;157m"
-GOLD="\033[38;2;255;215;0m"
-BOLD="\033[1m"
-RESET="\033[0m"
-
-echo -e "${CYAN}${BOLD}"
-echo -e "  ◈ Maya for Linux (Studio Pro)"
-echo -e "  Device Mockup & Kinetic Video Recording Studio"
-echo -e "${RESET}"
-
 cd "$MAYA_DIR"
 
-# Install node dependencies if not present
-if [[ ! -d "node_modules" ]] && [[ -f "package.json" ]]; then
-    echo -e "${GOLD}[*] Setting up Maya Studio packages...${RESET}"
-    npm install --silent >/dev/null 2>&1 || true
+# Launch native Electron desktop application window
+if [[ -x "node_modules/.bin/electron" ]]; then
+    exec ./node_modules/.bin/electron . --no-sandbox "$@"
+elif command -v electron &>/dev/null; then
+    exec electron . --no-sandbox "$@"
+else
+    exec npx electron . --no-sandbox "$@"
 fi
-
-# If electron is installed or available in node_modules, launch native desktop app
-if [[ -x "node_modules/.bin/electron" ]] || command -v electron &>/dev/null; then
-    echo -e "${GREEN}[*] Launching Maya Desktop Studio...${RESET}"
-    if [[ -x "node_modules/.bin/electron" ]]; then
-        exec ./node_modules/.bin/electron . "$@"
-    else
-        exec electron . "$@"
-    fi
-fi
-
-# Fallback: Launch Vite Web Studio interface
-echo -e "${GREEN}[*] Launching Maya Studio on http://127.0.0.1:5174...${RESET}"
-npm run dev -- --host 127.0.0.1 --port 5174 > "$HOME/.maya/studio.log" 2>&1 &
-local_pid=$!
-echo $local_pid > "$PID_DIR/studio.pid"
-
-sleep 2
-xdg-open "http://127.0.0.1:5174" 2>/dev/null || x-www-browser "http://127.0.0.1:5174" 2>/dev/null || true
-echo -e "${GREEN}[✓] Maya Studio is running at http://127.0.0.1:5174${RESET}"
