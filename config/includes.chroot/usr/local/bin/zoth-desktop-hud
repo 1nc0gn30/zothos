@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-[+] ZOTHOS Apex Desktop Telemetry HUD v2.0
-High-end glassmorphic CPU/RAM/Disk/Network/Swarm telemetry widget.
-Pure Linux /proc + PyGObject + Cairo — zero pip dependencies.
-Draws directly on compositor-composited desktop surface.
+==============================================================================
+ [+] ZOTHOS APEX TELEMETRY HUD v3.5 ULTRA — MAGIC UI EDITION [+]
+ Real-time Cyber-Alchemical Glassmorphic OS Telemetry, Security & AI Cockpit.
+ PyGObject + Cairo + Pure Linux Probes (Zero External Pip Bloat).
+==============================================================================
 """
 
 import sys
@@ -12,34 +13,71 @@ import time
 import math
 import signal
 import subprocess
+import json
 
 import gi
 gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
+gi.require_version('PangoCairo', '1.0')
 from gi.repository import Gtk, Gdk, GLib, Pango, PangoCairo
 import cairo
 
-# ─────────────────────────────────────────────────────────────
-# PALETTE
-# ─────────────────────────────────────────────────────────────
-C_VOID        = (0.024, 0.035, 0.055, 0.92)   # Card background
-C_BORDER      = (0.0,   1.0,   0.616, 0.28)   # Emerald border
-C_GLOW        = (0.0,   1.0,   0.616, 0.55)   # Emerald glow
-C_EMERALD     = (0.0,   1.0,   0.616, 1.0)    # Emerald text
-C_GOLD        = (1.0,   0.843, 0.0,   1.0)    # Gold
-C_CYAN        = (0.0,   0.898, 1.0,   1.0)    # Cyan
-C_WHITE       = (0.9,   0.95,  1.0,   0.95)   # Near white
-C_DIM         = (0.45,  0.55,  0.70,  0.75)   # Dimmed labels
-C_RED         = (1.0,   0.2,   0.33,  1.0)    # Alert red
-C_BAR_BG      = (0.06,  0.10,  0.18,  0.85)   # Bar track
+# ─────────────────────────────────────────────────────────────────────────────
+# PALETTES & THEMES
+# ─────────────────────────────────────────────────────────────────────────────
+THEMES = {
+    "emerald": {
+        "primary":   (0.0,   1.0,   0.616, 1.0),   # #00ff9d
+        "secondary": (0.0,   0.898, 1.0,   1.0),   # #00e5ff
+        "accent":    (1.0,   0.843, 0.0,   1.0),   # #ffd700
+        "border":    (0.0,   1.0,   0.616, 0.45),
+        "glow":      (0.0,   1.0,   0.616, 0.25),
+        "bg_top":    (0.04,  0.07,  0.11,  0.94),
+        "bg_bot":    (0.02,  0.03,  0.06,  0.96),
+    },
+    "ghost": {
+        "primary":   (1.0,   0.20,  0.33,  1.0),   # #ff3355
+        "secondary": (1.0,   0.50,  0.0,   1.0),   # #ff8000
+        "accent":    (0.8,   0.2,   1.0,   1.0),   # #cc33ff
+        "border":    (1.0,   0.20,  0.33,  0.50),
+        "glow":      (1.0,   0.20,  0.33,  0.30),
+        "bg_top":    (0.08,  0.03,  0.05,  0.94),
+        "bg_bot":    (0.04,  0.01,  0.02,  0.96),
+    },
+    "gold": {
+        "primary":   (1.0,   0.843, 0.0,   1.0),   # #ffd700
+        "secondary": (0.0,   1.0,   0.616, 1.0),   # #00ff9d
+        "accent":    (1.0,   0.60,  0.0,   1.0),   # #ff9900
+        "border":    (1.0,   0.843, 0.0,   0.50),
+        "glow":      (1.0,   0.843, 0.0,   0.30),
+        "bg_top":    (0.07,  0.06,  0.02,  0.94),
+        "bg_bot":    (0.03,  0.02,  0.01,  0.96),
+    },
+    "cyan": {
+        "primary":   (0.0,   0.898, 1.0,   1.0),   # #00e5ff
+        "secondary": (0.6,   0.4,   1.0,   1.0),   # #9966ff
+        "accent":    (0.0,   1.0,   0.616, 1.0),   # #00ff9d
+        "border":    (0.0,   0.898, 1.0,   0.50),
+        "glow":      (0.0,   0.898, 1.0,   0.25),
+        "bg_top":    (0.03,  0.06,  0.10,  0.94),
+        "bg_bot":    (0.01,  0.02,  0.05,  0.96),
+    }
+}
 
-HUD_W         = 310
-HUD_H         = 490
-REFRESH_MS    = 900
+C_WHITE  = (0.95, 0.98, 1.0, 0.95)
+C_DIM    = (0.50, 0.60, 0.75, 0.80)
+C_BAR_BG = (0.05, 0.08, 0.14, 0.90)
+C_RED    = (1.0,  0.25, 0.35, 1.0)
+
+HUD_W       = 330
+HUD_H_FULL  = 560
+HUD_H_MINI  = 90
+REFRESH_MS  = 800
+
 
 class Sparkline:
-    """Rolling history for mini sparkline graphs."""
-    def __init__(self, capacity=40):
+    """High-density rolling history graph with smooth curve filling."""
+    def __init__(self, capacity=45):
         self.capacity = capacity
         self.data = [0.0] * capacity
 
@@ -51,26 +89,32 @@ class Sparkline:
     def draw(self, cr, x, y, w, h, color):
         if len(self.data) < 2:
             return
-        cr.set_source_rgba(*color[:3], 0.7)
-        cr.set_line_width(1.2)
+        cr.set_source_rgba(*color[:3], 0.8)
+        cr.set_line_width(1.3)
         step = w / (len(self.data) - 1)
-        pts = [(x + i * step, y + h - (v / 100.0) * h) for i, v in enumerate(self.data)]
+        pts = [(x + i * step, y + h - (min(100.0, max(0.0, v)) / 100.0) * h) for i, v in enumerate(self.data)]
+        
         cr.move_to(*pts[0])
         for px, py in pts[1:]:
             cr.line_to(px, py)
         cr.stroke()
-        # fill under curve
+
+        # Gradient fill under graph
         cr.line_to(pts[-1][0], y + h)
         cr.line_to(pts[0][0], y + h)
         cr.close_path()
-        cr.set_source_rgba(*color[:3], 0.12)
+
+        pat = cairo.LinearGradient(x, y, x, y + h)
+        pat.add_color_stop_rgba(0, color[0], color[1], color[2], 0.25)
+        pat.add_color_stop_rgba(1, color[0], color[1], color[2], 0.02)
+        cr.set_source(pat)
         cr.fill()
 
 
-class ZothHUD(Gtk.Window):
+class ZothApexHUD(Gtk.Window):
     def __init__(self):
         super().__init__(type=Gtk.WindowType.TOPLEVEL)
-        self.set_title("ZOTHOS HUD")
+        self.set_title("ZOTHOS APEX TELEMETRY HUD")
         self.set_decorated(False)
         self.set_resizable(False)
         self.set_skip_taskbar_hint(True)
@@ -78,7 +122,7 @@ class ZothHUD(Gtk.Window):
         self.set_type_hint(Gdk.WindowTypeHint.DOCK)
         self.set_keep_below(True)
         self.set_accept_focus(False)
-        self.set_default_size(HUD_W, HUD_H)
+        self.set_default_size(HUD_W, HUD_H_FULL)
 
         screen = self.get_screen()
         visual = screen.get_rgba_visual()
@@ -86,345 +130,439 @@ class ZothHUD(Gtk.Window):
             self.set_visual(visual)
         self.set_app_paintable(True)
 
-        # Position: top-right, below panel
+        # Position top-right
         sw = screen.get_width()
-        self.move(sw - HUD_W - 20, 44)
+        self.move(sw - HUD_W - 24, 48)
 
-        # Metrics state
-        self._cpu_prev    = self._read_stat()
-        self._net_prev    = self._read_net()
-        self._last_t      = time.time()
-        self.cpu_pct      = 0.0
-        self.cpu_cores    = []
-        self.ram_pct      = 0.0
-        self.ram_used_gb  = 0.0
+        # State
+        self.theme_name = "emerald"
+        self.compact_mode = False
+        self._pulse = 0.0
+        self._last_t = time.time()
+        self._cpu_prev = self._read_stat()
+        self._net_prev = self._read_net()
+
+        self.cpu_pct = 0.0
+        self.cpu_cores = []
+        self.ram_pct = 0.0
+        self.ram_used_gb = 0.0
         self.ram_total_gb = 0.0
-        self.disk_pct     = 0.0
+        self.disk_pct = 0.0
         self.disk_free_gb = 0.0
-        self.net_rx       = 0.0
-        self.net_tx       = 0.0
-        self.cpu_temp     = self._read_temp()
-        self.swarm_count  = 0
-        self.tor_active   = False
+        self.net_rx = 0.0
+        self.net_tx = 0.0
+        self.cpu_temp = -1.0
+        self.tor_active = False
+        self.top_proc = "system"
+        self.top_proc_cpu = 0.0
+        self.ai_model = "llama3.2 (ollama)"
+        self.sentinel_active = True
 
         # Sparklines
-        self.sl_cpu = Sparkline()
-        self.sl_ram = Sparkline()
-        self.sl_net = Sparkline(30)
+        self.sl_cpu = Sparkline(45)
+        self.sl_ram = Sparkline(45)
+        self.sl_net = Sparkline(45)
+
+        # Hotspots
+        self.hotspots = {}
 
         self._update_metrics()
         self.connect("draw", self._on_draw)
         self.connect("delete-event", Gtk.main_quit)
         self.connect("button-press-event", self._on_click)
         self.add_events(Gdk.EventMask.BUTTON_PRESS_MASK)
+
         GLib.timeout_add(REFRESH_MS, self._tick)
-        self._pulse = 0.0
 
     # ── Proc readers ────────────────────────────────────────────
     def _read_stat(self):
         try:
-            lines = open('/proc/stat').readlines()
+            with open('/proc/stat', 'r') as f:
+                lines = f.readlines()
             out = []
             for line in lines:
-                if not line.startswith('cpu'): break
+                if not line.startswith('cpu'):
+                    break
                 p = list(map(float, line.split()[1:8]))
                 out.append((sum(p[3:5]), sum(p)))  # (idle, total)
             return out
-        except: return [(0, 1)]
+        except Exception:
+            return [(0, 1)]
 
     def _read_net(self):
         rx = tx = 0
         try:
-            for line in open('/proc/net/dev').readlines()[2:]:
+            with open('/proc/net/dev', 'r') as f:
+                lines = f.readlines()[2:]
+            for line in lines:
                 p = line.split()
                 if len(p) >= 10 and not p[0].startswith('lo'):
-                    rx += int(p[1]); tx += int(p[9])
-        except: pass
+                    rx += int(p[1])
+                    tx += int(p[9])
+        except Exception:
+            pass
         return rx, tx
 
     def _read_temp(self):
         for pat in ['/sys/class/thermal/thermal_zone0/temp',
-                    '/sys/class/hwmon/hwmon0/temp1_input']:
+                    '/sys/class/hwmon/hwmon0/temp1_input',
+                    '/sys/class/hwmon/hwmon1/temp1_input']:
             try:
-                v = int(open(pat).read()) / 1000.0
-                if v > 0: return v
-            except: pass
+                with open(pat, 'r') as f:
+                    v = int(f.read().strip()) / 1000.0
+                if v > 0:
+                    return v
+            except Exception:
+                pass
         return -1.0
 
-    def _check_tor(self):
+    def _read_top_process(self):
         try:
-            result = subprocess.run(['pgrep', '-x', 'tor'], capture_output=True)
-            return result.returncode == 0
-        except: return False
+            res = subprocess.run(
+                ["ps", "-eo", "comm,%cpu", "--sort=-%cpu", "--no-headers"],
+                capture_output=True, text=True, timeout=1
+            )
+            lines = res.stdout.strip().splitlines()
+            if lines:
+                parts = lines[0].split()
+                comm = parts[0]
+                cpu = float(parts[1]) if len(parts) > 1 else 0.0
+                return comm, cpu
+        except Exception:
+            pass
+        return "system", 0.0
 
-    def _count_agents(self):
-        try:
-            result = subprocess.run(['pgrep', '-fc', 'zoth-agent'], capture_output=True)
-            return max(0, int(result.stdout.strip()) - 1)
-        except: return 0
+    def _read_sentinel_info(self):
+        cfg_path = "/etc/zothos/sentinel.json"
+        if os.path.exists(cfg_path):
+            try:
+                with open(cfg_path, 'r') as f:
+                    data = json.load(f)
+                    return f"{data.get('model', 'llama3.2')} ({data.get('provider', 'ollama')})"
+            except Exception:
+                pass
+        return "llama3.2:latest (ollama)"
 
-    # ── Metric update ────────────────────────────────────────────
+    # ── Update loop ─────────────────────────────────────────────
     def _update_metrics(self):
         now = time.time()
-        dt  = max(0.1, now - self._last_t)
+        dt = max(0.1, now - self._last_t)
         self._last_t = now
 
+        # CPU
         cur = self._read_stat()
         if cur and self._cpu_prev and len(cur) == len(self._cpu_prev):
-            idle_d  = cur[0][0] - self._cpu_prev[0][0]
+            idle_d = cur[0][0] - self._cpu_prev[0][0]
             total_d = max(1.0, cur[0][1] - self._cpu_prev[0][1])
-            self.cpu_pct = max(0.0, min(100.0, (1 - idle_d/total_d)*100))
+            self.cpu_pct = max(0.0, min(100.0, (1 - idle_d / total_d) * 100))
             self.cpu_cores = []
             for i in range(1, len(cur)):
                 id2 = cur[i][0] - self._cpu_prev[i][0]
                 to2 = max(1.0, cur[i][1] - self._cpu_prev[i][1])
-                self.cpu_cores.append(max(0.0, min(100.0, (1 - id2/to2)*100)))
+                self.cpu_cores.append(max(0.0, min(100.0, (1 - id2 / to2) * 100)))
         self._cpu_prev = cur
 
+        # RAM
         try:
             mem = {}
-            for line in open('/proc/meminfo'):
-                k, v = line.split(':')
-                mem[k.strip()] = int(v.split()[0])
+            with open('/proc/meminfo', 'r') as f:
+                for line in f:
+                    k, v = line.split(':')
+                    mem[k.strip()] = int(v.split()[0])
             total = mem.get('MemTotal', 4194304)
-            avail = mem.get('MemAvailable', total//2)
-            used  = total - avail
+            avail = mem.get('MemAvailable', total // 2)
+            used = total - avail
             self.ram_total_gb = total / 1048576
-            self.ram_used_gb  = used  / 1048576
-            self.ram_pct      = (used / max(1, total)) * 100
-        except: pass
+            self.ram_used_gb = used / 1048576
+            self.ram_pct = (used / max(1, total)) * 100
+        except Exception:
+            pass
 
+        # Disk
         try:
             st = os.statvfs('/')
-            free_b  = st.f_bavail * st.f_frsize
+            free_b = st.f_bavail * st.f_frsize
             total_b = st.f_blocks * st.f_frsize
             self.disk_free_gb = free_b / (1024**3)
-            self.disk_pct     = ((total_b - free_b) / max(1, total_b)) * 100
-        except: pass
+            self.disk_pct = ((total_b - free_b) / max(1, total_b)) * 100
+        except Exception:
+            pass
 
+        # Network
         rx, tx = self._read_net()
         self.net_rx = max(0, (rx - self._net_prev[0]) / 1024 / dt)
         self.net_tx = max(0, (tx - self._net_prev[1]) / 1024 / dt)
         self._net_prev = (rx, tx)
 
-        self.cpu_temp   = self._read_temp()
-        self.tor_active = self._check_tor()
-        self.swarm_count = self._count_agents()
+        self.cpu_temp = self._read_temp()
+        self.tor_active = (subprocess.run(['pgrep', '-x', 'tor'], capture_output=True).returncode == 0)
+        self.top_proc, self.top_proc_cpu = self._read_top_process()
+        self.ai_model = self._read_sentinel_info()
+        self.sentinel_active = (subprocess.run(['systemctl', 'is-active', 'zoth-sentinel'], capture_output=True).returncode == 0)
 
+        # Sparklines
         self.sl_cpu.push(self.cpu_pct)
         self.sl_ram.push(self.ram_pct)
-        net_pct = min(100.0, (self.net_rx + self.net_tx) / 1000 * 100)
+        net_pct = min(100.0, (self.net_rx + self.net_tx) / 2048 * 100)
         self.sl_net.push(net_pct)
         return True
 
     def _tick(self):
-        self._pulse = (self._pulse + 0.05) % (2 * math.pi)
+        self._pulse = (self._pulse + 0.08) % (2 * math.pi)
         self._update_metrics()
         self.queue_draw()
         return True
 
+    # ── Interactive Click Handling ──────────────────────────────
     def _on_click(self, widget, event):
-        if event.button == 1:
-            self.begin_move_drag(event.button, int(event.x_root), int(event.y_root), event.time)
+        x, y = event.x, event.y
 
-    # ── Draw helpers ─────────────────────────────────────────────
+        # Drag window on header click
+        if event.button == 1 and y < 44:
+            if event.type == Gdk.EventType._2BUTTON_PRESS:
+                # Double click to toggle compact mode
+                self.compact_mode = not self.compact_mode
+                h = HUD_H_MINI if self.compact_mode else HUD_H_FULL
+                self.resize(HUD_W, h)
+            else:
+                self.begin_move_drag(event.button, int(event.x_root), int(event.y_root), event.time)
+            return
+
+        # Check interactive buttons
+        if event.button == 1:
+            for name, (hx, hy, hw, hh, action) in self.hotspots.items():
+                if hx <= x <= hx + hw and hy <= y <= hy + hh:
+                    action()
+                    self._update_metrics()
+                    self.queue_draw()
+                    break
+
+    def toggle_tor(self):
+        subprocess.Popen(["/usr/local/bin/zoth-ghost", "toggle"])
+
+    def toggle_sentinel_hud(self):
+        subprocess.Popen(["/usr/local/bin/zoth-sentinel-hud"])
+
+    def purge_ram(self):
+        subprocess.Popen(["sync"])
+        subprocess.Popen(["notify-send", "-a", "ZothOS HUD", "RAM & Disk Cache Synchronized", "Buffer caches synced."])
+
+    def cycle_theme(self):
+        theme_keys = list(THEMES.keys())
+        idx = (theme_keys.index(self.theme_name) + 1) % len(theme_keys)
+        self.theme_name = theme_keys[idx]
+
+    # ── Drawing Helpers ─────────────────────────────────────────
     def _rrect(self, cr, x, y, w, h, r):
         cr.new_sub_path()
-        cr.arc(x+w-r, y+r,   r, -math.pi/2, 0)
-        cr.arc(x+w-r, y+h-r, r,  0,          math.pi/2)
-        cr.arc(x+r,   y+h-r, r,  math.pi/2,  math.pi)
-        cr.arc(x+r,   y+r,   r,  math.pi,    1.5*math.pi)
+        cr.arc(x + w - r, y + r, r, -math.pi / 2, 0)
+        cr.arc(x + w - r, y + h - r, r, 0, math.pi / 2)
+        cr.arc(x + r, y + h - r, r, math.pi / 2, math.pi)
+        cr.arc(x + r, y + r, r, math.pi, 1.5 * math.pi)
         cr.close_path()
 
     def _text(self, cr, x, y, s, size=10, bold=False, color=C_WHITE):
         cr.set_source_rgba(*color)
-        cr.select_font_face("JetBrains Mono",
+        cr.select_font_face(
+            "JetBrains Mono",
             cairo.FONT_SLANT_NORMAL,
-            cairo.FONT_WEIGHT_BOLD if bold else cairo.FONT_WEIGHT_NORMAL)
+            cairo.FONT_WEIGHT_BOLD if bold else cairo.FONT_WEIGHT_NORMAL
+        )
         cr.set_font_size(size)
         cr.move_to(x, y)
-        cr.show_text(s)
+        cr.show_text(str(s))
 
-    def _bar(self, cr, x, y, w, h, pct, r, g, b, glow=True):
-        # Track
-        self._rrect(cr, x, y, w, h, h/2)
+    def _bar(self, cr, x, y, w, h, pct, color):
+        r, g, b = color[:3]
+        # Background Track
+        self._rrect(cr, x, y, w, h, h / 2)
         cr.set_source_rgba(*C_BAR_BG)
         cr.fill()
-        # Fill
-        fw = max(h, (w * min(100, max(0, pct)) / 100))
-        self._rrect(cr, x, y, fw, h, h/2)
-        pat = cairo.LinearGradient(x, y, x+fw, y)
-        pat.add_color_stop_rgba(0,   r*0.5, g*0.5, b*0.5, 0.9)
-        pat.add_color_stop_rgba(0.5, r,     g,     b,     1.0)
-        pat.add_color_stop_rgba(1.0, r,     g,     b,     0.8)
+
+        # Filled portion
+        fw = max(h, (w * min(100.0, max(0.0, pct)) / 100.0))
+        self._rrect(cr, x, y, fw, h, h / 2)
+        pat = cairo.LinearGradient(x, y, x + fw, y)
+        pat.add_color_stop_rgba(0, r * 0.6, g * 0.6, b * 0.6, 0.9)
+        pat.add_color_stop_rgba(0.5, r, g, b, 1.0)
+        pat.add_color_stop_rgba(1.0, min(1.0, r * 1.2), min(1.0, g * 1.2), min(1.0, b * 1.2), 0.85)
         cr.set_source(pat)
         cr.fill()
-        # Glow on top section
-        if glow and pct > 5:
-            self._rrect(cr, x+fw-h, y, h, h, h/2)
-            cr.set_source_rgba(r, g, b, 0.4)
-            cr.fill()
 
-    def _section_title(self, cr, x, y, label, color=C_GOLD):
-        cr.set_source_rgba(*color[:3], 0.5)
-        cr.set_line_width(0.5)
-        cr.move_to(x, y); cr.line_to(x+200, y); cr.stroke()
-        self._text(cr, x, y-3, label, size=8, color=(*color[:3], 0.85))
-
-    def _pill(self, cr, x, y, w, h, label, active=True, c=C_EMERALD):
-        r = h/2
+    def _button_pill(self, cr, x, y, w, h, label, active=True, color=None, key=None, callback=None):
+        c = color or THEMES[self.theme_name]["primary"]
+        r = h / 2
         self._rrect(cr, x, y, w, h, r)
         if active:
-            cr.set_source_rgba(*c[:3], 0.18)
+            cr.set_source_rgba(c[0], c[1], c[2], 0.22)
         else:
-            cr.set_source_rgba(0.1, 0.15, 0.25, 0.6)
+            cr.set_source_rgba(0.08, 0.12, 0.20, 0.7)
         cr.fill_preserve()
-        cr.set_source_rgba(*c[:3], 0.5 if active else 0.2)
+
+        cr.set_source_rgba(c[0], c[1], c[2], 0.65 if active else 0.25)
         cr.set_line_width(1.0)
         cr.stroke()
-        cr.set_source_rgba(*c[:3], 1.0 if active else 0.35)
+
+        cr.set_source_rgba(c[0], c[1], c[2], 1.0 if active else 0.4)
         cr.select_font_face("JetBrains Mono", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
-        cr.set_font_size(8)
+        cr.set_font_size(8.5)
         ext = cr.text_extents(label)
-        cr.move_to(x + (w - ext.width)/2, y + (h + ext.height)/2 - 1)
+        cr.move_to(x + (w - ext.width) / 2, y + (h + ext.height) / 2 - 1)
         cr.show_text(label)
 
-    # ── Main draw ────────────────────────────────────────────────
+        if key and callback:
+            self.hotspots[key] = (x, y, w, h, callback)
+
+    # ── Main Render ─────────────────────────────────────────────
     def _on_draw(self, widget, cr):
         cr.set_operator(cairo.OPERATOR_SOURCE)
         cr.set_source_rgba(0, 0, 0, 0)
         cr.paint()
         cr.set_operator(cairo.OPERATOR_OVER)
-        W, H = HUD_W, HUD_H
-        PAD = 16
 
-        # ── Card background ───────────────────────────────────────
-        self._rrect(cr, 3, 3, W-6, H-6, 14)
+        thm = THEMES[self.theme_name]
+        W = HUD_W
+        H = HUD_H_MINI if self.compact_mode else HUD_H_FULL
+        PAD = 16
+        self.hotspots.clear()
+
+        # ── Card Background with Acrylic Gradient ──────────────────
+        self._rrect(cr, 3, 3, W - 6, H - 6, 16)
         pat = cairo.LinearGradient(0, 0, 0, H)
-        pat.add_color_stop_rgba(0,   0.05, 0.08, 0.14, 0.94)
-        pat.add_color_stop_rgba(1.0, 0.02, 0.04, 0.08, 0.96)
+        pat.add_color_stop_rgba(0, *thm["bg_top"])
+        pat.add_color_stop_rgba(1.0, *thm["bg_bot"])
         cr.set_source(pat)
         cr.fill_preserve()
 
-        # Glowing emerald border (pulsed)
-        pulse = (math.sin(self._pulse) * 0.15 + 0.25)
-        cr.set_source_rgba(0, 1, 0.616, pulse)
+        # Pulsing Neon Border
+        pulse_alpha = 0.35 + (math.sin(self._pulse) * 0.15)
+        cr.set_source_rgba(thm["primary"][0], thm["primary"][1], thm["primary"][2], pulse_alpha)
         cr.set_line_width(1.5)
         cr.stroke()
 
-        # ── Header ───────────────────────────────────────────────
-        cr.set_source_rgba(0, 1, 0.616, 0.08)
-        self._rrect(cr, 3, 3, W-6, 40, 14)
+        # ── Header Bar ─────────────────────────────────────────────
+        self._rrect(cr, 3, 3, W - 6, 42, 16)
+        cr.set_source_rgba(thm["primary"][0], thm["primary"][1], thm["primary"][2], 0.08)
         cr.fill()
 
-        self._text(cr, PAD, 24, "[+] ZOTHOS APEX TELEMETRY", size=10, bold=True, color=C_GOLD)
-        # Version tag
-        self._text(cr, W-70, 18, "v2.0", size=8, color=(*C_EMERALD[:3], 0.5))
-        self._text(cr, W-70, 30, "KERNEL", size=8, color=(*C_DIM[:3], 0.6))
+        # Live Orb Indicator
+        orb_x, orb_y = PAD + 4, 22
+        cr.arc(orb_x, orb_y, 4.5, 0, 2 * math.pi)
+        cr.set_source_rgba(*thm["primary"])
+        cr.fill()
 
-        y = 50
+        self._text(cr, PAD + 16, 26, "ZOTHOS APEX HUD", size=10.5, bold=True, color=thm["accent"])
+        self._text(cr, W - 110, 20, "v3.5 PRO", size=8, color=thm["primary"])
+        self._text(cr, W - 110, 32, f"[{self.theme_name.upper()}]", size=7.5, color=C_DIM)
 
-        # ── CPU Section ───────────────────────────────────────────
-        self._section_title(cr, PAD, y, "CPU LOAD", C_EMERALD)
-        y += 14
+        # Theme Cycle Button in header
+        self._button_pill(cr, W - 48, 14, 32, 18, "FX", True, thm["secondary"], "btn_theme", self.cycle_theme)
 
-        pct_str = f"{self.cpu_pct:.1f}%"
-        self._text(cr, PAD, y, pct_str, size=22, bold=True,
-                   color=C_RED if self.cpu_pct > 85 else C_EMERALD)
+        if self.compact_mode:
+            # Compact summary line
+            self._text(cr, PAD, 64, f"CPU: {self.cpu_pct:.1f}% | RAM: {self.ram_pct:.0f}% | NET: ▼{self.net_rx:.0f}K", size=9, color=thm["primary"])
+            return False
 
-        # Temp
+        y = 56
+
+        # ── CPU Load Section ───────────────────────────────────────
+        self._text(cr, PAD, y, "CPU CORE COMPUTE", size=8, bold=True, color=thm["primary"])
         if self.cpu_temp > 0:
-            tc = C_RED if self.cpu_temp > 80 else (C_GOLD if self.cpu_temp > 60 else C_DIM)
-            self._text(cr, W - 65, y, f"{self.cpu_temp:.0f}°C", size=13, bold=True, color=tc)
+            tc = C_RED if self.cpu_temp > 80 else thm["accent"]
+            self._text(cr, W - PAD - 45, y, f"{self.cpu_temp:.0f}°C", size=9, bold=True, color=tc)
+        y += 16
 
-        y += 6
-        self._bar(cr, PAD, y, W-PAD*2, 8, self.cpu_pct, 0.0, 1.0, 0.616)
+        pct_color = C_RED if self.cpu_pct > 85 else thm["primary"]
+        self._text(cr, PAD, y, f"{self.cpu_pct:.1f}%", size=22, bold=True, color=pct_color)
+        self._text(cr, W - PAD - 120, y - 4, f"Top: {self.top_proc[:12]} ({self.top_proc_cpu:.0f}%)", size=8, color=C_DIM)
+
+        y += 8
+        self._bar(cr, PAD, y, W - PAD * 2, 7, self.cpu_pct, thm["primary"])
         y += 14
 
-        # Per-core micro bars
+        # Per-Core Micro Bars
         if self.cpu_cores:
-            ncores = len(self.cpu_cores)
-            cw = (W - PAD*2 - (ncores-1)*3) / max(1, ncores)
-            for i, cpct in enumerate(self.cpu_cores):
-                cx = PAD + i*(cw+3)
-                self._bar(cr, cx, y, cw, 4, cpct, 0.0, 0.9, 1.0, glow=False)
-                self._text(cr, cx, y+13, f"C{i}", size=7, color=C_DIM)
-            y += 18
+            n = len(self.cpu_cores)
+            cw = (W - PAD * 2 - (n - 1) * 3) / max(1, n)
+            for i, cp in enumerate(self.cpu_cores):
+                cx = PAD + i * (cw + 3)
+                self._bar(cr, cx, y, cw, 3, cp, thm["secondary"])
+            y += 12
 
-        # CPU sparkline
-        y += 4
-        self.sl_cpu.draw(cr, PAD, y, W-PAD*2, 24, C_EMERALD)
+        # CPU Sparkline
+        self.sl_cpu.draw(cr, PAD, y, W - PAD * 2, 22, thm["primary"])
         y += 28
 
-        # ── RAM Section ───────────────────────────────────────────
-        self._section_title(cr, PAD, y, "MEMORY", C_CYAN)
+        # ── Memory Section ─────────────────────────────────────────
+        self._text(cr, PAD, y, "DYNAMIC MEMORY ALLOCATION", size=8, bold=True, color=thm["secondary"])
+        self._text(cr, W - PAD - 60, y, f"{int(self.ram_pct)}%", size=9, bold=True, color=thm["secondary"])
         y += 14
 
-        ram_str = f"{self.ram_used_gb:.1f}G / {self.ram_total_gb:.1f}G"
-        self._text(cr, PAD, y, ram_str, size=11, bold=True, color=C_CYAN)
-        self._text(cr, W-55, y, f"{int(self.ram_pct)}%", size=13, bold=True,
-                   color=C_RED if self.ram_pct > 90 else C_CYAN)
+        ram_str = f"{self.ram_used_gb:.2f} GB / {self.ram_total_gb:.2f} GB"
+        self._text(cr, PAD, y, ram_str, size=11, bold=True, color=thm["secondary"])
         y += 8
-        self._bar(cr, PAD, y, W-PAD*2, 8, self.ram_pct, 0.0, 0.9, 1.0)
-        y += 18
-
-        # RAM sparkline
-        self.sl_ram.draw(cr, PAD, y, W-PAD*2, 18, C_CYAN)
-        y += 24
-
-        # ── DISK Section ──────────────────────────────────────────
-        self._section_title(cr, PAD, y, "ROOT STORAGE", C_GOLD)
+        self._bar(cr, PAD, y, W - PAD * 2, 7, self.ram_pct, thm["secondary"])
         y += 14
-        disk_str = f"{self.disk_free_gb:.1f}G free"
-        self._text(cr, PAD, y, disk_str, size=11, bold=True, color=C_GOLD)
-        self._text(cr, W-55, y, f"{int(self.disk_pct)}%", size=13, bold=True,
-                   color=C_RED if self.disk_pct > 90 else C_GOLD)
-        y += 8
-        self._bar(cr, PAD, y, W-PAD*2, 8, self.disk_pct, 1.0, 0.84, 0.0)
-        y += 20
-
-        # ── NETWORK Section ───────────────────────────────────────
-        self._section_title(cr, PAD, y, "NETWORK I/O", C_EMERALD)
-        y += 14
-
-        def fmt_rate(kbs):
-            if kbs > 1024: return f"{kbs/1024:.1f} MB/s"
-            return f"{kbs:.0f} KB/s"
-
-        self._text(cr, PAD, y, f"▼ {fmt_rate(self.net_rx)}", size=10, color=C_EMERALD)
-        self._text(cr, W//2 + 4, y, f"▲ {fmt_rate(self.net_tx)}", size=10, color=C_CYAN)
-        y += 12
-        self.sl_net.draw(cr, PAD, y, W-PAD*2, 18, C_EMERALD)
+        self.sl_ram.draw(cr, PAD, y, W - PAD * 2, 18, thm["secondary"])
         y += 26
 
-        # ── OPSEC Status Pills ────────────────────────────────────
-        cr.set_source_rgba(0, 1, 0.616, 0.12)
-        cr.set_line_width(0.5)
-        cr.move_to(PAD, y); cr.line_to(W-PAD, y); cr.stroke()
-        y += 10
+        # ── Storage & Network Split ────────────────────────────────
+        self._text(cr, PAD, y, "STORAGE", size=8, bold=True, color=thm["accent"])
+        self._text(cr, W // 2 + 6, y, "NETWORK I/O", size=8, bold=True, color=thm["primary"])
+        y += 14
 
-        pw = (W - PAD*2 - 6) // 2
-        # Swarm pill
-        swarm_label = f"[AGENT] SWARM: {self.swarm_count} LIVE" if self.swarm_count > 0 else "[AGENT] SWARM: IDLE"
-        self._pill(cr, PAD, y, pw, 22, swarm_label, self.swarm_count > 0, C_EMERALD)
-        # Ghost/Tor pill
-        ghost_label = "[GHOST] TOR: ACTIVE" if self.tor_active else "[GHOST] TOR: OFF"
-        self._pill(cr, PAD + pw + 6, y, pw, 22, ghost_label, self.tor_active, C_CYAN)
-        y += 30
+        half_w = (W - PAD * 2 - 10) // 2
+        # Disk Free
+        self._text(cr, PAD, y, f"{self.disk_free_gb:.1f}G Free ({self.disk_pct:.0f}%)", size=9, color=thm["accent"])
+        # Net Rates
+        self._text(cr, W // 2 + 6, y, f"▼{self.net_rx:.0f}K ▲{self.net_tx:.0f}K", size=9, color=thm["primary"])
+        y += 6
+        self._bar(cr, PAD, y, half_w, 5, self.disk_pct, thm["accent"])
+        self.sl_net.draw(cr, W // 2 + 6, y, half_w, 16, thm["primary"])
+        y += 24
 
-        # ── Footer ────────────────────────────────────────────────
-        self._text(cr, PAD, y, "ZOTH-CORE // NULLAI GHOSTMODE // AZOTH ENGINE",
-                   size=7, color=(*C_DIM[:3], 0.45))
+        # ── AI Sentinel & Autonomous Engine ────────────────────────
+        cr.set_source_rgba(thm["primary"][0], thm["primary"][1], thm["primary"][2], 0.18)
+        cr.set_line_width(0.8)
+        cr.move_to(PAD, y)
+        cr.line_to(W - PAD, y)
+        cr.stroke()
+        y += 12
+
+        self._text(cr, PAD, y, "AUTONOMOUS OS SENTINEL", size=8, bold=True, color=thm["accent"])
+        ai_st = "[ACTIVE]" if self.sentinel_active else "[IDLE]"
+        self._text(cr, W - PAD - 55, y, ai_st, size=8, bold=True, color=thm["primary"] if self.sentinel_active else C_RED)
+        y += 14
+
+        self._text(cr, PAD, y, f"Model: {self.ai_model}", size=8.5, color=C_WHITE)
+        y += 18
+
+        # ── Interactive Quick Actions ──────────────────────────────
+        pw = (W - PAD * 2 - 12) // 3
+        # Tor Ghostmode Button
+        tor_lbl = "TOR: ON" if self.tor_active else "TOR: OFF"
+        self._button_pill(cr, PAD, y, pw, 22, tor_lbl, self.tor_active, thm["primary"], "btn_tor", self.toggle_tor)
+
+        # AI Prompt HUD
+        self._button_pill(cr, PAD + pw + 6, y, pw, 22, "⚡ AI HUD", True, thm["accent"], "btn_ai", self.toggle_sentinel_hud)
+
+        # Purge Cache
+        self._button_pill(cr, PAD + (pw + 6) * 2, y, pw, 22, "PURGE", True, thm["secondary"], "btn_purge", self.purge_ram)
+        y += 32
+
+        # ── Footer Telemetry ───────────────────────────────────────
+        self._text(cr, PAD, y, "ZOTH APEX // MULTI-MODEL SOVEREIGN KERNEL", size=7, color=(*C_DIM[:3], 0.5))
 
         return False
 
 
 def main():
     signal.signal(signal.SIGTERM, lambda *a: Gtk.main_quit())
-    signal.signal(signal.SIGINT,  lambda *a: Gtk.main_quit())
-    app = ZothHUD()
+    signal.signal(signal.SIGINT, lambda *a: Gtk.main_quit())
+    app = ZothApexHUD()
     app.show_all()
     Gtk.main()
+
 
 if __name__ == "__main__":
     main()

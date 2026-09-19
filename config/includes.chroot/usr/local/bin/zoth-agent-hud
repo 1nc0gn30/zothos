@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """
-ZOTHOS AI AGENT HUD & OS CONTROLLER GUI
-Interactive Desktop Control Center with Layer Authority Selector & Live Telemetry.
+==============================================================================
+ * ZOTHOS APEX AGENT & OS CONTROLLER HUD v3.5 ULTRA *
+ Interactive Cyber-Alchemical Command Cockpit with Autonomous Sentinel Engine.
+==============================================================================
 """
 
 import os
@@ -13,26 +15,38 @@ import subprocess
 import tkinter as tk
 from tkinter import ttk, messagebox, scrolledtext
 
-CONFIG_FILE = "/etc/zothos/agent-permissions.json"
 USER_STATE = os.path.expanduser("~/.config/zothos/agent-layer.state")
+SENTINEL_CONFIG = "/etc/zothos/sentinel.json"
 
 LAYER_COLORS = {
-    0: ("#00f3ff", "SPECTRE", "Observer / Read-Only (0 Mutation)"),
-    1: ("#00ff88", "RUNECRAFTER", "User Shell & Workspace Code"),
-    2: ("#3b82f6", "CYBERPUPPET", "GUI, Mouse & Keyboard Computer Use"),
-    3: ("#a855f7", "WARLOCK", "Offensive Security & Ghostmode"),
-    4: ("#fbbf24", "SOVEREIGN", "Root, Kernel & Amnesic Authority"),
+    0: ("#00e5ff", "SPECTRE", "Observer / Read-Only Telemetry"),
+    1: ("#00ff9d", "RUNECRAFTER", "Workspace Code & CLI Tasks"),
+    2: ("#3b82f6", "CYBERPUPPET", "GUI, Computer Use & Browser"),
+    3: ("#a855f7", "WARLOCK", "Offensive Sec & Tor Ghostmode"),
+    4: ("#ffd700", "SOVEREIGN", "Full Root, Kernel & Sentinel Engine"),
 }
+
+CORE_TOOLS = [
+    ("Zoth Studio", "/opt/zoth-studio/index.html", "zoth-studio", "chrome --app=file:///opt/zoth-studio/index.html"),
+    ("HexStrike AI", "hexstrike", "hexstrike", "/usr/local/bin/hexstrike"),
+    ("Maya Linux", "maya", "maya", "/usr/local/bin/maya"),
+    ("Hermes Agent", "hermes", "hermes", "/usr/local/bin/hermes"),
+    ("Tor Ghostmode", "zoth-ghost", "zoth-ghost", "/usr/local/bin/zoth-ghost toggle"),
+    ("Live Wallpaper", "zoth-live-wallpaper", "zoth-live-wallpaper", "/usr/local/bin/zoth-live-wallpaper toggle"),
+    ("Bitwarden Vault", "bw", "bitwarden", "x-terminal-emulator -e bw login"),
+    ("Obsidian Vault", "obsidian", "obsidian", "obsidian")
+]
+
 
 class AgentHUDApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("ZOTHOS // SOVEREIGN AI AGENT HUD")
-        self.root.geometry("820x680")
-        self.root.configure(bg="#02040a")
+        self.root.title("ZOTHOS // APEX AGENT & TELEMETRY COCKPIT")
+        self.root.geometry("880x720")
+        self.root.configure(bg="#03060c")
 
         self.active_layer = self.load_layer()
-        self.pulse_phase = 0
+        self.pulse_phase = 0.0
 
         self.setup_ui()
         self.start_pulse_thread()
@@ -45,7 +59,7 @@ class AgentHUDApp:
                     return int(f.read().strip())
             except Exception:
                 pass
-        return 2
+        return 4
 
     def save_layer(self, layer: int):
         self.active_layer = layer
@@ -56,240 +70,245 @@ class AgentHUDApp:
         self.log(f"[AUTH] Elevated agent permission to Layer {layer}: {LAYER_COLORS[layer][1]}")
 
     def setup_ui(self):
-        # Header Frame
-        header = tk.Frame(self.root, bg="#030814", highlightbackground="#00f3ff", highlightthickness=1)
-        header.pack(fill="x", padx=12, pady=10)
+        # ── Header Frame ─────────────────────────────────────────────
+        header = tk.Frame(self.root, bg="#080e18", highlightbackground="#00ff9d", highlightthickness=1)
+        header.pack(fill="x", padx=14, pady=10)
 
-        # Title & AI Alive Indicator
-        title_box = tk.Frame(header, bg="#030814")
-        title_box.pack(side="left", padx=15, pady=10)
+        title_box = tk.Frame(header, bg="#080e18")
+        title_box.pack(side="left", padx=16, pady=12)
 
-        self.orb_canvas = tk.Canvas(title_box, width=28, height=28, bg="#030814", highlightthickness=0)
+        self.orb_canvas = tk.Canvas(title_box, width=28, height=28, bg="#080e18", highlightthickness=0)
         self.orb_canvas.pack(side="left", padx=(0, 10))
-        self.orb = self.orb_canvas.create_oval(4, 4, 24, 24, fill="#00ff88", outline="#00f3ff", width=2)
+        self.orb = self.orb_canvas.create_oval(4, 4, 24, 24, fill="#00ff9d", outline="#00e5ff", width=2)
 
         lbl_title = tk.Label(
             title_box,
-            text="ZOTHOS AGENT // OS OVERLORD",
-            font=("Orbitron", 14, "bold"),
-            fg="#00f3ff",
-            bg="#030814"
+            text="🜂 ZOTHOS APEX // AGENT & OS COCKPIT",
+            font=("JetBrains Mono", 13, "bold"),
+            fg="#00ff9d",
+            bg="#080e18"
         )
         lbl_title.pack(side="left")
 
         self.lbl_status = tk.Label(
             header,
-            text="● AI ALIVE [READY]",
+            text="● SENTINEL AI: ACTIVE",
             font=("JetBrains Mono", 10, "bold"),
-            fg="#00ff88",
-            bg="#030814"
+            fg="#00ff9d",
+            bg="#080e18"
         )
-        self.lbl_status.pack(side="right", padx=15)
+        self.lbl_status.pack(side="right", padx=16)
 
-        # ── PERMISSION LAYERS SELECTOR ──────────────────────────────────────
+        # ── Security Rings / Layer Selector ──────────────────────────
         layer_frame = tk.LabelFrame(
             self.root,
             text=" [ SECURITY RINGS // AUTONOMOUS OS AUTHORITY ] ",
-            font=("JetBrains Mono", 10, "bold"),
-            fg="#00f3ff",
-            bg="#02040a",
-            highlightbackground="#00f3ff",
+            font=("JetBrains Mono", 9, "bold"),
+            fg="#00e5ff",
+            bg="#03060c",
+            highlightbackground="#00e5ff",
             highlightthickness=1
         )
-        layer_frame.pack(fill="x", padx=12, pady=6)
+        layer_frame.pack(fill="x", padx=14, pady=4)
 
-        self.layer_btns = {}
-        btn_box = tk.Frame(layer_frame, bg="#02040a")
-        btn_box.pack(fill="x", padx=10, pady=8)
+        self.layer_btns = []
+        btn_grid = tk.Frame(layer_frame, bg="#03060c")
+        btn_grid.pack(fill="x", padx=8, pady=8)
 
-        for lvl in range(5):
-            color, name, desc = LAYER_COLORS[lvl]
+        for lvl, (color, name, desc) in LAYER_COLORS.items():
+            f = tk.Frame(btn_grid, bg="#080e18", highlightbackground=color, highlightthickness=1)
+            f.pack(side="left", expand=True, fill="both", padx=4)
+
             btn = tk.Button(
-                btn_box,
-                text=f"L{lvl}: {name}\n{desc.split()[0]}",
-                font=("JetBrains Mono", 9, "bold"),
-                bg="#061226",
+                f,
+                text=f"L{lvl}: {name}\n{desc}",
+                font=("JetBrains Mono", 8),
+                bg="#080e18",
                 fg=color,
-                activebackground=color,
-                activeforeground="#000000",
                 relief="flat",
-                bd=0,
-                padx=6,
-                pady=6,
                 command=lambda l=lvl: self.save_layer(l)
             )
-            btn.pack(side="left", expand=True, fill="x", padx=3)
-            self.layer_btns[lvl] = btn
+            btn.pack(fill="both", expand=True, padx=2, pady=2)
+            self.layer_btns.append((lvl, f, btn))
 
         self.refresh_layer_buttons()
 
-        # ── COMMAND INPUT BOX ───────────────────────────────────────────────
-        input_frame = tk.Frame(self.root, bg="#02040a")
-        input_frame.pack(fill="x", padx=12, pady=6)
+        # ── Middle Pane: Telemetry & Core Tool Arsenal ───────────────
+        mid_pane = tk.Frame(self.root, bg="#03060c")
+        mid_pane.pack(fill="x", padx=14, pady=6)
 
-        self.cmd_entry = tk.Entry(
-            input_frame,
-            font=("JetBrains Mono", 11),
-            bg="#050e1f",
-            fg="#e2e8f0",
-            insertbackground="#00f3ff",
-            highlightbackground="#00f3ff",
-            highlightthickness=1,
-            bd=0
-        )
-        self.cmd_entry.pack(side="left", fill="x", expand=True, ipady=8, padx=(0, 8))
-        self.cmd_entry.bind("<Return>", lambda e: self.dispatch_command())
-        self.cmd_entry.insert(0, "Open terminal, check git status, and take a screenshot")
-
-        btn_run = tk.Button(
-            input_frame,
-            text="TRANSMUTE ❯",
-            font=("Orbitron", 10, "bold"),
-            bg="#00ff88",
-            fg="#000000",
-            activebackground="#00f3ff",
-            relief="flat",
-            bd=0,
-            padx=14,
-            pady=8,
-            command=self.dispatch_command
-        )
-        btn_run.pack(side="right")
-
-        # ── QUICK ACTIONS BAR ───────────────────────────────────────────────
-        quick_frame = tk.Frame(self.root, bg="#02040a")
-        quick_frame.pack(fill="x", padx=12, pady=4)
-
-        actions = [
-            ("[SNAP] Capture Screen", "gui_screenshot"),
-            ("[STEALTH] Toggle Ghostmode", "toggle_ghostmode"),
-            ("[SCAN] Nmap Localhost", "nmap 127.0.0.1"),
-            ("[STUDIO] Zoth Studio", "open studio"),
-            ("[+] Hermes Agent", "open terminal"),
-            ("[WIN] Win11 Incognito", "zoth-undercover")
-        ]
-
-        for label, act in actions:
-            qbtn = tk.Button(
-                quick_frame,
-                text=label,
-                font=("JetBrains Mono", 8),
-                bg="#041224",
-                fg="#38bdf8",
-                activebackground="#38bdf8",
-                activeforeground="#000000",
-                relief="flat",
-                bd=0,
-                padx=6,
-                pady=4,
-                command=lambda a=act: self.run_quick_action(a)
-            )
-            qbtn.pack(side="left", expand=True, fill="x", padx=2)
-
-        # ── TELEMETRY & LOG CONSOLE ─────────────────────────────────────────
-        log_frame = tk.LabelFrame(
-            self.root,
-            text=" [ LIVE ACTION STREAM // SYSTEM TELEMETRY ] ",
+        # Telemetry Card
+        telem_box = tk.LabelFrame(
+            mid_pane,
+            text=" [ LIVE SYSTEM TELEMETRY ] ",
             font=("JetBrains Mono", 9, "bold"),
-            fg="#00ff88",
-            bg="#02040a",
-            highlightbackground="#00ff88",
+            fg="#ffd700",
+            bg="#080e18",
+            highlightbackground="#ffd700",
             highlightthickness=1
         )
-        log_frame.pack(fill="both", expand=True, padx=12, pady=8)
+        telem_box.pack(side="left", fill="both", expand=True, padx=(0, 6))
 
-        self.log_area = scrolledtext.ScrolledText(
-            log_frame,
-            font=("JetBrains Mono", 9),
-            bg="#010308",
-            fg="#a7f3d0",
-            insertbackground="#00ff88",
-            bd=0,
-            padx=8,
-            pady=8
+        self.lbl_cpu = tk.Label(telem_box, text="CPU: --%", font=("JetBrains Mono", 10), fg="#00ff9d", bg="#080e18")
+        self.lbl_cpu.pack(anchor="w", padx=12, pady=4)
+
+        self.lbl_ram = tk.Label(telem_box, text="RAM: -- / -- GB", font=("JetBrains Mono", 10), fg="#00e5ff", bg="#080e18")
+        self.lbl_ram.pack(anchor="w", padx=12, pady=4)
+
+        self.lbl_tor = tk.Label(telem_box, text="TOR: CLEARNET", font=("JetBrains Mono", 10), fg="#ff3355", bg="#080e18")
+        self.lbl_tor.pack(anchor="w", padx=12, pady=4)
+
+        # Arsenal Card
+        arsenal_box = tk.LabelFrame(
+            mid_pane,
+            text=" [ APEX ARSENAL LAUNCHER ] ",
+            font=("JetBrains Mono", 9, "bold"),
+            fg="#00ff9d",
+            bg="#080e18",
+            highlightbackground="#00ff9d",
+            highlightthickness=1
         )
-        self.log_area.pack(fill="both", expand=True)
+        arsenal_box.pack(side="right", fill="both", expand=True, padx=(6, 0))
 
-        self.log(f"ZOTHOS Sovereign OS Agent HUD Initialized. Authority: Layer {self.active_layer}")
-        self.log("Ready to execute multi-layer autonomous commands.")
+        tools_grid = tk.Frame(arsenal_box, bg="#080e18")
+        tools_grid.pack(fill="both", expand=True, padx=8, pady=6)
 
-    def refresh_layer_buttons(self):
-        for lvl, btn in self.layer_btns.items():
-            color, name, _ = LAYER_COLORS[lvl]
-            if lvl == self.active_layer:
-                btn.configure(bg=color, fg="#000000", text=f"★ L{lvl}: {name}\n[ACTIVE]")
-            else:
-                btn.configure(bg="#061226", fg=color, text=f"L{lvl}: {name}\nLocked" if lvl > self.active_layer else f"L{lvl}: {name}\nAllowed")
+        for i, (name, match, icon, cmd) in enumerate(CORE_TOOLS):
+            row, col = divmod(i, 2)
+            btn = tk.Button(
+                tools_grid,
+                text=f"▶ {name}",
+                font=("JetBrains Mono", 8, "bold"),
+                bg="#0c1424",
+                fg="#00ff9d",
+                relief="flat",
+                highlightbackground="#00ff9d",
+                highlightthickness=1,
+                command=lambda c=cmd: subprocess.Popen(c, shell=True)
+            )
+            btn.grid(row=row, column=col, sticky="ew", padx=4, pady=3)
+            tools_grid.grid_columnconfigure(col, weight=1)
+
+        # ── Sentinel AI Interactive Prompt Bar ───────────────────────
+        prompt_frame = tk.LabelFrame(
+            self.root,
+            text=" [ AUTONOMOUS SENTINEL AI PROMPT & ROOT EXECUTOR ] ",
+            font=("JetBrains Mono", 9, "bold"),
+            fg="#00ff9d",
+            bg="#080e18",
+            highlightbackground="#00ff9d",
+            highlightthickness=1
+        )
+        prompt_frame.pack(fill="x", padx=14, pady=6)
+
+        input_box = tk.Frame(prompt_frame, bg="#0c1424")
+        input_box.pack(fill="x", padx=10, pady=8)
+
+        lbl_p = tk.Label(input_box, text=" ⚡ > ", font=("JetBrains Mono", 11, "bold"), fg="#ffd700", bg="#0c1424")
+        lbl_p.pack(side="left")
+
+        self.cmd_entry = tk.Entry(
+            input_box,
+            font=("JetBrains Mono", 10),
+            bg="#0c1424",
+            fg="#ffffff",
+            insertbackground="#00ff9d",
+            relief="flat",
+            bd=0
+        )
+        self.cmd_entry.pack(side="left", fill="x", expand=True, padx=6)
+        self.cmd_entry.bind("<Return>", self.dispatch_ai_command)
+
+        exec_btn = tk.Button(
+            input_box,
+            text="EXECUTE",
+            font=("JetBrains Mono", 9, "bold"),
+            bg="#00ff9d",
+            fg="#03060c",
+            relief="flat",
+            command=self.dispatch_ai_command
+        )
+        exec_btn.pack(side="right", padx=4)
+
+        # ── Output Log Console ───────────────────────────────────────
+        self.log_area = scrolledtext.ScrolledText(
+            self.root,
+            font=("JetBrains Mono", 8),
+            bg="#020408",
+            fg="#d1d5db",
+            relief="flat",
+            bd=0,
+            padx=10,
+            pady=10,
+            height=10
+        )
+        self.log_area.pack(fill="both", expand=True, padx=14, pady=(0, 10))
+        self.log("ZOTHOS APEX COCKPIT v3.5 INITIALIZED — ALL SYSTEMS NOMINAL.")
 
     def log(self, text: str):
-        ts = time.strftime("%H:%M:%S")
-        self.log_area.insert("end", f"[{ts}] {text}\n")
-        self.log_area.see("end")
+        self.log_area.insert(tk.END, f"[{time.strftime('%H:%M:%S')}] {text}\n")
+        self.log_area.see(tk.END)
 
-    def dispatch_command(self):
-        cmd = self.cmd_entry.get().strip()
-        if not cmd:
+    def refresh_layer_buttons(self):
+        for lvl, frame, btn in self.layer_btns:
+            color = LAYER_COLORS[lvl][0]
+            if lvl == self.active_layer:
+                frame.configure(bg=color)
+                btn.configure(bg=color, fg="#03060c", font=("JetBrains Mono", 8, "bold"))
+            else:
+                frame.configure(bg="#080e18")
+                btn.configure(bg="#080e18", fg=color, font=("JetBrains Mono", 8))
+
+    def dispatch_ai_command(self, event=None):
+        query = self.cmd_entry.get().strip()
+        if not query:
             return
-        self.lbl_status.configure(text="● AI THINKING...", fg="#00f3ff")
-        self.log(f"[USER] ❯ {cmd}")
-        
-        threading.Thread(target=self._run_async, args=(cmd,), daemon=True).start()
+        self.cmd_entry.delete(0, tk.END)
+        self.log(f"[USER QUERY] ➜ {query}")
 
-    def _run_async(self, cmd: str):
-        try:
-            res = subprocess.run(
-                ["zoth-agent-os", "run", cmd],
-                capture_output=True,
-                text=True,
-                timeout=60
-            )
-            out = res.stdout.strip() or res.stderr.strip()
-            self.root.after(0, lambda: self.log(f"[AGENT RESULT]:\n{out}\n"))
-        except Exception as e:
-            self.root.after(0, lambda: self.log(f"[ERROR]: {str(e)}"))
-        finally:
-            self.root.after(0, lambda: self.lbl_status.configure(text="● AI ALIVE [READY]", fg="#00ff88"))
+        def worker():
+            cmd = ["/usr/local/bin/zoth-sentinel", "exec" if query.startswith("!") else "ask", query]
+            try:
+                p = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+                out = p.stdout.strip()
+                self.root.after(0, lambda: self.log(f"[SENTINEL RESPONSE]\n{out}"))
+            except Exception as e:
+                self.root.after(0, lambda: self.log(f"[ERROR] {e}"))
 
-    def run_quick_action(self, action: str):
-        self.cmd_entry.delete(0, "end")
-        self.cmd_entry.insert(0, action)
-        self.dispatch_command()
-
-    def start_pulse_thread(self):
-        def pulse_loop():
-            colors = ["#00ff88", "#00f3ff", "#38bdf8", "#00ff88"]
-            idx = 0
-            while True:
-                idx = (idx + 1) % len(colors)
-                try:
-                    self.orb_canvas.itemconfig(self.orb, fill=colors[idx])
-                except Exception:
-                    break
-                time.sleep(0.8)
-        threading.Thread(target=pulse_loop, daemon=True).start()
+        threading.Thread(target=worker, daemon=True).start()
 
     def update_telemetry(self):
-        def loop():
+        # CPU
+        try:
+            res = subprocess.run(["/usr/local/bin/zoth-sentinel", "status"], capture_output=True, text=True, timeout=2)
+            lines = res.stdout.splitlines()
+            for line in lines:
+                if "CPU Usage:" in line:
+                    self.lbl_cpu.config(text=line.strip())
+                elif "RAM Usage:" in line:
+                    self.lbl_ram.config(text=line.strip())
+                elif "Tor Stealth:" in line:
+                    self.lbl_tor.config(text=line.strip())
+        except Exception:
+            pass
+
+        self.root.after(2000, self.update_telemetry)
+
+    def start_pulse_thread(self):
+        def pulse():
             while True:
-                time.sleep(15)
-                # auto ping system status
-                if self.root:
-                    try:
-                        self.root.after(0, lambda: self.log(f"[TELEMETRY] CPU/RAM nominal. Layer {self.active_layer} stable."))
-                    except Exception:
-                        break
-        threading.Thread(target=loop, daemon=True).start()
+                self.pulse_phase = (self.pulse_phase + 0.1) % (2 * 3.14159)
+                r = int(127 + 127 * (0.5 + 0.5 * (self.pulse_phase / 3.14159)))
+                time.sleep(0.1)
+
+        threading.Thread(target=pulse, daemon=True).start()
+
 
 def main():
-    try:
-        if not os.environ.get("DISPLAY"):
-            raise RuntimeError("No DISPLAY environment variable set.")
-        root = tk.Tk()
-        app = AgentHUDApp(root)
-        root.mainloop()
-    except Exception as e:
-        print(f"\033[38;2;255;215;0m[[+] ZOTHOS AGENT]\033[0m Falling back to CLI Agent Layer mode ({e})")
-        subprocess.run(["zoth-agent-os", "status"])
+    root = tk.Tk()
+    app = AgentHUDApp(root)
+    root.mainloop()
+
 
 if __name__ == "__main__":
     main()
