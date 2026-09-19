@@ -1,116 +1,133 @@
-#!/usr/bin/env python3
-"""
-⚡ ZOTHOS HexStrike AI Autonomous Pentesting Framework v2.0
-Offensive Security Assessment Console & Multi-Vector Recon Matrix
-"""
+#!/usr/bin/env bash
+# ==============================================================================
+#  ◈ NullAI HexStrike AI Terminal — Sovereign Red Teaming Workstation
+#  Official Repository: https://github.com/NullAITech/NullAI-HexStrike-AI-Terminal
+# ==============================================================================
 
-import os
-import sys
-import time
-import shutil
-import subprocess
+set -e
 
-GREEN = "\033[38;2;0;255;157m"
-GOLD = "\033[38;2;255;215;0m"
-CYAN = "\033[38;2;0;229;255m"
-RED = "\033[38;2;255;51;85m"
-GRAY = "\033[38;2;120;140;160m"
-BOLD = "\033[1m"
-RESET = "\033[0m"
+HEXSTRIKE_DIR="/usr/share/hexstrike-ai"
+if [[ ! -d "$HEXSTRIKE_DIR" ]] && [[ -d "/opt/hexstrike-ai" ]]; then
+    HEXSTRIKE_DIR="/opt/hexstrike-ai"
+fi
+if [[ ! -d "$HEXSTRIKE_DIR" ]] && [[ -d "$HOME/.hexstrike/NullAI-HexStrike-AI-Terminal" ]]; then
+    HEXSTRIKE_DIR="$HOME/.hexstrike/NullAI-HexStrike-AI-Terminal"
+fi
 
-def banner():
-    os.system("clear" if os.name == "posix" else "cls")
-    print(f"{RED}{BOLD}")
-    print(r"  ██╗  ██╗███████╗██╗  ██╗███████╗████████╗██████╗ ██╗██╗  ██╗███████╗")
-    print(r"  ██║  ██║██╔════╝╚██╗██╔╝██╔════╝╚══██╔══╝██╔══██╗██║██║ ██╔╝██╔════╝")
-    print(r"  ███████║█████╗   ╚███╔╝ ███████╗   ██║   ██████╔╝██║█████═╝ █████╗  ")
-    print(r"  ██╔══██║██╔══╝   ██╔██╗ ╚════██║   ██║   ██╔══██╗██║██╔═██╗ ██╔══╝  ")
-    print(r"  ██║  ██║███████╗██╔╝ ██╗███████║   ██║   ██║  ██║██║██║ ╚██╗███████╗")
-    print(r"  ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝╚═╝  ╚═╝╚══════╝")
-    print(f"             {GOLD}⚡ AUTONOMOUS AI OFFENSIVE SECURITY FRAMEWORK ⚡{RESET}\n")
+PID_DIR="$HOME/.hexstrike/run"
+mkdir -p "$PID_DIR" "$HOME/.hexstrike"
 
-def run_recon():
-    banner()
-    print(f"{CYAN}{BOLD}>>> NETWORK RECONNAISSANCE & PORT PROBING <<<{RESET}\n")
-    target = input(f"Enter target IP / domain [default: 127.0.0.1]: ").strip() or "127.0.0.1"
-    print(f"\n{GOLD}[*] Executing asynchronous port scan via masscan / nmap on {target}...{RESET}")
+RED="\033[38;2;255;51;85m"
+GREEN="\033[38;2;0;255;157m"
+GOLD="\033[38;2;255;215;0m"
+CYAN="\033[38;2;0;229;255m"
+GRAY="\033[38;2;120;140;160m"
+BOLD="\033[1m"
+RESET="\033[0m"
+
+banner() {
+    echo -e "${RED}${BOLD}"
+    echo -e "  ◈  NullAI HexStrike AI Terminal  ◈"
+    echo -e "  Sovereign Red Teaming Workstation & Neural Attack Matrix"
+    echo -e "${RESET}"
+}
+
+check_backend() {
+    curl -s http://127.0.0.1:8000/docs >/dev/null 2>&1
+}
+
+start_backend() {
+    if check_backend; then
+        echo -e "${GREEN}[✓] HexStrike backend is already running on http://127.0.0.1:8000${RESET}"
+        return 0
+    fi
+
+    echo -e "${GOLD}[*] Starting NullAI HexStrike Neural Backend (Port 8000)...${RESET}"
+    cd "$HEXSTRIKE_DIR/backend"
     
-    if shutil.which("nmap"):
-        subprocess.run(["nmap", "-sV", "-T4", "-F", target])
-    else:
-        print(f"{RED}nmap not found in PATH.{RESET}")
-    input(f"\n{GRAY}Press Enter to return to HexStrike Console...{RESET}")
+    # Run via python3
+    python3 main.py > "$HOME/.hexstrike/backend.log" 2>&1 &
+    local b_pid=$!
+    echo $b_pid > "$PID_DIR/backend.pid"
 
-def run_web_assessment():
-    banner()
-    print(f"{CYAN}{BOLD}>>> WEB APPLICATION VULNERABILITY DISCOVERY <<<{RESET}\n")
-    target = input(f"Enter Target URL [e.g. http://localhost:8080]: ").strip() or "http://localhost:8080"
-    print(f"\n{GOLD}[*] Probing endpoints & SQL injection surfaces on {target}...{RESET}")
-    if shutil.which("sqlmap"):
-        subprocess.run(["sqlmap", "-u", target, "--batch", "--banner"])
-    else:
-        print(f"{RED}sqlmap not found in PATH.{RESET}")
-    input(f"\n{GRAY}Press Enter to return to HexStrike Console...{RESET}")
+    # Wait for startup
+    for i in {1..15}; do
+        if check_backend; then
+            echo -e "${GREEN}[✓] HexStrike Backend Online: http://127.0.0.1:8000${RESET}"
+            return 0
+        fi
+        sleep 0.5
+    done
+    echo -e "${RED}[!] Warning: Backend is initializing in background (check ~/.hexstrike/backend.log)${RESET}"
+}
 
-def run_hash_cracker():
-    banner()
-    print(f"{CYAN}{BOLD}>>> PASS HASH CRACKING & CRYPTANALYSIS <<<{RESET}\n")
-    print(f"  [1] John the Ripper (CPU Hybrid)")
-    print(f"  [2] Hashcat (GPU Accelerated)\n")
-    choice = input("Select engine [1-2]: ").strip()
-    if choice == "1" and shutil.which("john"):
-        subprocess.run(["john", "--test"])
-    elif choice == "2" and shutil.which("hashcat"):
-        subprocess.run(["hashcat", "-I"])
-    else:
-        print(f"{GREEN}[✓] Cryptanalysis engines are ready.{RESET}")
-    input(f"\n{GRAY}Press Enter to return...{RESET}")
+start_ui() {
+    start_backend
+    echo -e "${CYAN}[*] Launching NullAI HexStrike UI...${RESET}"
+    cd "$HEXSTRIKE_DIR/ui"
+    
+    if [[ ! -d "node_modules" ]] && [[ -f "package.json" ]]; then
+        echo -e "${GOLD}[*] First-time setup: installing UI packages...${RESET}"
+        npm install --silent >/dev/null 2>&1 || true
+    fi
 
-def ai_planner():
-    banner()
-    print(f"{GOLD}{BOLD}>>> HEXSTRIKE AI AUTONOMOUS ATTACK VECTOR SYNTHESIS <<<{RESET}")
-    print(f"{GRAY}Enter target description or scope to generate an AI penetration test plan.{RESET}\n")
-    scope = input(f"{RED}hexstrike-ai{RESET}{BOLD}❯{RESET} ").strip()
-    if scope:
-        print(f"\n{CYAN}[HexStrike AI: Analyzing Target Architecture & Generating Attack Graph...]{RESET}")
-        time.sleep(1)
-        print(f"\n{GREEN}⚡ [Autonomous Attack Plan Generated]:{RESET}")
-        print(f"  1. Passive Recon: Subdomain enumeration & ASN mapping")
-        print(f"  2. Active Probing: High-speed TCP SYN discovery on top 1000 ports")
-        print(f"  3. Surface Mapping: Web technology fingerprinting & API schema extraction")
-        print(f"  4. Exploit Verification: Automated non-destructive PoC verification")
-        print(f"  5. Reporting: CVSS v3.1 scoring and markdown remediation report\n")
-    input(f"{GRAY}Press Enter to return...{RESET}")
+    if [[ -d "dist" ]]; then
+        # If static build exists, open browser or serve
+        xdg-open "http://127.0.0.1:8000" 2>/dev/null || x-www-browser "http://127.0.0.1:8000" 2>/dev/null &
+    fi
 
-def main():
-    if len(sys.argv) > 1 and sys.argv[1] in ["--mcp", "mcp"]:
-        # MCP server mode
-        print('{"jsonrpc": "2.0", "result": {"name": "hexstrike-ai", "status": "online"}}')
-        return
+    # Launch dev server or interactive UI
+    npm run dev -- --host 127.0.0.1 --port 5173 > "$HOME/.hexstrike/ui.log" 2>&1 &
+    local ui_pid=$!
+    echo $ui_pid > "$PID_DIR/ui.pid"
+    
+    sleep 2
+    xdg-open "http://127.0.0.1:5173" 2>/dev/null || x-www-browser "http://127.0.0.1:5173" 2>/dev/null || true
+    echo -e "${GREEN}[✓] NullAI HexStrike Terminal is live at http://127.0.0.1:5173${RESET}"
+}
 
-    while True:
-        banner()
-        print(f"  {BOLD}{RED}[1]{RESET} 🎯  {BOLD}Autonomous AI Attack Vector Planner{RESET}")
-        print(f"  {BOLD}{GREEN}[2]{RESET} 📡  {BOLD}Network Reconnaissance & Port Probe (Nmap/Masscan){RESET}")
-        print(f"  {BOLD}{CYAN}[3]{RESET} 🌐  {BOLD}Web Vulnerability & API Prober (SQLMap/FFUF){RESET}")
-        print(f"  {BOLD}{GOLD}[4]{RESET} 🔑  {BOLD}Password Hash & Cryptanalysis Benchmark{RESET}")
-        print(f"  {BOLD}{GRAY}[0]{RESET} 🚪  {BOLD}Exit HexStrike{RESET}\n")
-        print(f"{RED}{BOLD}══════════════════════════════════════════════════════════════════════{RESET}")
-        
-        try:
-            choice = input(f"Select module [0-4]: ").strip()
-            if choice == "1":
-                ai_planner()
-            elif choice == "2":
-                run_recon()
-            elif choice == "3":
-                run_web_assessment()
-            elif choice == "4":
-                run_hash_cracker()
-            elif choice in ["0", "q", "Q"]:
-                break
-        except (KeyboardInterrupt, EOFError):
-            break
+stop_all() {
+    echo -e "${GOLD}[*] Stopping HexStrike services...${RESET}"
+    if [[ -f "$PID_DIR/backend.pid" ]]; then
+        kill $(cat "$PID_DIR/backend.pid") 2>/dev/null || true
+        rm -f "$PID_DIR/backend.pid"
+    fi
+    if [[ -f "$PID_DIR/ui.pid" ]]; then
+        kill $(cat "$PID_DIR/ui.pid") 2>/dev/null || true
+        rm -f "$PID_DIR/ui.pid"
+    fi
+    pkill -f "python3.*hexstrike.*main.py" 2>/dev/null || true
+    pkill -f "vite.*--port 5173" 2>/dev/null || true
+    echo -e "${GREEN}[✓] HexStrike stopped.${RESET}"
+}
 
-if __name__ == "__main__":
-    main()
+case "${1:-ui}" in
+    ui|start)
+        banner
+        start_ui
+        ;;
+    backend)
+        banner
+        start_backend
+        ;;
+    stop)
+        stop_all
+        ;;
+    status)
+        banner
+        if check_backend; then
+            echo -e "${GREEN}[✓] Backend: ONLINE (http://127.0.0.1:8000)${RESET}"
+        else
+            echo -e "${RED}[✗] Backend: OFFLINE${RESET}"
+        fi
+        ;;
+    mcp)
+        # Direct MCP server bridge mode
+        exec python3 "$HEXSTRIKE_DIR/main.py" "$@"
+        ;;
+    *)
+        banner
+        echo -e "Usage: hexstrike [ui|backend|stop|status|mcp]"
+        start_ui
+        ;;
+esac

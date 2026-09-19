@@ -1,32 +1,143 @@
 #!/usr/bin/env bash
 # ==============================================================================
-#  ⚡ NOUS RESEARCH HERMES AGENT - SOVEREIGN WORKSTATION CLI
-#  Official Nous Research Agent Runtime (https://nousresearch.com)
+#  ☤ NOUS RESEARCH HERMES AGENT - SOVEREIGN RUNTIME WRAPPER
+#  Official Nous Research Agent Runtime (https://github.com/NousResearch/Hermes-Agent)
 # ==============================================================================
 
-unset PYTHONPATH
-unset PYTHONHOME
+set -e
 
-# Priority 1: System-wide /opt installation
-if [[ -x "/opt/hermes-agent/venv/bin/python" ]] && [[ -f "/opt/hermes-agent/hermes" ]]; then
-    exec "/opt/hermes-agent/venv/bin/python" "/opt/hermes-agent/hermes" "$@"
+GREEN="\033[38;2;0;255;157m"
+GOLD="\033[38;2;255;215;0m"
+CYAN="\033[38;2;0;229;255m"
+RED="\033[38;2;255;51;85m"
+GRAY="\033[38;2;120;140;160m"
+BOLD="\033[1m"
+RESET="\033[0m"
+
+HERMES_USER_DIR="$HOME/.hermes/hermes-agent"
+HERMES_OPT_DIR="/opt/hermes-agent"
+
+find_hermes_executable() {
+    # 1. User venv
+    if [[ -x "$HERMES_USER_DIR/venv/bin/python" ]] && [[ -f "$HERMES_USER_DIR/hermes" ]]; then
+        echo "$HERMES_USER_DIR/venv/bin/python $HERMES_USER_DIR/hermes"
+        return 0
+    fi
+    # 2. System venv
+    if [[ -x "$HERMES_OPT_DIR/venv/bin/python" ]] && [[ -f "$HERMES_OPT_DIR/hermes" ]]; then
+        echo "$HERMES_OPT_DIR/venv/bin/python $HERMES_OPT_DIR/hermes"
+        return 0
+    fi
+    # 3. Direct hermes-agent CLI in PATH
+    if command -v hermes-agent &>/dev/null; then
+        echo "hermes-agent"
+        return 0
+    fi
+    # 4. ~/.local/bin/hermes if not self
+    if [[ -x "$HOME/.local/bin/hermes" ]] && [[ "$HOME/.local/bin/hermes" != "$0" ]]; then
+        echo "$HOME/.local/bin/hermes"
+        return 0
+    fi
+    return 1
+}
+
+install_hermes() {
+    echo -e "${CYAN}${BOLD}"
+    echo -e "  ☤ Installing Official Nous Research Hermes Agent..."
+    echo -e "${RESET}"
+
+    mkdir -p "$HOME/.hermes"
+    if [[ ! -d "$HERMES_USER_DIR" ]]; then
+        echo -e "${GOLD}[*] Cloning official Hermes Agent repository...${RESET}"
+        git clone https://github.com/NousResearch/Hermes-Agent.git "$HERMES_USER_DIR"
+    fi
+
+    cd "$HERMES_USER_DIR"
+    
+    # Check for uv or python3 venv
+    if command -v uv &>/dev/null; then
+        echo -e "${GREEN}[*] Bootstrapping Hermes Agent environment via uv...${RESET}"
+        uv venv --python 3.11 venv 2>/dev/null || uv venv venv
+        uv pip install -e . --quiet
+    else
+        echo -e "${GREEN}[*] Bootstrapping Hermes Agent virtual environment...${RESET}"
+        python3 -m venv venv
+        source venv/bin/activate
+        pip install --upgrade pip --quiet
+        pip install -e . --quiet
+    fi
+
+    echo -e "\n${GREEN}[✓] Hermes Agent successfully installed in $HERMES_USER_DIR${RESET}"
+    echo -e "${GRAY}Run 'hermes' to launch the agent.${RESET}\n"
+}
+
+uninstall_hermes() {
+    echo -e "${RED}${BOLD}[*] Uninstalling Hermes Agent...${RESET}"
+    read -p "Are you sure you want to remove Hermes Agent at $HERMES_USER_DIR? [y/N] " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        rm -rf "$HERMES_USER_DIR"
+        echo -e "${GREEN}[✓] Hermes Agent removed.${RESET}"
+    else
+        echo -e "${GRAY}[*] Aborted.${RESET}"
+    fi
+}
+
+update_hermes() {
+    if [[ ! -d "$HERMES_USER_DIR" ]]; then
+        echo -e "${RED}[!] Hermes Agent is not installed. Run 'hermes install' first.${RESET}"
+        exit 1
+    fi
+    echo -e "${GOLD}[*] Updating Hermes Agent from official upstream...${RESET}"
+    cd "$HERMES_USER_DIR"
+    git pull origin main
+    if command -v uv &>/dev/null; then
+        uv pip install -e . --quiet
+    else
+        source venv/bin/activate
+        pip install -e . --quiet
+    fi
+    echo -e "${GREEN}[✓] Hermes Agent updated to latest commit.${RESET}"
+}
+
+# Subcommands
+case "${1:-}" in
+    install|setup)
+        install_hermes
+        exit 0
+        ;;
+    uninstall|remove)
+        uninstall_hermes
+        exit 0
+        ;;
+    update|upgrade)
+        update_hermes
+        exit 0
+        ;;
+esac
+
+# Execute Hermes Agent if found
+RUN_CMD=$(find_hermes_executable || true)
+if [[ -n "$RUN_CMD" ]]; then
+    unset PYTHONPATH
+    unset PYTHONHOME
+    exec $RUN_CMD "$@"
 fi
 
-# Priority 2: User-level ~/.hermes installation
-if [[ -x "$HOME/.hermes/hermes-agent/venv/bin/python" ]] && [[ -f "$HOME/.hermes/hermes-agent/hermes" ]]; then
-    exec "$HOME/.hermes/hermes-agent/venv/bin/python" "$HOME/.hermes/hermes-agent/hermes" "$@"
+# If not found, prompt to install
+echo -e "${RED}${BOLD}[!] Hermes Agent is not installed yet.${RESET}"
+echo -e "${GRAY}Official Nous Research autonomous agent runtime is required.${RESET}\n"
+read -p "Would you like to install the official Hermes Agent now? [Y/n] " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Nn]$ ]]; then
+    echo -e "${GRAY}[*] You can install it anytime with: ${BOLD}hermes install${RESET}"
+    exit 1
+else
+    install_hermes
+    RUN_CMD=$(find_hermes_executable || true)
+    if [[ -n "$RUN_CMD" ]]; then
+        unset PYTHONPATH
+        unset PYTHONHOME
+        exec $RUN_CMD "$@"
+    fi
 fi
-
-# Priority 3: Python module fallback
-if python3 -c "import hermes_cli" 2>/dev/null; then
-    exec python3 -m hermes_cli "$@"
-fi
-
-# Priority 4: Direct CLI executable
-if command -v hermes-agent &>/dev/null; then
-    exec hermes-agent "$@"
-fi
-
-echo "[!] Hermes Agent runtime not found in /opt/hermes-agent or ~/.hermes/hermes-agent."
-echo "    Please run 'zoth-ai hermes' to configure the agent environment."
-exit 1
