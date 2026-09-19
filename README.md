@@ -77,13 +77,14 @@ Accessed via CLI launcher: `zoth-ai`
 
 ### 3. Underground & Frontier AI Harnesses
 - **Red-Teaming & Vulnerability Scanners**:
+  - `hexstrike`: [NullAI-HexStrike-AI-Terminal](https://github.com/NullAITech/NullAI-HexStrike-AI-Terminal) sovereign workstation with neural MITRE ATT&CK mapping, async FastAPI core & CRT shader UI.
   - `garak`: Generative AI vulnerability scanner (prompt injection, hallucinations, data exfiltration).
   - `pyrit`: Microsoft Python Risk Identification Tool for AI red teaming.
   - `promptfoo`: Automated LLM security testing & jailbreak harness.
   - `lm-evaluation-harness`: EleutherAI standard benchmarking (MMLU, GSM8k, ARC).
   - `inspect_ai`: Frontier AI safety and evaluation platform.
 - **Agent Orchestrators & Automation**:
-  - `hermes`: Hermes Agent autonomous runner & skill bus.
+  - `hermes`: [Nous Research Hermes Agent](https://github.com/NousResearch/Hermes-Agent) sovereign runtime & skill bus (`hermes`, `hermes install`, `hermes update`).
   - `google-antigravity`: AGY SDK multi-agent orchestration.
   - `crewai`: Role-playing autonomous agent swarms.
   - `langgraph`: Stateful directed-graph AI agent workflows.
@@ -93,9 +94,9 @@ Accessed via CLI launcher: `zoth-ai`
   - `crawl4ai`: High-speed async web crawler tailored for LLMs.
   - `caido`: Next-generation intercepting proxy for web and API security.
 
-### 4. Zoth Studio Integration
-- Built-in command: `zoth`
-- Pre-installed at `/opt/zoth-studio/` with interactive TUI, SimpleX E2EE bridge, BYOK Argon2id Keymaster Vault, and biomorphic memory matrix.
+### 4. Creator & Media Studio
+- `maya`: [Maya for Linux (Studio Pro)](https://github.com/1nc0gn30/maya-linux) native Electron screen recording & 3D device mockup studio (iPhone 17 Pro, MacBooks, iPad Pro), kinetic karaoke captions, and CapCut/JianYing draft exporter.
+- `zoth`: Zoth Studio Sovereign Cockpit pre-installed at `/opt/zoth-studio/` with interactive TUI, SimpleX E2EE bridge, BYOK Argon2id Keymaster Vault, and biomorphic memory matrix.
 
 ---
 
