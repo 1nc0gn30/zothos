@@ -108,6 +108,8 @@ echo -e "\n${BOLD}${YELLOW}[2/5] Auditing Visual Themes & Generated Wallpapers .
 WALLPAPERS=(
     "$CHROOT/usr/share/backgrounds/zothos/hermetic-matrix.png"
     "$CHROOT/usr/share/backgrounds/zothos/ghostmode-nullai.png"
+    "$CHROOT/usr/share/backgrounds/zothos/zoth-gold-master.png"
+    "$CHROOT/usr/share/backgrounds/zothos/alchemical-gold.png"
     "$CHROOT/usr/share/backgrounds/zothos/win11-bloom.jpg"
 )
 for w in "${WALLPAPERS[@]}"; do
