@@ -1,0 +1,24 @@
+[Unit]
+Description=ZOTHOS Ghostmode Runtime — Active Anti-Forensics Daemon
+Documentation=https://zoth.nullai.tech
+After=network-online.target NetworkManager.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/zoth-ghost start
+ExecStop=/usr/local/bin/zoth-ghost stop
+ExecReload=/usr/local/bin/zoth-ghost scrub
+Restart=on-failure
+RestartSec=5
+Environment=DEBIAN_FRONTEND=noninteractive
+
+# Security hardening
+NoNewPrivs=yes
+ProtectSystem=full
+ProtectHome=yes
+ReadWritePaths=/run /tmp /var/log
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

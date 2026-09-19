@@ -1,0 +1,130 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#  🜂 ZOTHOS DOCTOR: SYSTEM ARSENAL & ENVIRONMENT DIAGNOSTIC ENGINE 🜄
+# ==============================================================================
+
+set -eo pipefail
+
+GREEN="\e[38;2;0;255;157m"
+GOLD="\e[38;2;255;215;0m"
+CYAN="\e[38;2;0;229;255m"
+RED="\e[38;2;255;51;85m"
+GRAY="\e[38;2;120;140;160m"
+BOLD="\e[1m"
+RESET="\e[0m"
+
+echo -e "${GREEN}${BOLD}"
+echo "  ╔════════════════════════════════════════════════════════════════════╗"
+echo "  ║                  🜂  ZOTHOS SYSTEM DOCTOR  🜄                       ║"
+echo "  ║            Complete Arsenal Health & Diagnostic Suite              ║"
+echo "  ╚════════════════════════════════════════════════════════════════════╝"
+echo -e "${RESET}"
+
+FIX_MODE=false
+if [[ "${1:-}" == "--fix" ]] || [[ "${1:-}" == "-f" ]]; then
+    FIX_MODE=true
+    echo -e "${GOLD}[*] Auto-heal mode enabled (--fix)${RESET}\n"
+fi
+
+HEALTHY=0
+WARNED=0
+FAILED=0
+
+audit_tool() {
+    local name="$1"
+    local category="$2"
+    local test_cmd="$3"
+    local install_hint="$4"
+
+    if which "$name" >/dev/null 2>&1; then
+        local bin_path=$(which "$name")
+        echo -e "  ${GREEN}[✓ HEALTHY]${RESET} ${BOLD}${name}${RESET} (${GRAY}${category}${RESET}) -> ${CYAN}${bin_path}${RESET}"
+        HEALTHY=$((HEALTHY + 1))
+    else
+        if [[ "$FIX_MODE" == "true" ]] && [[ -n "$install_hint" ]]; then
+            echo -e "  ${GOLD}[* HEALING]${RESET} ${BOLD}${name}${RESET} ... executing: ${install_hint}"
+            eval "$install_hint" >/dev/null 2>&1 || true
+            if which "$name" >/dev/null 2>&1; then
+                echo -e "  ${GREEN}[✓ FIXED]${RESET}   ${BOLD}${name}${RESET} -> $(which "$name")"
+                HEALTHY=$((HEALTHY + 1))
+                return
+            fi
+        fi
+        echo -e "  ${RED}[✗ MISSING]${RESET} ${BOLD}${name}${RESET} (${category})"
+        FAILED=$((FAILED + 1))
+    fi
+}
+
+echo -e "${CYAN}${BOLD}[1/4] Auditing Offensive & Defensive Security Arsenal ...${RESET}"
+audit_tool nmap "Network Recon" "nmap --version" "sudo apt-get install -y nmap"
+audit_tool wireshark "Packet Analysis" "wireshark --version" "sudo apt-get install -y wireshark-qt"
+audit_tool tshark "CLI Packet Capture" "tshark --version" "sudo apt-get install -y tshark"
+audit_tool msfconsole "Metasploit Framework" "msfconsole -v" ""
+audit_tool sqlmap "Database Injection" "sqlmap --version" "sudo apt-get install -y sqlmap"
+audit_tool hydra "Network Login Cracker" "hydra -h" "sudo apt-get install -y hydra"
+audit_tool john "Password Hashes" "john" "sudo apt-get install -y john"
+audit_tool r2 "Radare2 Reverse Eng" "r2 -v" "sudo apt-get install -y radare2"
+audit_tool gobuster "Web Directory Fuzzer" "gobuster version" ""
+audit_tool ffuf "Fast Web Fuzzer" "ffuf -V" ""
+audit_tool nuclei "Vulnerability Scanner" "nuclei -version" ""
+audit_tool amass "OSINT & DNS Recon" "amass -version" ""
+audit_tool subfinder "Subdomain Discovery" "subfinder -version" ""
+audit_tool httpx "HTTP Probe Toolkit" "httpx -version" ""
+audit_tool binwalk "Firmware Extraction" "binwalk --help" "sudo apt-get install -y binwalk"
+audit_tool masscan "Mass IP Port Scanner" "masscan" "sudo apt-get install -y masscan"
+audit_tool aircrack-ng "Wireless Auditing" "aircrack-ng --help" "sudo apt-get install -y aircrack-ng"
+
+echo -e "\n${CYAN}${BOLD}[2/4] Auditing Frontier AI & Autonomous Agent Stack ...${RESET}"
+audit_tool hermes "Nous Research Agent" "hermes --version" ""
+audit_tool ollama "Local LLM Inference" "ollama --version" "curl -fsSL https://ollama.com/install.sh | sh"
+audit_tool uv "Astral Python Fast Pip" "uv --version" "curl -LsSf https://astral.sh/uv/install.sh | sh"
+audit_tool aider "AI Pair Programming" "aider --version" "uv pip install aider-chat"
+audit_tool garak "LLM Vulnerability Scanner" "garak --version" "uv pip install garak"
+audit_tool pyrit "AI Red-Teaming Toolkit" "pyrit --help" "uv pip install pyrit"
+audit_tool docker "Container Runtime" "docker --version" "sudo apt-get install -y docker.io"
+
+echo -e "\n${CYAN}${BOLD}[3/4] Auditing ZOTHOS Core CLI Wrappers ...${RESET}"
+audit_tool zoth "Zoth Studio Cockpit" "" ""
+audit_tool zoth-ai "AI Stack Controller" "" ""
+audit_tool zoth-sec "Security Suite Launcher" "" ""
+audit_tool zoth-mcp "MCP Server Manager" "" ""
+audit_tool zoth-mode "Reality Transmutation" "" ""
+audit_tool zoth-ghost "Amnesic OPSEC Switcher" "" ""
+audit_tool zoth-agent-os "Ring-Gated OS Controller" "" ""
+audit_tool hexstrike "Autonomous AI Pentester" "" ""
+audit_tool zoth-live-wallpaper "3D Live Wallpaper Engine" "" ""
+
+echo -e "\n${CYAN}${BOLD}[4/4] Auditing Zoth Studio & Sovereign Cockpit Hub ...${RESET}"
+if [[ -f "/opt/zoth-studio/index.html" ]] && [[ -x "/opt/zoth-studio/launch.sh" ]]; then
+    echo -e "  ${GREEN}[✓ HEALTHY]${RESET} Zoth Studio Core -> ${CYAN}/opt/zoth-studio/launch.sh${RESET}"
+    HEALTHY=$((HEALTHY + 1))
+else
+    echo -e "  ${RED}[✗ MISSING]${RESET} Zoth Studio Hub at /opt/zoth-studio"
+    FAILED=$((FAILED + 1))
+fi
+
+if [[ -f "/etc/zothos/mcp-servers.json" ]] && jq empty /etc/zothos/mcp-servers.json 2>/dev/null; then
+    echo -e "  ${GREEN}[✓ HEALTHY]${RESET} MCP Server Registry -> ${CYAN}/etc/zothos/mcp-servers.json (Valid JSON)${RESET}"
+    HEALTHY=$((HEALTHY + 1))
+else
+    echo -e "  ${RED}[✗ ERROR]${RESET}   MCP Server Registry missing or invalid JSON"
+    FAILED=$((FAILED + 1))
+fi
+
+if [[ -f "/etc/zothos/agent-permissions.json" ]] && jq empty /etc/zothos/agent-permissions.json 2>/dev/null; then
+    echo -e "  ${GREEN}[✓ HEALTHY]${RESET} Agent Permission Rings -> ${CYAN}/etc/zothos/agent-permissions.json (Valid JSON)${RESET}"
+    HEALTHY=$((HEALTHY + 1))
+else
+    echo -e "  ${RED}[✗ ERROR]${RESET}   Agent Permission Rings missing or invalid JSON"
+    FAILED=$((FAILED + 1))
+fi
+
+echo -e "\n----------------------------------------------------------------------"
+echo -e "  ${BOLD}Total Tools Audited:${RESET} $((HEALTHY + FAILED)) | ${GREEN}${BOLD}Healthy: ${HEALTHY}${RESET} | ${RED}${BOLD}Defects: ${FAILED}${RESET}"
+if [[ $FAILED -eq 0 ]]; then
+    echo -e "  ${GREEN}${BOLD}>>> ALL SYSTEMS NOMINAL: ZOTHOS IS 100% OPERATIONAL <<<\n${RESET}"
+    exit 0
+else
+    echo -e "  ${RED}${BOLD}>>> ${FAILED} DEFECT(S) DETECTED. Run 'zoth-doctor --fix' to repair. <<<\n${RESET}"
+    exit 1
+fi

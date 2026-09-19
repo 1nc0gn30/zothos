@@ -2,89 +2,31 @@
 # ==============================================================================
 #  ⚡ NOUS RESEARCH HERMES AGENT - SOVEREIGN WORKSTATION CLI
 #  Official Nous Research Agent Runtime (https://nousresearch.com)
-#  Documentation: https://hermes-agent.nousresearch.com/docs/
-#  Repository: https://github.com/NousResearch/hermes-agent
 # ==============================================================================
 
-set -euo pipefail
+unset PYTHONPATH
+unset PYTHONHOME
 
-GREEN="\e[38;2;0;255;157m"
-GOLD="\e[38;2;255;215;0m"
-CYAN="\e[38;2;0;229;255m"
-RED="\e[38;2;255;51;85m"
-GRAY="\e[38;2;120;140;160m"
-BOLD="\e[1m"
-RESET="\e[0m"
-
-# 1. Check if official hermes-agent CLI exists
-if command -v hermes-agent &>/dev/null; then
-    exec hermes-agent "$@"
+# Priority 1: System-wide /opt installation
+if [[ -x "/opt/hermes-agent/venv/bin/python" ]] && [[ -f "/opt/hermes-agent/hermes" ]]; then
+    exec "/opt/hermes-agent/venv/bin/python" "/opt/hermes-agent/hermes" "$@"
 fi
 
-if [[ -x "/opt/zothos-ai-env/bin/hermes" ]]; then
-    exec /opt/zothos-ai-env/bin/hermes "$@"
+# Priority 2: User-level ~/.hermes installation
+if [[ -x "$HOME/.hermes/hermes-agent/venv/bin/python" ]] && [[ -f "$HOME/.hermes/hermes-agent/hermes" ]]; then
+    exec "$HOME/.hermes/hermes-agent/venv/bin/python" "$HOME/.hermes/hermes-agent/hermes" "$@"
 fi
 
+# Priority 3: Python module fallback
 if python3 -c "import hermes_cli" 2>/dev/null; then
     exec python3 -m hermes_cli "$@"
 fi
 
-if [[ -x "$HOME/.local/bin/hermes" ]] && [[ "$HOME/.local/bin/hermes" != "$0" ]]; then
-    exec "$HOME/.local/bin/hermes" "$@"
+# Priority 4: Direct CLI executable
+if command -v hermes-agent &>/dev/null; then
+    exec hermes-agent "$@"
 fi
 
-# 2. Interactive Launcher / Provisioner for Official Nous Research Hermes Agent
-clear
-echo -e "${GREEN}${BOLD}"
-echo "  ██╗  ██╗███████╗██████╗ ███╗   ███╗███████╗███████╗"
-echo "  ██║  ██║██╔════╝██╔══██╗████╗ ████║██╔════╝██╔════╝"
-echo "  ███████║█████╗  ██████╔╝██╔████╔██║█████╗  ███████╗"
-echo "  ██╔══██║██╔══╝  ██╔══██╗██║╚██╔╝██║██╔══╝  ╚════██║"
-echo "  ██║  ██║███████╗██║  ██║██║ ╚═╝ ██║███████╗███████║"
-echo "  ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝╚══════╝"
-echo -e "             ${GOLD}⚡ NOUS RESEARCH HERMES AGENT CLI ⚡${RESET}"
-echo -e "           ${GRAY}Official Hub: https://nousresearch.com${RESET}\n"
-
-echo -e "${GOLD}[!] Official Nous Research hermes-agent CLI runtime is not installed yet.${RESET}\n"
-echo -e "Installation options:"
-echo -e "  ${BOLD}${GREEN}[1]${RESET} Install via Official PyPI Package (${CYAN}pip3 install hermes-agent${RESET})"
-echo -e "  ${BOLD}${CYAN}[2]${RESET} Install via Nous Research Official Installer (${CYAN}curl install.sh${RESET})"
-echo -e "  ${BOLD}${GOLD}[3]${RESET} Pull Nous Research Hermes 3 Weights into Ollama (${CYAN}ollama pull hermes3:8b${RESET})"
-echo -e "  ${BOLD}${GRAY}[0]${RESET} Exit"
-echo ""
-
-read -p "Select installation action [1-3]: " choice
-
-case "$choice" in
-    1)
-        echo -e "\n${GOLD}[*] Installing official hermes-agent from Nous Research PyPI registry...${RESET}"
-        pip3 install --break-system-packages hermes-agent || /opt/zothos-ai-env/bin/pip install hermes-agent
-        echo -e "\n${GREEN}[✓] Installation complete! Launching Hermes Agent...${RESET}"
-        sleep 1
-        if command -v hermes-agent &>/dev/null; then
-            exec hermes-agent "$@"
-        else
-            exec python3 -m hermes_cli "$@"
-        fi
-        ;;
-    2)
-        echo -e "\n${GOLD}[*] Running Nous Research Official Installer...${RESET}"
-        curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
-        echo -e "\n${GREEN}[✓] Installation complete! Launching Hermes Agent...${RESET}"
-        sleep 1
-        exec "$HOME/.local/bin/hermes" "$@"
-        ;;
-    3)
-        echo -e "\n${GOLD}[*] Pulling Nous Research Hermes 3 (Llama 3.1 8B) weights into Ollama...${RESET}"
-        if ! command -v ollama &>/dev/null; then
-            curl -fsSL https://ollama.com/install.sh | sh
-        fi
-        ollama pull hermes3:8b
-        echo -e "\n${GREEN}[✓] Hermes 3 weights loaded! Launching interactive chat...${RESET}"
-        ollama run hermes3:8b
-        ;;
-    *)
-        echo -e "\n${GRAY}Exiting.${RESET}"
-        exit 0
-        ;;
-esac
+echo "[!] Hermes Agent runtime not found in /opt/hermes-agent or ~/.hermes/hermes-agent."
+echo "    Please run 'zoth-ai hermes' to configure the agent environment."
+exit 1

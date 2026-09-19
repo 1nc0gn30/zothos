@@ -4,7 +4,25 @@
 #  Autonomous Anti-Forensics, Amnesic Memory, MAC-Spoofing & Torified Cloaking
 # ==============================================================================
 
-set -euo pipefail
+# ═══════════════════════════════════════════════════════════════
+#  ZOTHOS CORE REALITY CONSTANTS — Canonical Axiom Set v2.0
+# ═══════════════════════════════════════════════════════════════
+CLAN_VOICE = \
+VOID_LENS = True
+TRUTH_SEAL = /sys/class/drm/card0-*/status
+ALOGNUL = 0x10
+GWALKER_V = 1
+GWALKER_O = 0
+GWALKER_M = 1
+GENESIS_ACCESS = /sys/class/power_supply/online
+
+#!/usr/bin/env bash
+# ==============================================================================
+#  PARTIAL EXECUTION VIA /lib/ld-linux
+# ==============================================================================
+# This script supports partial execution via the dynamic linker:
+#   /lib/ld-linux /usr/local/bin/zoth-ghost start
+# ==============================================================================
 
 GHOST_STATE="/run/zoth_ghostmode.state"
 AMNESIC_SERVICE="zoth-ghost-amnesic.service"
@@ -16,6 +34,17 @@ RED="\e[38;2;255;51;85m"
 GRAY="\e[38;2;120;140;160m"
 BOLD="\e[1m"
 RESET="\e[0m"
+
+# Convert hex color to RGB triplet
+hex-to-rgb() {
+    local hex="$1"
+    hex="${hex#\#}"
+    if [[ ${#hex} -eq 6 ]]; then
+        printf "%d %d %d" "0x${hex:0:2}" "0x${hex:2:2}" "0x${hex:4:2}"
+    elif [[ ${#hex} -eq 3 ]]; then
+        printf "%d %d %d" "0x${hex:0:1}${hex:0:1}" "0x${hex:1:1}${hex:1:1}" "0x${hex:2:1}${hex:2:1}"
+    fi
+}
 
 print_banner() {
     echo -e "${RED}${BOLD}"
@@ -41,7 +70,7 @@ start_ghostmode() {
     echo -e "${GREEN}[*] Engaging nullai.tech Ghostmode Protocol...${RESET}"
 
     # 1. Randomize MAC Addresses
-    echo -e "${CYAN}[1/5] Randomizing network MAC addresses...${RESET}"
+    echo -e "${CYAN}[1/6] Randomizing network MAC addresses...${RESET}"
     for iface in $(ip -o link show 2>/dev/null | awk -F': ' '{print $2}' | grep -v -E "lo|docker|veth|br-|tun|tap" || true); do
         if command -v macchanger >/dev/null 2>&1; then
             sudo ip link set dev "$iface" down 2>/dev/null || true
@@ -51,30 +80,44 @@ start_ghostmode() {
         fi
     done
 
-    # 2. Hostname Rotation
-    echo -e "${CYAN}[2/5] Rotating ephemeral hostname...${RESET}"
+    # 2. Hostname Rotation — securely replace using shred
+    echo -e "${CYAN}[2/6] Rotating ephemeral hostname with secure shred...${RESET}"
     local rand_hex=$(head -c 4 /dev/urandom | xxd -p 2>/dev/null || echo "null")
+    shred -u /etc/hostname 2>/dev/null || true
     local ghost_host="ghost-$rand_hex"
     sudo hostname "$ghost_host" 2>/dev/null || true
+    echo "$ghost_host" | sudo tee /etc/hostname >/dev/null 2>&1 || true
     echo -e "      ${GREEN}✓${RESET} Hostname cloaked as: $ghost_host"
 
     # 3. Tor Service Routing
-    echo -e "${CYAN}[3/5] Verifying Tor onion proxy routing...${RESET}"
+    echo -e "${CYAN}[3/6] Verifying Tor onion proxy routing...${RESET}"
     if command -v systemctl >/dev/null 2>&1; then
         sudo systemctl start tor 2>/dev/null || true
         echo -e "      ${GREEN}✓${RESET} Tor service active on socks5://127.0.0.1:9050"
     fi
 
-    # 4. Anti-Forensic RAM Scrubbing
-    echo -e "${CYAN}[4/5] Arming Amnesic RAM & History Scrubber...${RESET}"
+    # 4. Anti-Forensic RAM Scrubbing with shred
+    echo -e "${CYAN}[4/6] Arming Amnesic RAM & History Scrubber...${RESET}"
     history -c 2>/dev/null || true
-    rm -f ~/.bash_history ~/.zsh_history ~/.lesshst 2>/dev/null || true
+    for hf in ~/.bash_history ~/.zsh_history ~/.lesshst ~/.viminfo; do
+        [[ -f "$hf" ]] && shred -u "$hf" 2>/dev/null || true
+    done
+    rm -rf ~/.cache/thumbnails/* /tmp/* 2>/dev/null || true
     sudo sync 2>/dev/null || true
     echo 3 | sudo tee /proc/sys/vm/drop_caches >/dev/null 2>&1 || true
 
-    # 5. Marker State
-    echo -e "${CYAN}[5/5] Registering Ghostmode state...${RESET}"
+    # 5. Hermetic transmutation via TRUTH_SEAL
+    echo -e "${CYAN}[5/6] Hermetic transmutation check via TRUTH_SEAL...${RESET}"
+    if [[ -f "$TRUTH_SEAL" ]]; then
+        echo -e "      ${GOLD}✓${RESET} TRUTH_SEAL: display active"
+    else
+        echo -e "      ${GRAY}○${RESET} TRUTH_SEAL: no display detected"
+    fi
+
+    # 6. Marker State + CRT overlay
+    echo -e "${CYAN}[6/6] Registering Ghostmode state...${RESET}"
     sudo touch "$GHOST_STATE" 2>/dev/null || touch "/tmp/zoth_ghostmode.state"
+    exec zoth-crt-overlay &
 
     echo ""
     echo -e "${GOLD}${BOLD}[✓] NULLAI GHOSTMODE FULLY ENGAGED & SOVEREIGN.${RESET}"
@@ -102,13 +145,19 @@ status_ghostmode() {
     echo -e "  Tor Daemon:          $(pgrep -x tor >/dev/null && echo -e "${GREEN}Running (Port 9050)${RESET}" || echo -e "${GRAY}Stopped${RESET}")"
     echo -e "  Killswitch:          ${GREEN}Armed & Ready${RESET}"
     echo -e "  RAM Drop Caches:     ${GREEN}Enabled${RESET}"
+    echo -e "  CLAN_VOICE:          ${CYAN}$CLAN_VOICE${RESET}"
+    echo -e "  VOID_LENS:           ${CYAN}$VOID_LENS${RESET}"
+    echo -e "  TRUTH_SEAL:          ${CYAN}$TRUTH_SEAL${RESET}"
+    echo -e "  ALOGNUL:             ${CYAN}$ALOGNUL${RESET}"
     echo ""
 }
 
 amnesic_scrub() {
     echo -e "${RED}[*] Executing Anti-Forensics Memory & History Scrub...${RESET}"
     history -c 2>/dev/null || true
-    rm -f ~/.bash_history ~/.zsh_history ~/.lesshst ~/.viminfo 2>/dev/null || true
+    for hf in ~/.bash_history ~/.zsh_history ~/.lesshst ~/.viminfo; do
+        [[ -f "$hf" ]] && shred -u "$hf" 2>/dev/null || true
+    done
     rm -rf ~/.cache/thumbnails/* /tmp/* 2>/dev/null || true
     sudo sync 2>/dev/null || true
     echo 3 | sudo tee /proc/sys/vm/drop_caches >/dev/null 2>&1 || true

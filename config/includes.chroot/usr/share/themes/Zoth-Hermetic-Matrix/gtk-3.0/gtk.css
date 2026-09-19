@@ -10,31 +10,48 @@
 @define-color surface_0     #0a0e17;
 @define-color surface_1     #0e1520;
 @define-color surface_2     #121c2c;
-@define-color card_bg       rgba(12, 18, 28, 0.90);
-@define-color overlay_bg    rgba(8, 12, 20, 0.95);
+@define-color surface_3     #1a2535;
+@define-color card_bg       rgba(12, 18, 28, 0.92);
+@define-color overlay_bg    rgba(8, 12, 20, 0.96);
+@define-color glass_bg      rgba(10, 14, 23, 0.75);
 
+/* Emerald neon core */
 @define-color emerald       #00ff9d;
-@define-color emerald_dim   rgba(0, 255, 157, 0.35);
-@define-color emerald_glow  rgba(0, 255, 157, 0.65);
-@define-color emerald_faint rgba(0, 255, 157, 0.10);
+@define-color emerald_bright  #00ffb8;
+@define-color emerald_dim   rgba(0, 255, 157, 0.40);
+@define-color emerald_glow  rgba(0, 255, 157, 0.75);
+@define-color emerald_faint rgba(0, 255, 157, 0.12);
+@define-color emerald_neon  rgba(0, 255, 157, 0.90);
 
+/* Gold accent */
 @define-color gold          #ffd700;
-@define-color gold_dim      rgba(255, 215, 0, 0.35);
-@define-color gold_faint    rgba(255, 215, 0, 0.10);
+@define-color gold_bright   #ffe44d;
+@define-color gold_dim      rgba(255, 215, 0, 0.40);
+@define-color gold_faint    rgba(255, 215, 0, 0.12);
 
+/* Cyan holographic */
 @define-color cyan          #00e5ff;
-@define-color cyan_dim      rgba(0, 229, 255, 0.35);
+@define-color cyan_dim      rgba(0, 229, 255, 0.40);
+@define-color cyan_faint    rgba(0, 229, 255, 0.10);
 
+/* Danger / warning */
 @define-color danger        #ff3355;
-@define-color danger_dim    rgba(255, 51, 85, 0.25);
+@define-color danger_bright #ff4466;
+@define-color danger_dim    rgba(255, 51, 85, 0.30);
 @define-color warning       #ff9500;
 @define-color success       #00ff9d;
 
+/* Text */
 @define-color text_primary  #f1f5f9;
+@define-color text_bright   #ffffff;
 @define-color text_dim      #8899aa;
 @define-color text_muted    #4a5a6a;
-@define-color border_subtle rgba(0, 255, 157, 0.14);
+
+/* Borders */
+@define-color border_subtle rgba(0, 255, 157, 0.12);
 @define-color border_active rgba(0, 255, 157, 0.55);
+@define-color border_neon   rgba(0, 255, 157, 0.85);
+@define-color border_glass  rgba(0, 255, 157, 0.20);
 
 /* ── Global Reset & Window Surface ───────────────────────────────────────── */
 * {
@@ -51,16 +68,22 @@ window, .background, frame {
     font-size:        10.5pt;
 }
 
-/* ── Headerbar & Titlebar ─────────────────────────────────────────────────── */
+/* ── Headerbar & Titlebar — Holographic Emerald ─────────────────────────── */
 headerbar,
 .titlebar,
 headerbar.titlebar {
-    background:    linear-gradient(180deg, @surface_1 0%, @surface_0 100%);
-    border-bottom: 1px solid @border_subtle;
+    background:    linear-gradient(180deg,
+        rgba(0, 255, 157, 0.06) 0%,
+        @surface_1 40%,
+        @surface_0 100%);
+    border-bottom: 1px solid @border_glass;
     color:         @emerald;
-    min-height:    36px;
-    padding:       0 12px;
-    box-shadow:    0 1px 0 @border_subtle, 0 2px 12px rgba(0, 0, 0, 0.6);
+    min-height:    40px;
+    padding:       0 14px;
+    box-shadow:    0 1px 0 @border_subtle,
+                   0 2px 16px rgba(0, 0, 0, 0.7),
+                   inset 0 1px 0 rgba(0, 255, 157, 0.08);
+    backdrop-filter: blur(20px);
 }
 
 headerbar .title,
@@ -69,54 +92,60 @@ headerbar .title,
     font-weight: 700;
     font-size:   10.5pt;
     color:       @emerald;
+    text-shadow: 0 0 8px @emerald_faint;
 }
 
-headerbar .subtitle,
-.titlebar .subtitle {
-    font-size: 9pt;
-    color:     @text_dim;
+/* Active window — bright neon header */
+window:focus-within headerbar,
+window:focus-within .titlebar {
+    background: linear-gradient(180deg,
+        rgba(0, 255, 157, 0.10) 0%,
+        @surface_1 30%,
+        @surface_0 100%);
+    border-bottom-color: @border_neon;
+    box-shadow: 0 1px 0 @border_neon,
+                0 2px 20px rgba(0, 255, 157, 0.15),
+                inset 0 1px 0 rgba(0, 255, 157, 0.12);
 }
 
-/* Window focus states */
-window:not(:focus-within) headerbar,
-window:not(:focus-within) .titlebar {
-    background: linear-gradient(180deg, @surface_0 0%, @void_black 100%);
-    color:      @text_muted;
+window:focus-within headerbar .title,
+window:focus-within .titlebar .title {
+    color: @emerald_bright;
+    text-shadow: 0 0 10px @emerald_dim;
 }
 
-window:not(:focus-within) headerbar .title,
-window:not(:focus-within) .titlebar .title {
-    color: @text_muted;
-}
-
-/* ── Buttons ──────────────────────────────────────────────────────────────── */
+/* ── Buttons — Neon Emerald with Phosphor Glow ───────────────────────────── */
 button {
     background:    @surface_1;
     border:        1px solid @border_subtle;
-    border-radius: 6px;
+    border-radius: 8px;
     color:         @text_primary;
-    padding:       6px 14px;
+    padding:       7px 16px;
     font-family:   "JetBrains Mono", monospace;
     font-size:     10pt;
     font-weight:   600;
-    min-height:    28px;
-    transition:    all 140ms cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow:    0 1px 4px rgba(0, 0, 0, 0.5);
+    min-height:    30px;
+    transition:    all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow:    0 1px 4px rgba(0, 0, 0, 0.5),
+                   inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 button:hover {
     background:    @surface_2;
     border-color:  @emerald_dim;
     color:         @emerald;
-    box-shadow:    0 0 12px @emerald_faint, 0 2px 8px rgba(0, 0, 0, 0.6);
+    box-shadow:    0 0 14px @emerald_faint,
+                   0 2px 8px rgba(0, 0, 0, 0.6),
+                   inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 button:active,
 button:checked {
     background:    @emerald_faint;
     border-color:  @emerald;
-    color:         @emerald;
-    box-shadow:    0 0 16px @emerald_dim, inset 0 1px 0 @emerald_dim;
+    color:         @emerald_bright;
+    box-shadow:    0 0 18px @emerald_dim,
+                   inset 0 1px 0 @emerald_dim;
 }
 
 button:disabled,
@@ -124,37 +153,46 @@ button:insensitive {
     background:    @surface_0;
     border-color:  @border_subtle;
     color:         @text_muted;
-    opacity:       0.5;
+    opacity:       0.45;
 }
 
-/* Suggested / Default button */
+/* Primary / suggested action — holographic glow */
 button.suggested-action,
 button.default {
-    background:    linear-gradient(180deg, rgba(0,255,157,0.2), rgba(0,255,157,0.12));
+    background:    linear-gradient(180deg,
+        rgba(0, 255, 157, 0.18) 0%,
+        rgba(0, 255, 157, 0.10) 100%);
     border-color:  @emerald;
     color:         @emerald;
     font-weight:   700;
+    box-shadow:    0 0 8px @emerald_faint,
+                   inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 button.suggested-action:hover,
 button.default:hover {
-    background:    linear-gradient(180deg, rgba(0,255,157,0.35), rgba(0,255,157,0.22));
-    box-shadow:    0 0 20px rgba(0,255,157,0.4);
+    background:    linear-gradient(180deg,
+        rgba(0, 255, 157, 0.30) 0%,
+        rgba(0, 255, 157, 0.18) 100%);
+    box-shadow:    0 0 22px rgba(0, 255, 157, 0.50),
+                   0 2px 8px rgba(0, 0, 0, 0.6);
 }
 
-/* Destructive button */
+/* Destructive — crimson glow */
 button.destructive-action {
     background:    @danger_dim;
     border-color:  @danger;
     color:         @danger;
+    box-shadow:    0 0 6px @danger_dim;
 }
 
 button.destructive-action:hover {
     background:    rgba(255, 51, 85, 0.35);
-    box-shadow:    0 0 16px rgba(255, 51, 85, 0.35);
+    border-color:  @danger_bright;
+    box-shadow:    0 0 16px rgba(255, 51, 85, 0.40);
 }
 
-/* Flat / Toolbar buttons */
+/* Flat / toolbar buttons */
 button.flat,
 .toolbar button,
 headerbar button {
@@ -162,6 +200,7 @@ headerbar button {
     border-color:  transparent;
     color:         @text_dim;
     box-shadow:    none;
+    min-height:    26px;
 }
 
 button.flat:hover,
@@ -170,62 +209,93 @@ headerbar button:hover {
     background:    @emerald_faint;
     border-color:  @emerald_dim;
     color:         @emerald;
+    box-shadow:    0 0 8px @emerald_faint;
 }
 
-/* Window control buttons */
+/* Window control buttons — circular neon */
 headerbar button.titlebutton {
     border-radius: 50%;
-    min-width:     16px;
-    min-height:    16px;
+    min-width:     18px;
+    min-height:    18px;
     padding:       0;
     border:        none;
     background:    @surface_2;
-    margin:        0 2px;
+    margin:        0 3px;
+    box-shadow:    0 1px 3px rgba(0, 0, 0, 0.5);
+    transition:    all 120ms ease;
 }
 
-/* ── Text Entries & Inputs ────────────────────────────────────────────────── */
+window:focus-within headerbar button.titlebutton {
+    background:    rgba(0, 255, 157, 0.10);
+    box-shadow:    0 0 6px @emerald_faint;
+}
+
+headerbar button.titlebutton:hover {
+    background:    @emerald_faint;
+    box-shadow:    0 0 10px @emerald_dim;
+}
+
+/* ── Text Entries & Inputs — Holographic Fields ──────────────────────────── */
 entry,
 spinbutton entry,
 searchentry,
 .entry {
-    background:    @surface_1;
+    background:    @glass_bg;
     border:        1px solid @border_subtle;
-    border-radius: 6px;
+    border-radius: 8px;
     color:         @text_primary;
-    padding:       6px 10px;
+    padding:       8px 12px;
     font-family:   "JetBrains Mono", monospace;
     font-size:     10pt;
     caret-color:   @emerald;
-    transition:    border-color 120ms ease, box-shadow 120ms ease;
+    transition:    border-color 130ms ease, box-shadow 130ms ease,
+                   background 130ms ease;
+    box-shadow:    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+                   0 1px 4px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+}
+
+entry:hover,
+spinbutton entry:hover,
+searchentry:hover,
+.entry:hover {
+    border-color: @border_glass;
+    background:   rgba(12, 16, 26, 0.80);
 }
 
 entry:focus,
 spinbutton entry:focus,
 searchentry:focus,
 .entry:focus {
-    border-color: @emerald;
-    box-shadow:   0 0 0 2px @emerald_faint, 0 0 14px @emerald_faint;
-    color:        @text_primary;
+    border-color: @border_neon;
+    box-shadow:   0 0 0 3px @emerald_faint,
+                  0 0 16px @emerald_dim,
+                  inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    color:        @text_bright;
     outline:      none;
 }
 
 entry:disabled,
 entry:insensitive {
-    background: @void_black;
-    color:      @text_muted;
+    background:   @void_black;
+    color:        @text_muted;
     border-color: @border_subtle;
+    caret-color:  @text_muted;
 }
 
-entry selection {
+entry selection,
+.entry selection {
     background-color: @emerald_dim;
     color:            @void_black;
 }
 
 /* Search bar */
 searchbar {
-    background: @surface_0;
-    border-bottom: 1px solid @border_subtle;
-    padding: 6px;
+    background:   @surface_0;
+    border-bottom: 1px solid @border_glass;
+    padding:      8px;
+    border-radius: 8px;
+    box-shadow:   inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 /* ── Checkboxes & Radio Buttons ───────────────────────────────────────────── */
@@ -296,114 +366,147 @@ switch:checked slider {
     background: @emerald;
 }
 
-/* ── Progress Bars ────────────────────────────────────────────────────────── */
+/* ── Progress Bars — Emerald Flow ─────────────────────────────────────────── */
 progressbar {
     background: @surface_1;
-    border-radius: 4px;
+    border-radius: 6px;
+    border: 1px solid @border_subtle;
 }
 
 progressbar progress {
-    background: linear-gradient(90deg, rgba(0,255,157,0.7), @emerald);
-    border-radius: 4px;
-    box-shadow:  0 0 8px @emerald_dim;
+    background: linear-gradient(90deg,
+        rgba(0, 255, 157, 0.50),
+        @emerald,
+        rgba(0, 240, 255, 0.40));
+    border-radius: 5px;
+    box-shadow:  0 0 10px @emerald_dim,
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    transition:  width 200ms ease;
 }
 
 progressbar trough {
     background: @surface_1;
     border:     1px solid @border_subtle;
-    border-radius: 4px;
+    border-radius: 6px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
-/* ── Scales / Sliders ─────────────────────────────────────────────────────── */
+/* ── Scales / Sliders — Neon Emerald ──────────────────────────────────────── */
 scale trough {
-    background: @surface_1;
-    border:     1px solid @border_subtle;
-    border-radius: 4px;
-    min-height: 6px;
+    background:   @surface_1;
+    border:       1px solid @border_subtle;
+    border-radius: 6px;
+    min-height:   8px;
+    box-shadow:   inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 scale highlight {
-    background: linear-gradient(90deg, rgba(0,255,157,0.5), @emerald);
-    border-radius: 4px;
+    background: linear-gradient(90deg,
+        rgba(0, 255, 157, 0.40),
+        @emerald,
+        rgba(0, 240, 255, 0.30));
+    border-radius: 5px;
+    box-shadow:  0 0 8px @emerald_dim;
 }
 
 scale slider {
     background:    @surface_2;
-    border:        1.5px solid @emerald_dim;
+    border:        2px solid @emerald_dim;
     border-radius: 50%;
-    min-width:     18px;
-    min-height:    18px;
-    box-shadow:    0 0 10px @emerald_faint;
-    transition:    all 120ms ease;
+    min-width:     20px;
+    min-height:    20px;
+    box-shadow:    0 0 12px @emerald_faint,
+                   0 1px 3px rgba(0, 0, 0, 0.5);
+    transition:    all 140ms ease;
 }
 
 scale slider:hover {
     border-color: @emerald;
-    box-shadow:   0 0 16px @emerald_dim;
+    box-shadow:   0 0 18px @emerald_dim;
 }
 
-/* ── Scrollbars ───────────────────────────────────────────────────────────── */
+scale slider:active {
+    background: rgba(0, 255, 157, 0.15);
+    border-color: @emerald_bright;
+}
+
+/* ── Scrollbars — Emerald Phosphor Tramlines with Hover Bloom ──────────────── */
 scrollbar {
     background: @surface_0;
     border:     none;
 }
 
-scrollbar.vertical   { border-left:  1px solid @border_subtle; }
-scrollbar.horizontal { border-top:   1px solid @border_subtle; }
+scrollbar.vertical   { border-left:  1px solid @border_glass; }
+scrollbar.horizontal { border-top:   1px solid @border_glass; }
 
 scrollbar slider {
-    background:    rgba(0, 255, 157, 0.25);
+    background:    rgba(0, 255, 157, 0.20);
     border:        1px solid @emerald_dim;
-    border-radius: 6px;
-    min-width:     6px;
-    min-height:    6px;
-    margin:        2px;
-    transition:    background 120ms ease;
+    border-radius: 8px;
+    min-width:     8px;
+    min-height:   8px;
+    margin:        3px;
+    transition:    all 130ms ease;
+    box-shadow:    0 0 6px @emerald_faint;
 }
 
 scrollbar slider:hover {
-    background: rgba(0, 255, 157, 0.45);
+    background: rgba(0, 255, 157, 0.40);
+    border-color: @emerald;
+    box-shadow:   0 0 12px @emerald_dim;
 }
 
 scrollbar.overlay-indicator slider {
-    background: rgba(0, 255, 157, 0.35);
-    min-width:  4px;
-    min-height: 4px;
+    background: rgba(0, 255, 157, 0.30);
+    min-width:  6px;
+    min-height: 6px;
     border:     none;
+    box-shadow: 0 0 6px @emerald_faint;
 }
 
-/* ── Menus & Dropdowns ────────────────────────────────────────────────────── */
+/* ── Menus & Dropdowns — Volumetric Holographic Glass ──────────────────────── */
 menu,
 .menu,
 .context-menu,
 popover,
 popover.menu {
     background:    @overlay_bg;
-    border:        1px solid @border_subtle;
-    border-radius: 10px;
+    border:        1px solid @border_neon;
+    border-radius: 14px;
     padding:       6px;
-    box-shadow:    0 8px 32px rgba(0, 0, 0, 0.7), 0 0 0 1px @border_subtle;
+    box-shadow:    0 12px 40px rgba(0, 0, 0, 0.85),
+                   0 0 0 1px @border_subtle,
+                   inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(24px);
+    -gtk-icon-shadow: 0 0 6px rgba(0, 255, 157, 0.2);
 }
 
 menuitem,
 .menuitem {
-    border-radius: 6px;
-    padding:       6px 12px;
+    border-radius: 8px;
+    padding:       8px 14px;
     color:         @text_primary;
-    transition:    all 100ms ease;
+    transition:    all 110ms ease;
+    margin:        1px 0;
+    -gtk-icon-shadow: 0 0 4px rgba(0,0,0,0.6);
 }
 
 menuitem:hover,
 menuitem:focus,
 .menuitem:hover {
-    background: linear-gradient(135deg, @emerald_faint, rgba(0,229,255,0.08));
-    color:      @emerald;
+    background: linear-gradient(135deg,
+        rgba(0, 255, 157, 0.20),
+        rgba(0, 229, 255, 0.10));
+    color:      @emerald_bright;
+    box-shadow: 0 0 14px @emerald_dim,
+                inset 0 0 8px rgba(0, 255, 157, 0.10);
+    -gtk-icon-shadow: 0 0 8px @emerald_faint;
 }
 
 menuitem:disabled,
 menuitem:insensitive {
     color:   @text_muted;
-    opacity: 0.5;
+    opacity: 0.45;
 }
 
 separator,
@@ -411,10 +514,10 @@ menuitem.separator,
 menu separator {
     background: @border_subtle;
     min-height: 1px;
-    margin:     4px 8px;
+    margin:     6px 8px;
 }
 
-/* ── Notebook / Tabs ──────────────────────────────────────────────────────── */
+/* ── Notebook / Tabs — Holographic Emerald Tabs ─────────────────────────────── */
 notebook {
     background: @base_bg;
     border:     none;
@@ -422,8 +525,10 @@ notebook {
 
 notebook header {
     background: @surface_0;
-    border-bottom: 1px solid @border_subtle;
+    border-bottom: 1px solid @border_neon;
     padding: 0;
+    border-radius: 0 0 14px 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(0,255,157,0.06);
 }
 
 notebook header tab {
@@ -431,17 +536,29 @@ notebook header tab {
     border:      none;
     border-bottom: 2px solid transparent;
     color:       @text_dim;
-    padding:     8px 16px;
-    font-weight: 600;
-    transition:  all 140ms ease;
+    padding:     10px 18px;
+    font-weight: 700;
+    font-family: "JetBrains Mono", monospace;
+    font-size:   9.5pt;
+    letter-spacing: 0.03em;
+    transition:  all 150ms ease;
+    text-shadow: 0 0 4px rgba(0,0,0,0.8);
 }
 
 notebook header tab:hover {
-    color:        @text_primary;
+    color:        @emerald_bright;
     border-bottom-color: @emerald_dim;
+    background:   rgba(0, 255, 157, 0.05);
+    box-shadow:   0 0 12px rgba(0,255,157,0.10);
 }
 
 notebook header tab:checked,
+notebook header tab:active {
+    background:   @emerald_faint;
+    border-bottom-color: @emerald;
+    color:        @emerald_bright;
+    box-shadow:   0 0 8px @emerald_faint;
+}
 notebook header tab:active {
     background:   @emerald_faint;
     color:        @emerald;
@@ -495,39 +612,51 @@ combobox button:hover {
     border-color: @emerald_dim;
 }
 
-/* ── Dialogs ──────────────────────────────────────────────────────────────── */
+/* ── Dialogs — Holographic Void with Emerald Border ────────────────────────── */
 dialog {
     background:    @overlay_bg;
-    border:        1px solid @border_subtle;
-    border-radius: 14px;
-    box-shadow:    0 24px 64px rgba(0, 0, 0, 0.85), 0 0 0 1px @border_subtle;
+    border:        1px solid @border_neon;
+    border-radius: 16px;
+    box-shadow:    0 28px 72px rgba(0, 0, 0, 0.9),
+                   0 0 0 1px @border_subtle,
+                   inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(28px);
 }
 
 dialog .dialog-content-area {
-    padding: 20px;
+    padding: 24px;
 }
 
 dialog .dialog-action-area {
     background:  @surface_0;
-    border-top:  1px solid @border_subtle;
-    padding:     12px 16px;
-    border-radius: 0 0 14px 14px;
+    border-top:  1px solid @border_neon;
+    padding:     14px 18px;
+    border-radius: 0 0 16px 16px;
 }
 
 messagedialog {
     background: @overlay_bg;
+    border:     1px solid @border_neon;
+    border-radius: 16px;
 }
 
-/* ── Tooltips ─────────────────────────────────────────────────────────────── */
+/* ── Tooltips — Gold-trimmed Void Pills ─────────────────────────────────────── */
 tooltip,
 .tooltip {
     background:    rgba(6, 9, 14, 0.96);
-    border:        1px solid @gold_dim;
-    border-radius: 8px;
+    border:        1px solid @gold;
+    border-radius: 10px;
     color:         @text_primary;
-    padding:       6px 10px;
-    box-shadow:    0 4px 16px rgba(0, 0, 0, 0.7);
+    padding:       6px 12px;
+    box-shadow:    0 4px 20px rgba(0, 0, 0, 0.8),
+                   0 0 10px @gold_dim;
     font-size:     9.5pt;
+    font-family:  "JetBrains Mono", monospace;
+    text-shadow:  0 0 4px rgba(0,0,0,0.9);
+}
+
+tooltip * {
+    color: @text_primary;
 }
 
 /* ── Popovers ─────────────────────────────────────────────────────────────── */
@@ -544,32 +673,38 @@ popover arrow {
     border:     1px solid @border_subtle;
 }
 
-/* ── Sidebar ──────────────────────────────────────────────────────────────── */
+/* ── Sidebar — Emerald-lit Navigation Pane ───────────────────────────────────── */
 .sidebar,
 .sidebar-pane {
     background: @surface_0;
-    border-right: 1px solid @border_subtle;
+    border-right: 1px solid @border_neon;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.4);
 }
 
 .sidebar row,
 .sidebar .row {
     padding: 8px 12px;
-    border-radius: 6px;
+    border-radius: 8px;
     margin: 2px 4px;
     color: @text_primary;
-    transition: all 120ms ease;
+    transition: all 140ms cubic-bezier(0.4, 0, 0.2, 1);
+    -gtk-icon-shadow: 0 0 4px rgba(0,0,0,0.7);
 }
 
 .sidebar row:hover,
 .sidebar .row:hover {
-    background: @emerald_faint;
-    color:      @emerald;
+    background: rgba(0, 255, 157, 0.12);
+    color:      @emerald_bright;
+    box-shadow: 0 0 8px @emerald_faint;
+    -gtk-icon-shadow: 0 0 10px @emerald_dim;
 }
 
 .sidebar row:selected,
 .sidebar .row:selected {
-    background: linear-gradient(135deg, @emerald_faint, rgba(0,229,255,0.08));
-    color:      @emerald;
+    background: linear-gradient(135deg, rgba(0,255,157,0.25), rgba(0,229,255,0.12));
+    color:      @emerald_bright;
+    box-shadow: 0 0 12px @emerald_dim;
+    border: 1px solid rgba(0, 255, 157, 0.20);
 }
 
 /* ── Rubberband Drag Selection ────────────────────────────────────────────── */
@@ -584,37 +719,38 @@ XfdesktopIconView.view rubberband {
     box-shadow:       0 0 18px rgba(0, 255, 157, 0.45), inset 0 0 8px rgba(0, 255, 157, 0.08);
 }
 
-/* ── Desktop Icon View (XFCE) ─────────────────────────────────────────────── */
+/* ── Desktop Icon View (XFCE) — Emerald-lit Void Labels ─────────────────────── */
 XfdesktopIconView.view {
     background-color: transparent;
     color:            #e2e8f0;
     font-family:      "JetBrains Mono", monospace;
-    font-weight:      600;
-    font-size:        10.5px;
-    text-shadow:      0 2px 8px rgba(0,0,0,0.9), 0 0 16px rgba(0,0,0,0.7);
+    font-weight:      700;
+    font-size:        11px;
+    text-shadow:      0 2px 10px rgba(0,0,0,0.95), 0 0 20px rgba(0,0,0,0.8);
 }
 
 XfdesktopIconView.view .label {
-    background-color: rgba(6, 9, 14, 0.75);
-    border:           1px solid rgba(0, 255, 157, 0.15);
-    border-radius:    8px;
-    padding:          3px 8px;
-    transition:       all 160ms cubic-bezier(0.4, 0, 0.2, 1);
+    background-color: rgba(6, 9, 14, 0.80);
+    border:           1px solid rgba(0, 255, 157, 0.18);
+    border-radius:    10px;
+    padding:          4px 10px;
+    transition:       all 180ms cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow:       0 2px 8px rgba(0,0,0,0.5);
 }
 
 XfdesktopIconView.view .label:hover {
-    background-color: rgba(0, 255, 157, 0.20);
-    border-color:     rgba(0, 255, 157, 0.7);
+    background-color: rgba(0, 255, 157, 0.22);
+    border-color:     rgba(0, 255, 157, 0.75);
     color:            #ffffff;
-    box-shadow:       0 0 18px rgba(0, 255, 157, 0.55), 0 4px 14px rgba(0, 0, 0, 0.8);
+    box-shadow:       0 0 22px rgba(0, 255, 157, 0.60), 0 4px 16px rgba(0,0,0,0.85);
 }
 
 XfdesktopIconView.view:selected,
 XfdesktopIconView.view .label:selected {
-    background:   linear-gradient(135deg, rgba(0,255,157,0.35), rgba(0,229,255,0.20));
-    border:       1.5px solid #00ff9d;
+    background:   linear-gradient(135deg, rgba(0,255,157,0.40), rgba(0,229,255,0.25));
+    border:       2px solid #00ff9d;
     color:        #ffffff;
-    box-shadow:   0 0 24px rgba(0,255,157,0.7), inset 0 0 10px rgba(0,255,157,0.25);
+    box-shadow:   0 0 30px rgba(0,255,157,0.75), inset 0 0 12px rgba(0,255,157,0.30);
 }
 
 /* ── Spinbutton ───────────────────────────────────────────────────────────── */
@@ -766,22 +902,40 @@ statusbar {
     background: linear-gradient(90deg, @void_black, @text_primary);
 }
 
-/* ── Overlay widgets ──────────────────────────────────────────────────────── */
+/* ── Overlay widgets — Volumetric Glass Popups with Neon Border ──────────── */
 overlay > revealer {
-    background: @overlay_bg;
-    border:     1px solid @border_subtle;
-    border-radius: 10px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+    background:   @overlay_bg;
+    border:       1px solid @border_neon;
+    border-radius: 16px;
+    box-shadow:   0 16px 48px rgba(0, 0, 0, 0.85),
+                   0 0 0 1px @border_subtle,
+                   inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(28px);
+    -gtk-icon-shadow: 0 0 8px rgba(0, 255, 157, 0.15);
 }
 
-/* ── Badges and Indicators ────────────────────────────────────────────────── */
+/* ── Badges & Indicators — Emerald Pills ───────────────────────────────────── */
 .badge {
     background:    @emerald;
     color:         @void_black;
-    border-radius: 10px;
-    padding:       2px 6px;
-    font-size:     8pt;
+    border-radius: 12px;
+    padding:       2px 8px;
     font-weight:   700;
+    font-size:     9pt;
+    box-shadow:    0 0 8px @emerald_dim;
+    text-shadow:  0 0 4px @emerald_faint;
+}
+
+.badge.warning {
+    background:    @warning;
+    color:         @void_black;
+}
+
+.badge.error,
+.badge.danger {
+    background:    @danger;
+    color:         @text_primary;
+    box-shadow:    0 0 8px @danger_dim;
 }
 
 /* ── Notifications (XFCE notify) ─────────────────────────────────────────── */

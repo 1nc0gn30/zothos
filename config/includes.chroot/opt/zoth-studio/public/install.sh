@@ -4,8 +4,8 @@ set -eo pipefail
 # ==============================================================================
 # ZOTH STUDIO — Sovereign Local-First AI Agent Environment Installer
 # Usage:
-#   curl -fsSL https://zoth.nullai.tech/install.sh | bash
-#   curl -fsSL https://zoth.nullai.tech/install.sh | bash -s -- --unattended
+#   curl -fsSL https://raw.githubusercontent.com/NullAITech/zoth-studio/main/public/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/NullAITech/zoth-studio/main/public/install.sh | bash -s -- --unattended
 #   ./install.sh -y --dir ~/.zoth
 # ==============================================================================
 
@@ -28,7 +28,7 @@ Zoth Studio Universal Installer
 
 Usage:
   install.sh [options]
-  curl -fsSL https://zoth.nullai.tech/install.sh | bash -s -- [options]
+  curl -fsSL https://raw.githubusercontent.com/NullAITech/zoth-studio/main/public/install.sh | bash -s -- [options]
 
 Options:
   -y, --yes, --unattended, --no-prompt, --non-interactive

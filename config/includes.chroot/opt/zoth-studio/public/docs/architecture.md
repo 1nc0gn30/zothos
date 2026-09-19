@@ -190,7 +190,7 @@ The vault daemon provides zero-knowledge memory enclaves on `127.0.0.1:8787`.
 ## 9. Installation & Packaging
 
 - **Debian / Ubuntu / Parrot OS**: `sudo dpkg -i zoth-studio_2.6.0_all.deb`
-- **Linux Universal**: `chmod +x Zoth_Studio-v2.6.0-x86_64.AppImage && ./Zoth_Studio-v2.6.0-x86_64.AppImage`
+- **Linux Universal**: `chmod +x Zoth_Studio-v12.0.0-x86_64.AppImage && ./Zoth_Studio-v12.0.0-x86_64.AppImage`
 - **Windows**: Unzip `zoth-studio-windows-x86_64.zip` and run `install.ps1`
 - **Android**: Install `zoth-studio-android.apk` for mobile SimpleX/Signal bridge control
 

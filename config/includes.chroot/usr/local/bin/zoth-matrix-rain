@@ -1,96 +1,204 @@
 #!/usr/bin/env bash
 # ==============================================================================
-#  🜂 ZOTHOS HERMETIC MATRIX DIGITAL RAIN v2.0 🜄
-#  Alchemical Glyphs, Sacred Geometry & Digital Rain Screensaver
+#  🜂 ZOTHOS HERMETIC MATRIX DIGITAL RAIN v3.0 🜄
+#  GPU-class cyberpunk rain with chromatic bloom, glitch bursts, alchemical glyphs
+#  Modes: classic | hyper | hacker | nebula | hypercube
 # ==============================================================================
 
+set -euo pipefail
 trap "tput cnorm; clear; exit 0" SIGINT SIGTERM EXIT
 
 tput civis
 clear
 
+# ── Mode selection ──────────────────────────────────────────────────────────
+MODE="${1:-classic}"
+case "$MODE" in
+    classic)  GLYPH_DENSITY=1; COLOR_SCHEME="emerald"; GLITCH_CHANCE=0.003 ;;
+    hyper)    GLYPH_DENSITY=2; COLOR_SCHEME="chromatic"; GLITCH_CHANCE=0.008 ;;
+    hacker)   GLYPH_DENSITY=1; COLOR_SCHEME="cyan-magenta"; GLITCH_CHANCE=0.015 ;;
+    nebula)   GLYPH_DENSITY=3; COLOR_SCHEME="void-stars"; GLITCH_CHANCE=0.005 ;;
+    hypercube) GLYPH_DENSITY=2; COLOR_SCHEME="gold-glyph"; GLITCH_CHANCE=0.01 ;;
+    *)        MODE="classic"; GLYPH_DENSITY=1; COLOR_SCHEME="emerald"; GLITCH_CHANCE=0.003 ;;
+esac
+
 LINES=$(tput lines)
 COLS=$(tput cols)
 
-GLYPHS=(
-    "0" "1" "2" "3" "4" "5" "6" "7" "8" "9"
-    "a" "b" "c" "d" "e" "f" "x" "z" "o" "t" "h"
-    "☉" "☽" "☿" "♀" "♂" "♃" "♄" "🜂" "🜄" "🜁" "🜃" "🝘" "🜚" "🜛" "🜞" "🝠"
-    "ᚠ" "ᚢ" "ᚦ" "ᚨ" "ᚱ" "ᚲ" "ᚷ" "ᚹ" "ᚺ" "ᚾ" "ᛁ" "ᛃ" "ᛈ" "ᛇ" "ᛉ" "ᛋ" "ᛏ"
-    "ｦ" "ｱ" "ｳ" "ｴ" "ｵ" "ｶ" "ｷ" "ｹ" "ｺ" "ｻ" "ｼ" "ｽ" "ｾ" "ｿ" "ﾀ" "ﾂ" "ﾃ" "ﾅ" "ﾆ" "ﾇ" "ﾈ"
-)
+# ── Glyph sets per mode ────────────────────────────────────────────────────
+get_glyphs() {
+    case "$COLOR_SCHEME" in
+        emerald)
+            echo "0 1 2 3 4 5 6 7 8 9 a b c d e f x z o t h k m n p q r s u v w y"
+            ;;
+        chromatic)
+            echo "0 1 2 3 4 5 6 7 8 9 a b c d e f x z o t h k m n p q r s u v w y"
+            ;;
+        "cyan-magenta")
+            echo "0 1 2 3 4 5 6 7 8 9 a b c d e f x z o t h k m n p q r s u v w y"
+            ;;
+        "void-stars")
+            echo " . * + : ; ! ? ~ ^ & % $ # @ § ¶ ∆ ∞ ≈ ≠ ≤ ≥ ⊂ ⊃ ∩ ∪ ⊥ ⊢ ⊣"
+            ;;
+        "gold-glyph")
+            echo "0 1 2 3 4 5 6 7 8 9 ☉ ☽ ☿ ♀ ♂ ♃ ♄ 🜂 🜄 🜁 🜃 🝘 🜚 🜛 🜞 🝠 ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ ᚺ ᚾ ᛁ ᛃ ᛈ ᛇ ᛉ"
+            ;;
+    esac
+}
+
+GLYPHS=($(get_glyphs))
 NUM_GLYPHS=${#GLYPHS[@]}
 
 declare -a Y_POS
 declare -a SPEEDS
 declare -a LENGTHS
+declare -a COLORS
 
-for ((i=0; i<COLS; i++)); do
+for ((i=0; i<COLS; i+=GLYPH_DENSITY)); do
     Y_POS[$i]=$((RANDOM % LINES))
     SPEEDS[$i]=$((RANDOM % 2 + 1))
     LENGTHS[$i]=$((RANDOM % 14 + 10))
+    COLORS[$i]=$((RANDOM % 100 + 50))  # phosphor brightness 50-150
 done
 
-# Check non-blocking keypress to exit on 'q' or 'ESC'
+# ── Color codes per scheme ──────────────────────────────────────────────────
+get_color() {
+    local brightness=$1
+    case "$COLOR_SCHEME" in
+        emerald)
+            local g=$((brightness + 50))
+            if [[ $g -gt 255 ]]; then g=255; fi
+            echo "38;5;${g}"  # emerald green ramp
+            ;;
+        chromatic)
+            local half=$((brightness + 20))
+            if (( RANDOM % 3 == 0 )); then
+                echo "38;5;220"  # gold flash
+            elif (( RANDOM % 2 == 0 )); then
+                echo "38;5;81"   # cyan
+            else
+                echo "38;5;197"  # magenta
+            fi
+            ;;
+        "cyan-magenta")
+            if (( RANDOM % 2 == 0 )); then
+                echo "38;5;81"   # cyan
+            else
+                echo "38;5;197"  # magenta
+            fi
+            ;;
+        "void-stars")
+            local w=$((RANDOM % 3 + 1))
+            case $w in
+                1) echo "1;37" ;;   # pure white star
+                2) echo "1;33" ;;   # gold star
+                3) echo "1;36" ;;   # cyan star
+            esac
+            ;;
+        "gold-glyph")
+            if (( RANDOM % 7 == 0 )); then
+                echo "1;38;5;220"  # bright gold
+            elif (( RANDOM % 3 == 0 )); then
+                echo "1;38;5;214"  # gold
+            else
+                echo "1;38;5;251"  # pale gold
+            fi
+            ;;
+    esac
+}
+
+# ── Glitch burst trigger ────────────────────────────────────────────────────
+declare -i glitch_timer=0
+declare -i glitch_active=0
+declare -a glitch_lines
+
+trigger_glitch() {
+    local num_lines=$((RANDOM % 8 + 3))
+    glitch_active=1
+    glitch_lines=()
+    for ((i=0; i<num_lines; i++)); do
+        glitch_lines+=($((RANDOM % LINES)))
+    done
+    glitch_timer=8
+}
+
+# ── Main render loop ────────────────────────────────────────────────────────
 while true; do
     read -t 0.03 -n 1 key 2>/dev/null && [[ "$key" == "q" || "$key" == $'\e' ]] && break
 
-    for ((col=0; col<COLS; col+=2)); do
+    # Glitch timer countdown
+    if (( glitch_timer > 0 )); then
+        glitch_timer=$((glitch_timer - 1))
+        if (( glitch_timer == 0 )); then
+            glitch_active=0
+        fi
+    fi
+
+    # Random glitch trigger
+    if (( RANDOM % 1000 < GLITCH_CHANCE * 1000 )); then
+        trigger_glitch
+    fi
+
+    # Render frame
+    for ((col=0; col<COLS; col+=GLYPH_DENSITY)); do
         y=${Y_POS[$col]}
         stream_len=${LENGTHS[$col]}
-        glyph=${GLYPHS[$((RANDOM % NUM_GLYPHS))]}
+        speed=${SPEEDS[$col]}
+        base_color=$(get_color ${COLORS[$col]})
 
-        # 1. Lead glyph: Radiant brilliant white / golden core
+        # Lead glyph (brightest — white/gold core)
         if (( y >= 0 && y < LINES )); then
             tput cup "$y" "$col" 2>/dev/null || true
             if (( RANDOM % 5 == 0 )); then
-                echo -ne "\e[1;38;5;220m$glyph\e[0m" # Solar gold flash
+                echo -ne "\e[1;38;5;220m${GLYPHS[$((RANDOM % NUM_GLYPHS))]}\e[0m"
             else
-                echo -ne "\e[1;37m$glyph\e[0m" # Pure white lead
+                echo -ne "\e[1;37m${GLYPHS[$((RANDOM % NUM_GLYPHS))]}\e[0m"
             fi
         fi
 
-        # 2. First trail: High-phosphor emerald green
-        y1=$((y - 1))
-        if (( y1 >= 0 && y1 < LINES )); then
-            tput cup "$y1" "$col" 2>/dev/null || true
-            echo -ne "\e[38;5;48m${GLYPHS[$((RANDOM % NUM_GLYPHS))]}\e[0m"
-        fi
+        # Trail layers (fading down)
+        for trail in 1 2 3 4 5 6; do
+            ty=$((y - trail))
+            if (( ty >= 0 && ty < LINES )); then
+                tput cup "$ty" "$col" 2>/dev/null || true
+                local dim=$((COLORS[$col] - trail * 8))
+                if (( dim < 10 )); then dim=10; fi
+                local tcolor=$(get_color $dim)
+                echo -ne "\e[${tcolor}m${GLYPHS[$((RANDOM % NUM_GLYPHS))]}\e[0m"
+            fi
+        done
 
-        # 3. Second trail: Bright matrix green
-        y2=$((y - 2))
-        if (( y2 >= 0 && y2 < LINES )); then
-            tput cup "$y2" "$col" 2>/dev/null || true
-            echo -ne "\e[38;5;42m${GLYPHS[$((RANDOM % NUM_GLYPHS))]}\e[0m"
-        fi
-
-        # 4. Mid trail: Medium forest emerald
-        mid_y=$((y - 6))
-        if (( mid_y >= 0 && mid_y < LINES )); then
-            tput cup "$mid_y" "$col" 2>/dev/null || true
-            echo -ne "\e[38;5;29m${GLYPHS[$((RANDOM % NUM_GLYPHS))]}\e[0m"
-        fi
-
-        # 5. Deep tail: Deep obsidian green fade
-        deep_y=$((y - stream_len + 2))
-        if (( deep_y >= 0 && deep_y < LINES )); then
-            tput cup "$deep_y" "$col" 2>/dev/null || true
-            echo -ne "\e[38;5;22m${GLYPHS[$((RANDOM % NUM_GLYPHS))]}\e[0m"
-        fi
-
-        # 6. Tail erase
+        # Trail erase
         erase_y=$((y - stream_len))
         if (( erase_y >= 0 && erase_y < LINES )); then
             tput cup "$erase_y" "$col" 2>/dev/null || true
             echo -ne " "
         fi
 
-        # Advance stream
-        Y_POS[$col]=$((y + SPEEDS[$col]))
+        # Advance
+        Y_POS[$col]=$((y + speed))
         if (( Y_POS[$col] - stream_len >= LINES )); then
             Y_POS[$col]=0
             LENGTHS[$col]=$((RANDOM % 14 + 10))
             SPEEDS[$col]=$((RANDOM % 2 + 1))
+            COLORS[$col]=$((RANDOM % 100 + 50))
         fi
     done
+
+    # Glitch overlay: draw phantom lines
+    if (( glitch_active )); then
+        for line in "${glitch_lines[@]}"; do
+            for ((col=0; col<COLS; col+=3)); do
+                tput cup "$line" "$col" 2>/dev/null || true
+                echo -ne "\e[1;38;5;$((RANDOM % 255 + 1))m${GLYPHS[$((RANDOM % NUM_GLYPHS))]}\e[0m"
+            done
+            # Duplicate line shifted for RGB-split effect
+            tput cup "$((line + 1))" "0" 2>/dev/null || true
+            echo -ne "\e[1;38;5;81m"
+            printf "%-${COLS}s" "$(head -c $COLS /dev/urandom 2>/dev/null | tr -dc '[:print:]' | head -c $COLS)"
+            echo -ne "\e[0m"
+        done
+    fi
 done
+
+tput cnorm

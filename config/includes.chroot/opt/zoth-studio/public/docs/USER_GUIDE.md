@@ -4,7 +4,7 @@
 
 ### *Sovereign Local-First Multi-Agent Architecture, 3D CAD Omniverse & ESP32-S3 Companion*
 
-[![Version](https://img.shields.io/badge/manual-v2.6.0-00f0ff?style=for-the-badge&logo=target&logoColor=white)](http://127.0.0.1:8088/docs/)
+[![Version](https://img.shields.io/badge/manual-v12.0.0-00f0ff?style=for-the-badge&logo=target&logoColor=white)](http://127.0.0.1:8088/docs/)
 [![Local-First](https://img.shields.io/badge/architecture-100%25%20Local--First-34d399?style=for-the-badge&logo=safari&logoColor=white)](http://127.0.0.1:8088/)
 [![Security](https://img.shields.io/badge/vault-Argon2id%20%2B%20XChaCha20-f472b6?style=for-the-badge&logo=rust&logoColor=white)](http://127.0.0.1:8088/vault/)
 

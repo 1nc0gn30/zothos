@@ -1,0 +1,139 @@
+#!/usr/bin/env bash
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ZOTHOS CRT SCANLINE OVERLAY DAEMON
+#  Injects a full-screen horizontal scanline overlay for authentic CRT phosphor feel.
+#  Run BEFORE picom for seamless compositing: zoth-crt-overlay start
+# ═══════════════════════════════════════════════════════════════════════════════
+
+set -euo pipefail
+
+STATE_DIR="/run/zoth-crt-overlay"
+OVERLAY_WM_CLASS="zoth-crt-scanlines"
+SCANLINE_IMG="/usr/share/backgrounds/zothos/crt-scanlines.png"
+
+usage() {
+    echo "Usage: zoth-crt-overlay {start|stop|toggle|status}"
+    echo ""
+    echo "  start   — Launch the CRT scanline overlay (run before picom)"
+    echo "  stop    — Kill the overlay"
+    echo "  toggle  — Toggle overlay on/off"
+    echo "  status  — Show overlay state"
+    echo ""
+    echo "The overlay is a transparent full-screen window with horizontal"
+    echo "scanline stripes. It composites above all content but below fullscreen."
+    exit 1
+}
+
+generate_scanline_image() {
+    local out="$1"
+    local w="${2:-1920}"
+    local h="${3:-1080}"
+    python3 -c "
+from PIL import Image, ImageDraw
+w, h = $w, $h
+img = Image.new('RGBA', (w, h), (0, 0, 0, 0))
+draw = ImageDraw.Draw(img)
+# Horizontal scanline stripes: every other row gets dark alpha
+stripe_height = 2  # 2px per scanline = 1px gap
+alpha = 28  # Subtle darkness — adjust for intensity
+for y in range(0, h, stripe_height * 2):
+    draw.rectangle([0, y, w, y + stripe_height], fill=(0, 0, 0, alpha))
+img.save('$out', 'PNG')
+print(f'  Generated scanline overlay: {out} ({w}x{h})')
+"
+}
+
+start_overlay() {
+    mkdir -p "$STATE_DIR"
+
+    # Generate scanline image if missing
+    if [[ ! -f "$SCANLINE_IMG" ]]; then
+        echo "[*] Generating CRT scanline overlay image..."
+        generate_scanline_image "$SCANLINE_IMG" 1920 1080
+    fi
+
+    # Kill existing overlay
+    stop_overlay 2>/dev/null || true
+
+    # Launch with matchbox-window or openbox or a minimal window manager
+    # We use a Python script via tkinter/PIL to create the overlay window
+    python3 -c "
+import tkinter as tk
+from PIL import Image, ImageTk
+import os
+
+w = 1920
+h = 1080
+scanline_img = '$SCANLINE_IMG'
+
+root = tk.Tk()
+root.title('ZOTH CRT Overlay')
+root.configure(bg='black')
+root.overriding_redirect = True
+root.attributes('-fullscreen', True)
+root.attributes('-alpha', 0.99)
+root.attributes('-topmost', True)
+root.attributes('-disabled', True)
+
+# Make window click-through
+root.attributes('-transparentcolor', 'black')
+
+canvas = tk.Canvas(root, width=w, height=h, bg='black', highlightthickness=0, bd=0)
+canvas.pack(fill='both', expand=True)
+
+img = Image.open(scanline_img)
+tk_img = ImageTk.PhotoImage(img)
+canvas.create_image(0, 0, anchor='nw', image=tk_img)
+canvas.image = tk_img  # keep reference
+
+root.mainloop()
+" &
+
+    OVERLAY_PID=$!
+    echo "$OVERLAY_PID" > "$STATE_DIR/pid"
+    echo "[+] CRT scanline overlay launched (PID: $OVERLAY_PID)"
+    echo "[+] Run picom now for full effect."
+}
+
+stop_overlay() {
+    if [[ -f "$STATE_DIR/pid" ]]; then
+        local pid=$(cat "$STATE_DIR/pid" 2>/dev/null)
+        if kill -0 "$pid" 2>/dev/null; then
+            kill "$pid" 2>/dev/null || true
+            echo "[+] CRT scanline overlay stopped (PID: $pid)"
+        fi
+        rm -f "$STATE_DIR/pid"
+    fi
+    # Also kill any tkinter CRT overlay
+    pkill -f "zoth-crt-scanlines" 2>/dev/null || true
+    pkill -f "CRT Overlay" 2>/dev/null || true
+}
+
+status_overlay() {
+    if [[ -f "$STATE_DIR/pid" ]]; then
+        local pid=$(cat "$STATE_DIR/pid" 2>/dev/null)
+        if kill -0 "$pid" 2>/dev/null; then
+            echo "[+] CRT Scanline Overlay: ACTIVE (PID: $pid)"
+            return 0
+        fi
+    fi
+    echo "[-] CRT Scanline Overlay: INACTIVE"
+    return 1
+}
+
+toggle_overlay() {
+    if status_overlay 2>/dev/null; then
+        stop_overlay
+    else
+        start_overlay
+    fi
+}
+
+target="${1:-}"
+case "$target" in
+    start)   start_overlay ;;
+    stop)    stop_overlay ;;
+    status)  status_overlay ;;
+    toggle)  toggle_overlay ;;
+    *)       usage ;;
+esac

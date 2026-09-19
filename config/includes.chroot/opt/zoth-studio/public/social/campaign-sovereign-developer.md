@@ -19,7 +19,7 @@ A single sovereign engineer, equipped with **Zoth Studio's 21-Agent Autonomous P
 
 ```
 +-------------------------------------------------------------------------+
-|                       ZOTH TERMINAL COCKPIT (v2.6)                      |
+|                       ZOTH TERMINAL COCKPIT (v12)                      |
 +-------------------------------------------------------------------------+
 | [Deck :8484] [Memory :8485] [Vault :8486] [Consensus: QUORUM REACHED]    |
 |                                                                         |

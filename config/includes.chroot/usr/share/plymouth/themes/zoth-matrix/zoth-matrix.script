@@ -1,18 +1,215 @@
-# ZOTHOS Plymouth Script (Hermetic Matrix Animation)
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ZOTHOS — Hermetic Matrix Plymouth Boot Splash v3.0 (2028-2030 Cutter)
+#  Multi-phase animated boot: cosmic seal + matrix rain + neon alchemical FX
+# ═══════════════════════════════════════════════════════════════════════════════
+
 screen_width = Window.GetWidth();
 screen_height = Window.GetHeight();
 
-# Pure obsidian background
-Window.SetBackgroundTopColor(0.02, 0.03, 0.03);
-Window.SetBackgroundBottomColor(0.00, 0.00, 0.00);
+# ── Obsidian void background (deep void-black with subtle gradient) ─────────
+Window.SetBackgroundTopColor(0.015, 0.023, 0.020);  # #030504
+Window.SetBackgroundBottomColor(0.000, 0.000, 0.000);
 
-# Status Text (Emerald Green)
-status.image = Image.Text("ZOTHOS :: TRANSMUTING CONSCIOUSNESS", 0.0, 1.0, 0.62);
-status.sprite = Sprite(status.image);
-status.sprite.SetPosition(screen_width / 2 - status.image.GetWidth() / 2, screen_height * 0.75, 10);
+# ── Stars/particle background layer ─────────────────────────────────────────
+star_count = 180;
+stars = [];
 
+for (i = 0; i < star_count; i++) {
+    stars[i] = {
+        x:      Math.Random() * screen_width,
+        y:      Math.Random() * screen_height,
+        size:   Math.Random() * 1.6 + 0.4,
+        alpha:  Math.Random() * 0.5 + 0.15,
+        twinkle_speed: Math.Random() * 2.0 + 0.5
+    };
+}
+
+# ── Matrix rain layer — emerald phosphor digital rain ─────────────────────
+MAX_DROPS = 75;
+drops = [];
+
+for (i = 0; i < MAX_DROPS; i++) {
+    drops[i] = {
+        x:       Math.Random() * screen_width,
+        y:       Math.Random() * screen_height * -1,
+        speed:   Math.Random() * 4.0 + 2.0,
+        len:     Math.Random() * 22.0 + 10.0,
+        brightness: Math.Random() * 0.7 + 0.3
+    };
+}
+
+# ── Central alchemical seal (Azoth emblem) ──────────────────────────────────
+seal_image = Image.File("seal.png");
+if (seal_image != null) {
+    seal_scale = Math.Min(screen_width, screen_height) / 500.0;
+    seal_sprite = Sprite(seal_image);
+    seal_sprite.SetScale(seal_scale, seal_scale);
+    seal_sprite.SetX(screen_width / 2 - seal_image.GetWidth() * seal_scale / 2);
+    seal_sprite.SetY(screen_height / 2 - seal_image.GetHeight() * seal_scale / 2 - 30);
+    seal_sprite.SetOpacity(0.80);
+}
+
+# ── Gold ring orbiting seal ──────────────────────────────────────────────────
+ring_image = Image.File("ring.png");
+ring_angle = 0.0;
+if (ring_image != null) {
+    ring_scale = Math.Min(screen_width, screen_height) / 700.0;
+    ring_sprite = Sprite(ring_image);
+    ring_sprite.SetScale(ring_scale, ring_scale);
+    ring_sprite.SetX(screen_width / 2 - ring_image.GetWidth() * ring_scale / 2);
+    ring_sprite.SetY(screen_height / 2 - ring_image.GetHeight() * ring_scale / 2 - 30);
+    ring_sprite.SetOpacity(0.60);
+}
+
+# ── Title text ───────────────────────────────────────────────────────────────
+title_layer = Image.Text("ZOTHOS", 0.0, 1.0, 0.90);
+title_sprite = Sprite(title_layer);
+title_sprite.SetPosition(screen_width / 2 - title_layer.GetWidth() / 2, screen_height / 2 - 130, 100);
+title_sprite.SetFont("JetBrains Mono Bold 84");
+
+subtitle_layer = Image.Text("The Alchemical Intelligence & Security OS", 0.0, 1.0, 0.55);
+subtitle_sprite = Sprite(subtitle_layer);
+subtitle_sprite.SetPosition(screen_width / 2 - subtitle_layer.GetWidth() / 2, screen_height / 2 - 72, 100);
+subtitle_sprite.SetFont("JetBrains Mono Regular 28");
+
+version_layer = Image.Text("v12.0.0 · Azoth Edition", 0.0, 1.0, 0.45);
+version_sprite = Sprite(version_layer);
+version_sprite.SetPosition(screen_width / 2 - version_layer.GetWidth() / 2, screen_height / 2 - 42, 100);
+version_sprite.SetFont("JetBrains Mono Regular 18");
+
+# ── Boot progress bar ────────────────────────────────────────────────────────
+bar_width = Math.Min(screen_width * 0.60, 680);
+bar_height = 8;
+bar_x = (screen_width - bar_width) / 2;
+bar_y = screen_height / 2 + 60;
+
+bar_bg = Image.Rectangle(bar_width, bar_height);
+bar_bg_sprite = Sprite(bar_bg);
+bar_bg_sprite.SetPosition(bar_x, bar_y, 100);
+bar_bg_sprite.SetColor(0.04, 0.06, 0.05, 0.95);
+
+bar_fill = Image.Rectangle(0, bar_height);
+bar_fill_sprite = Sprite(bar_fill);
+bar_fill_sprite.SetPosition(bar_x, bar_y, 200);
+
+progress_text_layer = Image.Text("Initializing System", 0.0, 1.0, 0.75);
+progress_text_sprite = Sprite(progress_text_layer);
+progress_text_sprite.SetPosition(screen_width / 2 - progress_text_layer.GetWidth() / 2, bar_y + bar_height + 22, 100);
+progress_text_sprite.SetFont("JetBrains Mono Regular 16");
+
+# ── Phase label (top-right) ──────────────────────────────────────────────────
+phase_layer = Image.Text("", 0.0, 1.0, 0.60);
+phase_sprite = Sprite(phase_layer);
+phase_sprite.SetPosition(screen_width - phase_layer.GetWidth() - 30, 30, 100);
+phase_sprite.SetFont("JetBrains Mono Regular 14");
+
+# ── Refresh function (60fps animation loop) ─────────────────────────────────
 fun refresh_callback() {
-    # Pulsing status effect
+    # ── 1. Twinkle star background ─────────────────────────────────────────
+    for (i = 0; i < star_count; i++) {
+        local s = stars[i];
+        s.alpha = 0.15 + Math.Sin(Plymouth.GetRefreshCount() * 0.02 * s.twinkle_speed + i) * 0.35;
+        star_sprite = Image.Point(s.size, s.size);
+        star_sprite_sprite = Sprite(star_sprite);
+        star_sprite_sprite.SetPosition(s.x, s.y, Math.Floor(s.alpha * 200));
+        star_sprite_sprite.SetColor(0.6, 0.8, 1.0, 1.0);
+    }
+
+    # ── 2. Matrix rain animation ────────────────────────────────────────────
+    for (i = 0; i < MAX_DROPS; i++) {
+        drops[i].y = drops[i].y + drops[i].speed;
+        if (drops[i].y > screen_height + drops[i].len) {
+            drops[i].y = -drops[i].len;
+            drops[i].x = Math.Random() * screen_width;
+            drops[i].speed = Math.Random() * 4.0 + 2.0;
+            drops[i].len = Math.Random() * 22.0 + 10.0;
+            drops[i].brightness = Math.Random() * 0.7 + 0.3;
+        }
+        drop_sprite = Image.Line(0, 0, 0, drops[i].len);
+        drop_sprite_sprite = Sprite(drop_sprite);
+        drop_sprite_sprite.SetPosition(drops[i].x, drops[i].y, Math.Floor(drops[i].brightness * 220));
+        drop_sprite_sprite.SetColor(0.0, 1.0, 0.62, 1.0);
+    }
+
+    # ── 3. Orbiting gold ring ───────────────────────────────────────────────
+    ring_angle = ring_angle + 0.02;
+    if (ring_sprite != null) {
+        local orbit_x = Math.Sin(ring_angle) * screen_width * 0.28;
+        local orbit_y = Math.Cos(ring_angle * 0.7) * screen_height * 0.18;
+        ring_sprite.SetX(screen_width / 2 - ring_image.GetWidth() * ring_scale / 2 + orbit_x);
+        ring_sprite.SetY(screen_height / 2 - ring_image.GetHeight() * ring_scale / 2 - 30 + orbit_y);
+        ring_sprite.SetOpacity(120 + Math.Floor(Math.Sin(ring_angle * 3) * 40));
+    }
+
+    # ── 4. Seal pulse ────────────────────────────────────────────────────────
+    if (seal_sprite != null) {
+        local seal_glow = 180 + Math.Floor(Math.Sin(Plymouth.GetRefreshCount() * 0.05) * 50);
+        seal_sprite.SetOpacity(seal_glow);
+    }
+
+    # ── 5. Title text shimmer ────────────────────────────────────────────────
+    local title_intensity = 200 + Math.Floor(Math.Sin(Plymouth.GetRefreshCount() * 0.03) * 40);
+    title_sprite.SetOpacity(title_intensity);
+    subtitle_sprite.SetOpacity(140 + Math.Floor(Math.Sin(Plymouth.GetRefreshCount() * 0.02 + 1) * 30));
+    version_sprite.SetOpacity(100 + Math.Floor(Math.Sin(Plymouth.GetRefreshCount() * 0.04 + 2) * 30));
+
+    # ── 6. Boot progress ─────────────────────────────────────────────────────
+    progress = Plymouth.GetBootProgress();
+    fill_width = Math.Floor(bar_width * progress);
+    if (fill_width < 0) fill_width = 0;
+
+    fill_img = Image.Rectangle(fill_width, bar_height);
+    bar_fill_sprite.SetImage(fill_img);
+    bar_fill_sprite.SetPosition(bar_x, bar_y, 220);
+
+    # Emerald→gold gradient on fill based on progress
+    local r = 0.0 + progress * 0.8;
+    local g = 1.0;
+    local b = 0.62 - progress * 0.4;
+    bar_fill_sprite.SetColor(r, g, b, 0.90);
+
+    # ── 7. Phase text ────────────────────────────────────────────────────────
+    if (progress < 0.005) {
+        phase_sprite.SetText("✦ INITIALIZING KERNEL");
+        progress_text_sprite.SetText("Initializing System...");
+    } else if (progress < 0.25) {
+        phase_sprite.SetText("✦ LOAD NG KERNEL & DRIVERS");
+        progress_text_sprite.SetText("Loading Kernel & Drivers...");
+    } else if (progress < 0.50) {
+        phase_sprite.SetText("✦ MOUN T ING  A R S E N A L");
+        progress_text_sprite.SetText("Mounting Arsenal (Kali + Parrot)...");
+    } else if (progress < 0.75) {
+        phase_sprite.SetText("✦ A C T I V A T I N G  S E C U R I T Y");
+        progress_text_sprite.SetText("Activating Security Stack...");
+    } else if (progress < 0.92) {
+        phase_sprite.SetText("✦ S T A R T I N G  A I  E N G I N E S");
+        progress_text_sprite.SetText("Starting AI Engines...");
+    } else {
+        phase_sprite.SetText("✦ T R A N S M U T I N G  R E A L I T Y");
+        progress_text_sprite.SetText("Transmuting Reality...");
+    }
+
+    # ── 8. Progress bar glow pulse ───────────────────────────────────────────
+    local glow_intensity = 180 + Math.Floor(Math.Sin(Plymouth.GetRefreshCount() * 0.1) * 50);
+    bar_fill_sprite.SetOpacity(glow_intensity);
+
+    # ── 9. Emerald sparkles on progress milestones ───────────────────────────
+    if (progress > 0.01 && progress < 0.99) {
+        local sparkle_x = Math.Random() * screen_width;
+        local sparkle_y = Math.Random() * screen_height;
+        sparkle = Image.Point(2.0, 2.0);
+        sparkle_sprite = Sprite(sparkle);
+        sparkle_sprite.SetPosition(sparkle_x, sparkle_y, 200);
+        sparkle_sprite.SetColor(0.0, 1.0, 0.62, 1.0);
+    }
 }
 
 Plymouth.SetRefreshFunction(refresh_callback);
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ASSET REQUIREMENTS
+#  Place in same directory as this script:
+#    seal.png  — Azoth alchemical seal (square, ~500px recommended)
+#    ring.png  — Gold orbital ring (square, ~400px recommended)
+#  Generated at boot if missing (fallback to text-only mode).
+# ═══════════════════════════════════════════════════════════════════════════════

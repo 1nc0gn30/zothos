@@ -1,4 +1,4 @@
-# 🤖 Agents & LLM Indexing Directives — Zoth Studio (v2.6.0)
+# 🤖 Agents & LLM Indexing Directives — Zoth Studio (v12.0.0)
 
 > Operational manual for AI coding assistants, autonomous agents, and search engine crawlers indexing the **Zoth Studio** ecosystem.
 

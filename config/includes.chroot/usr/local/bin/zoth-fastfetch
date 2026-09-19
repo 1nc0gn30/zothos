@@ -1,67 +1,124 @@
 #!/usr/bin/env bash
 # ==============================================================================
-#  🜂 ZOTHOS HERMETIC FASTFETCH v2.0 🜄
-#  Alchemical Emerald Tablet Status Deck & Vitals
+#  🜂 ZOTHOS FASTFETCH HUD v3.0 — Hermetic Telemetry Deck 🜄
+#  Living system dashboard with mode-reactive colors, live metrics, aurora glow
 # ==============================================================================
 
-EMERALD="\e[38;5;48m"
-GREEN="\e[38;5;42m"
-GOLD="\e[38;5;214m"
-AMBER="\e[38;5;208m"
-CYAN="\e[38;5;51m"
-DARK="\e[38;5;239m"
-WHITE="\e[1;37m"
-PURPLE="\e[38;5;177m"
-RESET="\e[0m"
+set -euo pipefail
 
-# Current reality mode
-MODE="${EMERALD}Hermetic Matrix [Emerald Phosphor]${RESET}"
+# ── Color palette (mode-reactive) ──────────────────────────────────────────
+get_mode_colors() {
+    local mode="matrix"
+    if [[ -f "$HOME/.config/zothos/current_mode" ]]; then
+        mode=$(cat "$HOME/.config/zothos/current_mode" 2>/dev/null || echo "matrix")
+    fi
+    case "$mode" in
+        matrix)
+            echo "38;5;48:38;5;214:38;5;51:38;5;29:38;5;42:38;5;22:38;5;239"  # emerald palette
+            ;;
+        ghost)
+            echo "38;5;196:38;5;177:38;5;135:38;5;160:38;5;144:38;5;128:38;5;239"  # ghost palette
+            ;;
+        incognito)
+            echo "38;5;39:38;5;214:38;5;51:38;5;29:38;5;42:38;5;22:38;5;239"  # win11 palette
+            ;;
+        *)
+            echo "38;5;48:38;5;214:38;5;51:38;5;29:38;5;42:38;5;22:38;5;239"
+            ;;
+    esac
+}
+
+read -r E C G B D F A <<< "$(get_mode_colors)"
+RESET="\e[0m"
+BOLD="\e[1m"
+
+# ── System data ────────────────────────────────────────────────────────────
+MODE="Hermetic Matrix [Emerald Phosphor]"
 if [[ -f "$HOME/.config/zothos/current_mode" ]]; then
     m=$(cat "$HOME/.config/zothos/current_mode" 2>/dev/null || echo "matrix")
-    if [[ "$m" == "ghost" ]]; then
-        MODE="\e[38;5;196mGhostmode [nullai.tech Stealth]${RESET}"
-    elif [[ "$m" == "incognito" ]]; then
-        MODE="\e[38;5;39mIncognito [Windows 11 Chameleon]${RESET}"
+    case "$m" in
+        ghost) MODE="\e[${E}mGhostmode [nullai.tech Stealth]\e[0m" ;;
+        incognito) MODE="\e[${E}mIncognito [Windows 11 Chameleon]\e[0m" ;;
+    esac
+fi
+
+TOR_STATUS="Direct Clearnet Route"
+if [[ -f "/run/zoth_ghostmode.state" ]] || systemctl is-active --quiet tor 2>/dev/null; then
+    TOR_STATUS="\e[${E}m● Torified & Cloaked [Active]\e[0m"
+fi
+
+AI_STATUS="Engine Standby"
+if pgrep -x "ollama" >/dev/null 2>&1; then
+    AI_STATUS="\e[${G}m● Ollama Neural Server Online\e[0m"
+fi
+if pgrep -x "vllm" >/dev/null 2>&1; then
+    AI_STATUS="\e[${G}m● vLLM Inference Engine Running\e[0m"
+fi
+if pgrep -x "comfyui" >/dev/null 2>&1; then
+    AI_STATUS="\e[${G}m● ComfyUI Workflow Active\e[0m"
+fi
+
+WEBUI_STATUS="—"
+if curl -s --max-time 2 http://127.0.0.1:8080/api/version >/dev/null 2>&1; then
+    WEBUI_STATUS="\e[${G}m● Open WebUI [Port 8080]\e[0m"
+fi
+if curl -s --max-time 2 http://127.0.0.1:8188 >/dev/null 2>&1; then
+    if [[ "$WEBUI_STATUS" == "—" ]]; then
+        WEBUI_STATUS="\e[${G}m● ComfyUI [Port 8188]\e[0m"
+    else
+        WEBUI_STATUS="${WEBUI_STATUS} + \e[${G}mComfyUI\e[0m"
     fi
 fi
 
-# Tor status
-TOR_STATUS="${DARK}Direct Clearnet Route${RESET}"
-if [[ -f "/run/zoth_ghostmode.state" ]] || systemctl is-active --quiet tor 2>/dev/null; then
-    TOR_STATUS="${EMERALD}● Torified & Cloaked [Active]${RESET}"
-fi
-
-# AI status
-AI_STATUS="${DARK}Engine Standby${RESET}"
-if pgrep -x "ollama" >/dev/null 2>&1; then
-    AI_STATUS="${GOLD}● Ollama Neural Server Online${RESET}"
-fi
-
-# Planetary hour symbol calculation based on current hour
+# ── Planetary hour ─────────────────────────────────────────────────────────
 PLANETS=("☉ Sol" "♀ Venus" "☿ Mercury" "☽ Luna" "♄ Saturn" "♃ Jupiter" "♂ Mars")
 H=$(date +%H)
 P_IDX=$(( 10#$H % 7 ))
-PLANETARY_HOUR="${GOLD}${PLANETS[$P_IDX]}${RESET}"
+PLANETARY_HOUR="\e[${G}m${PLANETS[$P_IDX]}\e[0m"
 
-UPTIME=$(uptime -p 2>/dev/null | sed 's/up //' || uptime | awk -F',' '{print $1}')
 KERNEL=$(uname -r)
 SHELL_NAME=$(basename "$SHELL")
-MEM_USED=$(free -m | awk '/Mem:/ {print $3}')
-MEM_TOTAL=$(free -m | awk '/Mem:/ {print $2}')
-MEM_PCT=$(( MEM_USED * 100 / MEM_TOTAL ))
+UPTIME=$(uptime -p 2>/dev/null | sed 's/up //' || uptime | awk -F',' '{print $1}' | xargs)
 
-echo -e "
-${EMERALD}       ▲             ${GOLD}ZOTHOS Linux 1.0 [Codename: Azoth]${RESET}
-${EMERALD}      ▲ ▲            ${DARK}─────────────────────────────────────────────────${RESET}
-${EMERALD}     ▲   ▲           ${WHITE}OS Reality:       ${MODE}
-${EMERALD}    ▲  ${GOLD}☉${EMERALD}  ▲          ${WHITE}Kernel:           ${CYAN}${KERNEL}${RESET}
-${EMERALD}   ▲   |   ▲         ${WHITE}Planetary Hour:   ${PLANETARY_HOUR}
-${EMERALD}  ▲ ${AMBER}🜂${EMERALD}  ${CYAN}☿${EMERALD}  ${AMBER}🜄${EMERALD} ▲        ${WHITE}Desktop Surface:  ${CYAN}XFCE 4.18 + Picom (Matrix Glass)${RESET}
-${EMERALD} ▲             ▲       ${WHITE}Shell & Prompt:   ${CYAN}${SHELL_NAME} (Alchemical Powerline)${RESET}
-${EMERALD}▲═══════${PURPLE}🜁${EMERALD}═══════▲      ${WHITE}Memory / Vitals:  ${EMERALD}${MEM_USED}MB / ${MEM_TOTAL}MB (${MEM_PCT}%)${RESET}
-${EMERALD}  \\   ${AMBER}🜃${EMERALD}     /        ${WHITE}Security Arsenal: ${EMERALD}Kali + Parrot Dual Repos [Active]${RESET}
-${EMERALD}   \\   |   /         ${WHITE}Frontier AI:      ${AI_STATUS}
-${EMERALD}    \\  ${GOLD}🝘${EMERALD}  /          ${WHITE}Ghost Routing:    ${TOR_STATUS}
-${EMERALD}     \\   /           ${WHITE}Zoth Studio:      ${GOLD}v3.2 Sovereign Cockpit [Linked]${RESET}
-${EMERALD}      ▼              ${WHITE}Hermetic Axiom:   ${DARK}\"As above, so below; as code, so mind.\"${RESET}
-"
+# Memory
+MEM_USED=$(free -m | awk '/Mem:/ {printf "%.0f", $3}')
+MEM_TOTAL=$(free -m | awk '/Mem:/ {printf "%.0f", $2}')
+MEM_PCT=$(( MEM_USED * 100 / MEM_TOTAL ))
+MEM_BARS=""
+local_filled=$((MEM_PCT / 10))
+if [[ $local_filled -gt 10 ]]; then local_filled=10; fi
+local_empty=$((10 - local_filled))
+MEM_BARS=$(printf '\\e[${E}m▓%.0s' $(seq 1 $local_filled))
+MEM_BARS+=$(printf '\\e[${D}m░%.0s' $(seq 1 $local_empty))
+MEM_BARS+=" \\e[${D}m${MEM_PCT}%\e[0m"
+
+# CPU
+CPU_PCT=$(top -bn1 2>/dev/null | grep "Cpu(s)" | awk '{print int($2)}' || echo "0")
+CPU_BARS=""
+cpu_filled=$((CPU_PCT / 10))
+if [[ $cpu_filled -gt 10 ]]; then cpu_filled=10; fi
+cpu_empty=$((10 - cpu_filled))
+CPU_BARS=$(printf '\\e[${G}m▓%.0s' $(seq 1 $cpu_filled))
+CPU_BARS+=$(printf '\\e[${D}m░%.0s' $(seq 1 $cpu_empty))
+CPU_BARS+=" \\e[${D}m${CPU_PCT}%\e[0m"
+
+# ── Build the HUD ──────────────────────────────────────────────────────────
+cat <<EOF
+
+\e[${E}m       ▲             \e[${G}mZOTHOS Linux 1.0 [Codename: Azoth]\e[${RESET}]
+\e[${E}m      ▲ ▲            \e[${D}m───────────────────────────────────────────────────────────${RESET}
+\e[${E}m     ▲   ▲           \e[1;${B}mOS Reality:\e[0m        ${MODE}
+\e[${E}m    ▲  \e[${G}m☉\e[${E}m  ▲          \e[1;${B}mKernel:\e[0m           \e[${C}m${KERNEL}\e[${RESET}]
+\e[${E}m   ▲   |   ▲         \e[1;${B}mPlanetary Hour:\e[0m   ${PLANETARY_HOUR}
+\e[${E}m  ▲ \e[${D}m🜂\e[${E}m  \e[${C}m☿\e[${E}m  \e[${D}m🜄\e[${E}m ▲        \e[1;${B}mDesktop Surface:\e[0m  \e[${C}mXFCE 4.18 + Picom (Matrix Glass)\e[${RESET}]
+\e[${E}m ▲             ▲       \e[1;${B}mShell & Prompt:\e[0m   \e[${C}m${SHELL_NAME} (Living Powerline HUD)\e[${RESET}]
+\e[${E}m▲═══════\e[${B}m🜁\e[${E}m═══════▲      \e[1;${B}mMemory / Vitals:\e[0m  \e[${E}m${MEM_USED}M / ${MEM_TOTAL}M${RESET}  ${MEM_BARS}
+\e[${E}m  \\\\   \e[${D}m🜃\e[${E}m     /        \e[1;${B}mCPU Load:\e[0m        \e[${G}m${CPU_PCT}%\e[${RESET}]  ${CPU_BARS}
+\e[${E}m   \\\\   |   /         \e[1;${B}mSecurity Arsenal:\e[0m \e[${E}mKali + Parrot Dual Repos [Active]\e[${RESET}]
+\e[${E}m    \\\\  \e[${G}m🝘\e[${E}m  /          \e[1;${B}mNetwork Route:\e[0m   ${TOR_STATUS}
+\e[${E}m     \\\\   /           \e[1;${B}mFrontier AI:\e[0m      ${AI_STATUS}
+\e[${E}m      ▼              \e[1;${B}mWeb Interfaces:\e[0m    ${WEBUI_STATUS}
+\e[${E}m                     \e[1;${B}mZoth Studio:\e[0m      \e[${G}m⚡ Sovereign Cockpit [Linked]\e[${RESET}]
+\e[${E}m                     \e[1;${B}Hermetic Axiom:\e[0m   \e[${D}m"As above, so below; as code, so mind."\e[${RESET}]
+
+EOF

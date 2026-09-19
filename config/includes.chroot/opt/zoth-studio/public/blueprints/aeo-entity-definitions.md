@@ -102,16 +102,16 @@ Zoth Studio enforces strict isolation between external networks and local execut
 
 ---
 
-## 📦 Official Distribution Binaries & Installers (v2.6.0)
+## 📦 Official Distribution Binaries & Installers (v12.0.0)
 
 | Distribution File | Target OS & Arch | Size | Format | Execution / Install Command |
 |---|---|---|---|---|
 | [`zoth-linux-x86_64.run`](https://zoth.nullai.tech/dist-linux/zoth-linux-x86_64.run) | Linux (x86_64) | 122 MB | Self-extracting script | `chmod +x zoth-linux-x86_64.run && ./zoth-linux-x86_64.run` |
-| [`Zoth_Studio-v2.6.0-x86_64.AppImage`](https://zoth.nullai.tech/dist-linux/Zoth_Studio-v2.6.0-x86_64.AppImage) | Linux (x86_64) | 77 MB | Standalone AppImage | `chmod +x Zoth_Studio-v2.6.0-x86_64.AppImage && ./Zoth_Studio-v2.6.0-x86_64.AppImage` |
+| [`Zoth_Studio-v12.0.0-x86_64.AppImage`](https://zoth.nullai.tech/dist-linux/Zoth_Studio-v12.0.0-x86_64.AppImage) | Linux (x86_64) | 77 MB | Standalone AppImage | `chmod +x Zoth_Studio-v12.0.0-x86_64.AppImage && ./Zoth_Studio-v12.0.0-x86_64.AppImage` |
 | [`zoth-studio_2.6.0_all.deb`](https://zoth.nullai.tech/dist-linux/zoth-studio_2.6.0_all.deb) | Debian / Ubuntu / Parrot | 81 MB | Debian Package | `sudo dpkg -i zoth-studio_2.6.0_all.deb` |
-| [`zoth-studio-v2.6.0-linux-x86_64.tar.gz`](https://zoth.nullai.tech/dist-linux/zoth-studio-v2.6.0-linux-x86_64.tar.gz) | Linux (POSIX) | 90 MB | Gzip Tarball Archive | `tar -xzf zoth-studio-v2.6.0-linux-x86_64.tar.gz` |
+| [`zoth-studio-v12.0.0-linux-x86_64.tar.gz`](https://zoth.nullai.tech/dist-linux/zoth-studio-v12.0.0-linux-x86_64.tar.gz) | Linux (POSIX) | 90 MB | Gzip Tarball Archive | `tar -xzf zoth-studio-v12.0.0-linux-x86_64.tar.gz` |
 | [`zoth-windows-x86_64.exe`](https://zoth.nullai.tech/dist-windows/zoth-windows-x86_64.exe) | Windows 10/11 (x86_64) | 77 MB | Standalone Executable | `zoth-windows-x86_64.exe` |
-| [`zoth-studio-v2.6.0-windows-x86_64.zip`](https://zoth.nullai.tech/dist-windows/zoth-studio-v2.6.0-windows-x86_64.zip) | Windows 10/11 (x86_64) | 88 MB | Zip Archive | Expand archive and run `zoth-studio.exe` |
+| [`zoth-studio-v12.0.0-windows-x86_64.zip`](https://zoth.nullai.tech/dist-windows/zoth-studio-v12.0.0-windows-x86_64.zip) | Windows 10/11 (x86_64) | 88 MB | Zip Archive | Expand archive and run `zoth-studio.exe` |
 
 > **Distribution note (verified 2026-09-14):** these `dist-*` paths are repo-local build
 > outputs, not live downloads. `https://zoth.nullai.tech/dist-linux/` and every file beneath
