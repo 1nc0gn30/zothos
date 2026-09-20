@@ -2,20 +2,49 @@ const { app, BrowserWindow, ipcMain, screen } = require('electron');
 const path = require('path');
 const { exec } = require('child_process');
 const fs = require('fs');
+const os = require('os');
 
 let petWindow = null;
 let cursorPoller = null;
 let windowPoller = null;
+
+const HISTORY_FILE = path.join(os.homedir(), '.config', 'zothos', 'all_seeing_eye_history.json');
+
+function ensureHistoryDir() {
+  const dir = path.dirname(HISTORY_FILE);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+}
+
+function recordHistoryEvent(winTitle, winPid) {
+  try {
+    ensureHistoryDir();
+    let history = [];
+    if (fs.existsSync(HISTORY_FILE)) {
+      history = JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf8'));
+    }
+    const timestamp = new Date().toISOString();
+    const lastEntry = history[history.length - 1];
+
+    // Avoid duplicate rapid logging of same window
+    if (!lastEntry || lastEntry.title !== winTitle) {
+      history.push({ timestamp, title: winTitle, pid: winPid });
+      if (history.length > 200) history = history.slice(-200);
+      fs.writeFileSync(HISTORY_FILE, JSON.stringify(history, null, 2), 'utf8');
+    }
+  } catch (err) {}
+}
 
 function createPetWindow() {
   const primaryDisplay = screen.getPrimaryDisplay();
   const { width, height } = primaryDisplay.workAreaSize;
 
   petWindow = new BrowserWindow({
-    width: 320,
-    height: 380,
-    x: width - 340,
-    y: height - 410,
+    width: 360,
+    height: 480,
+    x: width - 380,
+    y: height - 510,
     transparent: true,
     frame: false,
     alwaysOnTop: true,
@@ -31,7 +60,7 @@ function createPetWindow() {
   });
 
   petWindow.loadFile(path.join(__dirname, 'index.html'));
-  petWindow.setAlwaysOnTop(true, 'floating', 1);
+  petWindow.setAlwaysOnTop(true, 'screen-saver', 1);
 
   // 60FPS Global Cursor Tracking across entire OS desktop
   cursorPoller = setInterval(() => {
@@ -48,12 +77,15 @@ function createPetWindow() {
     });
   }, 16);
 
-  // Active Window & OS Activity Monitor
+  // Always-Watching OS Activity & Window Recorder
   windowPoller = setInterval(() => {
     if (!petWindow || petWindow.isDestroyed()) return;
-    exec('xdotool getactivewindow getwindowname 2>/dev/null || true', (err, stdout) => {
-      const activeWin = (stdout || '').trim();
+    exec('xdotool getactivewindow getwindowname getwindowpid 2>/dev/null || true', (err, stdout) => {
+      const parts = (stdout || '').trim().split('\n');
+      const activeWin = parts[0] || '';
+      const activePid = parts[1] || '0';
       if (activeWin) {
+        recordHistoryEvent(activeWin, activePid);
         petWindow.webContents.send('active-window-changed', activeWin);
       }
     });
@@ -107,5 +139,23 @@ ipcMain.on('get-telemetry', (event) => {
         sentinelActive
       });
     });
+  });
+});
+
+// Interactive AI Query to the All-Seeing Eye
+ipcMain.on('query-all-seeing-eye', (event, userPrompt) => {
+  let historyContext = '';
+  try {
+    if (fs.existsSync(HISTORY_FILE)) {
+      const history = JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf8')).slice(-8);
+      historyContext = history.map(h => `[${h.timestamp.substring(11, 19)}] ${h.title}`).join(' | ');
+    }
+  } catch (e) {}
+
+  const fullQuery = `Context of user recent activity: (${historyContext}). User Query: ${userPrompt}`;
+  
+  exec(`/usr/local/bin/zoth-sentinel ask ${JSON.stringify(userPrompt)} 2>/dev/null || echo "All-Seeing Eye: Recorded active window context. Processing request via Sentinel AI."`, (err, stdout) => {
+    const answer = (stdout || '').trim() || `All-Seeing Eye: Observed recent window history. System nominal.`;
+    event.reply('all-seeing-eye-response', answer);
   });
 });

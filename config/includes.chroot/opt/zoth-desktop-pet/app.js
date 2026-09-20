@@ -6,13 +6,14 @@ const bubbleText = document.getElementById('bubble-text');
 const eyePupil = document.getElementById('eye-pupil');
 const scanBeam = document.getElementById('scan-beam');
 const petMenu = document.getElementById('pet-menu');
+const chatInput = document.getElementById('chat-input');
 
 const THOUGHTS = [
-  "⚡ Sentinel AI: OS Memory cache clean. 0 vulnerabilities detected.",
-  "🌿 Hermetic Matrix Active: Cyber-Alchemical phosphor glow engaged.",
+  "⚡ Sentinel AI: OS Memory & history buffer active. Zero anomalies.",
+  "👁️ All-Seeing Eye: Recorded active window vector & cursor trajectory.",
   "👻 NullAI Ghostmode: Transparent Tor routing verified on Port 9040.",
-  "👑 Azoth 24K Gold: Sovereign Ring-0 authority enclave secure.",
-  "🌌 Swarm Nexus: 7 AI agents registered across local & cloud channels."
+  "👑 Azoth 24K Gold: Sovereign Ring-0 authority enclave active.",
+  "🌌 Swarm Nexus: Multi-agent swarm monitoring desktop environment."
 ];
 
 let thoughtIdx = 0;
@@ -57,7 +58,7 @@ ipcRenderer.on('global-cursor-pos', (event, pos) => {
   eyePupil.style.transform = `translate(${pupilX}px, ${pupilY}px)`;
 });
 
-// Active Window Reading Reaction
+// Active Window Reading & Recording Reaction
 ipcRenderer.on('active-window-changed', (event, winTitle) => {
   const lower = winTitle.toLowerCase();
   if (lower.includes('terminal') || lower.includes('code') || lower.includes('hexstrike') || lower.includes('studio') || lower.includes('bash')) {
@@ -65,7 +66,7 @@ ipcRenderer.on('active-window-changed', (event, winTitle) => {
       isReadingCode = true;
       eyePupil.classList.add('reading');
       scanBeam.classList.add('active');
-      showSpeech(`Reading active window: "${winTitle.substring(0, 32)}..."`, '📖 AI CODE & TASK READER');
+      showSpeech(`Recording active workspace: "${winTitle.substring(0, 32)}..."`, '👁️ ALL-SEEING EYE OBSERVER');
     }
   } else {
     if (isReadingCode) {
@@ -76,13 +77,13 @@ ipcRenderer.on('active-window-changed', (event, winTitle) => {
   }
 });
 
-function showSpeech(text, agent = '⚡ GHOSTBYTE NULLAI') {
+function showSpeech(text, agent = '👁️ ALL-SEEING EYE AI') {
   bubbleAgent.textContent = agent;
   bubbleText.textContent = text;
   speechBubble.classList.add('visible');
   setTimeout(() => {
     speechBubble.classList.remove('visible');
-  }, 4500);
+  }, 6000);
 }
 
 window.triggerPoke = function() {
@@ -90,6 +91,26 @@ window.triggerPoke = function() {
   thoughtIdx = (thoughtIdx + 1) % THOUGHTS.length;
   showSpeech(THOUGHTS[thoughtIdx]);
 };
+
+window.sendChatQuery = function() {
+  const query = chatInput.value.trim();
+  if (!query) return;
+  chatInput.value = '';
+  playSound(780, 'sine');
+  showSpeech(`Thinking: "${query}"...`, '👁️ ALL-SEEING EYE REASONING');
+  ipcRenderer.send('query-all-seeing-eye', query);
+};
+
+window.handleChatKey = function(event) {
+  if (event.key === 'Enter') {
+    sendChatQuery();
+  }
+};
+
+ipcRenderer.on('all-seeing-eye-response', (event, responseText) => {
+  playSound(920, 'sine');
+  showSpeech(responseText, '👁️ ALL-SEEING EYE RESPONSE');
+});
 
 // Right click context menu
 window.addEventListener('contextmenu', (e) => {
@@ -110,16 +131,16 @@ window.launch = function(appName) {
 
 // Telemetry Polling
 ipcRenderer.on('telemetry-update', (event, data) => {
-  if (Math.random() < 0.25) {
-    showSpeech(`RAM Usage: ${data.usedGB} GB (${data.ramPct}%). Sentinel Supervisor: ${data.sentinelActive ? 'ACTIVE' : 'IDLE'}.`);
+  if (Math.random() < 0.2) {
+    showSpeech(`RAM Buffer: ${data.usedGB} GB (${data.ramPct}%). All-Seeing Eye sentinel recording continuously.`);
   }
 });
 
 setInterval(() => {
   ipcRenderer.send('get-telemetry');
-}, 16000);
+}, 18000);
 
 // Initial greeting
 setTimeout(() => {
-  showSpeech("ZothOS Companion Online. Tracking cursor across OS & reading active windows.");
+  showSpeech("👁️ All-Seeing Eye Active. Recording OS events & tracking cursor globally. Speak to me below!");
 }, 1000);

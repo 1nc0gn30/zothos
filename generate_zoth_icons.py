@@ -603,14 +603,38 @@ def build_icon_zoth_live_wallpaper():
     base = Image.alpha_composite(base, fg)
     return base
 
+def build_icon_hexstrike():
+    """Red-team lightning crosshair strike emblem (NullAI HexStrike)"""
+    base = create_glass_squircle_base(
+        bg_top=(45, 10, 15, 255),
+        bg_bot=(10, 2, 4, 255),
+        glow_color=(255, 51, 85, 110),
+        rim_top=(255, 100, 120, 230),
+        rim_bot=(0, 255, 157, 160)
+    )
+    ov = Image.new("RGBA", (CANVAS_SIZE, CANVAS_SIZE), (0, 0, 0, 0))
+    od = ImageDraw.Draw(ov)
+    cx, cy = CANVAS_SIZE // 2, CANVAS_SIZE // 2
+    pts = []
+    for i in range(6):
+        ang = math.radians(60 * i - 30)
+        pts.append((cx + math.cos(ang) * 170, cy + math.sin(ang) * 170))
+    od.polygon(pts, outline=(255, 51, 85, 230), width=6)
+    od.line([(cx, cy - 200), (cx, cy - 140)], fill=(0, 255, 157, 240), width=4)
+    od.line([(cx, cy + 140), (cx, cy + 200)], fill=(0, 255, 157, 240), width=4)
+    od.line([(cx - 200, cy), (cx - 140, cy)], fill=(0, 255, 157, 240), width=4)
+    od.line([(cx + 140, cy), (cx + 200, cy)], fill=(0, 255, 157, 240), width=4)
+    od.polygon([(cx - 15, cy - 60), (cx + 25, cy - 10), (cx - 5, cy + 10), (cx + 20, cy + 60), (cx - 20, cy + 10), (cx + 10, cy - 10)], fill=(255, 215, 0, 255))
+    return Image.alpha_composite(base, ov)
+
 # Registry of Icon Builders & Aliases
 BUILDERS = {
     "zoth-studio": build_icon_zoth_studio,
     "zoth-cockpit": build_icon_zoth_studio,
     "zoth-ai": build_icon_zoth_ai,
     "zoth-sec": build_icon_zoth_sec,
-    "hexstrike": build_icon_zoth_sec,
-    "hexstrike-ai": build_icon_zoth_sec,
+    "hexstrike": build_icon_hexstrike,
+    "hexstrike-ai": build_icon_hexstrike,
     "zoth-ghost": build_icon_zoth_ghost,
     "nullai": build_icon_zoth_ghost,
     "nullai-ghostmode": build_icon_zoth_ghost,

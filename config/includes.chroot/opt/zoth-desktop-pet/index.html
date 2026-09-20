@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zoth AI Desktop Companion</title>
+  <title>ZothOS All-Seeing Eye AI Companion</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
     html, body {
@@ -22,7 +22,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: flex-end;
-      padding-bottom: 25px;
+      padding-bottom: 12px;
       position: relative;
       background: transparent !important;
     }
@@ -33,19 +33,20 @@
       top: 10px;
       left: 10px;
       right: 10px;
-      background: rgba(6, 10, 18, 0.92);
+      background: rgba(6, 10, 18, 0.95);
       border: 1.5px solid #00ff9d;
       border-radius: 12px;
       padding: 12px 14px;
       color: #f1f5f9;
       font-size: 10.5px;
       line-height: 1.45;
-      box-shadow: 0 0 25px rgba(0, 255, 157, 0.3);
+      box-shadow: 0 0 25px rgba(0, 255, 157, 0.35);
       backdrop-filter: blur(16px);
       opacity: 0;
       transform: translateY(-10px) scale(0.95);
       transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
       pointer-events: auto;
+      z-index: 10;
     }
     .speech-bubble.visible {
       opacity: 1;
@@ -59,7 +60,7 @@
       transform: translateX(-50%);
       border-width: 9px 9px 0;
       border-style: solid;
-      border-color: rgba(6, 10, 18, 0.92) transparent;
+      border-color: rgba(6, 10, 18, 0.95) transparent;
     }
     .bubble-agent {
       font-size: 9.5px;
@@ -96,7 +97,7 @@
     }
     @keyframes bobbing {
       0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-14px) rotate(2deg); }
+      50% { transform: translateY(-12px) rotate(2deg); }
     }
 
     /* Outer Holographic & Planetary Glyphs Ring */
@@ -130,10 +131,11 @@
       align-items: center;
       justify-content: center;
       transition: all 0.3s;
+      cursor: pointer;
     }
     .orb-core:hover {
       box-shadow: 0 0 45px rgba(0, 255, 157, 0.9), inset 0 0 25px rgba(255, 255, 255, 0.85);
-      transform: scale(1.04);
+      transform: scale(1.05);
     }
 
     /* Laser Eye Socket & Iris */
@@ -182,10 +184,55 @@
       100% { left: 100%; }
     }
 
-    /* Right Click Launcher Menu */
+    /* Interactive AI Conversation Chat Input Drawer */
+    .chat-drawer {
+      width: 92%;
+      margin-top: 10px;
+      background: rgba(6, 10, 18, 0.94);
+      border: 1px solid rgba(0, 255, 157, 0.4);
+      border-radius: 8px;
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 0 15px rgba(0, 255, 157, 0.2);
+    }
+    .chat-input {
+      flex: 1;
+      background: rgba(3, 6, 10, 0.8);
+      border: 1px solid rgba(0, 255, 157, 0.25);
+      border-radius: 6px;
+      padding: 6px 10px;
+      color: #ffffff;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      outline: none;
+    }
+    .chat-input:focus {
+      border-color: #00ff9d;
+      box-shadow: 0 0 10px rgba(0, 255, 157, 0.3);
+    }
+    .chat-btn {
+      background: #00ff9d;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 10px;
+      color: #03060c;
+      font-weight: 800;
+      font-size: 9.5px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .chat-btn:hover {
+      background: #00e5ff;
+      box-shadow: 0 0 10px #00e5ff;
+    }
+
+    /* Context Menu */
     .pet-menu {
       position: absolute;
-      bottom: 25px;
+      bottom: 60px;
       background: rgba(6, 10, 18, 0.95);
       border: 1.5px solid #00e5ff;
       border-radius: 10px;
@@ -199,6 +246,7 @@
       pointer-events: none;
       transform: scale(0.9);
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 20;
     }
     .pet-menu.active {
       opacity: 1;
@@ -228,8 +276,8 @@
   <div class="container">
     <!-- Speech Bubble Overlay -->
     <div id="speech-bubble" class="speech-bubble">
-      <div id="bubble-agent" class="bubble-agent">GHOSTBYTE NULLAI</div>
-      <div id="bubble-text">ZothOS Companion active. Reading cursor vector and system telemetry.</div>
+      <div id="bubble-agent" class="bubble-agent">👁️ ALL-SEEING EYE AI</div>
+      <div id="bubble-text">Always watching and recording OS events. Type below to speak with me.</div>
     </div>
 
     <!-- Interactive Holographic Mascot -->
@@ -242,6 +290,12 @@
           <div class="eye-pupil" id="eye-pupil"></div>
         </div>
       </div>
+    </div>
+
+    <!-- Interactive AI Conversation Drawer -->
+    <div class="chat-drawer">
+      <input type="text" id="chat-input" class="chat-input" placeholder="👁️ Ask the All-Seeing Eye..." onkeydown="handleChatKey(event)">
+      <button class="chat-btn" onclick="sendChatQuery()">ASK</button>
     </div>
 
     <!-- Quick Launcher Context Menu -->
