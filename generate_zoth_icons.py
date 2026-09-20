@@ -195,7 +195,7 @@ def build_icon_zoth_studio():
     return base
 
 def build_icon_zoth_ai():
-    """Aether neural crystal orb (azoth-aether.jpg / azoth-quantum-orb.jpg)"""
+    """Aether neural crystal orb (Cyan & Emerald Quantum Engine)"""
     base = create_glass_squircle_base(
         bg_top=(8, 28, 38, 255),
         bg_bot=(2, 8, 14, 255),
@@ -205,30 +205,28 @@ def build_icon_zoth_ai():
     )
     
     p = get_asset_path("mascot/azoth-aether.jpg") or get_asset_path("mascot/azoth-quantum-orb.jpg")
-    if p:
+    if p and os.path.exists(p):
         badge = make_circular_artwork_badge(p, size=300, glow_color=(0, 243, 255, 180), rim_color=(0, 243, 255, 230))
         pos = (CANVAS_SIZE - 300) // 2
-        
-        # Neural rings & nodes around orb
-        rings = Image.new("RGBA", (CANVAS_SIZE, CANVAS_SIZE), (0, 0, 0, 0))
-        rd = ImageDraw.Draw(rings)
-        cx, cy = CANVAS_SIZE // 2, CANVAS_SIZE // 2
-        for r in [170, 195]:
-            rd.ellipse([cx - r, cy - r, cx + r, cy + r], outline=(0, 255, 157, 100), width=2)
-        # 6 neural nodes
-        for angle in range(0, 360, 60):
-            rad = math.radians(angle)
-            nx = cx + math.cos(rad) * 195
-            ny = cy + math.sin(rad) * 195
-            rd.ellipse([nx - 6, ny - 6, nx + 6, ny + 6], fill=(0, 255, 157, 240))
-        
-        base = Image.alpha_composite(base, rings)
         base.paste(badge, (pos, pos), badge)
+    else:
+        # High-definition procedural 3D Neural Crystal Orb
+        ov = Image.new("RGBA", (CANVAS_SIZE, CANVAS_SIZE), (0, 0, 0, 0))
+        od = ImageDraw.Draw(ov)
+        cx, cy = CANVAS_SIZE // 2, CANVAS_SIZE // 2
+        # Central glowing orb
+        od.ellipse([cx - 110, cy - 110, cx + 110, cy + 110], fill=(0, 243, 255, 210), outline=(0, 255, 157, 255), width=6)
+        # Inner core
+        od.ellipse([cx - 55, cy - 55, cx + 55, cy + 55], fill=(255, 255, 255, 240))
+        # Orbiting Rings
+        for r, color in [(155, (0, 255, 157, 200)), (180, (56, 189, 248, 200)), (205, (168, 85, 247, 200))]:
+            od.ellipse([cx - r, cy - r, cx + r, cy + r], outline=color, width=4)
+        base = Image.alpha_composite(base, ov)
     
     return base
 
 def build_icon_zoth_sec():
-    """Cyberpunk offensive shield with phosphor glow (cyber_security_badge / strike shield)"""
+    """Cyberpunk offensive shield with phosphor glow"""
     base = create_glass_squircle_base(
         bg_top=(38, 10, 18, 255),
         bg_bot=(8, 2, 5, 255),
@@ -238,30 +236,20 @@ def build_icon_zoth_sec():
     )
     
     p = get_asset_path("generated/cyber_security_badge_1786718112180.jpg")
-    if p:
+    if p and os.path.exists(p):
         badge = make_circular_artwork_badge(p, size=290, glow_color=(239, 68, 68, 180), rim_color=(239, 68, 68, 230))
         pos = (CANVAS_SIZE - 290) // 2
-        
-        # Cyber strike crosshair overlay
+        base.paste(badge, (pos, pos), badge)
+    else:
+        # High-definition procedural 3D Security Shield
         ov = Image.new("RGBA", (CANVAS_SIZE, CANVAS_SIZE), (0, 0, 0, 0))
         od = ImageDraw.Draw(ov)
         cx, cy = CANVAS_SIZE // 2, CANVAS_SIZE // 2
-        
-        # Outer Hexagon
-        pts = []
-        for i in range(6):
-            ang = math.radians(60 * i - 30)
-            pts.append((cx + math.cos(ang) * 185, cy + math.sin(ang) * 185))
-        od.polygon(pts, outline=(0, 255, 136, 160), width=3)
-        
-        # Crosshair lines
-        od.line([(cx, cy - 205), (cx, cy - 150)], fill=(0, 255, 136, 220), width=3)
-        od.line([(cx, cy + 150), (cx, cy + 205)], fill=(0, 255, 136, 220), width=3)
-        od.line([(cx - 205, cy), (cx - 150, cy)], fill=(0, 255, 136, 220), width=3)
-        od.line([(cx + 150, cy), (cx + 205, cy)], fill=(0, 255, 136, 220), width=3)
-        
+        shield_pts = [(cx, cy - 170), (cx + 130, cy - 100), (cx + 110, cy + 80), (cx, cy + 180), (cx - 110, cy + 80), (cx - 130, cy - 100)]
+        od.polygon(shield_pts, fill=(20, 6, 12, 230), outline=(239, 68, 68, 255), width=6)
+        od.rectangle([cx - 35, cy - 10, cx + 35, cy + 65], fill=(239, 68, 68, 240))
+        od.arc([cx - 28, cy - 55, cx + 28, cy + 5], start=180, end=360, fill=(239, 68, 68, 240), width=10)
         base = Image.alpha_composite(base, ov)
-        base.paste(badge, (pos, pos), badge)
     
     return base
 

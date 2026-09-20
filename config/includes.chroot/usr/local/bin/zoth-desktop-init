@@ -81,10 +81,16 @@ if ! pgrep -x picom &>/dev/null && ! pgrep -x compton &>/dev/null; then
     fi
 fi
 
-# ── 7. Launch HUD if not running ──────────────────────────────────────────
-log "Starting Desktop HUD..."
-if ! pgrep -f "zoth-desktop-hud" &>/dev/null; then
-    DISPLAY="${DISPLAY:-:0}" /usr/local/bin/zoth-desktop-hud &
+# ── 7. Launch Telemetry HUD & All-Seeing Eye AI Pet ───────────────────────
+log "Starting Desktop Telemetry HUD..."
+if ! pgrep -f "opt/zoth-hud" &>/dev/null; then
+    DISPLAY="${DISPLAY:-:0}" XAUTHORITY="${XAUTHORITY:-$HOME/.Xauthority}" /usr/local/bin/zoth-desktop-hud >/tmp/hud_init.log 2>&1 &
+    disown
+fi
+
+log "Starting All-Seeing Eye AI Pet..."
+if ! pgrep -f "opt/zoth-desktop-pet" &>/dev/null; then
+    DISPLAY="${DISPLAY:-:0}" XAUTHORITY="${XAUTHORITY:-$HOME/.Xauthority}" electron /opt/zoth-desktop-pet/main.js >/tmp/pet_init.log 2>&1 &
     disown
 fi
 
