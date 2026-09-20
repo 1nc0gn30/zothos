@@ -219,7 +219,7 @@ ipcRenderer.on('telemetry-update', (event, data) => {
   const maxNet = Math.max(50, ...historyNet);
   drawWaveCanvas('canvas-net', historyNet, getThemeColor('--primary'), maxNet);
 
-  // 4. Network Interfaces
+  // 4. Network Interfaces & Public WAN IP Cloak
   const ifaceList = document.getElementById('iface-list');
   ifaceList.innerHTML = '';
   if (data.net.interfaces && data.net.interfaces.length > 0) {
@@ -245,9 +245,30 @@ ipcRenderer.on('telemetry-update', (event, data) => {
     ifaceList.innerHTML = '<div style="font-size:8px; color:var(--text-dim);">No active network adapters</div>';
   }
 
+  // Public WAN IP Banner & Cloak Indicator
+  const wanIpText = document.getElementById('wan-ip-text');
+  const wanBadge = document.getElementById('wan-status-badge');
+  const wanDot = document.getElementById('wan-status-dot');
+  const wanLabel = document.getElementById('wan-status-label');
+
+  if (data.net.wanIp) {
+    wanIpText.textContent = data.net.wanIp;
+  }
+  if (data.net.isTor) {
+    wanBadge.style.color = 'var(--primary)';
+    wanDot.style.background = 'var(--primary)';
+    wanDot.style.boxShadow = '0 0 8px var(--primary)';
+    wanLabel.textContent = 'TOR CLOAKED';
+  } else {
+    wanBadge.style.color = 'var(--danger)';
+    wanDot.style.background = 'var(--danger)';
+    wanDot.style.boxShadow = '0 0 8px var(--danger)';
+    wanLabel.textContent = 'CLEARNET';
+  }
+
   // 5. Sentinel & Tor Status
   const torBtn = document.getElementById('btn-tor');
-  if (data.torActive) {
+  if (data.torActive || data.net.isTor) {
     torBtn.textContent = 'TOR: ON';
     torBtn.classList.add('active');
   } else {
@@ -336,6 +357,16 @@ document.getElementById('btn-cloak-all').addEventListener('click', (e) => {
   ipcRenderer.send('cloak-all');
 });
 
+const btnRotate = document.getElementById('btn-rotate-ip');
+if (btnRotate) {
+  btnRotate.addEventListener('click', (e) => {
+    e.stopPropagation();
+    btnRotate.textContent = '...';
+    ipcRenderer.send('rotate-ip');
+    setTimeout(() => { btnRotate.textContent = 'ROTATE'; }, 2000);
+  });
+}
+
 document.getElementById('btn-tor').addEventListener('click', (e) => {
   e.stopPropagation();
   const isActive = document.getElementById('btn-tor').classList.contains('active');
@@ -356,3 +387,4 @@ document.getElementById('btn-heal').addEventListener('click', (e) => {
   e.stopPropagation();
   ipcRenderer.send('run-heal');
 });
+

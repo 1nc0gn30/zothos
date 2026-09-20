@@ -6,6 +6,7 @@ const { exec, spawn } = require('child_process');
 let mainWindow = null;
 let lastCpuStat = null;
 let lastNetBytes = { rx: 0, tx: 0, time: Date.now() };
+let currentWanInfo = { ip: 'Checking...', isTor: false, lastCheck: 0 };
 
 function readCpuStat() {
   try {
@@ -48,8 +49,37 @@ function readNetBytes() {
   return { rx, tx, time: Date.now() };
 }
 
+// Check WAN IP and Tor Exit Status asynchronously
+function pollWanStatus() {
+  const now = Date.now();
+  if (now - currentWanInfo.lastCheck < 4000) return;
+  currentWanInfo.lastCheck = now;
+
+  exec("curl -s -m 4 https://check.torproject.org/api/ip 2>/dev/null || curl -s -m 4 https://api.ipify.org 2>/dev/null", (err, stdout) => {
+    if (!err && stdout && stdout.trim()) {
+      const out = stdout.trim();
+      if (out.includes('"IsTor":true') || out.includes('"IsTor": true')) {
+        const m = out.match(/"IP":\s*"([^"]+)"/);
+        currentWanInfo.isTor = true;
+        currentWanInfo.ip = m ? m[1] : 'Tor Cloaked';
+      } else if (out.includes('"IsTor":false') || out.includes('"IsTor": false')) {
+        const m = out.match(/"IP":\s*"([^"]+)"/);
+        currentWanInfo.isTor = false;
+        currentWanInfo.ip = m ? m[1] : out;
+      } else {
+        // Plain IP text
+        const isIptablesTor = fs.existsSync('/run/zoth_ghostmode.state');
+        currentWanInfo.ip = out.replace(/[^0-9.]/g, '').substring(0, 16);
+        currentWanInfo.isTor = isIptablesTor;
+      }
+    }
+  });
+}
+
 function getSystemTelemetry() {
   return new Promise((resolve) => {
+    pollWanStatus();
+
     // 1. CPU Usage & Cores
     const curCpu = readCpuStat();
     let cpuPct = 0;
@@ -210,9 +240,9 @@ function getSystemTelemetry() {
               }
             }
 
-            // 7. Check Tor & Sentinel
-            exec("systemctl is-active tor", (torErr, torOut) => {
-              const torActive = (torOut && torOut.trim() === 'active');
+            // 7. Check Tor & Transparent Proxy
+            exec("iptables -t nat -L OUTPUT 2>/dev/null | grep -q '9040' || [ -f /run/zoth_ghostmode.state ]", (torErr) => {
+              const torActive = (torErr === null) || currentWanInfo.isTor;
 
               // Uptime
               let uptimeStr = '0h 00m';
@@ -245,6 +275,8 @@ function getSystemTelemetry() {
                 net: {
                   rxKB: netRxKB,
                   txKB: netTxKB,
+                  wanIp: currentWanInfo.ip,
+                  isTor: currentWanInfo.isTor,
                   interfaces: netIdentities.slice(0, 3)
                 },
                 processes: {
@@ -269,7 +301,7 @@ function createWindow() {
   const { width: screenW, height: screenH } = primaryDisplay.workAreaSize;
 
   const hudW = 420;
-  const hudH = 680;
+  const hudH = 710;
   const posX = Math.max(10, screenW - hudW - 16);
   const posY = 36;
 
@@ -323,8 +355,16 @@ ipcMain.on('renew-dhcp', (event, iface) => {
 });
 
 ipcMain.on('cloak-all', (event) => {
-  exec("for i in $(ls /sys/class/net | grep -E '^(en|eth|wl)'); do sudo macchanger -r $i; sudo nmcli device reapply $i; done; sudo resolvectl flush-caches", (err) => {
-    exec('notify-send -u critical -i /usr/share/pixmaps/zothos.png "[🛡️] FULL CLOAK APPLIED" "All MACs randomized, IP leases refreshed, DNS flushed"');
+  exec("sudo /usr/local/bin/zoth-ghost start", (err) => {
+    currentWanInfo.lastCheck = 0;
+    pollWanStatus();
+  });
+});
+
+ipcMain.on('rotate-ip', (event) => {
+  exec("sudo /usr/local/bin/zoth-ghost change", (err) => {
+    currentWanInfo.lastCheck = 0;
+    pollWanStatus();
   });
 });
 
@@ -335,8 +375,10 @@ ipcMain.on('kill-process', (event, { pid, name }) => {
 });
 
 ipcMain.on('toggle-tor', (event, active) => {
-  exec(`sudo systemctl ${active ? 'stop' : 'start'} tor`, () => {
-    exec(`notify-send -i /usr/share/pixmaps/zothos.png "[☿] TOR STATUS" "Tor network ${active ? 'stopped' : 'started'}"`);
+  const cmd = active ? "sudo /usr/local/bin/zoth-ghost stop" : "sudo /usr/local/bin/zoth-ghost start";
+  exec(cmd, () => {
+    currentWanInfo.lastCheck = 0;
+    pollWanStatus();
   });
 });
 
