@@ -243,7 +243,14 @@ interactive_menu() {
 }
 
 # ── Main Dispatch ───────────────────────────────────────────────────────────
-target="${1:-interactive}"
+target="${1:-}"
+
+if [[ -z "$target" || "$target" == "--gui" || "$target" == "gui" ]]; then
+    if [[ -n "${DISPLAY:-}" ]] && command -v electron >/dev/null 2>&1 && [[ -f "/opt/zoth-mode-app/main.js" ]]; then
+        exec electron /opt/zoth-mode-app
+    fi
+    target="${target:-interactive}"
+fi
 
 case "$target" in
     matrix)                 apply_mode "matrix" ;;
@@ -263,3 +270,4 @@ case "$target" in
         ;;
     interactive|*) interactive_menu ;;
 esac
+

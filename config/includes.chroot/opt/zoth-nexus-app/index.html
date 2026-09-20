@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zoth Tool Nexus // Cyber App Store & Arsenal</title>
+  <style>
+    :root {
+      --bg: #06090e;
+      --panel: rgba(12, 18, 28, 0.8);
+      --card: rgba(16, 24, 38, 0.6);
+      --border: rgba(0, 229, 255, 0.2);
+      --primary: #00e5ff;
+      --secondary: #00ff9d;
+      --gold: #ffd700;
+      --purple: #a855f7;
+      --red: #ff4757;
+      --text: #f1f5f9;
+      --text-dim: #7d90a0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'JetBrains Mono', 'Segoe UI', monospace;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    header {
+      padding: 14px 20px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(12px);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-title {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: var(--primary);
+    }
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      width: 380px;
+    }
+    .search-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 12px;
+      width: 100%;
+      user-select: text;
+    }
+    .tabs-bar {
+      display: flex;
+      gap: 8px;
+      padding: 10px 20px;
+      background: rgba(6, 9, 14, 0.95);
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+    }
+    .tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-dim);
+      padding: 6px 14px;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .tab-btn.active {
+      background: rgba(0, 229, 255, 0.15);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 14px;
+    }
+    .tool-card {
+      background: var(--card);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 6px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+      transition: all 0.2s;
+    }
+    .tool-card:hover {
+      border-color: var(--primary);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      background: rgba(0, 229, 255, 0.05);
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .tool-name {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .domain-badge {
+      font-size: 8px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      background: rgba(168, 85, 247, 0.15);
+      color: var(--purple);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+    }
+    .tool-desc {
+      font-size: 10px;
+      color: var(--text-dim);
+      line-height: 1.4;
+      flex: 1;
+    }
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .status-badge {
+      font-size: 9px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .status-badge.installed { color: var(--secondary); }
+    .status-badge.uninstalled { color: var(--text-dim); }
+    button.action-btn {
+      background: rgba(0, 229, 255, 0.15);
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    button.action-btn:hover {
+      background: var(--primary);
+      color: #000;
+    }
+    button.action-btn.install {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(255, 215, 0, 0.1);
+    }
+    button.action-btn.install:hover {
+      background: var(--gold);
+      color: #000;
+    }
+    footer {
+      padding: 6px 20px;
+      background: rgba(6, 9, 14, 0.95);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      font-size: 9px;
+      color: var(--text-dim);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div style="font-size:22px;">📦</div>
+      <div>
+        <div class="brand-title">ZOTH TOOL NEXUS</div>
+        <div style="font-size:9px; color:var(--text-dim);">175+ CYBER ARSENAL & PACKAGE STORE</div>
+      </div>
+    </div>
+    <div class="search-bar">
+      <span>🔍</span>
+      <input type="text" id="search-input" class="search-input" placeholder="Search 175+ tools by name, CVE, or domain...">
+    </div>
+  </header>
+
+  <div class="tabs-bar">
+    <button class="tab-btn active" onclick="filterDomain('All')">ALL TOOLS</button>
+    <button class="tab-btn" onclick="filterDomain('Flagship')">FLAGSHIPS</button>
+    <button class="tab-btn" onclick="filterDomain('AI & Agents')">AI & AGENTS</button>
+    <button class="tab-btn" onclick="filterDomain('Offensive Sec')">OFFENSIVE SEC</button>
+    <button class="tab-btn" onclick="filterDomain('OSINT & Recon')">OSINT & RECON</button>
+    <button class="tab-btn" onclick="filterDomain('Binary & RE')">BINARY & RE</button>
+    <button class="tab-btn" onclick="filterDomain('Privacy')">PRIVACY</button>
+  </div>
+
+  <main id="tools-grid">
+    <!-- Injected dynamically -->
+  </main>
+
+  <footer>
+    <div>SOURCE REPOSITORIES: KALI ROLLING // PARROT LORY // ZOTHOS CORE</div>
+    <div>ACTIVE DOMAIN: <span id="active-domain-lbl" style="color:var(--primary);">ALL TOOLS</span></div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

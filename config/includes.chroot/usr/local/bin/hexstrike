@@ -161,7 +161,23 @@ def launch_gui(port=8000):
     os.environ.setdefault("WEBKIT_DISABLE_COMPOSITING_MODE", "0")
     os.environ.setdefault("GDK_BACKEND", "x11")
 
-    # 1. Try WebKit2GTK native window
+    # 1. Try native Electron standalone app first
+    electron_candidates = ["/usr/local/bin/electron", "/usr/bin/electron", "/opt/maya-linux/node_modules/.bin/electron"]
+    electron_bin = None
+    for el in electron_candidates:
+        if os.path.exists(el) and os.access(el, os.X_OK):
+            electron_bin = el
+            break
+
+    if electron_bin and os.path.exists("/opt/hexstrike-app/main.js"):
+        try:
+            proc = subprocess.Popen([electron_bin, "/opt/hexstrike-app"])
+            proc.wait()
+            return
+        except Exception:
+            pass
+
+    # 2. Try WebKit2GTK native window
     try:
         import gi
         gi.require_version('Gtk', '3.0')

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zoth Reality Switcher</title>
+  <style>
+    :root {
+      --bg: #06090e;
+      --card-bg: rgba(15, 23, 36, 0.7);
+      --border: rgba(255, 255, 255, 0.1);
+      --text: #f1f5f9;
+      --text-dim: #94a3b8;
+      --green: #00ff9d;
+      --cyan: #00e5ff;
+      --gold: #ffd700;
+      --win: #3b82f6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'JetBrains Mono', 'Segoe UI', monospace;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+      overflow: hidden;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    h1 {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      color: var(--gold);
+      text-shadow: 0 0 14px rgba(255, 215, 0, 0.4);
+    }
+    p {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 4px;
+      letter-spacing: 1px;
+    }
+    .grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    .reality-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    .reality-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0.1;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .reality-card.matrix::before { background: radial-gradient(circle at top right, var(--green), transparent 70%); }
+    .reality-card.ghost::before { background: radial-gradient(circle at top right, #ff4757, transparent 70%); }
+    .reality-card.gold::before { background: radial-gradient(circle at top right, var(--gold), transparent 70%); }
+    .reality-card.win11::before { background: radial-gradient(circle at top right, var(--win), transparent 70%); }
+
+    .reality-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    }
+    .reality-card.active {
+      border-width: 2px;
+    }
+    .reality-card.matrix.active { border-color: var(--green); box-shadow: 0 0 20px rgba(0, 255, 157, 0.3); }
+    .reality-card.ghost.active { border-color: #ff4757; box-shadow: 0 0 20px rgba(255, 71, 87, 0.3); }
+    .reality-card.gold.active { border-color: var(--gold); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+    .reality-card.win11.active { border-color: var(--win); box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+
+    .card-icon { font-size: 32px; margin-bottom: 8px; }
+    .card-title { font-size: 15px; font-weight: 800; letter-spacing: 1.5px; }
+    .card-desc { font-size: 11px; color: var(--text-dim); margin-top: 6px; line-height: 1.4; }
+    .card-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 14px;
+      font-size: 9.5px;
+      font-weight: 700;
+    }
+    .btn-apply {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid currentColor;
+      padding: 6px 14px;
+      border-radius: 4px;
+      color: inherit;
+      font-family: inherit;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-apply:hover {
+      background: currentColor;
+      color: #000;
+    }
+    footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+    .toggle-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>REALITY TRANSMUTATION CHAMBER</h1>
+    <p>TRANSMUTE DESKTOP ENVIRONMENT // WALLPAPERS, COMPOSITOR SHADERS & GTK SUITE</p>
+  </header>
+
+  <div class="grid">
+    <!-- Matrix -->
+    <div id="card-matrix" class="reality-card matrix" style="color:var(--green);" onclick="triggerSwitch('matrix')">
+      <div>
+        <div class="card-icon">🌿</div>
+        <div class="card-title">HERMETIC MATRIX</div>
+        <div class="card-desc">Phosphor emerald digital rain, alchemical glyphs, high-contrast matrix monospace typography and scanline compositor glass.</div>
+      </div>
+      <div class="card-status">
+        <span id="badge-matrix">STANDBY</span>
+        <button class="btn-apply">TRANSMUTE [1]</button>
+      </div>
+    </div>
+
+    <!-- Ghostmode -->
+    <div id="card-ghost" class="reality-card ghost" style="color:#ff4757;" onclick="triggerSwitch('ghost')">
+      <div>
+        <div class="card-icon">👻</div>
+        <div class="card-title">NULLAI GHOSTMODE</div>
+        <div class="card-desc">Deep obsidian void, stealth purple-crimson highlights, anti-forensics RAM flushing and transparent Tor network routing.</div>
+      </div>
+      <div class="card-status">
+        <span id="badge-ghost">STANDBY</span>
+        <button class="btn-apply">TRANSMUTE [2]</button>
+      </div>
+    </div>
+
+    <!-- Gold -->
+    <div id="card-gold" class="reality-card gold" style="color:var(--gold);" onclick="triggerSwitch('gold')">
+      <div>
+        <div class="card-icon">👑</div>
+        <div class="card-title">AZOTH 24K GOLD</div>
+        <div class="card-desc">Sacred alchemical geometry, 24-karat gold specular reflections, regal sovereign styling and glowing gold compositor aura.</div>
+      </div>
+      <div class="card-status">
+        <span id="badge-gold">STANDBY</span>
+        <button class="btn-apply">TRANSMUTE [3]</button>
+      </div>
+    </div>
+
+    <!-- Win11 -->
+    <div id="card-win11" class="reality-card win11" style="color:var(--win);" onclick="triggerSwitch('win11')">
+      <div>
+        <div class="card-icon">🪟</div>
+        <div class="card-title">WINDOWS 11 INCOGNITO</div>
+        <div class="card-desc">Complete enterprise camouflage: Windows 11 bloom backdrop, disguised whisker start menu, and clean corporate theme for covert physical opsec.</div>
+      </div>
+      <div class="card-status">
+        <span id="badge-win11">STANDBY</span>
+        <button class="btn-apply">TRANSMUTE [4]</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="toggle-bar">
+      <span>3D Interactive Live Wallpaper:</span>
+      <button id="btn-live-wp" class="btn-apply" style="color:var(--cyan); border-color:var(--cyan);" onclick="toggleLiveWallpaper()">TOGGLE 3D MATRIX RAIN</button>
+    </div>
+    <div style="font-size:10px; color:var(--text-dim);">SYSTEM: X11 / PICOM COMPOSITOR // ZERO REBOOT REQUIRED</div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

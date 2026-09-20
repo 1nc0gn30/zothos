@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HexStrike AI // Offensive Cyber Warfare Cockpit</title>
+  <style>
+    :root {
+      --bg: #06090e;
+      --panel-bg: rgba(12, 18, 28, 0.75);
+      --card-bg: rgba(18, 26, 40, 0.6);
+      --border: rgba(0, 229, 255, 0.2);
+      --border-glow: rgba(0, 229, 255, 0.4);
+      --primary: #00e5ff;
+      --secondary: #ff4757;
+      --accent: #00ff9d;
+      --gold: #ffd700;
+      --purple: #a855f7;
+      --text: #e2e8f0;
+      --text-dim: #7d90a0;
+      --term-bg: #030508;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'JetBrains Mono', 'Fira Code', 'Segoe UI', monospace;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    /* Grid background */
+    body::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 10%, rgba(0, 229, 255, 0.05) 0%, transparent 70%),
+                  linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
+                  linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
+      background-size: 100% 100%, 24px 24px, 24px 24px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    header {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      background: var(--panel-bg);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-logo {
+      width: 28px;
+      height: 28px;
+      filter: drop-shadow(0 0 8px var(--primary));
+    }
+    .brand-title {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: var(--primary);
+      text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+    }
+    .brand-sub {
+      font-size: 9px;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+    }
+    .target-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+    .target-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--primary);
+      font-family: inherit;
+      font-size: 12px;
+      width: 220px;
+      user-select: text;
+    }
+    .header-btns {
+      display: flex;
+      gap: 8px;
+    }
+    button {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 10.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    button:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+    }
+    button.danger {
+      border-color: rgba(255, 71, 87, 0.4);
+      color: var(--secondary);
+    }
+    button.danger:hover {
+      background: rgba(255, 71, 87, 0.2);
+      border-color: var(--secondary);
+      box-shadow: 0 0 10px rgba(255, 71, 87, 0.3);
+    }
+    button.accent {
+      border-color: rgba(0, 255, 157, 0.4);
+      color: var(--accent);
+    }
+    button.accent:hover {
+      background: rgba(0, 255, 157, 0.15);
+      box-shadow: 0 0 10px rgba(0, 255, 157, 0.3);
+    }
+    main {
+      position: relative;
+      z-index: 5;
+      flex: 1;
+      display: grid;
+      grid-template-columns: 280px 1fr 340px;
+      gap: 12px;
+      padding: 12px;
+      overflow: hidden;
+    }
+    .panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+    .panel-header {
+      padding: 10px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--primary);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(0, 0, 0, 0.2);
+    }
+    .panel-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .tool-group-title {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-dim);
+      margin-top: 4px;
+      margin-bottom: 2px;
+    }
+    .tool-btn {
+      width: 100%;
+      text-align: left;
+      justify-content: flex-start;
+      padding: 8px 10px;
+      background: var(--card-bg);
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 11px;
+    }
+    .tool-btn:hover {
+      background: rgba(0, 229, 255, 0.1);
+      border-color: var(--border-glow);
+    }
+    .term-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--term-bg);
+    }
+    .term-output {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 11.5px;
+      line-height: 1.5;
+      color: #38ef7d;
+      white-space: pre-wrap;
+      user-select: text;
+    }
+    .term-prompt-bar {
+      display: flex;
+      padding: 8px 12px;
+      background: rgba(12, 18, 28, 0.95);
+      border-top: 1px solid var(--border);
+      gap: 8px;
+    }
+    .term-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 12px;
+      user-select: text;
+    }
+    .ai-chat-box {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .ai-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      user-select: text;
+    }
+    .ai-bubble {
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      line-height: 1.4;
+      max-width: 95%;
+    }
+    .ai-bubble.user {
+      align-self: flex-end;
+      background: rgba(0, 229, 255, 0.15);
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      color: var(--primary);
+    }
+    .ai-bubble.agent {
+      align-self: flex-start;
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      color: var(--text);
+    }
+    .ai-input-bar {
+      display: flex;
+      padding: 8px;
+      background: rgba(0, 0, 0, 0.3);
+      border-top: 1px solid var(--border);
+      gap: 6px;
+    }
+    .ai-input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      padding: 6px 10px;
+      font-family: inherit;
+      font-size: 11px;
+      outline: none;
+      user-select: text;
+    }
+    footer {
+      position: relative;
+      z-index: 10;
+      padding: 6px 16px;
+      background: rgba(6, 9, 14, 0.95);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 9.5px;
+      color: var(--text-dim);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div style="font-size:20px;">⚡</div>
+      <div>
+        <div class="brand-title">HEXSTRIKE AI // RED TEAM SUITE</div>
+        <div class="brand-sub">KALI & PARROT UNIFIED OFFENSIVE RADAR v4.0</div>
+      </div>
+    </div>
+    <div class="target-bar">
+      <span style="color:var(--text-dim); font-size:10px;">TARGET:</span>
+      <input type="text" id="target-host" class="target-input" value="127.0.0.1" placeholder="IP, Domain, or CIDR range">
+    </div>
+    <div class="header-btns">
+      <button class="accent" id="btn-quick-scan">⚡ FAST RECON</button>
+      <button class="danger" id="btn-stop-cmd">⏹ ABORT</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Left Panel: Tactical Modules -->
+    <div class="panel">
+      <div class="panel-header">
+        <span>TACTICAL MODULES</span>
+        <span style="font-size:9px; color:var(--text-dim);">175+ ARSENAL</span>
+      </div>
+      <div class="panel-content">
+        <div class="tool-group-title">Recon & Discovery</div>
+        <button class="tool-btn" onclick="runPreset('nmap_fast')">🔍 Nmap Syn Stealth Scan (-sS)</button>
+        <button class="tool-btn" onclick="runPreset('nmap_full')">📡 Comprehensive Port & Vuln Scan</button>
+        <button class="tool-btn" onclick="runPreset('gobuster')">📁 Gobuster Directory Fuzzing</button>
+        <button class="tool-btn" onclick="runPreset('nikto')">🌐 Nikto Web Vulnerability Scanner</button>
+        
+        <div class="tool-group-title">Exploitation & Payloads</div>
+        <button class="tool-btn" onclick="runPreset('sqlmap')">💉 SQLmap Automated SQLi Audit</button>
+        <button class="tool-btn" onclick="genRevShell('bash')">🐚 Generate Bash Reverse Shell</button>
+        <button class="tool-btn" onclick="genRevShell('python')">🐍 Generate Python Reverse Shell</button>
+        <button class="tool-btn" onclick="genRevShell('powershell')">💠 Generate PowerShell Payload</button>
+
+        <div class="tool-group-title">External GUI Cockpits</div>
+        <button class="tool-btn" onclick="launchExt('burp')">🎯 Burp Suite Community</button>
+        <button class="tool-btn" onclick="launchExt('caido')">⚡ Caido Next-Gen Web Proxy</button>
+        <button class="tool-btn" onclick="launchExt('wireshark')">🦈 Wireshark Packet Analyzer</button>
+        <button class="tool-btn" onclick="launchExt('ghidra')">🔬 Ghidra Reverse Engineering</button>
+        <button class="tool-btn" onclick="launchExt('msfconsole')">💀 Metasploit Framework Console</button>
+      </div>
+    </div>
+
+    <!-- Center Panel: Interactive Cyberpunk Terminal -->
+    <div class="panel">
+      <div class="panel-header">
+        <span>EXECUTION MATRIX & LIVE TELEMETRY</span>
+        <span id="cmd-status" style="color:var(--accent); font-size:9.5px;">READY</span>
+      </div>
+      <div class="term-wrapper">
+        <div id="term-output" class="term-output">[*] HexStrike AI Offensive Cyber Warfare Engine Ready.
+[*] Target Scope: 127.0.0.1
+[*] Select a tactical module on the left or enter any shell command below.</div>
+        <div class="term-prompt-bar">
+          <span style="color:var(--primary); font-weight:700;">hexstrike@zothos:~$</span>
+          <input type="text" id="term-input" class="term-input" placeholder="Type custom bash command or payload...">
+          <button id="btn-term-send" class="accent">RUN</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panel: AI Red-Team Copilot -->
+    <div class="panel">
+      <div class="panel-header">
+        <span>AI RED-TEAM COPILOT</span>
+        <span style="color:var(--purple); font-size:9.5px;">LLAMA-3.2 / MCP</span>
+      </div>
+      <div class="ai-chat-box">
+        <div id="ai-messages" class="ai-messages">
+          <div class="ai-bubble agent">
+            ⚡ <b>HexStrike Copilot Online</b>. I monitor your scan outputs in real-time. Ask me to formulate exploit chains, craft custom payloads, or bypass WAFs.
+          </div>
+        </div>
+        <div class="ai-input-bar">
+          <input type="text" id="ai-input" class="ai-input" placeholder="Ask AI Copilot for tactical guidance...">
+          <button id="btn-ai-send" style="border-color:var(--purple); color:var(--purple);">SEND</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div>AUTHORITY: RING-1 (SEC ENGINE) // SYSTEM: KALI/PARROT KERNEL</div>
+    <div style="display:flex; gap:16px;">
+      <span>HEXSTRIKE DAEMON: <span style="color:var(--accent);">ONLINE (PORT 8000)</span></span>
+      <span>MCP BRIDGE: <span style="color:var(--primary);">CONNECTED</span></span>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

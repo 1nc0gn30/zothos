@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NullAI Ghostmode // Sovereign Privacy Fortress</title>
+  <style>
+    :root {
+      --bg: #05070a;
+      --panel: rgba(10, 15, 24, 0.8);
+      --card: rgba(16, 24, 38, 0.6);
+      --border: rgba(0, 255, 157, 0.2);
+      --green: #00ff9d;
+      --red: #ff4757;
+      --cyan: #00e5ff;
+      --gold: #ffd700;
+      --purple: #a855f7;
+      --text: #f1f5f9;
+      --text-dim: #7d90a0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'JetBrains Mono', 'Segoe UI', monospace;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      overflow: hidden;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .title { font-size: 16px; font-weight: 800; letter-spacing: 2px; color: var(--green); }
+    .sub { font-size: 9px; color: var(--text-dim); }
+
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 14px;
+      padding-top: 14px;
+      overflow: hidden;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      overflow-y: auto;
+    }
+    .master-shield {
+      background: var(--card);
+      border: 2px solid var(--green);
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+    }
+    .master-shield.uncloaked {
+      border-color: var(--red);
+      box-shadow: 0 0 20px rgba(255, 71, 87, 0.2);
+    }
+    .master-shield.cloaked {
+      border-color: var(--green);
+      box-shadow: 0 0 20px rgba(0, 255, 157, 0.25);
+    }
+    .shield-icon { font-size: 40px; }
+    .shield-status { font-size: 14px; font-weight: 800; letter-spacing: 1px; }
+
+    button {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    button:hover {
+      border-color: var(--green);
+      color: var(--green);
+    }
+    button.primary {
+      background: rgba(0, 255, 157, 0.2);
+      border-color: var(--green);
+      color: var(--green);
+    }
+    button.primary:hover {
+      background: rgba(0, 255, 157, 0.35);
+    }
+    button.danger {
+      background: rgba(255, 71, 87, 0.15);
+      border-color: var(--red);
+      color: var(--red);
+    }
+    button.danger:hover {
+      background: rgba(255, 71, 87, 0.3);
+    }
+
+    .ip-box {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .ip-val {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      user-select: text;
+    }
+
+    .iface-card {
+      background: var(--card);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 6px;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .log-box {
+      flex: 1;
+      background: #020407;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px;
+      overflow-y: auto;
+      font-size: 11px;
+      line-height: 1.4;
+      color: var(--green);
+      white-space: pre-wrap;
+      user-select: text;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div style="font-size:24px;">🛡️</div>
+      <div>
+        <div class="title">NULLAI GHOSTMODE // PRIVACY FORTRESS</div>
+        <div class="sub">100% TRANSPARENT TOR ROUTING & HARDWARE SPOOFER</div>
+      </div>
+    </div>
+    <div style="display:flex; gap:10px;">
+      <button id="btn-toggle-cloak" class="primary" onclick="toggleCloak()">ENGAGE GHOST CLOAK</button>
+      <button class="danger" onclick="panicScrub()">🚨 PANIC SCRUB</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Left Column: Shield & IP Status -->
+    <div class="panel">
+      <div id="master-shield" class="master-shield uncloaked">
+        <div id="shield-icon" class="shield-icon">🔓</div>
+        <div id="shield-status" class="shield-status" style="color:var(--red);">CLEARNET EXPOSED</div>
+        <div id="shield-sub" style="font-size:10px; color:var(--text-dim);">Traffic routed through ISP gateway</div>
+      </div>
+
+      <div class="ip-box">
+        <div style="display:flex; justify-content:space-between; font-size:9.5px; color:var(--text-dim);">
+          <span>PUBLIC WAN IDENTITY</span>
+          <button style="padding:1px 6px; font-size:8px;" onclick="rotateCircuit()">ROTATE</button>
+        </div>
+        <div id="public-ip" class="ip-val" style="color:var(--cyan);">Auditing...</div>
+        <div id="tor-badge" style="font-size:9px; font-weight:700; color:var(--red);">[CLEARNET DETECTED]</div>
+      </div>
+
+      <div style="font-size:10px; font-weight:700; color:var(--green); margin-top:4px;">HARDWARE ADAPTER SPOOFING</div>
+      <div id="iface-list" style="display:flex; flex-direction:column; gap:8px;">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+
+    <!-- Right Column: Protocol Live Stream & Routing Engine -->
+    <div class="panel">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:11px; font-weight:700; color:var(--green);">SOVEREIGN PROTOCOL TELEMETRY</span>
+        <button style="padding:2px 8px; font-size:9px;" onclick="refreshState()">AUDIT NOW</button>
+      </div>
+      <div id="log-box" class="log-box">[*] Initializing Ghostmode Fortress telemetry...
+[*] Ready to engage sovereign transparent Torification.</div>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

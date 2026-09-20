@@ -318,6 +318,16 @@ class AgentHUDApp:
 
 
 def main():
+    electron_candidates = ["/usr/local/bin/electron", "/usr/bin/electron", "/opt/maya-linux/node_modules/.bin/electron"]
+    for el in electron_candidates:
+        if os.path.exists(el) and os.access(el, os.X_OK) and os.path.exists("/opt/zoth-agent-app/main.js"):
+            try:
+                proc = subprocess.Popen([el, "/opt/zoth-agent-app"])
+                proc.wait()
+                return
+            except Exception:
+                pass
+
     root = tk.Tk()
     app = AgentHUDApp(root)
     root.mainloop()
