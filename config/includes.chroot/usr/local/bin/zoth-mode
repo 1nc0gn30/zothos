@@ -96,6 +96,16 @@ set_theme() {
         gsettings set org.gnome.desktop.interface icon-theme "$icon_theme" 2>/dev/null || true
         gsettings set org.gnome.desktop.wm.preferences theme "$wm_theme" 2>/dev/null || true
     fi
+
+    # KDE Plasma Color Scheme & Look-and-Feel sync
+    if command -v plasma-apply-colorscheme >/dev/null 2>&1; then
+        case "$gtk_theme" in
+            "Zoth-Hermetic-Matrix") plasma-apply-colorscheme ZothHermeticMatrix 2>/dev/null || true ;;
+            "Zoth-Ghost-NullAI")    plasma-apply-colorscheme ZothGhostNullAI 2>/dev/null || true ;;
+            "Zoth-Azoth-Gold")      plasma-apply-colorscheme ZothAzothGold 2>/dev/null || true ;;
+            "Zoth-Incognito-Win11") plasma-apply-colorscheme ZothIncognitoWin11 2>/dev/null || true ;;
+        esac
+    fi
 }
 
 # ── Picom Compositor Reload (Flicker-Free Profile Swap) ─────────────────────
