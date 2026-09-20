@@ -334,10 +334,14 @@ function createWindow() {
 
   // Periodic Telemetry IPC Broadcast
   setInterval(async () => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      const data = await getSystemTelemetry();
-      mainWindow.webContents.send('telemetry-update', data);
-    }
+    try {
+      if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents && !mainWindow.webContents.isDestroyed()) {
+        const data = await getSystemTelemetry();
+        if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents && !mainWindow.webContents.isDestroyed()) {
+          mainWindow.webContents.send('telemetry-update', data);
+        }
+      }
+    } catch (err) {}
   }, 800);
 }
 
