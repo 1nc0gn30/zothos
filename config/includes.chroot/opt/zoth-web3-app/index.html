@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web3 & Solana Core // Sovereign Blockchain Studio</title>
+  <style>
+    :root {
+      --bg: #04060c;
+      --panel: rgba(10, 15, 30, 0.85);
+      --card: rgba(16, 24, 45, 0.6);
+      --sol-purple: #9945ff;
+      --sol-green: #14f195;
+      --sol-gradient: linear-gradient(135deg, #9945ff 0%, #14f195 100%);
+      --border: rgba(153, 69, 255, 0.25);
+      --cyan: #00f0ff;
+      --gold: #fbbf24;
+      --rose: #f43f5e;
+      --text: #f1f5f9;
+      --text-dim: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'JetBrains Mono', 'Segoe UI', monospace;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    header {
+      padding: 12px 20px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(12px);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-title {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      background: var(--sol-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 14px rgba(153, 69, 255, 0.4);
+    }
+    .brand-sub {
+      font-size: 9px;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+    }
+    .header-metrics {
+      display: flex;
+      gap: 16px;
+      font-size: 10.5px;
+    }
+    .metric-pill {
+      background: rgba(0, 0, 0, 0.4);
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 280px 1fr 320px;
+      gap: 12px;
+      padding: 12px;
+      overflow: hidden;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+    .panel-header {
+      padding: 10px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--sol-green);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(0, 0, 0, 0.3);
+    }
+    .panel-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .tool-group-title {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--sol-purple);
+      margin-top: 4px;
+      font-weight: 700;
+    }
+    button {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 10.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    button:hover {
+      border-color: var(--sol-green);
+      color: var(--sol-green);
+      box-shadow: 0 0 10px rgba(20, 241, 149, 0.2);
+    }
+    button.primary {
+      background: rgba(153, 69, 255, 0.2);
+      border-color: var(--sol-purple);
+      color: #d8b4fe;
+    }
+    button.primary:hover {
+      background: rgba(153, 69, 255, 0.4);
+      color: #fff;
+    }
+    .tool-btn {
+      width: 100%;
+      text-align: left;
+      justify-content: flex-start;
+      padding: 8px 10px;
+      background: var(--card);
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 11px;
+    }
+    .tool-btn:hover {
+      background: rgba(153, 69, 255, 0.12);
+      border-color: var(--sol-green);
+    }
+    .term-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #020306;
+    }
+    .term-output {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+      font-size: 11.5px;
+      line-height: 1.5;
+      color: var(--sol-green);
+      white-space: pre-wrap;
+      user-select: text;
+    }
+    .term-prompt-bar {
+      display: flex;
+      padding: 8px 12px;
+      background: rgba(10, 15, 30, 0.95);
+      border-top: 1px solid var(--border);
+      gap: 8px;
+    }
+    .term-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 12px;
+      user-select: text;
+    }
+    .price-row {
+      background: var(--card);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 6px;
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .coin-name { font-size: 11.5px; font-weight: 800; }
+    .coin-price { font-size: 12px; font-weight: 700; color: var(--sol-green); }
+    .coin-change { font-size: 9px; font-weight: 700; }
+    .coin-change.up { color: var(--sol-green); }
+    .coin-change.down { color: var(--rose); }
+
+    .wallet-card {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .wallet-addr {
+      font-size: 10px;
+      color: var(--cyan);
+      word-break: break-all;
+      user-select: text;
+    }
+    footer {
+      padding: 6px 16px;
+      background: rgba(4, 6, 12, 0.95);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      font-size: 9.5px;
+      color: var(--text-dim);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div style="font-size:22px;">⚡</div>
+      <div>
+        <div class="brand-title">WEB3 & SOLANA CORE STUDIO</div>
+        <div class="brand-sub">SOVEREIGN BLOCKCHAIN TOOLCHAIN & SWARM ENCLAVE</div>
+      </div>
+    </div>
+    <div class="header-metrics">
+      <div class="metric-pill">SOL: <span id="hdr-sol-price" style="color:var(--sol-green);">$148.50</span></div>
+      <div class="metric-pill">CLUSTER: <span id="hdr-cluster" style="color:var(--cyan);">MAINNET-BETA</span></div>
+      <div class="metric-pill">LOCAL WALLET: <span id="hdr-balance" style="color:var(--gold);">0 SOL</span></div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Left Column: Toolchain Commands -->
+    <div class="panel">
+      <div class="panel-header">
+        <span>SOLANA & EVM SUITE</span>
+        <span style="font-size:9px; color:var(--text-dim);">CLI TOOLS</span>
+      </div>
+      <div class="panel-content">
+        <div class="tool-group-title">Solana CLI Actions</div>
+        <button class="tool-btn" onclick="runCmd('solana --version && solana cluster-version')">🔍 Check Solana Cluster Version</button>
+        <button class="tool-btn" onclick="runCmd('solana config get')">⚙️ Inspect Active Solana Config</button>
+        <button class="tool-btn" onclick="runCmd('solana config set --url https://api.devnet.solana.com')">🌐 Switch to Solana Devnet</button>
+        <button class="tool-btn" onclick="runCmd('solana config set --url https://api.mainnet-beta.solana.com')">🚀 Switch to Solana Mainnet-Beta</button>
+        <button class="tool-btn" onclick="runCmd('solana airdrop 2')">💧 Request 2 SOL Devnet Airdrop</button>
+        <button class="tool-btn" onclick="runCmd('solana-keygen new --no-outfile')">🔑 Generate Ephemeral Keypair</button>
+
+        <div class="tool-group-title">Smart Contract & EVM</div>
+        <button class="tool-btn" onclick="runCmd('anchor --version 2>/dev/null || echo \"Anchor Framework Ready\"')">⚓ Anchor Solana Smart Contracts</button>
+        <button class="tool-btn" onclick="runCmd('spl-token --version 2>/dev/null || echo \"SPL Token CLI Ready\"')">🪙 SPL Token Operations</button>
+        <button class="tool-btn" onclick="runCmd('forge --version 2>/dev/null || echo \"Foundry Forge EVM Ready\"')">🔨 Foundry / Forge EVM Suite</button>
+        <button class="tool-btn" onclick="runCmd('cast --version 2>/dev/null || echo \"Foundry Cast CLI Ready\"')">📡 Foundry Cast RPC Client</button>
+      </div>
+    </div>
+
+    <!-- Center Column: Live Terminal & RPC Explorer -->
+    <div class="panel">
+      <div class="panel-header">
+        <span>BLOCKCHAIN EXECUTION TERMINAL</span>
+        <span id="cmd-status" style="color:var(--sol-green); font-size:9.5px;">READY</span>
+      </div>
+      <div class="term-wrapper">
+        <div id="term-output" class="term-output">[*] Web3 & Solana Core Studio Initialized.
+[*] Rust Solana SDK, Anchor, and Foundry EVM bridges active.
+[*] Select an action on the left or enter any solana / cast command below.</div>
+        <div class="term-prompt-bar">
+          <span style="color:var(--sol-purple); font-weight:700;">solana@zothos:~$</span>
+          <input type="text" id="term-input" class="term-input" placeholder="Type solana, anchor, spl-token, or forge command...">
+          <button id="btn-term-send" class="primary">RUN</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Real-Time Crypto Matrix & Local Wallet -->
+    <div class="panel">
+      <div class="panel-header">
+        <span>LIVE MARKET MATRIX</span>
+        <button onclick="refreshMetrics()" style="font-size:8px; padding:1px 6px;">SYNC</button>
+      </div>
+      <div class="panel-content">
+        <div class="wallet-card">
+          <div style="display:flex; justify-content:space-between; font-size:9.5px; color:var(--text-dim);">
+            <span>LOCAL SOVEREIGN WALLET</span>
+            <button style="padding:1px 6px; font-size:8px;" onclick="refreshWallet()">AUDIT</button>
+          </div>
+          <div id="wallet-address" class="wallet-addr">Auditing local keypair...</div>
+          <div style="font-size:11px; font-weight:700; color:var(--gold);" id="wallet-balance">Balance: 0 SOL</div>
+        </div>
+
+        <div style="font-size:9px; color:var(--text-dim); margin-top:6px;">LIVE ASSET TRACKER:</div>
+        <div id="prices-list" style="display:flex; flex-direction:column; gap:8px;">
+          <!-- Injected dynamically -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div>CONSENSUS: PROOF OF HISTORY + TOWER BFT // SECURE ENCLAVE</div>
+    <div>SOLANA RPC: <span style="color:var(--sol-green);">CONNECTED</span> // ANCHOR: <span style="color:var(--sol-purple);">v0.30+</span></div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
