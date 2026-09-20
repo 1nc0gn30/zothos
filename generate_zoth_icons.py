@@ -615,6 +615,46 @@ def build_icon_hexstrike():
     od.polygon([(cx - 15, cy - 60), (cx + 25, cy - 10), (cx - 5, cy + 10), (cx + 20, cy + 60), (cx - 20, cy + 10), (cx + 10, cy - 10)], fill=(255, 215, 0, 255))
     return Image.alpha_composite(base, ov)
 
+def build_icon_web3_solana():
+    """Web3 Solana Triad Gradient Glass Emblem"""
+    base = create_glass_squircle_base(
+        bg_top=(32, 12, 45, 255),
+        bg_bot=(6, 2, 12, 255),
+        glow_color=(168, 85, 247, 95),
+        rim_top=(0, 255, 157, 230),
+        rim_bot=(0, 243, 255, 160)
+    )
+    fg = Image.new("RGBA", (CANVAS_SIZE, CANVAS_SIZE), (0, 0, 0, 0))
+    fd = ImageDraw.Draw(fg)
+    
+    # 3 Parallel Slanted Bars (Solana Gradient Triad)
+    def draw_slanted_bar(y_top, color_fill):
+        pts = [(130, y_top + 40), (340, y_top), (380, y_top + 32), (170, y_top + 72)]
+        fd.polygon(pts, fill=color_fill)
+
+    draw_slanted_bar(140, (0, 255, 157, 240))
+    draw_slanted_bar(220, (0, 243, 255, 240))
+    draw_slanted_bar(300, (168, 85, 247, 240))
+    
+    return Image.alpha_composite(base, fg)
+
+def build_icon_caido():
+    """Caido Web Proxy Purple Cyber Diamond"""
+    base = create_glass_squircle_base(
+        bg_top=(42, 15, 38, 255),
+        bg_bot=(8, 2, 8, 255),
+        glow_color=(236, 72, 153, 90),
+        rim_top=(244, 114, 182, 230),
+        rim_bot=(168, 85, 247, 160)
+    )
+    fg = Image.new("RGBA", (CANVAS_SIZE, CANVAS_SIZE), (0, 0, 0, 0))
+    fd = ImageDraw.Draw(fg)
+    cx, cy = CANVAS_SIZE // 2, CANVAS_SIZE // 2
+    pts = [(cx, cy - 160), (cx + 150, cy), (cx, cy + 160), (cx - 150, cy)]
+    fd.polygon(pts, fill=(236, 72, 153, 220), outline=(255, 255, 255, 240), width=6)
+    fd.polygon([(cx, cy - 80), (cx + 80, cy), (cx, cy + 80), (cx - 80, cy)], fill=(168, 85, 247, 240))
+    return Image.alpha_composite(base, fg)
+
 # Registry of Icon Builders & Aliases
 BUILDERS = {
     "zoth-studio": build_icon_zoth_studio,
@@ -638,6 +678,9 @@ BUILDERS = {
     "zoth-matrix": build_icon_zoth_matrix,
     "zoth-tool-nexus": build_icon_zoth_tool_nexus,
     "zoth-live-wallpaper": build_icon_zoth_live_wallpaper,
+    "web3-solana": build_icon_web3_solana,
+    "solana": build_icon_web3_solana,
+    "caido": build_icon_caido,
     
     # Aliases & System icons
     "zothos": build_icon_zoth_studio,

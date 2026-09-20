@@ -29,6 +29,7 @@ virt-customize -a "$VM_DISK" \
     --network \
     --install openssh-server,qemu-guest-agent,sudo,curl,rsync \
     --copy-in "$ZOTHOS_SRC/usr/local/bin:/usr/local" \
+    --copy-in "$ZOTHOS_SRC/usr/share/applications:/usr/share" \
     --copy-in "$ZOTHOS_SRC/usr/share/backgrounds/zothos:/usr/share/backgrounds" \
     --copy-in "$ZOTHOS_SRC/usr/share/themes:/usr/share" \
     --copy-in "$ZOTHOS_SRC/usr/share/color-schemes:/usr/share" \
@@ -37,6 +38,7 @@ virt-customize -a "$VM_DISK" \
     --copy-in "$ZOTHOS_SRC/opt/zoth-desktop-pet:/opt" \
     --copy-in "$ZOTHOS_SRC/opt/zoth-hud:/opt" \
     --copy-in "$ZOTHOS_SRC/etc/xdg/kwinrulesrc:/etc/xdg" \
+    --copy-in "$ZOTHOS_SRC/etc/skel/.config:/etc/skel" \
     --copy-in "$ZOTHOS_SRC/etc/skel/.bashrc:/etc/skel" \
     --copy-in "$ZOTHOS_SRC/etc/skel/.zshrc:/etc/skel" \
     --copy-in "$ZOTHOS_SRC/etc/systemd/system/zoth-ghost-amnesic.service:/etc/systemd/system" \

@@ -3,6 +3,7 @@ const { ipcRenderer } = require('electron');
 const speechBubble = document.getElementById('speech-bubble');
 const bubbleAgent = document.getElementById('bubble-agent');
 const bubbleText = document.getElementById('bubble-text');
+const eyeIris = document.getElementById('eye-iris');
 const eyePupil = document.getElementById('eye-pupil');
 const scanBeam = document.getElementById('scan-beam');
 const petMenu = document.getElementById('pet-menu');
@@ -27,8 +28,8 @@ function playSound(freq = 520, type = 'sine') {
     const gain = ctx.createGain();
     osc.type = type;
     osc.frequency.setValueAtTime(freq, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(freq * 1.5, ctx.currentTime + 0.12);
-    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(freq * 1.4, ctx.currentTime + 0.12);
+    gain.gain.setValueAtTime(0.25, ctx.currentTime);
     gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.12);
     osc.connect(gain);
     gain.connect(ctx.destination);
@@ -39,7 +40,8 @@ function playSound(freq = 520, type = 'sine') {
 
 // 60FPS Global OS Cursor Tracking
 ipcRenderer.on('global-cursor-pos', (event, pos) => {
-  const eyeSocket = eyePupil.parentElement;
+  if (!eyeIris) return;
+  const eyeSocket = eyeIris.parentElement;
   const socketRect = eyeSocket.getBoundingClientRect();
   
   // Calculate center of eye socket in global screen coordinates
@@ -50,12 +52,12 @@ ipcRenderer.on('global-cursor-pos', (event, pos) => {
   const deltaY = pos.cursorY - eyeGlobalY;
 
   const angle = Math.atan2(deltaY, deltaX);
-  const distance = Math.min(12, Math.hypot(deltaX, deltaY) / 45);
+  const distance = Math.min(11, Math.hypot(deltaX, deltaY) / 40);
 
   const pupilX = Math.cos(angle) * distance;
   const pupilY = Math.sin(angle) * distance;
 
-  eyePupil.style.transform = `translate(${pupilX}px, ${pupilY}px)`;
+  eyeIris.style.transform = `translate(${pupilX}px, ${pupilY}px)`;
 });
 
 // Active Window Reading & Recording Reaction
@@ -83,7 +85,7 @@ function showSpeech(text, agent = '👁️ ALL-SEEING EYE AI') {
   speechBubble.classList.add('visible');
   setTimeout(() => {
     speechBubble.classList.remove('visible');
-  }, 6000);
+  }, 6500);
 }
 
 window.triggerPoke = function() {
@@ -97,7 +99,7 @@ window.sendChatQuery = function() {
   if (!query) return;
   chatInput.value = '';
   playSound(780, 'sine');
-  showSpeech(`Thinking: "${query}"...`, '👁️ ALL-SEEING EYE REASONING');
+  showSpeech(`Thinking: "${query}"...`, '👁️ QWEN REASONING');
   ipcRenderer.send('query-all-seeing-eye', query);
 };
 
@@ -109,7 +111,7 @@ window.handleChatKey = function(event) {
 
 ipcRenderer.on('all-seeing-eye-response', (event, responseText) => {
   playSound(920, 'sine');
-  showSpeech(responseText, '👁️ ALL-SEEING EYE RESPONSE');
+  showSpeech(responseText, '👁️ ALL-SEEING EYE QWEN');
 });
 
 // Right click context menu

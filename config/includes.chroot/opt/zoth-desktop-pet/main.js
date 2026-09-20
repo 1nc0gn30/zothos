@@ -41,16 +41,17 @@ function createPetWindow() {
   const { width, height } = primaryDisplay.workAreaSize;
 
   petWindow = new BrowserWindow({
-    width: 360,
-    height: 480,
-    x: width - 380,
-    y: height - 510,
+    width: 340,
+    height: 440,
+    x: 30,
+    y: height - 460,
     transparent: true,
     frame: false,
     alwaysOnTop: true,
     skipTaskbar: true,
     resizable: false,
     hasShadow: false,
+    thickFrame: false,
     backgroundColor: '#00000000',
     webPreferences: {
       nodeIntegration: true,
@@ -89,7 +90,7 @@ function createPetWindow() {
         petWindow.webContents.send('active-window-changed', activeWin);
       }
     });
-  }, 2500);
+  }, 2000);
 
   petWindow.on('closed', () => {
     if (cursorPoller) clearInterval(cursorPoller);
@@ -192,16 +193,12 @@ ipcMain.on('query-all-seeing-eye', (event, userPrompt) => {
     }
   } catch (e) {}
 
-  // 1. Try fast local zoth-ai / Qwen Ollama model
   queryOllamaQwen(userPrompt, historyContext, (err, response) => {
     if (!err && response) {
-      event.reply('all-seeing-eye-response', `👁️ ${response}`);
+      event.reply('all-seeing-eye-response', `${response}`);
     } else {
-      // 2. Fallback to zoth-sentinel CLI executor
-      exec(`/usr/local/bin/zoth-sentinel ask ${JSON.stringify(userPrompt)} 2>/dev/null || echo "All-Seeing Eye: Observed recent window history (${historyContext}). All systems nominal."`, (sErr, stdout) => {
-        const answer = (stdout || '').trim() || `All-Seeing Eye: Recorded window history (${historyContext}).`;
-        event.reply('all-seeing-eye-response', `👁️ ${answer}`);
-      });
+      // Fallback
+      event.reply('all-seeing-eye-response', `👁️ Recorded workspace context: "${historyContext.substring(0, 40)}...". All-Seeing Eye listening.`);
     }
   });
 });
