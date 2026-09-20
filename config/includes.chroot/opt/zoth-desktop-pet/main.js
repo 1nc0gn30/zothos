@@ -3,6 +3,7 @@ const path = require('path');
 const { exec } = require('child_process');
 const fs = require('fs');
 const os = require('os');
+const http = require('http');
 
 let petWindow = null;
 let cursorPoller = null;
@@ -27,7 +28,6 @@ function recordHistoryEvent(winTitle, winPid) {
     const timestamp = new Date().toISOString();
     const lastEntry = history[history.length - 1];
 
-    // Avoid duplicate rapid logging of same window
     if (!lastEntry || lastEntry.title !== winTitle) {
       history.push({ timestamp, title: winTitle, pid: winPid });
       if (history.length > 200) history = history.slice(-200);
@@ -110,6 +110,46 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
 
+// Fast Local Qwen / zoth-ai Ollama Query Engine
+function queryOllamaQwen(prompt, contextText, callback) {
+  const postData = JSON.stringify({
+    model: 'zoth-ai',
+    prompt: `System: You are the All-Seeing Eye AI Agent for ZothOS. Be extremely concise, direct, and helpful in 1-2 short sentences.\nRecorded Recent Active Windows Context: ${contextText}\nUser Question: ${prompt}`,
+    stream: false
+  });
+
+  const req = http.request({
+    hostname: '127.0.0.1',
+    port: 11434,
+    path: '/api/generate',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(postData)
+    },
+    timeout: 3500
+  }, (res) => {
+    let raw = '';
+    res.on('data', chunk => { raw += chunk; });
+    res.on('end', () => {
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.response) {
+          callback(null, parsed.response.trim());
+          return;
+        }
+      } catch (e) {}
+      callback(new Error('Invalid Ollama JSON response'));
+    });
+  });
+
+  req.on('error', (err) => { callback(err); });
+  req.on('timeout', () => { req.destroy(); callback(new Error('Ollama Timeout')); });
+
+  req.write(postData);
+  req.end();
+}
+
 // ── IPC Handlers ────────────────────────────────────────────────────────
 ipcMain.on('launch-app', (event, appName) => {
   const apps = {
@@ -142,20 +182,26 @@ ipcMain.on('get-telemetry', (event) => {
   });
 });
 
-// Interactive AI Query to the All-Seeing Eye
+// Fast Local Qwen Interactive AI Query for All-Seeing Eye
 ipcMain.on('query-all-seeing-eye', (event, userPrompt) => {
   let historyContext = '';
   try {
     if (fs.existsSync(HISTORY_FILE)) {
-      const history = JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf8')).slice(-8);
-      historyContext = history.map(h => `[${h.timestamp.substring(11, 19)}] ${h.title}`).join(' | ');
+      const history = JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf8')).slice(-6);
+      historyContext = history.map(h => h.title).join(' -> ');
     }
   } catch (e) {}
 
-  const fullQuery = `Context of user recent activity: (${historyContext}). User Query: ${userPrompt}`;
-  
-  exec(`/usr/local/bin/zoth-sentinel ask ${JSON.stringify(userPrompt)} 2>/dev/null || echo "All-Seeing Eye: Recorded active window context. Processing request via Sentinel AI."`, (err, stdout) => {
-    const answer = (stdout || '').trim() || `All-Seeing Eye: Observed recent window history. System nominal.`;
-    event.reply('all-seeing-eye-response', answer);
+  // 1. Try fast local zoth-ai / Qwen Ollama model
+  queryOllamaQwen(userPrompt, historyContext, (err, response) => {
+    if (!err && response) {
+      event.reply('all-seeing-eye-response', `👁️ ${response}`);
+    } else {
+      // 2. Fallback to zoth-sentinel CLI executor
+      exec(`/usr/local/bin/zoth-sentinel ask ${JSON.stringify(userPrompt)} 2>/dev/null || echo "All-Seeing Eye: Observed recent window history (${historyContext}). All systems nominal."`, (sErr, stdout) => {
+        const answer = (stdout || '').trim() || `All-Seeing Eye: Recorded window history (${historyContext}).`;
+        event.reply('all-seeing-eye-response', `👁️ ${answer}`);
+      });
+    }
   });
 });

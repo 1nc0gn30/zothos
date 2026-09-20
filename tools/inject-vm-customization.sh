@@ -32,6 +32,7 @@ virt-customize -a "$VM_DISK" \
     --copy-in "$ZOTHOS_SRC/usr/share/backgrounds/zothos:/usr/share/backgrounds" \
     --copy-in "$ZOTHOS_SRC/usr/share/themes:/usr/share" \
     --copy-in "$ZOTHOS_SRC/usr/share/color-schemes:/usr/share" \
+    --copy-in "$ZOTHOS_SRC/usr/share/icons:/usr/share" \
     --copy-in "$ZOTHOS_SRC/opt/zoth-studio:/opt" \
     --copy-in "$ZOTHOS_SRC/opt/zoth-desktop-pet:/opt" \
     --copy-in "$ZOTHOS_SRC/opt/zoth-hud:/opt" \
@@ -49,6 +50,7 @@ virt-customize -a "$VM_DISK" \
     --run-command "ln -sf /lib/systemd/system/systemd-networkd.service /etc/systemd/system/multi-user.target.wants/systemd-networkd.service 2>/dev/null || true" \
     --run-command "ln -sf /lib/systemd/system/qemu-guest-agent.service /etc/systemd/system/multi-user.target.wants/qemu-guest-agent.service 2>/dev/null || true" \
     --run-command "chmod +x /usr/local/bin/* /opt/zoth-studio/launch.sh 2>/dev/null || true" \
+    --run-command "rm -rf /home/neo/.config/xfce4/panel/launcher-* 2>/dev/null || true" \
     --run-command "cp -rf /etc/skel/. /home/neo/ && chown -R neo:neo /home/neo" \
     --run-command "if [ -n '$SSH_KEY_CONTENT' ]; then echo '$SSH_KEY_CONTENT' > /home/neo/.ssh/authorized_keys && chmod 700 /home/neo/.ssh && chmod 600 /home/neo/.ssh/authorized_keys && chown -R neo:neo /home/neo/.ssh; fi" \
     --run-command "mkdir -p /etc/systemd/system/getty@tty1.service.d" \
