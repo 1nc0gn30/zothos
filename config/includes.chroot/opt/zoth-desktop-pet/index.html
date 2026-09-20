@@ -9,9 +9,11 @@
     html, body {
       width: 100%;
       height: 100%;
-      background: transparent;
+      background: transparent !important;
       overflow: hidden;
       font-family: 'JetBrains Mono', 'Segoe UI', monospace;
+      border: none !important;
+      box-shadow: none !important;
     }
     .container {
       width: 100%;
@@ -20,60 +22,73 @@
       flex-direction: column;
       align-items: center;
       justify-content: flex-end;
-      padding-bottom: 20px;
+      padding-bottom: 25px;
       position: relative;
+      background: transparent !important;
     }
-    /* Speech Bubble */
+
+    /* Speech Bubble Overlay - Ultra-Clean Floating Glass */
     .speech-bubble {
       position: absolute;
       top: 10px;
       left: 10px;
       right: 10px;
-      background: rgba(10, 15, 25, 0.9);
-      border: 1px solid rgba(0, 255, 157, 0.4);
-      border-radius: 10px;
-      padding: 10px 12px;
-      color: #e2e8f0;
-      font-size: 10px;
-      line-height: 1.4;
-      box-shadow: 0 4px 20px rgba(0, 255, 157, 0.2);
-      backdrop-filter: blur(12px);
+      background: rgba(6, 10, 18, 0.92);
+      border: 1.5px solid #00ff9d;
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: #f1f5f9;
+      font-size: 10.5px;
+      line-height: 1.45;
+      box-shadow: 0 0 25px rgba(0, 255, 157, 0.3);
+      backdrop-filter: blur(16px);
       opacity: 0;
-      transform: translateY(-8px);
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: translateY(-10px) scale(0.95);
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
       pointer-events: auto;
     }
     .speech-bubble.visible {
       opacity: 1;
-      transform: translateY(0);
+      transform: translateY(0) scale(1);
     }
     .speech-bubble::after {
       content: '';
       position: absolute;
-      bottom: -8px;
+      bottom: -9px;
       left: 50%;
       transform: translateX(-50%);
-      border-width: 8px 8px 0;
+      border-width: 9px 9px 0;
       border-style: solid;
-      border-color: rgba(10, 15, 25, 0.9) transparent;
+      border-color: rgba(6, 10, 18, 0.92) transparent;
     }
     .bubble-agent {
-      font-size: 9px;
+      font-size: 9.5px;
       font-weight: 800;
       color: #00ff9d;
       margin-bottom: 4px;
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
-    /* Mascot Pet Body */
+    .bubble-agent::before {
+      content: '●';
+      color: #00ff9d;
+      font-size: 8px;
+      animation: pulse-dot 1.5s infinite;
+    }
+    @keyframes pulse-dot { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+    /* Mascot Floating Wrapper */
     .mascot-wrapper {
-      width: 160px;
-      height: 160px;
+      width: 170px;
+      height: 170px;
       position: relative;
       cursor: grab;
       display: flex;
       align-items: center;
       justify-content: center;
-      animation: bobbing 3.5s ease-in-out infinite;
+      animation: bobbing 4s ease-in-out infinite;
       -webkit-app-region: drag;
     }
     .mascot-wrapper:active {
@@ -81,27 +96,35 @@
     }
     @keyframes bobbing {
       0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-12px) rotate(2deg); }
+      50% { transform: translateY(-14px) rotate(2deg); }
     }
 
-    /* Holographic Ring Outer */
+    /* Outer Holographic & Planetary Glyphs Ring */
     .holo-ring {
       position: absolute;
       inset: 0;
-      border: 2px dashed rgba(0, 255, 157, 0.4);
+      border: 2px dashed rgba(0, 255, 157, 0.5);
       border-radius: 50%;
-      animation: spin 12s linear infinite;
-      box-shadow: 0 0 15px rgba(0, 255, 157, 0.2);
+      animation: spin 14s linear infinite;
+      box-shadow: 0 0 20px rgba(0, 255, 157, 0.25);
+    }
+    .holo-ring-inner {
+      position: absolute;
+      inset: 12px;
+      border: 1px solid rgba(0, 229, 255, 0.4);
+      border-radius: 50%;
+      animation: spin-reverse 9s linear infinite;
     }
     @keyframes spin { 100% { transform: rotate(360deg); } }
+    @keyframes spin-reverse { 100% { transform: rotate(-360deg); } }
 
-    /* Core AI Orb */
+    /* Core AI Orb Engine */
     .orb-core {
-      width: 110px;
-      height: 110px;
+      width: 114px;
+      height: 114px;
       border-radius: 50%;
-      background: radial-gradient(circle at 35% 35%, #00ff9d 0%, #00e5ff 40%, #0c1220 90%);
-      box-shadow: 0 0 25px rgba(0, 255, 157, 0.6), inset 0 0 15px rgba(255, 255, 255, 0.5);
+      background: radial-gradient(circle at 35% 35%, #00ff9d 0%, #00e5ff 40%, #070d18 90%);
+      box-shadow: 0 0 30px rgba(0, 255, 157, 0.65), inset 0 0 20px rgba(255, 255, 255, 0.6);
       position: relative;
       display: flex;
       align-items: center;
@@ -109,49 +132,73 @@
       transition: all 0.3s;
     }
     .orb-core:hover {
-      box-shadow: 0 0 40px rgba(0, 255, 157, 0.85), inset 0 0 20px rgba(255, 255, 255, 0.8);
+      box-shadow: 0 0 45px rgba(0, 255, 157, 0.9), inset 0 0 25px rgba(255, 255, 255, 0.85);
+      transform: scale(1.04);
     }
 
-    /* Cyber Eye pupil that tracks mouse cursor */
+    /* Laser Eye Socket & Iris */
     .eye-socket {
-      width: 44px;
-      height: 44px;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
-      background: #04060b;
+      background: #030509;
       border: 2px solid #00ff9d;
       display: flex;
       align-items: center;
       justify-content: center;
       position: relative;
       overflow: hidden;
+      box-shadow: inset 0 0 10px rgba(0, 255, 157, 0.8);
     }
     .eye-pupil {
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
       border-radius: 50%;
-      background: #00ff9d;
-      box-shadow: 0 0 10px #00ff9d;
+      background: radial-gradient(circle, #ffffff 0%, #00ff9d 60%, #00e5ff 100%);
+      box-shadow: 0 0 14px #00ff9d, 0 0 25px #00e5ff;
       position: absolute;
-      transition: transform 0.05s ease-out;
+      transition: transform 0.04s ease-out, scale 0.2s;
+    }
+    .eye-pupil.reading {
+      transform: scale(1.35) !important;
+      box-shadow: 0 0 20px #00e5ff, 0 0 30px #00ff9d;
+    }
+    .scan-beam {
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 255, 157, 0.8), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .scan-beam.active {
+      opacity: 1;
+      animation: scan 1.2s ease-in-out infinite;
+    }
+    @keyframes scan {
+      0% { left: -100%; }
+      100% { left: 100%; }
     }
 
-    /* Context Menu Modal (Right Click) */
+    /* Right Click Launcher Menu */
     .pet-menu {
       position: absolute;
-      bottom: 20px;
-      background: rgba(10, 15, 25, 0.95);
-      border: 1px solid rgba(0, 229, 255, 0.3);
-      border-radius: 8px;
+      bottom: 25px;
+      background: rgba(6, 10, 18, 0.95);
+      border: 1.5px solid #00e5ff;
+      border-radius: 10px;
       padding: 6px;
       display: flex;
       flex-direction: column;
       gap: 4px;
-      backdrop-filter: blur(16px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 15px rgba(0, 229, 255, 0.3);
       opacity: 0;
       pointer-events: none;
       transform: scale(0.9);
-      transition: all 0.2s;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .pet-menu.active {
       opacity: 1;
@@ -159,15 +206,17 @@
       transform: scale(1);
     }
     .menu-item {
-      padding: 6px 12px;
-      font-size: 10px;
+      padding: 7px 14px;
+      font-size: 10.5px;
+      font-weight: 700;
       color: #f1f5f9;
       background: rgba(255, 255, 255, 0.04);
-      border-radius: 4px;
+      border-radius: 6px;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
+      transition: all 0.15s;
     }
     .menu-item:hover {
       background: rgba(0, 229, 255, 0.2);
@@ -179,15 +228,17 @@
   <div class="container">
     <!-- Speech Bubble Overlay -->
     <div id="speech-bubble" class="speech-bubble">
-      <div id="bubble-agent" class="bubble-agent">⚡ GHOSTBYTE NULLAI</div>
-      <div id="bubble-text">Sovereign Sentinel AI Active. Monitoring OS memory and kernel rings.</div>
+      <div id="bubble-agent" class="bubble-agent">GHOSTBYTE NULLAI</div>
+      <div id="bubble-text">ZothOS Companion active. Reading cursor vector and system telemetry.</div>
     </div>
 
-    <!-- Interactive Animated Mascot -->
+    <!-- Interactive Holographic Mascot -->
     <div class="mascot-wrapper" id="mascot-wrapper">
       <div class="holo-ring"></div>
+      <div class="holo-ring-inner"></div>
       <div class="orb-core" id="orb-core" onclick="triggerPoke()">
         <div class="eye-socket">
+          <div class="scan-beam" id="scan-beam"></div>
           <div class="eye-pupil" id="eye-pupil"></div>
         </div>
       </div>
@@ -200,7 +251,8 @@
       <div class="menu-item" onclick="launch('hexstrike')">⚡ HexStrike AI</div>
       <div class="menu-item" onclick="launch('reality')">🌿 Reality Switcher</div>
       <div class="menu-item" onclick="launch('ghost')">👻 NullAI Ghostmode</div>
-      <div class="menu-item" onclick="toggleMenu()">❌ Close Menu</div>
+      <div class="menu-item" onclick="launch('nexus')">📦 Zoth Tool Nexus</div>
+      <div class="menu-item" onclick="toggleMenu()" style="color:#ff4757;">❌ Close Menu</div>
     </div>
   </div>
 

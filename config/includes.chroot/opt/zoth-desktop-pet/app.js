@@ -4,6 +4,7 @@ const speechBubble = document.getElementById('speech-bubble');
 const bubbleAgent = document.getElementById('bubble-agent');
 const bubbleText = document.getElementById('bubble-text');
 const eyePupil = document.getElementById('eye-pupil');
+const scanBeam = document.getElementById('scan-beam');
 const petMenu = document.getElementById('pet-menu');
 
 const THOUGHTS = [
@@ -15,8 +16,9 @@ const THOUGHTS = [
 ];
 
 let thoughtIdx = 0;
+let isReadingCode = false;
 
-// Web Audio synth poke sound
+// Synthesized Web Audio Acoustic Feedback
 function playSound(freq = 520, type = 'sine') {
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -34,21 +36,44 @@ function playSound(freq = 520, type = 'sine') {
   } catch (e) {}
 }
 
-// Track mouse position to move pupil
-window.addEventListener('mousemove', (e) => {
-  const rect = eyePupil.parentElement.getBoundingClientRect();
-  const eyeCenterX = rect.left + rect.width / 2;
-  const eyeCenterY = rect.top + rect.height / 2;
+// 60FPS Global OS Cursor Tracking
+ipcRenderer.on('global-cursor-pos', (event, pos) => {
+  const eyeSocket = eyePupil.parentElement;
+  const socketRect = eyeSocket.getBoundingClientRect();
+  
+  // Calculate center of eye socket in global screen coordinates
+  const eyeGlobalX = pos.windowX + socketRect.left + socketRect.width / 2;
+  const eyeGlobalY = pos.windowY + socketRect.top + socketRect.height / 2;
 
-  const deltaX = e.clientX - eyeCenterX;
-  const deltaY = e.clientY - eyeCenterY;
+  const deltaX = pos.cursorX - eyeGlobalX;
+  const deltaY = pos.cursorY - eyeGlobalY;
+
   const angle = Math.atan2(deltaY, deltaX);
-  const distance = Math.min(10, Math.hypot(deltaX, deltaY) / 10);
+  const distance = Math.min(12, Math.hypot(deltaX, deltaY) / 45);
 
   const pupilX = Math.cos(angle) * distance;
   const pupilY = Math.sin(angle) * distance;
 
   eyePupil.style.transform = `translate(${pupilX}px, ${pupilY}px)`;
+});
+
+// Active Window Reading Reaction
+ipcRenderer.on('active-window-changed', (event, winTitle) => {
+  const lower = winTitle.toLowerCase();
+  if (lower.includes('terminal') || lower.includes('code') || lower.includes('hexstrike') || lower.includes('studio') || lower.includes('bash')) {
+    if (!isReadingCode) {
+      isReadingCode = true;
+      eyePupil.classList.add('reading');
+      scanBeam.classList.add('active');
+      showSpeech(`Reading active window: "${winTitle.substring(0, 32)}..."`, '📖 AI CODE & TASK READER');
+    }
+  } else {
+    if (isReadingCode) {
+      isReadingCode = false;
+      eyePupil.classList.remove('reading');
+      scanBeam.classList.remove('active');
+    }
+  }
 });
 
 function showSpeech(text, agent = '⚡ GHOSTBYTE NULLAI') {
@@ -66,7 +91,7 @@ window.triggerPoke = function() {
   showSpeech(THOUGHTS[thoughtIdx]);
 };
 
-// Right click to toggle quick launch menu
+// Right click context menu
 window.addEventListener('contextmenu', (e) => {
   e.preventDefault();
   petMenu.classList.toggle('active');
@@ -80,21 +105,21 @@ window.launch = function(appName) {
   playSound(880, 'sine');
   ipcRenderer.send('launch-app', appName);
   petMenu.classList.remove('active');
-  showSpeech(`Launching ${appName.toUpperCase()}...`, '🚀 ZOTH DESKTOP DISPATCH');
+  showSpeech(`Launching ${appName.toUpperCase()}...`, '🚀 ZOTH DISPATCH');
 };
 
-// Periodic telemetry polling
+// Telemetry Polling
 ipcRenderer.on('telemetry-update', (event, data) => {
-  if (Math.random() < 0.3) {
-    showSpeech(`RAM Usage: ${data.usedGB} GB (${data.ramPct}%). Sentinel Daemon: ${data.sentinelActive ? 'ACTIVE' : 'IDLE'}.`);
+  if (Math.random() < 0.25) {
+    showSpeech(`RAM Usage: ${data.usedGB} GB (${data.ramPct}%). Sentinel Supervisor: ${data.sentinelActive ? 'ACTIVE' : 'IDLE'}.`);
   }
 });
 
 setInterval(() => {
   ipcRenderer.send('get-telemetry');
-}, 15000);
+}, 16000);
 
 // Initial greeting
 setTimeout(() => {
-  showSpeech("ZothOS Companion Online. Drag me anywhere or click for OS status.");
-}, 1200);
+  showSpeech("ZothOS Companion Online. Tracking cursor across OS & reading active windows.");
+}, 1000);

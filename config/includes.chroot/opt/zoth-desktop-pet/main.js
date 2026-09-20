@@ -1,9 +1,11 @@
-const { app, BrowserWindow, ipcMain, screen, Menu, MenuItem } = require('electron');
+const { app, BrowserWindow, ipcMain, screen } = require('electron');
 const path = require('path');
 const { exec } = require('child_process');
 const fs = require('fs');
 
 let petWindow = null;
+let cursorPoller = null;
+let windowPoller = null;
 
 function createPetWindow() {
   const primaryDisplay = screen.getPrimaryDisplay();
@@ -13,13 +15,14 @@ function createPetWindow() {
     width: 320,
     height: 380,
     x: width - 340,
-    y: height - 400,
+    y: height - 410,
     transparent: true,
     frame: false,
     alwaysOnTop: true,
     skipTaskbar: true,
     resizable: false,
     hasShadow: false,
+    backgroundColor: '#00000000',
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -28,11 +31,37 @@ function createPetWindow() {
   });
 
   petWindow.loadFile(path.join(__dirname, 'index.html'));
-
-  // Ensure mascot sits smoothly over windows without stealing input focus
   petWindow.setAlwaysOnTop(true, 'floating', 1);
 
+  // 60FPS Global Cursor Tracking across entire OS desktop
+  cursorPoller = setInterval(() => {
+    if (!petWindow || petWindow.isDestroyed()) return;
+    const point = screen.getCursorScreenPoint();
+    const bounds = petWindow.getBounds();
+    petWindow.webContents.send('global-cursor-pos', {
+      cursorX: point.x,
+      cursorY: point.y,
+      windowX: bounds.x,
+      windowY: bounds.y,
+      width: bounds.width,
+      height: bounds.height
+    });
+  }, 16);
+
+  // Active Window & OS Activity Monitor
+  windowPoller = setInterval(() => {
+    if (!petWindow || petWindow.isDestroyed()) return;
+    exec('xdotool getactivewindow getwindowname 2>/dev/null || true', (err, stdout) => {
+      const activeWin = (stdout || '').trim();
+      if (activeWin) {
+        petWindow.webContents.send('active-window-changed', activeWin);
+      }
+    });
+  }, 2500);
+
   petWindow.on('closed', () => {
+    if (cursorPoller) clearInterval(cursorPoller);
+    if (windowPoller) clearInterval(windowPoller);
     petWindow = null;
   });
 }
@@ -79,10 +108,4 @@ ipcMain.on('get-telemetry', (event) => {
       });
     });
   });
-});
-
-ipcMain.on('move-window', (event, { deltaX, deltaY }) => {
-  if (!petWindow) return;
-  const [x, y] = petWindow.getPosition();
-  petWindow.setPosition(x + deltaX, y + deltaY);
 });
