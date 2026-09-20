@@ -1,0 +1,96 @@
+#!/usr/bin/env python3
+"""
+==============================================================================
+ * ZOTHOS OS ACOUSTIC ENGINE & UI SOUND EFFECT DAEMON v1.0 *
+ Synthesizes and plays real-time futuristic UI acoustic feedback on Linux.
+ Supports: Paplay, Aplay, PipeWire, PulseAudio.
+==============================================================================
+"""
+
+import sys
+import os
+import math
+import wave
+import struct
+import tempfile
+import subprocess
+from typing import Optional
+
+SOUND_CACHE_DIR = os.path.expanduser("~/.cache/zothos/sounds")
+os.makedirs(SOUND_CACHE_DIR, exist_ok=True)
+
+
+def generate_synth_wav(filename: str, freq: float, duration: float = 0.12, sound_type: str = "sine"):
+    """Generates a clean 44.1kHz 16-bit PCM WAV sound effect file on the fly."""
+    sample_rate = 44100
+    n_samples = int(sample_rate * duration)
+
+    with wave.open(filename, "w") as wav_file:
+        wav_file.setnchannels(1)
+        wav_file.setsampwidth(2)
+        wav_file.setframerate(sample_rate)
+
+        frames = bytearray()
+        for i in range(n_samples):
+            t = i / sample_rate
+            # Frequency sweep
+            cur_freq = freq + (freq * 0.8 * (i / n_samples))
+            
+            if sound_type == "sine":
+                val = math.sin(2 * math.pi * cur_freq * t)
+            elif sound_type == "triangle":
+                val = (2 / math.pi) * math.asin(math.sin(2 * math.pi * cur_freq * t))
+            elif sound_type == "square":
+                val = 0.6 if math.sin(2 * math.pi * cur_freq * t) >= 0 else -0.6
+            else:
+                val = math.sin(2 * math.pi * cur_freq * t)
+
+            # Decay envelope
+            decay = math.exp(-6.0 * (i / n_samples))
+            sample_val = int(val * decay * 16383)
+            frames.extend(struct.pack("<h", sample_val))
+
+        wav_file.writeframes(frames)
+
+
+def play_sound(sound_name: str, freq: float = 440, duration: float = 0.12, sound_type: str = "sine"):
+    wav_path = os.path.join(SOUND_CACHE_DIR, f"{sound_name}.wav")
+    if not os.path.exists(wav_path):
+        generate_synth_wav(wav_path, freq, duration, sound_type)
+
+    # Play using available Linux audio player
+    if subprocess.run(["which", "paplay"], capture_output=True).returncode == 0:
+        subprocess.Popen(["paplay", wav_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    elif subprocess.run(["which", "aplay"], capture_output=True).returncode == 0:
+        subprocess.Popen(["aplay", "-q", wav_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    elif subprocess.run(["which", "pw-play"], capture_output=True).returncode == 0:
+        subprocess.Popen(["pw-play", wav_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def main():
+    if len(sys.argv) > 1:
+        cmd = sys.argv[1].lower()
+        if cmd == "click":
+            play_sound("ui_click", 680, 0.08, "triangle")
+        elif cmd == "hover":
+            play_sound("ui_hover", 320, 0.05, "sine")
+        elif cmd == "launch":
+            play_sound("app_launch", 520, 0.18, "sine")
+        elif cmd == "matrix":
+            play_sound("transmute_matrix", 440, 0.22, "triangle")
+        elif cmd == "ghost":
+            play_sound("transmute_ghost", 220, 0.25, "square")
+        elif cmd == "gold":
+            play_sound("transmute_gold", 780, 0.25, "sine")
+        elif cmd == "win11":
+            play_sound("transmute_win11", 580, 0.20, "sine")
+        elif cmd == "poke":
+            play_sound("mascot_poke", 620, 0.12, "triangle")
+        else:
+            play_sound("ui_click", 440, 0.10, "sine")
+    else:
+        print("Usage: zoth-audio-effects <click|hover|launch|matrix|ghost|gold|win11|poke>")
+
+
+if __name__ == "__main__":
+    main()

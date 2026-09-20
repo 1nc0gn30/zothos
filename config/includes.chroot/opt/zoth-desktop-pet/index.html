@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zoth AI Desktop Companion</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      overflow: hidden;
+      font-family: 'JetBrains Mono', 'Segoe UI', monospace;
+    }
+    .container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding-bottom: 20px;
+      position: relative;
+    }
+    /* Speech Bubble */
+    .speech-bubble {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      background: rgba(10, 15, 25, 0.9);
+      border: 1px solid rgba(0, 255, 157, 0.4);
+      border-radius: 10px;
+      padding: 10px 12px;
+      color: #e2e8f0;
+      font-size: 10px;
+      line-height: 1.4;
+      box-shadow: 0 4px 20px rgba(0, 255, 157, 0.2);
+      backdrop-filter: blur(12px);
+      opacity: 0;
+      transform: translateY(-8px);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: auto;
+    }
+    .speech-bubble.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .speech-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 8px 8px 0;
+      border-style: solid;
+      border-color: rgba(10, 15, 25, 0.9) transparent;
+    }
+    .bubble-agent {
+      font-size: 9px;
+      font-weight: 800;
+      color: #00ff9d;
+      margin-bottom: 4px;
+      letter-spacing: 1px;
+    }
+    /* Mascot Pet Body */
+    .mascot-wrapper {
+      width: 160px;
+      height: 160px;
+      position: relative;
+      cursor: grab;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: bobbing 3.5s ease-in-out infinite;
+      -webkit-app-region: drag;
+    }
+    .mascot-wrapper:active {
+      cursor: grabbing;
+    }
+    @keyframes bobbing {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-12px) rotate(2deg); }
+    }
+
+    /* Holographic Ring Outer */
+    .holo-ring {
+      position: absolute;
+      inset: 0;
+      border: 2px dashed rgba(0, 255, 157, 0.4);
+      border-radius: 50%;
+      animation: spin 12s linear infinite;
+      box-shadow: 0 0 15px rgba(0, 255, 157, 0.2);
+    }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    /* Core AI Orb */
+    .orb-core {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #00ff9d 0%, #00e5ff 40%, #0c1220 90%);
+      box-shadow: 0 0 25px rgba(0, 255, 157, 0.6), inset 0 0 15px rgba(255, 255, 255, 0.5);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+    .orb-core:hover {
+      box-shadow: 0 0 40px rgba(0, 255, 157, 0.85), inset 0 0 20px rgba(255, 255, 255, 0.8);
+    }
+
+    /* Cyber Eye pupil that tracks mouse cursor */
+    .eye-socket {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #04060b;
+      border: 2px solid #00ff9d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .eye-pupil {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #00ff9d;
+      box-shadow: 0 0 10px #00ff9d;
+      position: absolute;
+      transition: transform 0.05s ease-out;
+    }
+
+    /* Context Menu Modal (Right Click) */
+    .pet-menu {
+      position: absolute;
+      bottom: 20px;
+      background: rgba(10, 15, 25, 0.95);
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      border-radius: 8px;
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.9);
+      transition: all 0.2s;
+    }
+    .pet-menu.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1);
+    }
+    .menu-item {
+      padding: 6px 12px;
+      font-size: 10px;
+      color: #f1f5f9;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .menu-item:hover {
+      background: rgba(0, 229, 255, 0.2);
+      color: #00e5ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Speech Bubble Overlay -->
+    <div id="speech-bubble" class="speech-bubble">
+      <div id="bubble-agent" class="bubble-agent">⚡ GHOSTBYTE NULLAI</div>
+      <div id="bubble-text">Sovereign Sentinel AI Active. Monitoring OS memory and kernel rings.</div>
+    </div>
+
+    <!-- Interactive Animated Mascot -->
+    <div class="mascot-wrapper" id="mascot-wrapper">
+      <div class="holo-ring"></div>
+      <div class="orb-core" id="orb-core" onclick="triggerPoke()">
+        <div class="eye-socket">
+          <div class="eye-pupil" id="eye-pupil"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Launcher Context Menu -->
+    <div id="pet-menu" class="pet-menu">
+      <div class="menu-item" onclick="launch('studio')">🎨 Zoth Studio Pro</div>
+      <div class="menu-item" onclick="launch('agent')">🤖 Zoth Agent OS</div>
+      <div class="menu-item" onclick="launch('hexstrike')">⚡ HexStrike AI</div>
+      <div class="menu-item" onclick="launch('reality')">🌿 Reality Switcher</div>
+      <div class="menu-item" onclick="launch('ghost')">👻 NullAI Ghostmode</div>
+      <div class="menu-item" onclick="toggleMenu()">❌ Close Menu</div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

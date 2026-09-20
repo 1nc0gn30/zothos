@@ -41,6 +41,9 @@ notify_transition() {
     local title="$1"
     local msg="$2"
     local icon="${3:-/usr/share/pixmaps/zothos.png}"
+    if command -v zoth-audio-effects >/dev/null 2>&1; then
+        zoth-audio-effects "${title,,}" 2>/dev/null || true
+    fi
     if command -v notify-send >/dev/null 2>&1; then
         notify-send -a "ZothOS Reality Engine" -i "$icon" --urgency normal \
             "$title" "$msg" 2>/dev/null || true
