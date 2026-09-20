@@ -184,6 +184,10 @@ check_file "$CHROOT/usr/share/hexstrike-ai/hexstrike_mcp.py" "HexStrike MCP Serv
 check_syntax_python "$CHROOT/usr/share/hexstrike-ai/hexstrike_mcp.py"
 check_file "$CHROOT/usr/share/hexstrike-ai/hexstrike_server.py" "HexStrike Backend Server"
 check_syntax_python "$CHROOT/usr/share/hexstrike-ai/hexstrike_server.py"
+check_file "$CHROOT/opt/zoth-hud/package.json" "Electron HUD Package Manifest"
+check_file "$CHROOT/opt/zoth-hud/main.js" "Electron HUD Main Process"
+check_file "$CHROOT/opt/zoth-hud/index.html" "Electron HUD UI Canvas Engine"
+check_file "$CHROOT/opt/zoth-hud/app.js" "Electron HUD Frontend Controller"
 
 echo -e "\n------------------------------------------------------"
 if [[ $ERRORS -eq 0 ]]; then

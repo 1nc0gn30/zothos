@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ZothOS Apex Telemetry HUD</title>
+  <style>
+    :root {
+      --primary: #00ff9d;
+      --primary-glow: rgba(0, 255, 157, 0.35);
+      --secondary: #00e5ff;
+      --secondary-glow: rgba(0, 229, 255, 0.35);
+      --accent: #ffd700;
+      --accent-glow: rgba(255, 215, 0, 0.35);
+      --danger: #ff3355;
+      --danger-glow: rgba(255, 51, 85, 0.40);
+      
+      --bg-acrylic: rgba(6, 11, 18, 0.88);
+      --card-bg: rgba(10, 18, 28, 0.75);
+      --card-border: rgba(0, 255, 157, 0.20);
+      --card-hover: rgba(14, 25, 38, 0.85);
+
+      --text-white: #f5f8ff;
+      --text-muted: #9bb0cb;
+      --text-dim: #546a88;
+      
+      --font-mono: "JetBrains Mono", "Fira Code", monospace;
+    }
+
+    [data-theme="ghost"] {
+      --primary: #ff3355;
+      --primary-glow: rgba(255, 51, 85, 0.40);
+      --secondary: #ff8000;
+      --secondary-glow: rgba(255, 128, 0, 0.35);
+      --accent: #cc33ff;
+      --accent-glow: rgba(204, 51, 255, 0.35);
+      --bg-acrylic: rgba(18, 6, 10, 0.88);
+      --card-bg: rgba(28, 10, 16, 0.75);
+      --card-border: rgba(255, 51, 85, 0.22);
+      --card-hover: rgba(38, 14, 22, 0.85);
+    }
+
+    [data-theme="gold"] {
+      --primary: #ffd700;
+      --primary-glow: rgba(255, 215, 0, 0.40);
+      --secondary: #00ff9d;
+      --secondary-glow: rgba(0, 255, 157, 0.35);
+      --accent: #ff9900;
+      --accent-glow: rgba(255, 153, 0, 0.35);
+      --bg-acrylic: rgba(14, 12, 6, 0.88);
+      --card-bg: rgba(24, 20, 10, 0.75);
+      --card-border: rgba(255, 215, 0, 0.22);
+      --card-hover: rgba(34, 28, 14, 0.85);
+    }
+
+    [data-theme="cyan"] {
+      --primary: #00e5ff;
+      --primary-glow: rgba(0, 229, 255, 0.40);
+      --secondary: #9966ff;
+      --secondary-glow: rgba(153, 102, 255, 0.35);
+      --accent: #00ff9d;
+      --accent-glow: rgba(0, 255, 157, 0.35);
+      --bg-acrylic: rgba(6, 12, 20, 0.88);
+      --card-bg: rgba(10, 20, 32, 0.75);
+      --card-border: rgba(0, 229, 255, 0.22);
+      --card-hover: rgba(14, 28, 44, 0.85);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      font-family: var(--font-mono);
+      background: transparent;
+      color: var(--text-white);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 4px;
+    }
+
+    /* ── Main Acrylic Container ── */
+    .hud-container {
+      width: 100%;
+      height: 100%;
+      background: var(--bg-acrylic);
+      backdrop-filter: blur(28px) saturate(160%);
+      -webkit-backdrop-filter: blur(28px) saturate(160%);
+      border: 1px solid var(--primary-glow);
+      border-radius: 14px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.70), 0 0 20px var(--primary-glow);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Scanline Overlay */
+    .hud-container::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.12) 0px,
+        rgba(0, 0, 0, 0.12) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      pointer-events: none;
+      z-index: 100;
+      opacity: 0.6;
+    }
+
+    /* ── Header ── */
+    .hud-header {
+      height: 42px;
+      padding: 0 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.02);
+      -webkit-app-region: drag;
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pulse-orb {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--primary);
+      box-shadow: 0 0 10px var(--primary);
+      animation: pulse-glow 2s infinite;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.6; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.15); box-shadow: 0 0 14px var(--primary); }
+    }
+
+    .brand-text {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: var(--accent);
+      text-shadow: 0 0 8px var(--accent-glow);
+    }
+
+    .brand-sub {
+      font-size: 8px;
+      color: var(--text-dim);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .header-controls {
+      display: flex;
+      gap: 6px;
+      -webkit-app-region: no-drag;
+    }
+
+    /* ── Cyber Pill Buttons ── */
+    .pill-btn {
+      background: rgba(14, 22, 34, 0.90);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 8.5px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .pill-btn:hover {
+      background: var(--primary-glow);
+      border-color: var(--primary);
+      color: var(--text-white);
+      box-shadow: 0 0 10px var(--primary-glow);
+    }
+
+    .pill-btn.active {
+      background: var(--primary-glow);
+      border-color: var(--primary);
+      color: var(--text-white);
+      box-shadow: 0 0 12px var(--primary-glow);
+    }
+
+    .pill-btn.accent {
+      border-color: rgba(255, 215, 0, 0.4);
+      color: var(--accent);
+    }
+    .pill-btn.accent:hover {
+      background: var(--accent-glow);
+      border-color: var(--accent);
+      box-shadow: 0 0 10px var(--accent-glow);
+      color: #fff;
+    }
+
+    .pill-btn.danger {
+      border-color: rgba(255, 51, 85, 0.4);
+      color: var(--danger);
+    }
+    .pill-btn.danger:hover {
+      background: var(--danger-glow);
+      border-color: var(--danger);
+      box-shadow: 0 0 10px var(--danger-glow);
+      color: #fff;
+    }
+
+    /* ── Content Body ── */
+    .hud-body {
+      flex: 1;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .hud-body::-webkit-scrollbar {
+      width: 4px;
+    }
+    .hud-body::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 2px;
+    }
+
+    /* ── Telemetry Cards ── */
+    .telemetry-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 9px 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+
+    .telemetry-card:hover {
+      background: var(--card-hover);
+      border-color: var(--primary-glow);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    }
+
+    .telemetry-card.open {
+      border-color: var(--primary);
+      box-shadow: 0 0 16px var(--primary-glow);
+    }
+
+    .card-row-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-label {
+      font-size: 9.5px;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      color: var(--primary);
+      text-transform: uppercase;
+    }
+
+    .card-badge {
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--text-dim);
+    }
+
+    .metric-hero-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+
+    .metric-value {
+      font-size: 17px;
+      font-weight: 900;
+      color: var(--text-white);
+      letter-spacing: -0.5px;
+      line-height: 1;
+    }
+
+    .metric-sub {
+      font-size: 8.5px;
+      color: var(--text-dim);
+      font-weight: 600;
+    }
+
+    .top-proc-label {
+      font-size: 8.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* ── Progress & Equalizer Bars ── */
+    .bar-track {
+      width: 100%;
+      height: 4px;
+      background: rgba(0, 0, 0, 0.45);
+      border-radius: 2px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--secondary), var(--primary));
+      border-radius: 2px;
+      transition: width 0.4s ease;
+      box-shadow: 0 0 8px var(--primary-glow);
+    }
+
+    .core-equalizer {
+      display: flex;
+      gap: 3px;
+      height: 16px;
+      align-items: flex-end;
+      padding: 2px 0;
+    }
+
+    .core-col {
+      flex: 1;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 1px;
+      display: flex;
+      align-items: flex-end;
+      overflow: hidden;
+    }
+
+    .core-fill {
+      width: 100%;
+      background: linear-gradient(0deg, var(--secondary), var(--primary));
+      transition: height 0.3s ease;
+    }
+
+    /* ── Canvas Wave Graphs ── */
+    .wave-canvas {
+      width: 100%;
+      height: 44px;
+      display: block;
+      border-radius: 4px;
+    }
+
+    /* ── Expandable Process Drawer ── */
+    .process-drawer {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 6px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      animation: drawer-fade 0.2s ease-out forwards;
+    }
+
+    .telemetry-card.open .process-drawer {
+      display: flex;
+    }
+
+    @keyframes drawer-fade {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .drawer-title {
+      font-size: 8px;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2px;
+    }
+
+    .proc-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 3px 6px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 3px;
+      font-size: 8.5px;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+    }
+
+    .proc-row:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .proc-info {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .proc-pid {
+      color: var(--text-dim);
+      font-size: 8px;
+    }
+
+    .proc-name {
+      color: var(--text-white);
+      font-weight: 600;
+    }
+
+    .proc-metric {
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    /* ── Dual Grid (Disk + Net) ── */
+    .dual-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    /* ── Network Interfaces Card ── */
+    .iface-entry {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      padding: 5px 6px;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .iface-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .iface-badge {
+      font-size: 9px;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .iface-ip {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: var(--text-white);
+    }
+
+    .iface-actions {
+      display: flex;
+      gap: 4px;
+    }
+
+    .iface-mac {
+      font-size: 8px;
+      color: var(--text-dim);
+    }
+
+    /* ── Sentinel Status ── */
+    .sentinel-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sentinel-core {
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--text-white);
+    }
+
+    .sentinel-ring {
+      font-size: 8px;
+      color: var(--text-dim);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 8.5px;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--primary);
+      box-shadow: 0 0 6px var(--primary);
+    }
+
+    /* ── Action Command Deck ── */
+    .command-deck {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    .deck-btn {
+      height: 28px;
+      background: rgba(14, 24, 38, 0.95);
+      border: 1px solid var(--primary-glow);
+      border-radius: 5px;
+      color: var(--text-white);
+      font-family: var(--font-mono);
+      font-size: 8.5px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    .deck-btn:hover {
+      background: var(--primary-glow);
+      border-color: var(--primary);
+      box-shadow: 0 0 14px var(--primary-glow);
+      transform: translateY(-1px);
+    }
+
+    .deck-btn:active {
+      transform: translateY(1px);
+    }
+
+    .deck-btn.gold {
+      border-color: var(--accent-glow);
+      color: var(--accent);
+    }
+    .deck-btn.gold:hover {
+      background: var(--accent-glow);
+      border-color: var(--accent);
+      color: #fff;
+      box-shadow: 0 0 14px var(--accent-glow);
+    }
+
+    .deck-btn.cyan {
+      border-color: var(--secondary-glow);
+      color: var(--secondary);
+    }
+    .deck-btn.cyan:hover {
+      background: var(--secondary-glow);
+      border-color: var(--secondary);
+      color: #fff;
+      box-shadow: 0 0 14px var(--secondary-glow);
+    }
+
+    /* ── Footer ── */
+    .hud-footer {
+      height: 24px;
+      padding: 0 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 8px;
+      color: var(--text-dim);
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    /* ── Compact Mini Mode ── */
+    .hud-container.mini {
+      height: 64px !important;
+    }
+    .hud-container.mini .hud-body,
+    .hud-container.mini .hud-footer {
+      display: none;
+    }
+    .hud-container.mini .mini-ticker {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      height: 22px;
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .mini-ticker {
+      display: none;
+    }
+  </style>
+</head>
+<body data-theme="emerald">
+  <div class="hud-container" id="hud-container">
+    
+    <!-- Header -->
+    <div class="hud-header">
+      <div class="brand-title">
+        <div class="pulse-orb"></div>
+        <div>
+          <div class="brand-text">ZOTHOS APEX HUD</div>
+          <div class="brand-sub" id="theme-sub-label">PRO SOVEREIGN // [EMERALD]</div>
+        </div>
+      </div>
+      <div class="header-controls">
+        <button class="pill-btn" id="btn-mini" title="Toggle Compact Mini Mode">MINI</button>
+        <button class="pill-btn accent" id="btn-theme" title="Cycle Visual Theme">FX</button>
+      </div>
+    </div>
+
+    <!-- Mini Ticker (only in mini mode) -->
+    <div class="mini-ticker" id="mini-ticker">
+      <span id="mini-cpu">CPU: 0.0%</span>
+      <span>•</span>
+      <span id="mini-ram">RAM: 0.0G</span>
+      <span>•</span>
+      <span id="mini-net">NET: ▼0.0K</span>
+    </div>
+
+    <!-- Main Body Cards -->
+    <div class="hud-body" id="hud-body">
+      
+      <!-- Card 1: CPU Compute Matrix -->
+      <div class="telemetry-card" id="card-cpu">
+        <div class="card-row-header">
+          <div class="card-label">CPU Compute Matrix</div>
+          <div class="card-badge" id="cpu-temp">42°C</div>
+        </div>
+        <div class="metric-hero-row">
+          <div class="metric-value" id="cpu-pct">0.0%</div>
+          <div class="metric-sub" id="cpu-freq">[2.4 GHz]</div>
+          <div class="top-proc-label" id="cpu-top-proc">Top: idle</div>
+        </div>
+        <!-- Per-Core Equalizer -->
+        <div class="core-equalizer" id="core-equalizer"></div>
+        <!-- Wave Canvas -->
+        <canvas class="wave-canvas" id="canvas-cpu"></canvas>
+        <!-- Expandable Drawer -->
+        <div class="process-drawer" id="drawer-cpu">
+          <div class="drawer-title">
+            <span>⚡ TOP CPU CONSUMERS</span>
+            <span style="font-size:7px; color:var(--text-dim)">CLICK [KILL] TO TERMINATE</span>
+          </div>
+          <div id="cpu-proc-list" style="display:flex; flex-direction:column; gap:3px;"></div>
+        </div>
+      </div>
+
+      <!-- Card 2: Dynamic Memory Buffer -->
+      <div class="telemetry-card" id="card-ram">
+        <div class="card-row-header">
+          <div class="card-label" style="color:var(--secondary)">Dynamic Memory Buffer</div>
+          <div class="card-badge" id="ram-pct-badge" style="color:var(--secondary); font-weight:800">0% USED</div>
+        </div>
+        <div class="metric-hero-row">
+          <div class="metric-value" id="ram-metric" style="font-size:13px;">0.00G / 0.00G</div>
+          <div class="metric-sub" id="ram-cache">(Cache: 0.00G)</div>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" id="ram-bar-fill" style="width: 0%;"></div>
+        </div>
+        <!-- RAM Wave Canvas -->
+        <canvas class="wave-canvas" id="canvas-ram"></canvas>
+        <!-- Expandable Drawer -->
+        <div class="process-drawer" id="drawer-ram">
+          <div class="drawer-title">
+            <span>💾 TOP MEMORY CONSUMERS</span>
+            <span style="font-size:7px; color:var(--text-dim)">CLICK [KILL] TO TERMINATE</span>
+          </div>
+          <div id="ram-proc-list" style="display:flex; flex-direction:column; gap:3px;"></div>
+        </div>
+      </div>
+
+      <!-- Card 3: Storage & Network Dual Grid -->
+      <div class="dual-grid">
+        <!-- Storage -->
+        <div class="telemetry-card" style="cursor:default;">
+          <div class="card-label" style="color:var(--accent)">NVMe Storage</div>
+          <div class="metric-value" id="disk-free" style="font-size:13px;">0.0 GB Free</div>
+          <div class="metric-sub" id="disk-used-sub">Used: 0% of 0G</div>
+          <div class="bar-track" style="margin-top:4px;">
+            <div class="bar-fill" id="disk-bar-fill" style="background:var(--accent); width: 0%;"></div>
+          </div>
+        </div>
+        <!-- Network I/O -->
+        <div class="telemetry-card" style="cursor:default;">
+          <div class="card-label" style="color:var(--primary)">Network I/O</div>
+          <div class="metric-value" id="net-rx" style="font-size:12px; color:var(--primary)">▼ 0.0 KB/s</div>
+          <div class="metric-sub" id="net-tx">▲ 0.0 KB/s</div>
+          <canvas class="wave-canvas" id="canvas-net" style="height:22px; margin-top:2px;"></canvas>
+        </div>
+      </div>
+
+      <!-- Card 4: Network Hardware Identity -->
+      <div class="telemetry-card" style="cursor:default;" id="card-net-id">
+        <div class="card-row-header">
+          <div class="card-label" style="color:var(--secondary)">Network Interfaces</div>
+          <button class="pill-btn accent" id="btn-cloak-all" style="font-size:8px; padding:2px 8px;">🛡️ CLOAK ALL</button>
+        </div>
+        <div id="iface-list" style="display:flex; flex-direction:column; gap:4px;"></div>
+      </div>
+
+      <!-- Card 5: Autonomous Sentinel AI & Security Ring -->
+      <div class="telemetry-card" style="cursor:default;">
+        <div class="sentinel-row">
+          <div class="card-label" style="color:var(--accent)">Autonomous Sentinel AI</div>
+          <div class="status-badge" id="sentinel-status">
+            <div class="status-dot"></div>
+            <span>ACTIVE</span>
+          </div>
+        </div>
+        <div class="sentinel-core" id="sentinel-model">Neural Core: llama3.2:latest (ollama)</div>
+        <div class="sentinel-ring">Security Authority: Ring-1 (Root Kernel Execution)</div>
+      </div>
+
+      <!-- Quick Action Command Deck -->
+      <div class="command-deck">
+        <button class="deck-btn" id="btn-tor">TOR: OFF</button>
+        <button class="deck-btn gold" id="btn-sentinel">SENTINEL</button>
+        <button class="deck-btn cyan" id="btn-purge">PURGE</button>
+        <button class="deck-btn" id="btn-heal">HEAL</button>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="hud-footer">
+      <span id="hud-uptime">UPTIME: 0h 00m</span>
+      <span>ZOTHOS APEX v5.0 ELECTRON PRO</span>
+    </div>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
