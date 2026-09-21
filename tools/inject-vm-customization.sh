@@ -20,6 +20,14 @@ fi
 
 echo "[*] Customizing ZOTHOS VM disk image with virt-customize..."
 
+# ── Copy-in coverage map (all paths targeting the new icon/launcher/desktop files):
+#   usr/local/bin         → zoth-matrix-rain, zoth-ghost-amnesic, zoth-netkill,
+#                            zoth-quicklock, zoth-pet-hud, zoth-animated-bg,
+#                            zoth-powershell, zoth-undercover + all existing scripts
+#   usr/share/applications → .desktop files for all 12 new icons + 8 new launchers
+#   usr/share/icons        → scalable/apps/*.svg for all 25 icons (13 old + 12 new)
+# ────────────────────────────────────────────────────────────────────────────────
+
 virt-customize -a "$VM_DISK" \
     --root-password password:zoth \
     --run-command "useradd -m -s /bin/bash -G sudo,audio,video,dialout neo 2>/dev/null || true" \
@@ -37,7 +45,10 @@ virt-customize -a "$VM_DISK" \
     --copy-in "$ZOTHOS_SRC/usr/share/pixmaps:/usr/share" \
     --copy-in "$ZOTHOS_SRC/usr/share/sddm:/usr/share" \
     --copy-in "$ZOTHOS_SRC/etc/lightdm:/etc" \
-    --copy-in "$ZOTHOS_SRC/etc/sddm.conf.d:/etc" \
+    --copy-in "$ZOTHOS_SRC/etc/sddm.conf.d:/etc/sddm.conf.d" \
+        --copy-in "$ZOTHOS_SRC/usr/share/plymouth/themes:/usr/share/plymouth/themes" \
+        --copy-in "$ZOTHOS_SRC/etc/xdg/xfce4/xfwm4/themes:/etc/xdg/xfce4/xfwm4/themes" \
+        --copy-in "$ZOTHOS_SRC/etc/xdg/xfwm4/themes:/etc/xdg/xfwm4/themes" \
     --copy-in "$ZOTHOS_SRC/opt/zoth-studio:/opt" \
     --copy-in "$ZOTHOS_SRC/opt/zoth-desktop-pet:/opt" \
     --copy-in "$ZOTHOS_SRC/opt/zoth-hud:/opt" \
@@ -63,10 +74,9 @@ virt-customize -a "$VM_DISK" \
     --run-command "cp -rf /etc/skel/. /home/neo/ && chown -R neo:neo /home/neo" \
     --run-command "if [ -n '$SSH_KEY_CONTENT' ]; then echo '$SSH_KEY_CONTENT' > /home/neo/.ssh/authorized_keys && chmod 700 /home/neo/.ssh && chmod 600 /home/neo/.ssh/authorized_keys && chown -R neo:neo /home/neo/.ssh; fi" \
     --run-command "mkdir -p /etc/systemd/system/getty@tty1.service.d" \
-    --run-command "printf '[Service]\nExecStart=\nExecStart=-/sbin/agetty -o \"-p -f -- \\\\\\\\u\" --noclear --autologin neo %%I \$TERM\n' > /etc/systemd/system/getty@tty1.service.d/autologin.conf" \
+    --run-command "printf '[Service]\nExecStart=\nExecStart=-/sbin/agetty -o \"-p -f -- \\\\\\\\\\\\\\\\u\" --noclear --autologin neo %%I \$TERM\n' > /etc/systemd/system/getty@tty1.service.d/autologin.conf" \
     --run-command "mkdir -p /etc/systemd/system/serial-getty@ttyS0.service.d" \
-    --run-command "printf '[Service]\nExecStart=\nExecStart=-/sbin/agetty -o \"-p -f -- \\\\\\\\u\" --keep-baud --autologin neo 115200,38400,9600 %%I \$TERM\n' > /etc/systemd/system/serial-getty@ttyS0.service.d/autologin.conf" \
+    --run-command "printf '[Service]\nExecStart=\nExecStart=-/sbin/agetty -o \"-p -f -- \\\\\\\\\\\\\\\\u\" --keep-baud --autologin neo 115200,38400,9600 %%I \$TERM\n' > /etc/systemd/system/serial-getty@ttyS0.service.d/autologin.conf" \
     --run-command "systemctl daemon-reload 2>/dev/null || true"
 
 echo "[✓] ZOTHOS VM disk image successfully customized."
-

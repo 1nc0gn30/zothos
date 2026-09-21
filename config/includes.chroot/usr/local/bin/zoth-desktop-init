@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # =============================================================================
-#  ZOTHOS Apex Desktop Initialization Engine v3
-#  Applies theme, wallpaper, compositor, HUD, hotkeys, notifications, and panel
+#  ZOTHOS Apex Desktop Initialization Engine v4
+#  Applies theme, wallpaper, compositor, HUD, hotkeys, notifications, panel
+#  Added: animated background launch + picom auto-restart watchdog
 # =============================================================================
 
 log() { echo "[zoth-desktop-init] $*"; }
@@ -68,20 +69,54 @@ if [[ -f "$WALLPAPER" ]]; then
     feh --bg-fill "$WALLPAPER" 2>/dev/null || true
 fi
 
-# ── 6. Start picom compositor ──────────────────────────────────────────────
-log "Starting compositor..."
-if ! pgrep -x picom &>/dev/null && ! pgrep -x compton &>/dev/null; then
-    PICOM_CONF="/etc/xdg/picom/picom-matrix.conf"
-    if command -v picom &>/dev/null && [[ -f "$PICOM_CONF" ]]; then
-        picom --config "$PICOM_CONF" --daemon 2>/dev/null &
-    elif command -v picom &>/dev/null; then
-        picom --backend glx --shadow --fading --blur-background --daemon 2>/dev/null &
-    elif command -v compton &>/dev/null; then
-        compton --backend glx --shadow --fading --daemon 2>/dev/null &
-    fi
+# ── 6. Start picom compositor with auto-restart watchdog ─────────────────
+log "Starting compositor with watchdog..."
+
+PICOM_CONF="/etc/xdg/picom/picom-matrix.conf"
+COMPOSITOR_LOG="/tmp/zoth-compositor.log"
+
+# Picom auto-restart watchdog (5s backoff)
+(
+    while true; do
+        if command -v picom &>/dev/null && [[ -f "$PICOM_CONF" ]]; then
+            picom --config "$PICOM_CONF" --daemon 2>>"$COMPOSITOR_LOG" &
+            echo "$(date): picom started with matrix config (PID: $!)" >> "$COMPOSITOR_LOG"
+        elif command -v picom &>/dev/null; then
+            picom --backend glx --shadow --fading --blur-background --daemon 2>>"$COMPOSITOR_LOG" &
+            echo "$(date): picom started with fallback config (PID: $!)" >> "$COMPOSITOR_LOG"
+        elif command -v compton &>/dev/null; then
+            compton --backend glx --shadow --fading --daemon 2>>"$COMPOSITOR_LOG" &
+            echo "$(date): compton started (PID: $!)" >> "$COMPOSITOR_LOG"
+        else
+            echo "$(date): WARNING - No compositor found" >> "$COMPOSITOR_LOG"
+        fi
+
+        # Wait for compositor to exit
+        while pgrep -x picom &>/dev/null || pgrep -x compton &>/dev/null; do
+            sleep 5
+        done
+
+        echo "$(date): compositor exited, restarting in 5s..." >> "$COMPOSITOR_LOG"
+        sleep 5
+    done
+) >>"$COMPOSITOR_LOG" 2>&1 &
+WATCHDOG_PID=$!
+echo $WATCHDOG_PID > /tmp/zoth-picom-watchdog.pid
+log "Picom watchdog started (PID: $WATCHDOG_PID)"
+
+# ── 7. Launch animated background (if installed) ─────────────────────────
+log "Checking for animated background engine..."
+
+ANIMATED_BG="/usr/local/bin/zoth-animated-bg"
+if [[ -x "$ANIMATED_BG" ]]; then
+    log "Starting animated matrix rain background..."
+    DISPLAY="${DISPLAY:-:0}" "$ANIMATED_BG" start >>/tmp/zoth-animated-bg-async.log 2>&1 &
+    log "Animated background launched"
+else
+    log "zoth-animated-bg not found or not executable — skipping"
 fi
 
-# ── 7. Launch Telemetry HUD & All-Seeing Eye AI Pet ───────────────────────
+# ── 8. Launch Telemetry HUD & All-Seeing Eye AI Pet ───────────────────────
 log "Starting Desktop Telemetry HUD..."
 if ! pgrep -f "opt/zoth-hud" &>/dev/null; then
     DISPLAY="${DISPLAY:-:0}" XAUTHORITY="${XAUTHORITY:-$HOME/.Xauthority}" /usr/local/bin/zoth-desktop-hud >/tmp/hud_init.log 2>&1 &
@@ -94,16 +129,16 @@ if ! pgrep -f "opt/zoth-desktop-pet" &>/dev/null; then
     disown
 fi
 
-# ── 8. Reload xfdesktop & panel ────────────────────────────────────────────
+# ── 9. Reload xfdesktop & panel ────────────────────────────────────────────
 log "Reloading XFCE desktop..."
 sleep 1
 xfdesktop --reload 2>/dev/null || true
 sleep 0.5
 
-# ── 9. Live System Notification ────────────────────────────────────────────
+# ── 10. Live System Notification ────────────────────────────────────────────
 notify-send -i /usr/share/pixmaps/zothos.png -u normal \
   "[+] ZOTHOS APEX ONLINE" \
-  "Sovereign Operating System Initialized.\n• 175+ Tool Nexus: PRIMED\n• Nous Research Hermes: READY\n• Telemetry Cockpit: LIVE" 2>/dev/null || true
+  "Sovereign Operating System Initialized.\n• 175+ Tool Nexus: PRIMED\n• Nous Research Hermes: READY\n• Telemetry Cockpit: LIVE\n• Animated Matrix BG: ACTIVE" 2>/dev/null || true
 
 log "ZOTHOS desktop initialization complete ✓"
 exit 0

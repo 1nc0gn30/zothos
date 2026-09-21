@@ -34,8 +34,15 @@
       box-shadow: none !important;
       border: none !important;
     }
+    /* Keyboard-active: pause bobbing, eye stays alert */
+    .container.keyboard-active .mascot-wrapper {
+      animation-play-state: paused;
+    }
+    .container.keyboard-active .orb-core {
+      box-shadow: 0 0 35px rgba(0, 255, 157, 0.9), inset 0 0 25px rgba(255, 255, 255, 0.9);
+    }
 
-    /* Speech Bubble Overlay — Floating Cyber-Alchemical Glass */
+    /* Speech Bubble Overlay */
     .speech-bubble {
       position: absolute;
       top: 6px;
@@ -88,7 +95,16 @@
     }
     @keyframes pulse-dot { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
 
-    /* Mascot Floating Outer Wrapper — Zero Box Shadow */
+    /* Particle Trail Container (positioned behind mascot) */
+    .particle-container {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 15;
+      overflow: hidden;
+    }
+
+    /* Mascot Floating Outer Wrapper */
     .mascot-wrapper {
       width: 170px;
       height: 170px;
@@ -103,9 +119,7 @@
       border: none !important;
       background: transparent !important;
     }
-    .mascot-wrapper:active {
-      cursor: grabbing;
-    }
+    .mascot-wrapper:active { cursor: grabbing; }
     @keyframes bobbing {
       0%, 100% { transform: translateY(0px) rotate(0deg); }
       50% { transform: translateY(-10px) rotate(1.5deg); }
@@ -148,6 +162,12 @@
       box-shadow: 0 0 40px rgba(0, 255, 157, 0.85), inset 0 0 25px rgba(255, 255, 255, 0.85);
       transform: scale(1.04);
     }
+    /* Focused state: pupil dilates on click */
+    .eye-pupil.focused {
+      scale: 1.8 !important;
+      box-shadow: 0 0 20px #00e5ff !important;
+      transition: scale 0.15s ease-out, box-shadow 0.15s ease-out;
+    }
 
     /* Laser Eye Socket & Iris */
     .eye-socket {
@@ -163,8 +183,6 @@
       overflow: hidden;
       box-shadow: inset 0 0 12px rgba(0, 255, 157, 0.85);
     }
-    
-    /* Biomorphic Radial Iris Striations */
     .eye-iris {
       width: 36px;
       height: 36px;
@@ -327,7 +345,7 @@
       <div class="menu-item" onclick="launch('reality')">🌌 Reality Switcher</div>
       <div class="menu-item" onclick="launch('ghost')">👻 NullAI Ghostmode</div>
       <div class="menu-item" onclick="launch('nexus')">🛠️ Tool Nexus Hub</div>
-      <div class="menu-item" onclick="toggleMenu()">❌ Close Menu</div>
+      <div class="menu-item" onclick="toggleMenu()">&#10005; Close Menu</div>
     </div>
 
     <!-- Mascot Floating Orb with Eye socket -->
@@ -346,7 +364,7 @@
 
     <!-- Fast Local Qwen Interactive Chat Drawer -->
     <div class="chat-drawer">
-      <input type="text" class="chat-input" id="chat-input" placeholder="Ask All-Seeing Eye Qwen..." onkeydown="handleChatKey(event)">
+      <input type="text" class="chat-input" id="chat-input" placeholder="Ask All-Seeing Eye Qwen... (tracking: cursor, keyboard, clipboard, processes, journal)" onkeydown="handleChatKey(event)">
       <button class="chat-btn" onclick="sendChatQuery()">ASK</button>
     </div>
   </div>

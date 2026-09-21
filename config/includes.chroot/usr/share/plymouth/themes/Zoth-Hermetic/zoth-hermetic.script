@@ -1,0 +1,339 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  ZOTH-HERMETIC PLYMOUTH SCRIPT — EMERALD MATRIX BOOT
+ *  Central ☉ glyph fades in over 3s, matrix rain backdrop, spinning
+ *  alchemical emblem, segmented emerald progress bar at bottom.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+Window.SetTitleFront(true);
+
+// ── Constants ────────────────────────────────────────────────────────────────
+const double EMERALD[] = {0.0, 1.0, 0.6157, 1.0};        // #00ff9d
+const double DARK_BG[]  = {0.0078, 0.0314, 0.0235, 1.0}; // #020806
+const double OBSIDIAN[] = {0.0392, 0.1765, 0.1255, 1.0}; // #0a2d20
+const int WIDTH  = Window.GetWidth();
+const int HEIGHT = Window.GetHeight();
+const int FONT_SIZE   = 48;
+const int GLYPH_SCALE = 8;
+
+// ── Mono font for boot readability ──────────────────────────────────────────
+Font monospace_font = Image.Text.Font("Mono");
+if (Font.Exists(monospace_font)) {
+    // use system mono
+}
+
+// ── Background: Radial emerald-obsidian void ────────────────────────────────
+Sprite background = Window.NewSprite();
+background.SetPosition(0, 0);
+background.SetOpacity(1.0);
+
+Ptsy bg_center = {WIDTH / 2, HEIGHT / 2};
+Ptsy bg_size   = {WIDTH, HEIGHT};
+
+// Gradient: emerald center → obsidian edges
+background.Image = Image.Texture.Create(
+    WIDTH, HEIGHT,
+    [&](Ptsy pos) {
+        double dx = (pos.x - bg_center.x) / bg_center.x;
+        double dy = (pos.y - bg_center.y) / bg_center.y;
+        double dist = sqrt(dx*dx + dy*dy);
+        double t = __min(1.0, dist);
+        // smoothstep
+        t = t * t * (3.0 - 2.0 * t);
+        Color c;
+        c.r = OBSIDIAN[0] * t + EMERALD[0] * (1.0 - t);
+        c.g = OBSIDIAN[1] * t + EMERALD[1] * (1.0 - t);
+        c.b = OBSIDIAN[2] * t + EMERALD[2] * (1.0 - t);
+        c.a = 1.0;
+        return c;
+    }
+);
+background.Update();
+
+// ── Matrix Rain Backdrop ─────────────────────────────────────────────────────
+// Simplified phosphor rain: descending column streaks
+class MatrixRainColumn {
+    int x;
+    int length;
+    double speed;
+    int offset;
+    Color color;
+
+    MatrixRainColumn(int x_, int length_, double speed_, int offset_) {
+        x = x_;
+        length = length_;
+        speed = speed_;
+        offset = offset_;
+        // Emerald with random brightness variation
+        double bright = 0.3 + (offset_ % 100) / 200.0;
+        color = Color(0.0, __min(1.0, 1.0 * bright), __min(1.0, 0.6157 * bright), 1.0);
+    }
+
+    void Paint(Image surface, int frame) {
+        int y_center = (frame * speed + offset) % (HEIGHT + length) - length / 2;
+        int y_start = y_center - length / 2;
+        int y_end   = y_center + length / 2;
+
+        // Draw line with gradient (brighter head)
+        for (int y = y_start; y < y_end; y++) {
+            if (y < 0 || y >= HEIGHT) continue;
+            double t = (double)(y - y_start) / length;
+            double alpha = __max(0.0, 1.0 - t * 0.7);
+            Color c = color;
+            c.a = alpha;
+            surface.SetPixel(x, y, c);
+
+            // Head glow (white-emerald)
+            if (y == y_end - 1) {
+                for (int dy = -2; dy <= 2; dy++) {
+                    for (int dx = -2; dx <= 2; dx++) {
+                        int px = x + dx;
+                        int py = y + dy;
+                        if (px < 0 || px >= WIDTH || py < 0 || py >= HEIGHT) continue;
+                        double dist = sqrt(dx*dx + dy*dy);
+                        if (dist <= 2.0) {
+                            Color glow = Color(0.5, 1.0, 0.8, __max(0.0, 0.6 * (1.0 - dist/2.0)));
+                            surface.SetPixel(px, py, glow);
+                        }
+                    }
+                }
+            }
+        }
+    }
+};
+
+// Create rain columns
+ArrayList<MatrixRainColumn> rain_columns;
+for (int i = 0; i < WIDTH / 14; i++) {
+    int x = (i * 14 + (i * 7) % 14) % WIDTH;
+    int length = 30 + (i * 13) % 50;
+    double speed = 1.0 + (i % 5) * 0.3;
+    int offset = (i * 31) % 200;
+    rain_columns.Add(new MatrixRainColumn(x, length, speed, offset));
+}
+
+// ── Central Alchemical Glyph ☉ ───────────────────────────────────────────────
+// Draws a sun/alchemy glyph scaled up, fading in over 3 seconds (90 frames @ 30fps)
+class AlchemicalGlyph {
+    Sprite glyph_sprite;
+    double scale;
+    double target_opacity;
+    int fade_in_frames;
+    int current_frame;
+
+    AlchemicalGlyph() {
+        glyph_sprite = Window.NewSprite();
+        glyph_sprite.SetPosition(
+            (WIDTH - 120 * GLYPH_SCALE) / 2,
+            (HEIGHT - 120 * GLYPH_SCALE) / 2
+        );
+        glyph_sprite.SetOpacity(0.0);
+        scale = 0.0;
+        target_opacity = 1.0;
+        fade_in_frames = 90; // 3 seconds at 30fps
+        current_frame = 0;
+    }
+
+    void Update(int frame) {
+        current_frame = frame;
+
+        // Scale up from 0 to full over 3s with ease-out
+        double t = (double)current_frame / fade_in_frames;
+        if (t < 1.0) {
+            // ease-out cubic: 1 - (1-t)^3
+            double ease = 1.0 - __pow(1.0 - t, 3.0);
+            scale = ease * GLYPH_SCALE;
+            glyph_sprite.SetScale(scale);
+
+            // Fade in opacity
+            double opacity = ease;
+            glyph_sprite.SetOpacity(opacity);
+        } else {
+            scale = GLYPH_SCALE;
+            glyph_sprite.SetScale(scale);
+            glyph_sprite.SetOpacity(1.0);
+        }
+
+        // Reposition centered
+        double gw = 120 * scale;
+        double gh = 120 * scale;
+        glyph_sprite.SetPosition((WIDTH - gw) / 2, (HEIGHT - gh) / 2);
+    }
+
+    void Paint(Image surface) {
+        // Draw ☉ (sun symbol) — circle with rays
+        double cx = gw / 2;
+        double cy = gh / 2;
+        double radius = 45 * scale;
+
+        // Main circle
+        surface.DrawCircle(
+            (int)(cx), (int)(cy),
+            (int)(radius),
+            Color(EMERALD[0], EMERALD[1], EMERALD[2], 1.0)
+        );
+
+        // Inner circle (alchemical eye)
+        surface.DrawCircle(
+            (int)(cx), (int)(cy),
+            (int)(radius * 0.5),
+            Color(0.0, 0.2, 0.1, 1.0)
+        );
+
+        // Rays — 8 directional lines
+        for (int i = 0; i < 8; i++) {
+            double angle = i * M_PI / 4.0;
+            double tip_x = cx + cos(angle) * radius * 1.6;
+            double tip_y = cy + sin(angle) * radius * 1.6;
+            double base_x = cx + cos(angle) * radius * 1.1;
+            double base_y = cy + sin(angle) * radius * 1.1;
+
+            surface.DrawLine(
+                (int)base_x, (int)base_y,
+                (int)tip_x, (int)tip_y,
+                Color(EMERALD[0], EMERALD[1], EMERALD[2], 0.8)
+            );
+        }
+
+        // Center dot
+        surface.DrawCircle(
+            (int)cx, (int)cy,
+            (int)(radius * 0.15),
+            Color(1.0, 1.0, 1.0, 1.0)
+        );
+    }
+};
+
+AlchemicalGlyph glyph;
+
+// ── Spinning Glyph Animation ─────────────────────────────────────────────────
+// After fade-in, glyph slowly rotates (visual interest during boot)
+class SpinningGlyphOverlay {
+    double rotation;
+    int spin_speed; // degrees per frame
+
+    SpinningGlyphOverlay() {
+        rotation = 0.0;
+        spin_speed = 1; // slow rotation
+    }
+
+    void Update() {
+        rotation += spin_speed;
+        if (rotation >= 360.0) rotation -= 360.0;
+    }
+
+    double GetRotation() { return rotation; }
+};
+
+SpinningGlyphOverlay spinner;
+
+// ── Segmented Emerald Progress Bar ───────────────────────────────────────────
+class ProgressBar {
+    int bar_x, bar_y, bar_width, bar_height;
+    int segments;
+    int current_segment;
+    Color seg_color;
+    Color seg_bg;
+
+    ProgressBar() {
+        bar_height = 8;
+        bar_width = (int)(WIDTH * 0.6);
+        bar_x = (WIDTH - bar_width) / 2;
+        bar_y = HEIGHT - 60;
+        segments = 40;
+        current_segment = 0;
+        seg_color = Color(EMERALD[0], EMERALD[1], EMERALD[2], 1.0);
+        seg_bg = Color(0.1, 0.1, 0.1, 0.6);
+    }
+
+    void SetProgress(double pct) {
+        current_segment = (int)(segments * __max(0.0, __min(1.0, pct)));
+    }
+
+    void Paint(Image surface) {
+        int seg_w = bar_width / segments;
+        int seg_gap = 2;
+
+        for (int i = 0; i < segments; i++) {
+            int sx = bar_x + i * seg_w;
+            int sy = bar_y;
+
+            if (i < current_segment) {
+                // Active segment — emerald with glow
+                surface.DrawRectangle(
+                    sx + 1, sy + 1,
+                    seg_w - seg_gap - 2, bar_height - 2,
+                    seg_color
+                );
+                // Glow highlight on top edge
+                surface.DrawLine(
+                    sx + 1, sy + 1,
+                    sx + seg_w - seg_gap - 3, sy + 1,
+                    Color(1.0, 1.0, 1.0, 0.4)
+                );
+            } else {
+                // Inactive segment — dark
+                surface.DrawRectangle(
+                    sx + 1, sy + 1,
+                    seg_w - seg_gap - 2, bar_height - 2,
+                    seg_bg
+                );
+            }
+        }
+
+        // Bar border
+        surface.DrawRectangle(
+            bar_x, bar_y,
+            bar_width, bar_height,
+            Color(EMERALD[0], EMERALD[1], EMERALD[2], 0.3)
+        );
+    }
+};
+
+ProgressBar progress;
+
+// ── Plymouth Animation Loop ──────────────────────────────────────────────────
+void update() {
+    // Get boot progress (0.0 to 1.0)
+    double boot_progress = Script.UpdateBootProgress();
+
+    // Spin the glyph slowly
+    spinner.Update();
+
+    // Update glyph (fade-in over first 3s, then static)
+    glyph.Update(Script.GetFrameCount());
+
+    // Update progress bar
+    progress.SetProgress(boot_progress);
+}
+
+void paint(Pitsa pixmap) {
+    Image surface = Image(surface, pixmap);
+
+    // Paint matrix rain backdrop
+    for (int i = 0; i < rain_columns.Count(); i++) {
+        rain_columns[i].Paint(surface, Script.GetFrameCount());
+    }
+
+    // Paint glyph (centered, fading in)
+    glyph.Paint(surface);
+
+    // Paint progress bar at bottom
+    progress.Paint(surface);
+
+    // Subtle vignette
+    for (int y = 0; y < HEIGHT; y++) {
+        for (int x = 0; x < WIDTH; x++) {
+            double dx = (double)(x - WIDTH/2) / (WIDTH/2);
+            double dy = (double)(y - HEIGHT/2) / (HEIGHT/2);
+            double dist = sqrt(dx*dx + dy*dy);
+            if (dist > 0.7) {
+                double vignette = __max(0.0, 1.0 - (dist - 0.7) * 3.0);
+                Color c = surface.GetPixel(x, y);
+                c.r *= vignette;
+                c.g *= vignette;
+                c.b *= vignette;
+                surface.SetPixel(x, y, c);
+            }
+        }
+    }
+}

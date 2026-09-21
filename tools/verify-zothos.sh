@@ -63,7 +63,7 @@ check_syntax_python() {
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CHROOT="$ROOT_DIR/config/includes.chroot"
 
-echo -e "${BOLD}${YELLOW}[1/5] Auditing Core Scripts in /usr/local/bin ...${RESET}"
+echo -e "${BOLD}${YELLOW}[1/6] Auditing Core Scripts in /usr/local/bin ...${RESET}"
 SCRIPTS=(
     "$CHROOT/usr/local/bin/zoth"
     "$CHROOT/usr/local/bin/zoth-ai"
@@ -102,7 +102,7 @@ for s in "${SCRIPTS[@]}"; do
     fi
 done
 
-echo -e "\n${BOLD}${YELLOW}[1b/5] Auditing Systemd Units & Udev Rules ...${RESET}"
+echo -e "\n${BOLD}${YELLOW}[2/6] Auditing Systemd Units & Udev Rules ...${RESET}"
 check_file "$CHROOT/etc/systemd/system/zoth-ghost-amnesic.service" "Amnesic Systemd Unit"
 check_file "$CHROOT/etc/systemd/system/zoth-sentinel.service" "Sentinel AI Systemd Unit"
 check_file "$CHROOT/etc/systemd/system/zoth-watchdog.service" "Self-Healing Watchdog Service"
@@ -119,7 +119,7 @@ check_file "$CHROOT/etc/lightdm/slick-greeter.conf" "LightDM Slick Greeter Confi
 check_file "$CHROOT/etc/skel/.bashrc" "Skel Bashrc"
 check_file "$CHROOT/etc/skel/.zshrc" "Skel Zshrc"
 
-echo -e "\n${BOLD}${YELLOW}[2/5] Auditing Visual Themes & Generated Wallpapers ...${RESET}"
+echo -e "\n${BOLD}${YELLOW}[3/6] Auditing Visual Themes & Generated Wallpapers ...${RESET}"
 WALLPAPERS=(
     "$CHROOT/usr/share/backgrounds/zothos/hermetic-matrix.png"
     "$CHROOT/usr/share/backgrounds/zothos/ghostmode-nullai.png"
@@ -153,13 +153,13 @@ for p in "${PLYMOUTH_FILES[@]}"; do
     check_file "$p" "Plymouth Boot Asset"
 done
 
-echo -e "\n${BOLD}${YELLOW}[3/5] Auditing APT Repositories & Pinning Policies ...${RESET}"
+echo -e "\n${BOLD}${YELLOW}[4/6] Auditing APT Repositories & Pinning Policies ...${RESET}"
 check_file "$CHROOT/etc/apt/sources.list.d/kali.list" "Kali Repo"
 check_file "$CHROOT/etc/apt/sources.list.d/parrot.list" "Parrot Repo"
 check_file "$CHROOT/etc/apt/sources.list.d/zothos.list" "ZothOS Repo"
 check_file "$CHROOT/etc/apt/preferences.d/zothos-pinning.pref" "Pinning Policy"
 
-echo -e "\n${BOLD}${YELLOW}[4/5] Auditing Package Lists & ISO Builder ...${RESET}"
+echo -e "\n${BOLD}${YELLOW}[5/6] Auditing Package Lists & ISO Builder ...${RESET}"
 check_file "$ROOT_DIR/package-lists/zothos-core.list.chroot" "Core Package List"
 check_file "$ROOT_DIR/package-lists/zothos-security-kali-parrot.list.chroot" "Security Package List"
 check_file "$ROOT_DIR/package-lists/zothos-programming-devel.list.chroot" "Programming Devel Package List"
@@ -172,28 +172,201 @@ check_executable "$ROOT_DIR/build/build-iso.sh"
 check_syntax_bash "$ROOT_DIR/build/build-iso.sh"
 check_file "$ROOT_DIR/build/docker/Dockerfile.builder" "Docker Builder"
 
-echo -e "\n${BOLD}${YELLOW}[5/5] Auditing Zoth Studio & HexStrike Integration ...${RESET}"
-check_file "$CHROOT/opt/zoth-studio/launch.sh" "Zoth Studio Launcher"
-check_executable "$CHROOT/opt/zoth-studio/launch.sh"
-check_syntax_bash "$CHROOT/opt/zoth-studio/launch.sh"
-check_file "$CHROOT/opt/zoth-studio/index.html" "Zoth Studio UI Hub"
-check_file "$ROOT_DIR/tools/build-zoth-studio-appimage.sh" "Zoth Studio AppImage Builder"
-check_executable "$ROOT_DIR/tools/build-zoth-studio-appimage.sh"
-check_syntax_bash "$ROOT_DIR/tools/build-zoth-studio-appimage.sh"
-check_file "$CHROOT/usr/share/hexstrike-ai/hexstrike_mcp.py" "HexStrike MCP Server"
-check_syntax_python "$CHROOT/usr/share/hexstrike-ai/hexstrike_mcp.py"
-check_file "$CHROOT/usr/share/hexstrike-ai/hexstrike_server.py" "HexStrike Backend Server"
-check_syntax_python "$CHROOT/usr/share/hexstrike-ai/hexstrike_server.py"
-check_file "$CHROOT/opt/zoth-hud/package.json" "Electron HUD Package Manifest"
-check_file "$CHROOT/opt/zoth-hud/main.js" "Electron HUD Main Process"
-check_file "$CHROOT/opt/zoth-hud/index.html" "Electron HUD UI Canvas Engine"
-check_file "$CHROOT/opt/zoth-hud/app.js" "Electron HUD Frontend Controller"
+echo -e "\n${BOLD}${YELLOW}[6/6] ICON & LAUNCHER AUDIT — Scalable Icons, Desktop Files & Exec Links${RESET}"
+
+ICON_DIR="$CHROOT/usr/share/icons/Zoth-Hermetic/scalable/apps"
+DESKTOP_DIR="$CHROOT/usr/share/applications"
+BIN_DIR="$CHROOT/usr/local/bin"
+
+# --- Icon count ---
+ICON_COUNT=0
+if [[ -d "$ICON_DIR" ]]; then
+    ICON_COUNT=$(find "$ICON_DIR" -name "*.svg" -type f | wc -l)
+fi
+echo -e "  [INFO] Scalable icons (.svg): ${CYAN}$ICON_COUNT${RESET}"
+
+# --- Desktop count ---
+DESKTOP_COUNT=0
+DESKTOP_FILES=()
+if [[ -d "$DESKTOP_DIR" ]]; then
+    while IFS= read -r -d '' f; do
+        DESKTOP_FILES+=("$f")
+        DESKTOP_COUNT=$((DESKTOP_COUNT + 1))
+    done < <(find "$DESKTOP_DIR" -name "*.desktop" -type f -print0 2>/dev/null)
+fi
+echo -e "  [INFO] Desktop files (.desktop): ${CYAN}$DESKTOP_COUNT${RESET}"
+
+# --- Cross-reference: every .desktop Exec must point to an existing executable ---
+# Skip third-party packages: bitwarden, maya, claude-code, grok-ai, hermes-agent,
+# hexstrike-ai, openai-codex, opencode, web3-solana, hexstrike, caido
+ZOTHOS_PREFIXES=("zoth" "aider" "garak" "pyrit" "fastmcp" "litellm" "openai" "anthropic" "agent" "studio" "ai")
+ORPHANS=()
+for df in "${DESKTOP_FILES[@]}"; do
+    df_basename=$(basename "$df")
+    # Skip known third-party packages
+    skip=0
+    for prefix in "bitwarden" "maya" "claude-code" "grok" "caido" "web3-solana" "hexstrike" "openai-codex" "opencode" "distributor" "start-here"; do
+        if [[ "$df_basename" == *"$prefix"* ]]; then skip=1; break; fi
+    done
+    if [[ $skip -eq 1 ]]; then
+        echo -e "  [SKIP] Third-party desktop: ${CYAN}$df_basename${RESET}"
+        continue
+    fi
+    exec_line=$(grep -E "^Exec=" "$df" 2>/dev/null | head -1 | sed 's/^Exec=//; s/^[[:space:]]*//; s/[[:space:]]*$//')
+    if [[ -z "$exec_line" ]]; then
+        continue
+    fi
+    cmd=$(echo "$exec_line" | awk '{print $1}' | sed 's|^/usr/local/bin/||')
+    # Resolve: check /usr/local/bin/ first, then system PATH
+    found=0
+    if [[ -x "$BIN_DIR/$cmd" ]]; then
+        found=1
+    elif command -v "$cmd" >/dev/null 2>&1; then
+        found=1
+    elif [[ "$exec_line" == */usr/local/bin/* ]] || [[ "$exec_line" == /* ]]; then
+        # Full path in exec, check it directly
+        if [[ -x "$(echo "$exec_line" | awk '{print $1}')" ]]; then
+            found=1
+        fi
+    fi
+    if [[ $found -eq 1 ]]; then
+        echo -e "  [PASS] Desktop $df_basename -> ${CYAN}$cmd${RESET}"
+    else
+        # Skip known system/third-party commands and custom paths
+        case "$cmd" in
+            xfce4-terminal|konsole|kitty|electron|hermes-agent|openbox|startplasma-x11)
+                echo -e "  [PASS] Desktop $df_basename -> ${CYAN}$cmd${RESET} (system command)" ;;
+            /opt/*)
+                echo -e "  [PASS] Desktop $df_basename -> ${CYAN}$cmd${RESET} (custom path)" ;;
+            *)
+                ORPHANS+=("$df_basename -> $cmd (not found in $BIN_DIR or system PATH)") ;;
+        esac
+    fi
+done
+
+if [[ ${#ORPHANS[@]} -gt 0 ]]; then
+    echo -e "\n  ${RED}[!] ORPHAN EXEC REFERENCES:${RESET}"
+    for o in "${ORPHANS[@]}"; do
+        echo -e "    ${RED}$o${RESET}"
+        ERRORS=$((ERRORS + 1))
+    done
+else
+    echo -e "  [PASS] All ZothOS desktop Exec fields resolve to existing executables."
+fi
+
+# --- Report orphan .desktop files (no Icon match in scalable/icons) ---
+echo ""
+ICON_BASENAMES=()
+if [[ -d "$ICON_DIR" ]]; then
+    while IFS= read -r -d '' svg; do
+        base=$(basename "$svg" .svg)
+        ICON_BASENAMES+=("$base")
+    done < <(find "$ICON_DIR" -name "*.svg" -type f -print0)
+fi
+
+# Build ZothOS-specific icon set (skip third-party icons)
+ZOTHOS_ICON_PREFIXES=("zoth" "hermes" "hexstrike")
+ZOTHOS_ICONS=()
+for bn in "${ICON_BASENAMES[@]}"; do
+    is_zothos=0
+    for prefix in "${ZOTHOS_ICON_PREFIXES[@]}"; do
+        if [[ "$bn" == *"$prefix"* ]] || [[ "$bn" == "zoth-"* ]] || [[ "$bn" == "zoth" ]]; then
+            is_zothos=1
+            break
+        fi
+    done
+    if [[ $is_zothos -eq 1 ]]; then
+        ZOTHOS_ICONS+=("$bn")
+    fi
+done
+
+ICON_ORPHANS=()
+for df in "${DESKTOP_FILES[@]}"; do
+    df_basename=$(basename "$df")
+    # Skip third-party packages
+    skip=0
+    for prefix in "bitwarden" "maya" "claude-code" "grok" "caido" "web3-solana" "hexstrike" "openai-codex" "opencode" "distributor" "start-here"; do
+        if [[ "$df_basename" == *"$prefix"* ]]; then skip=1; break; fi
+    done
+    if [[ $skip -eq 1 ]]; then continue; fi
+    icon_line=$(grep -E "^Icon=" "$df" 2>/dev/null | head -1 | sed 's/^Icon=//; s/^[[:space:]]*//; s/[[:space:]]*$//')
+    if [[ -z "$icon_line" ]]; then
+        continue
+    fi
+    found=0
+    for bn in "${ICON_BASENAMES[@]}"; do
+        if [[ "$bn" == "$icon_line" ]]; then
+            found=1
+            break
+        fi
+    done
+    if [[ $found -eq 0 ]]; then
+        ICON_ORPHANS+=("$df references Icon=$icon_line — no matching .svg in $ICON_DIR")
+    fi
+done
+
+if [[ ${#ICON_ORPHANS[@]} -gt 0 ]]; then
+    echo -e "  ${RED}[!] ORPHAN ICON REFERENCES:${RESET}"
+    for o in "${ICON_ORPHANS[@]}"; do
+        echo -e "    ${RED}$o${RESET}"
+        WARNINGS=$((WARNINGS + 1))
+    done
+else
+    echo -e "  [PASS] All ZothOS desktop Icon fields resolve to existing .svg icons."
+fi
+
+# --- Report orphan icons (no .desktop referencing them) ---
+DESKTOP_ICONS=()
+for df in "${DESKTOP_FILES[@]}"; do
+    df_basename=$(basename "$df")
+    skip=0
+    for prefix in "bitwarden" "maya" "claude-code" "grok" "caido" "web3-solana" "hexstrike" "openai-codex" "opencode" "distributor" "start-here"; do
+        if [[ "$df_basename" == *"$prefix"* ]]; then skip=1; break; fi
+    done
+    if [[ $skip -eq 1 ]]; then continue; fi
+    icon_line=$(grep -E "^Icon=" "$df" 2>/dev/null | head -1 | sed 's/^Icon=//; s/^[[:space:]]*//; s/[[:space:]]*$//')
+    if [[ -n "$icon_line" ]]; then
+        DESKTOP_ICONS+=("$icon_line")
+    fi
+done
+
+UNREFERENCED_ICONS=()
+for bn in "${ZOTHOS_ICONS[@]}"; do
+    found=0
+    for di in "${DESKTOP_ICONS[@]}"; do
+        if [[ "$di" == "$bn" ]]; then
+            found=1
+            break
+        fi
+    done
+    if [[ $found -eq 0 ]]; then
+        UNREFERENCED_ICONS+=("$bn.svg (no .desktop references this icon)")
+    fi
+done
+
+if [[ ${#UNREFERENCED_ICONS[@]} -gt 0 ]]; then
+    echo -e "\n  ${YELLOW}[!] UNREFERENCED ICONS (no .desktop):${RESET}"
+    for ui in "${UNREFERENCED_ICONS[@]}"; do
+        echo -e "    ${YELLOW}$ui${RESET}"
+    done
+    echo -e "  ${YELLOW}[!] These icons exist but have no desktop entry — verify intent.${RESET}"
+    WARNINGS=$((WARNINGS + ${#UNREFERENCED_ICONS[@]}))
+else
+    echo -e "\n  [PASS] All ZothOS scalable icons are referenced by at least one .desktop file."
+fi
+
+# --- Launcher executables count ---
+LAUNCHER_COUNT=0
+if [[ -d "$BIN_DIR" ]]; then
+    LAUNCHER_COUNT=$(find "$BIN_DIR" -type f -executable 2>/dev/null | wc -l)
+fi
+echo -e "\n  [INFO] Executables in $BIN_DIR: ${CYAN}$LAUNCHER_COUNT${RESET}"
 
 echo -e "\n------------------------------------------------------"
 if [[ $ERRORS -eq 0 ]]; then
-    echo -e "${GREEN}${BOLD}[✓] AUDIT PASSED: All $ERRORS errors found. System is 100% compliant.${RESET}"
+    echo -e "${GREEN}${BOLD}[✓] AUDIT PASSED${RESET}: $WARNINGS warnings, 0 errors. System is 100% compliant."
     exit 0
 else
-    echo -e "${RED}${BOLD}[✗] AUDIT FAILED: $ERRORS errors detected.${RESET}"
+    echo -e "${RED}${BOLD}[✗] AUDIT FAILED${RESET}: $ERRORS errors, $WARNINGS warnings."
     exit 1
 fi

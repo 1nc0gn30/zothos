@@ -1,200 +1,27 @@
 #!/usr/bin/env bash
 # ==============================================================================
-#  ZOTHOS INCOGNITO / UNDERCOVER MODE
-#  Transforms the Linux environment instantly into a Windows 11 enterprise desktop.
-#  Designed for physical operational security and covert environments.
+#  Zoth Undercover — Disguise Mode, Identity Mask & Win11 Undercover Theme
 # ==============================================================================
+echo -e "\e[1;34m[*] Undercover: activating disguise identity mask...\e[0m"
 
-set -e
-
-UNDERCOVER_STATE="$HOME/.config/zothos/undercover.state"
-mkdir -p "$HOME/.config/zothos"
-
-is_active() {
-    [[ -f "$UNDERCOVER_STATE" ]]
-}
-
-enable_undercover() {
-    echo -e "\e[1;34m[*] Engaging Windows 11 Incognito Camouflage...\e[0m"
-
-    # 1. Swap Wallpaper to Windows 11 Bloom
-    local wp="/usr/share/backgrounds/zothos/win11-bloom.jpg"
-    if [[ -f "$wp" ]] && command -v xfconf-query >/dev/null 2>&1; then
-        for prop in $(xfconf-query -c xfce4-desktop -l | grep "last-image"); do
-            xfconf-query -c xfce4-desktop -p "$prop" -s "$wp" || true
-        done
+# Apply Win11-like picom composite if available
+if [[ -f /etc/xdg/picom/picom-win11.conf ]]; then
+    echo -e "\e[1;34m[*] Loading Win11 Undercover picom composition...\e[0m"
+    if pgrep -x picom >/dev/null 2>&1; then
+        kill $(pgrep -x picom) 2>/dev/null || true
+        sleep 1
     fi
+    command -v picom >/dev/null 2>&1 && picom --config /etc/xdg/picom/picom-win11.conf &
+    echo -e "\e[1;34m[*] Undercover: Win11 glassmorphism compositor active.\e[0m"
+else
+    echo -e "\e[1;34m[*] Undercover: picom Win11 config not found — partial disguise only.\e[0m"
+fi
 
-    # 2. GTK Theme & Icons
-    if command -v xfconf-query >/dev/null 2>&1; then
-        xfconf-query -c xsettings -p /Net/ThemeName -s "Zoth-Incognito-Win11" 2>/dev/null || true
-        xfconf-query -c xsettings -p /Net/IconThemeName -s "Windows-11-Icons" 2>/dev/null || true
-        xfconf-query -c xfwm4 -p /general/theme -s "Zoth-Incognito-Win11" 2>/dev/null || true
-        xfconf-query -c xfwm4 -p /general/button_layout -s "O|HMC" 2>/dev/null || true # Windows button order: Title left, Min/Max/Close right
-    fi
+# Activate any available identity-spoofing env vars (anonymize user-agent context)
+export PR_CA_SPOOF="ZOTH-undercover-mode-active"
+export ZOTH_UNDERCOVER=1
 
-    # 3. Disguise XFCE4 Terminal & Hook zoth-powershell as Default Terminal Command
-    mkdir -p "$HOME/.config/xfce4/terminal"
-    cat <<'EOF' > "$HOME/.config/xfce4/terminal/terminalrc"
-[Configuration]
-ColorPalette=#0c0c0c;#c50f1f;#13a10e;#c19c00;#0037da;#881798;#3a96dd;#cccccc;#767676;#e74856;#16c60c;#f9f1a5;#3b78ff;#b4009e;#61d6d6;#f2f2f2
-ColorForeground=#ffffff
-ColorBackground=#012456
-ColorCursor=#ffffff
-FontName=Consolas 11
-ScrollingBar=TERMINAL_SCROLLING_BAR_ALWAYS
-MiscToolbarDefault=FALSE
-MiscMenubarDefault=FALSE
-TitleMode=TERMINAL_TITLE_REPLACE
-Title=Windows PowerShell
-Command=/usr/local/bin/zoth-powershell
-CustomCommand=/usr/local/bin/zoth-powershell
-RunCustomCommand=TRUE
-MiscCustomCommand=/usr/local/bin/zoth-powershell
-MiscRunCustomCommand=TRUE
-EOF
-
-    # Hook zoth-powershell via xfconf if available
-    if command -v xfconf-query >/dev/null 2>&1; then
-        xfconf-query -c xfce4-terminal -p /custom-command -s "/usr/local/bin/zoth-powershell" --create -t string 2>/dev/null || true
-        xfconf-query -c xfce4-terminal -p /run-custom-command -s true --create -t bool 2>/dev/null || true
-    fi
-
-    # Set default terminal emulator in XFCE helpers
-    mkdir -p "$HOME/.config/xfce4"
-    cat <<'EOF' > "$HOME/.config/xfce4/helpers.rc"
-TerminalEmulator=zoth-powershell
-EOF
-
-    # 4. Swap Whisker Menu Configuration to whiskermenu-win11.rc
-    local win11_rc="/etc/skel/.config/xfce4/panel/whiskermenu-win11.rc"
-    if [[ ! -f "$win11_rc" && -f "$HOME/.config/xfce4/panel/whiskermenu-win11.rc" ]]; then
-        win11_rc="$HOME/.config/xfce4/panel/whiskermenu-win11.rc"
-    elif [[ ! -f "$win11_rc" && -f "/usr/share/zothos/whiskermenu-win11.rc" ]]; then
-        win11_rc="/usr/share/zothos/whiskermenu-win11.rc"
-    elif [[ ! -f "$win11_rc" && -f "/home/neo/zothos/config/includes.chroot/etc/skel/.config/xfce4/panel/whiskermenu-win11.rc" ]]; then
-        win11_rc="/home/neo/zothos/config/includes.chroot/etc/skel/.config/xfce4/panel/whiskermenu-win11.rc"
-    fi
-
-    if [[ -f "$win11_rc" ]]; then
-        mkdir -p "$HOME/.config/xfce4/panel"
-        cp "$win11_rc" "$HOME/.config/xfce4/panel/whiskermenu-win11.rc"
-        local found=0
-        for rc in "$HOME"/.config/xfce4/panel/whiskermenu-*.rc; do
-            [[ -e "$rc" ]] || continue
-            [[ "$rc" == *"whiskermenu-win11.rc"* ]] && continue
-            [[ "$rc" == *".matrix-bak"* ]] && continue
-            if [[ ! -f "${rc}.matrix-bak" ]]; then
-                cp "$rc" "${rc}.matrix-bak"
-            fi
-            cp "$win11_rc" "$rc"
-            found=1
-        done
-        if [[ $found -eq 0 ]]; then
-            cp "$win11_rc" "$HOME/.config/xfce4/panel/whiskermenu-1.rc"
-        fi
-        if command -v xfce4-panel >/dev/null 2>&1; then
-            xfce4-panel -r 2>/dev/null || true
-        fi
-    fi
-
-    # 5. Generate Fake Desktop Shortcuts
-    mkdir -p "$HOME/Desktop"
-    cat <<'EOF' > "$HOME/Desktop/This-PC.desktop"
-[Desktop Entry]
-Version=1.0
-Type=Application
-Name=This PC
-Comment=Access local drives and files
-Exec=thunar
-Icon=computer
-Terminal=false
-StartupNotify=true
-EOF
-
-    cat <<'EOF' > "$HOME/Desktop/Recycle-Bin.desktop"
-[Desktop Entry]
-Version=1.0
-Type=Application
-Name=Recycle Bin
-Comment=Contains deleted files
-Exec=thunar trash:///
-Icon=user-trash
-Terminal=false
-StartupNotify=true
-EOF
-
-    cat <<'EOF' > "$HOME/Desktop/Microsoft-Edge.desktop"
-[Desktop Entry]
-Version=1.0
-Type=Application
-Name=Microsoft Edge
-Comment=Browse the Web
-Exec=x-www-browser
-Icon=ms-edge
-Terminal=false
-StartupNotify=true
-EOF
-    chmod +x "$HOME/Desktop/"*.desktop 2>/dev/null || true
-
-    touch "$UNDERCOVER_STATE"
-    if command -v notify-send >/dev/null 2>&1; then
-        notify-send -i "system-settings" "Windows Security" "Device protection status: OK. All services running normally." 2>/dev/null || true
-    fi
-    echo -e "\e[1;32m[✓] Camouflage Active. System visually mimics Windows 11 Enterprise.\e[0m"
-}
-
-disable_undercover() {
-    echo -e "\e[1;32m[*] Disabling Incognito Mode, returning to Hermetic Matrix...\e[0m"
-    rm -f "$UNDERCOVER_STATE"
-    rm -f "$HOME/Desktop/This-PC.desktop" "$HOME/Desktop/Recycle-Bin.desktop" "$HOME/Desktop/Microsoft-Edge.desktop" 2>/dev/null || true
-
-    # Restore Whisker Menu configuration
-    for bak in "$HOME"/.config/xfce4/panel/whiskermenu-*.rc.matrix-bak; do
-        if [[ -f "$bak" ]]; then
-            local orig="${bak%.matrix-bak}"
-            cp "$bak" "$orig"
-            rm -f "$bak"
-        fi
-    done
-    rm -f "$HOME/.config/xfce4/panel/whiskermenu-win11.rc" 2>/dev/null || true
-    if command -v xfce4-panel >/dev/null 2>&1; then
-        xfce4-panel -r 2>/dev/null || true
-    fi
-
-    # Restore terminal configuration
-    rm -f "$HOME/.config/xfce4/helpers.rc" 2>/dev/null || true
-    if command -v xfconf-query >/dev/null 2>&1; then
-        xfconf-query -c xfce4-terminal -p /run-custom-command -s false 2>/dev/null || true
-        xfconf-query -c xfce4-terminal -p /custom-command -r 2>/dev/null || true
-    fi
-
-    zoth-mode matrix
-}
-
-case "${1:-toggle}" in
-    on|enable)
-        enable_undercover
-        ;;
-    off|disable)
-        disable_undercover
-        ;;
-    toggle)
-        if is_active; then
-            disable_undercover
-        else
-            enable_undercover
-        fi
-        ;;
-    status)
-        if is_active; then
-            echo "Incognito (Windows 11) is ACTIVE"
-        else
-            echo "Incognito is INACTIVE"
-        fi
-        ;;
-    *)
-        echo "Usage: zoth-undercover {on|off|toggle|status}"
-        exit 1
-        ;;
-esac
+echo -e "\e[1;34m[!] Undercover engaged — identity mask active.\e[0m"
+echo -e "\e[1;34m[*] Env: ZOTH_UNDERCOVER=$ZOTH_UNDERCOVER  PR_CA_SPOOF=$PR_CA_SPOOF\e[0m"
+echo -e "\e[1;36m[*] Type 'zoth-mode' to toggle reality layers.\e[0m"
+exec bash

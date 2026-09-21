@@ -2,25 +2,18 @@
 # ==============================================================================
 #  Garak - 2026 Generative AI Red-Teaming & Vulnerability Scanner
 # ==============================================================================
+if ! command -v garak >/dev/null 2>&1 && [[ ! -f /opt/zothos-ai-env/bin/garak ]]; then
+    echo -e "\e[1;35m[*] Provisioning Garak LLM Vulnerability Scanner...\e[0m"
+    mkdir -p /opt/zothos-ai-env
+    python3 -m venv /opt/zothos-ai-env --system-site-packages 2>/dev/null || true
+    /opt/zothos-ai-env/bin/pip install --upgrade garak 2>/dev/null || pip install garak
+fi
 
-if [[ -x /opt/zothos-ai-env/bin/garak ]]; then
+if [[ -f /opt/zothos-ai-env/bin/garak ]]; then
     exec /opt/zothos-ai-env/bin/garak "$@"
+elif command -v garak >/dev/null 2>&1; then
+    exec garak "$@"
+else
+    echo -e "\e[1;31m[!] Error: Unable to launch Garak.\e[0m"
+    exit 1
 fi
-
-if python3 -c "import garak" >/dev/null 2>&1; then
-    exec python3 -m garak "$@"
-fi
-
-REAL_BIN=$(type -all garak 2>/dev/null | grep -v "/usr/local/bin/garak" | head -n 1 | awk '{print $NF}')
-if [[ -n "$REAL_BIN" && -x "$REAL_BIN" ]]; then
-    exec "$REAL_BIN" "$@"
-fi
-
-echo -e "\e[38;2;255;215;0m[[+] ZOTHOS SEC]\e[0m \e[1;37mGarak LLM Vulnerability Scanner not installed.\e[0m"
-echo -e "\e[38;2;0;229;255m[*] To install Garak now, run:\e[0m uv pip install garak"
-read -p "Install garak now? (y/N): " choice
-if [[ "$choice" =~ ^[Yy]$ ]]; then
-    uv pip install garak || pip3 install --break-system-packages garak
-    exec python3 -m garak "$@"
-fi
-exit 1

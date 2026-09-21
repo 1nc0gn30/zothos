@@ -2,29 +2,18 @@
 # ==============================================================================
 #  Aider - 2026 AI Pair Programming Agent in the Terminal
 # ==============================================================================
+if ! command -v aider >/dev/null 2>&1 && [[ ! -f /opt/zothos-ai-env/bin/aider ]]; then
+    echo -e "\e[1;36m[*] Initializing Aider AI Coding Agent (2026 Edition)...\e[0m"
+    mkdir -p /opt/zothos-ai-env
+    python3 -m venv /opt/zothos-ai-env --system-site-packages 2>/dev/null || true
+    /opt/zothos-ai-env/bin/pip install --upgrade aider-chat 2>/dev/null || pip install aider-chat
+fi
 
-# 1. Try local venv
-if [[ -x /opt/zothos-ai-env/bin/aider ]]; then
+if [[ -f /opt/zothos-ai-env/bin/aider ]]; then
     exec /opt/zothos-ai-env/bin/aider "$@"
+elif command -v aider >/dev/null 2>&1; then
+    exec aider "$@"
+else
+    echo -e "\e[1;31m[!] Error: Unable to launch Aider.\e[0m"
+    exit 1
 fi
-
-# 2. Try python module
-if python3 -m aider --version >/dev/null 2>&1; then
-    exec python3 -m aider "$@"
-fi
-
-# 3. Try global binary (excluding this script)
-REAL_BIN=$(type -all aider 2>/dev/null | grep -v "/usr/local/bin/aider" | head -n 1 | awk '{print $NF}')
-if [[ -n "$REAL_BIN" && -x "$REAL_BIN" ]]; then
-    exec "$REAL_BIN" "$@"
-fi
-
-# 4. If missing, offer bootstrap or run interactive guidance
-echo -e "\e[38;2;255;215;0m[[+] ZOTHOS AI]\e[0m \e[1;37mAider AI Pair Programmer is not yet provisioned in Python environment.\e[0m"
-echo -e "\e[38;2;0;229;255m[*] To install Aider now, run:\e[0m uv pip install aider-chat"
-read -p "Install aider-chat now? (y/N): " choice
-if [[ "$choice" =~ ^[Yy]$ ]]; then
-    uv pip install aider-chat || pip3 install --break-system-packages aider-chat
-    exec python3 -m aider "$@"
-fi
-exit 1

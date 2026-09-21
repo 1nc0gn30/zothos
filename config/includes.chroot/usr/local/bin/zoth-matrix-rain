@@ -1,204 +1,37 @@
 #!/usr/bin/env bash
 # ==============================================================================
-#  * ZOTHOS HERMETIC MATRIX DIGITAL RAIN v3.0 *
-#  GPU-class cyberpunk rain with chromatic bloom, glitch bursts, alchemical glyphs
-#  Modes: classic | hyper | hacker | nebula | hypercube
+#  Zoth Matrix Rain — Phosphor Green Terminal Cascade Visualizer
 # ==============================================================================
+if ! command -v cmatrix >/dev/null 2>&1 && [[ ! -f /opt/zothos-ai-env/bin/cmatrix ]]; then
+    echo -e "\e[1;32m[*] Installing Matrix Rain engine (cmatrix)...\e[0m"
+    apt-get install -y cmatrix 2>/dev/null || true
+fi
 
-set -euo pipefail
-trap "tput cnorm; clear; exit 0" SIGINT SIGTERM EXIT
-
-tput civis
-clear
-
-# ── Mode selection ──────────────────────────────────────────────────────────
-MODE="${1:-classic}"
-case "$MODE" in
-    classic)  GLYPH_DENSITY=1; COLOR_SCHEME="emerald"; GLITCH_CHANCE=0.003 ;;
-    hyper)    GLYPH_DENSITY=2; COLOR_SCHEME="chromatic"; GLITCH_CHANCE=0.008 ;;
-    hacker)   GLYPH_DENSITY=1; COLOR_SCHEME="cyan-magenta"; GLITCH_CHANCE=0.015 ;;
-    nebula)   GLYPH_DENSITY=3; COLOR_SCHEME="void-stars"; GLITCH_CHANCE=0.005 ;;
-    hypercube) GLYPH_DENSITY=2; COLOR_SCHEME="gold-glyph"; GLITCH_CHANCE=0.01 ;;
-    *)        MODE="classic"; GLYPH_DENSITY=1; COLOR_SCHEME="emerald"; GLITCH_CHANCE=0.003 ;;
-esac
-
-LINES=$(tput lines)
-COLS=$(tput cols)
-
-# ── Glyph sets per mode ────────────────────────────────────────────────────
-get_glyphs() {
-    case "$COLOR_SCHEME" in
-        emerald)
-            echo "0 1 2 3 4 5 6 7 8 9 a b c d e f x z o t h k m n p q r s u v w y"
-            ;;
-        chromatic)
-            echo "0 1 2 3 4 5 6 7 8 9 a b c d e f x z o t h k m n p q r s u v w y"
-            ;;
-        "cyan-magenta")
-            echo "0 1 2 3 4 5 6 7 8 9 a b c d e f x z o t h k m n p q r s u v w y"
-            ;;
-        "void-stars")
-            echo " . * + : ; ! ? ~ ^ & % $ # @ § ¶ ∆ ∞ ≈ ≠ ≤ ≥ ⊂ ⊃ ∩ ∪ ⊥ ⊢ ⊣"
-            ;;
-        "gold-glyph")
-            echo "0 1 2 3 4 5 6 7 8 9 * ~ + + + + + * * ^ v # 🜚 🜛 🜞 🝠 ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ ᚺ ᚾ ᛁ ᛃ ᛈ ᛇ ᛉ"
-            ;;
-    esac
-}
-
-GLYPHS=($(get_glyphs))
-NUM_GLYPHS=${#GLYPHS[@]}
-
-declare -a Y_POS
-declare -a SPEEDS
-declare -a LENGTHS
-declare -a COLORS
-
-for ((i=0; i<COLS; i+=GLYPH_DENSITY)); do
-    Y_POS[$i]=$((RANDOM % LINES))
-    SPEEDS[$i]=$((RANDOM % 2 + 1))
-    LENGTHS[$i]=$((RANDOM % 14 + 10))
-    COLORS[$i]=$((RANDOM % 100 + 50))  # phosphor brightness 50-150
-done
-
-# ── Color codes per scheme ──────────────────────────────────────────────────
-get_color() {
-    local brightness=$1
-    case "$COLOR_SCHEME" in
-        emerald)
-            local g=$((brightness + 50))
-            if [[ $g -gt 255 ]]; then g=255; fi
-            echo "38;5;${g}"  # emerald green ramp
-            ;;
-        chromatic)
-            local half=$((brightness + 20))
-            if (( RANDOM % 3 == 0 )); then
-                echo "38;5;220"  # gold flash
-            elif (( RANDOM % 2 == 0 )); then
-                echo "38;5;81"   # cyan
-            else
-                echo "38;5;197"  # magenta
-            fi
-            ;;
-        "cyan-magenta")
-            if (( RANDOM % 2 == 0 )); then
-                echo "38;5;81"   # cyan
-            else
-                echo "38;5;197"  # magenta
-            fi
-            ;;
-        "void-stars")
-            local w=$((RANDOM % 3 + 1))
-            case $w in
-                1) echo "1;37" ;;   # pure white star
-                2) echo "1;33" ;;   # gold star
-                3) echo "1;36" ;;   # cyan star
-            esac
-            ;;
-        "gold-glyph")
-            if (( RANDOM % 7 == 0 )); then
-                echo "1;38;5;220"  # bright gold
-            elif (( RANDOM % 3 == 0 )); then
-                echo "1;38;5;214"  # gold
-            else
-                echo "1;38;5;251"  # pale gold
-            fi
-            ;;
-    esac
-}
-
-# ── Glitch burst trigger ────────────────────────────────────────────────────
-declare -i glitch_timer=0
-declare -i glitch_active=0
-declare -a glitch_lines
-
-trigger_glitch() {
-    local num_lines=$((RANDOM % 8 + 3))
-    glitch_active=1
-    glitch_lines=()
-    for ((i=0; i<num_lines; i++)); do
-        glitch_lines+=($((RANDOM % LINES)))
-    done
-    glitch_timer=8
-}
-
-# ── Main render loop ────────────────────────────────────────────────────────
-while true; do
-    read -t 0.03 -n 1 key 2>/dev/null && [[ "$key" == "q" || "$key" == $'\e' ]] && break
-
-    # Glitch timer countdown
-    if (( glitch_timer > 0 )); then
-        glitch_timer=$((glitch_timer - 1))
-        if (( glitch_timer == 0 )); then
-            glitch_active=0
-        fi
-    fi
-
-    # Random glitch trigger
-    if (( RANDOM % 1000 < GLITCH_CHANCE * 1000 )); then
-        trigger_glitch
-    fi
-
-    # Render frame
-    for ((col=0; col<COLS; col+=GLYPH_DENSITY)); do
-        y=${Y_POS[$col]}
-        stream_len=${LENGTHS[$col]}
-        speed=${SPEEDS[$col]}
-        base_color=$(get_color ${COLORS[$col]})
-
-        # Lead glyph (brightest — white/gold core)
-        if (( y >= 0 && y < LINES )); then
-            tput cup "$y" "$col" 2>/dev/null || true
-            if (( RANDOM % 5 == 0 )); then
-                echo -ne "\e[1;38;5;220m${GLYPHS[$((RANDOM % NUM_GLYPHS))]}\e[0m"
-            else
-                echo -ne "\e[1;37m${GLYPHS[$((RANDOM % NUM_GLYPHS))]}\e[0m"
-            fi
-        fi
-
-        # Trail layers (fading down)
-        for trail in 1 2 3 4 5 6; do
-            ty=$((y - trail))
-            if (( ty >= 0 && ty < LINES )); then
-                tput cup "$ty" "$col" 2>/dev/null || true
-                local dim=$((COLORS[$col] - trail * 8))
-                if (( dim < 10 )); then dim=10; fi
-                local tcolor=$(get_color $dim)
-                echo -ne "\e[${tcolor}m${GLYPHS[$((RANDOM % NUM_GLYPHS))]}\e[0m"
-            fi
-        done
-
-        # Trail erase
-        erase_y=$((y - stream_len))
-        if (( erase_y >= 0 && erase_y < LINES )); then
-            tput cup "$erase_y" "$col" 2>/dev/null || true
-            echo -ne " "
-        fi
-
-        # Advance
-        Y_POS[$col]=$((y + speed))
-        if (( Y_POS[$col] - stream_len >= LINES )); then
-            Y_POS[$col]=0
-            LENGTHS[$col]=$((RANDOM % 14 + 10))
-            SPEEDS[$col]=$((RANDOM % 2 + 1))
-            COLORS[$col]=$((RANDOM % 100 + 50))
-        fi
-    done
-
-    # Glitch overlay: draw phantom lines
-    if (( glitch_active )); then
-        for line in "${glitch_lines[@]}"; do
-            for ((col=0; col<COLS; col+=3)); do
-                tput cup "$line" "$col" 2>/dev/null || true
-                echo -ne "\e[1;38;5;$((RANDOM % 255 + 1))m${GLYPHS[$((RANDOM % NUM_GLYPHS))]}\e[0m"
-            done
-            # Duplicate line shifted for RGB-split effect
-            tput cup "$((line + 1))" "0" 2>/dev/null || true
-            echo -ne "\e[1;38;5;81m"
-            printf "%-${COLS}s" "$(head -c $COLS /dev/urandom 2>/dev/null | tr -dc '[:print:]' | head -c $COLS)"
-            echo -ne "\e[0m"
-        done
-    fi
-done
-
-tput cnorm
+if [[ -f /opt/zothos-ai-env/bin/cmatrix ]]; then
+    exec /opt/zothos-ai-env/bin/cmatrix -o 8 -l -u 4 -C green -b "$@" 2>/dev/null
+elif command -v cmatrix >/dev/null 2>&1; then
+    exec cmatrix -o 8 -l -u 4 -C green -b "$@" 2>/dev/null
+else
+    echo -e "\e[1;32m[*] Matrix Rain initialized — scrolling green phosphor terminal.\e[0m"
+    echo -e "\e[1;32m[*] Piping ANSI rain to terminal...\e[0m"
+    python3 - "$@" <<'PYEOF' 2>/dev/null
+import sys, time, random, os, shutil
+COLS, ROWS = shutil.get_terminal_size()
+SCR = [[" " for _ in range(COLS)] for _ in range(ROWS)]
+drops = [(random.randint(0, ROWS-1), random.randint(0, COLS-1)) for _ in range(COLS//4)]
+green = "\033[32m"
+bright = "\033[1;32m"
+reset = "\033[0m"
+while True:
+    os.system("clear")
+    for r, c in drops:
+        ch = random.choice("01+-*/$#%%@&")
+        color = bright if random.random() < 0.15 else green
+        if r < ROWS:
+            SCR[r][c] = f"{color}{ch}{reset}"
+        drops = [(r+1, c) if r+1 < ROWS else (0, c) for r, c in drops]
+    for row in SCR:
+        print("".join(row))
+    time.sleep(0.05)
+PYEOF
+fi

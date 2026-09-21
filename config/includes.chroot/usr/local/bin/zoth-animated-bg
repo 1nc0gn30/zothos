@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#  Zoth Animated BG — Cyber Film Strip & Datamosh Visualizer Engine
+# ==============================================================================
+ENGINE_DIR="/opt/zoth-live-wallpaper"
+ENGINE_HTML="$ENGINE_DIR/index.html"
+
+if [[ ! -d "$ENGINE_DIR" ]]; then
+    echo -e "\e[1;35m[*] Installing Live Wallpaper visual FX engine...\e[0m"
+    mkdir -p "$ENGINE_DIR"
+fi
+
+if [[ -f "$ENGINE_HTML" ]]; then
+    echo -e "\e[1;35m[*] Launching Cyber Film Strip datamosh visualizer...\e[0m"
+    if command -v xdg-open >/dev/null 2>&1; then
+        xdg-open "file://$ENGINE_HTML" 2>/dev/null || true
+    fi
+    if command -v chromium >/dev/null 2>&1 || command -v google-chrome >/dev/null 2>&1; then
+        nohup chromium --kiosk --disable-features=HardwareMediaKeyHandled --app="file://$ENGINE_HTML" --hide-crash-restore-button >/dev/null 2>&1 &
+        echo -e "\e[1;35m[*] Animated BG running in kiosk mode.\e[0m"
+    fi
+else
+    echo -e "\e[1;35m[*] Live Wallpaper engine not yet installed — run 'zoth-live-wallpaper' to provision.\e[0m"
+    echo -e "\e[1;35m[*] Animated BG placeholder: cyber film strip visualizer pending.\e[0m"
+fi
+exec bash

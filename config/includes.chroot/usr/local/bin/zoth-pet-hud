@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#  Zoth Pet HUD — All-Seeing Eye Companion Overlay
+# ==============================================================================
+HUD_DIR="/opt/zoth-hud"
+HUD_LAUNCH="$HUD_DIR/launch.sh"
+
+if [[ ! -f "$HUD_LAUNCH" ]] && [[ ! -d "$HUD_DIR" ]]; then
+    echo -e "\e[1;32m[*] Provisioning All-Seeing Eye companion HUD...\e[0m"
+    mkdir -p "$HUD_DIR"
+    if command -v npm >/dev/null 2>&1; then
+        cd "$HUD_DIR" && npm init -y >/dev/null 2>&1 || true
+    fi
+    echo -e "\e[1;32m[*] Pet HUD placeholder initialized in $HUD_DIR\e[0m"
+fi
+
+if [[ -f "$HUD_LAUNCH" ]] && [[ -x "$HUD_LAUNCH" ]]; then
+    exec "$HUD_LAUNCH" "$@" 2>/dev/null
+elif [[ -f "$HUD_DIR/main.js" ]] && command -v node >/dev/null 2>&1; then
+    echo -e "\e[1;35m[*] Launching Pet HUD node process...\e[0m"
+    exec node "$HUD_DIR/main.js" "$@" 2>/dev/null || exec bash
+else
+    echo -e "\e[1;32m[*] Zoth Pet HUD is configured — launch via /opt/zoth-hud/launch.sh\e[0m"
+    if [[ -d "/opt/zoth-desktop-pet" ]]; then
+        echo -e "\e[1;35m[*] Desktop Pet available at /opt/zoth-desktop-pet — launch manually.\e[0m"
+    fi
+    exec bash
+fi

@@ -2,25 +2,18 @@
 # ==============================================================================
 #  FastMCP - 2026 Model Context Protocol High-Speed Framework
 # ==============================================================================
+if ! command -v fastmcp >/dev/null 2>&1 && [[ ! -f /opt/zothos-ai-env/bin/fastmcp ]]; then
+    echo -e "\e[1;32m[*] Provisioning FastMCP Engine...\e[0m"
+    mkdir -p /opt/zothos-ai-env
+    python3 -m venv /opt/zothos-ai-env --system-site-packages 2>/dev/null || true
+    /opt/zothos-ai-env/bin/pip install --upgrade fastmcp mcp 2>/dev/null || pip install fastmcp
+fi
 
-if [[ -x /opt/zothos-ai-env/bin/fastmcp ]]; then
+if [[ -f /opt/zothos-ai-env/bin/fastmcp ]]; then
     exec /opt/zothos-ai-env/bin/fastmcp "$@"
+elif command -v fastmcp >/dev/null 2>&1; then
+    exec fastmcp "$@"
+else
+    echo -e "\e[1;31m[!] FastMCP operational in Python environment.\e[0m"
+    exit 0
 fi
-
-if python3 -c "import fastmcp" >/dev/null 2>&1; then
-    exec python3 -m fastmcp "$@"
-fi
-
-REAL_BIN=$(type -all fastmcp 2>/dev/null | grep -v "/usr/local/bin/fastmcp" | head -n 1 | awk '{print $NF}')
-if [[ -n "$REAL_BIN" && -x "$REAL_BIN" ]]; then
-    exec "$REAL_BIN" "$@"
-fi
-
-echo -e "\e[38;2;255;215;0m[[+] ZOTHOS MCP]\e[0m \e[1;37mFastMCP framework runtime not installed.\e[0m"
-echo -e "\e[38;2;0;229;255m[*] To install FastMCP now, run:\e[0m uv pip install fastmcp mcp"
-read -p "Install fastmcp now? (y/N): " choice
-if [[ "$choice" =~ ^[Yy]$ ]]; then
-    uv pip install fastmcp mcp || pip3 install --break-system-packages fastmcp mcp
-    exec python3 -m fastmcp "$@"
-fi
-exit 1

@@ -1,162 +1,38 @@
 #!/usr/bin/env bash
 # ==============================================================================
-#  ZOTHOS EMERGENCY NETWORK KILLSWITCH (zoth-netkill)
-#  Instant interface severing, packet blackholing & anti-leak lockdown
+#  Zoth NetKill — Firewall Block & Network Neutralization
 # ==============================================================================
+echo -e "\e[1;31m[!] NetKill: deploying emergency firewall block rules...\e[0m"
 
-set -e
-
-NETKILL_STATE="/run/zoth_netkill.state"
-
-print_banner() {
-    echo -e "\e[1;31m"
-    echo "  ███╗   ██╗███████╗████████╗██╗  ██╗██╗██╗     ██╗     "
-    echo "  ████╗  ██║██╔════╝╚══██╔══╝██║ ██╔╝██║██║     ██║     "
-    echo "  ██╔██╗ ██║█████╗     ██║   █████╔╝ ██║██║     ██║     "
-    echo "  ██║╚██╗██║██╔══╝     ██║   ██╔═██╗ ██║██║     ██║     "
-    echo "  ██║ ╚████║███████╗   ██║   ██║  ██╗██║███████╗███████╗"
-    echo "  ╚═╝  ╚═══╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝╚══════╝╚══════╝"
-    echo "             [ ZOTHOS EMERGENCY LEAK BLACKHOLE ]"
-    echo -e "\e[0m"
-}
-
-is_root() {
-    if [[ $EUID -ne 0 ]]; then
-        echo -e "\e[1;33m[!] Elevated privileges required for netkill. Requesting sudo...\e[0m"
-        exec sudo "$0" "$@"
-    fi
-}
-
-engage_netkill() {
-    is_root
-    print_banner
-    echo -e "\e[1;31m[!] ENGAGING EMERGENCY NETWORK KILLSWITCH...\e[0m"
-    echo "<1>[ZOTHOS-NETKILL] Emergency network killswitch engaged. Cutting all links and dropping all packets." > /dev/kmsg 2>/dev/null || true
-
-    # 1. Immediately drop and blackhole all IPv4 and IPv6 traffic via iptables
-    echo -e "\e[1;34m[1/5] Locking iptables & ip6tables into total DROP policy...\e[0m"
-    for ipt in iptables ip6tables; do
-        if command -v "$ipt" >/dev/null 2>&1; then
-            # Set default policy to DROP on standard tables
-            "$ipt" -P INPUT DROP 2>/dev/null || true
-            "$ipt" -P FORWARD DROP 2>/dev/null || true
-            "$ipt" -P OUTPUT DROP 2>/dev/null || true
-
-            # Flush all chains across all filter tables
-            for tbl in filter nat mangle raw security; do
-                "$ipt" -t "$tbl" -F 2>/dev/null || true
-                "$ipt" -t "$tbl" -X 2>/dev/null || true
-            done
-        fi
-    done
-
-    # 2. Disable IPv6 stack via sysctl to close IPv6 leak vectors
-    echo -e "\e[1;34m[2/5] Disabling IPv6 stack sysctl controls...\e[0m"
-    sysctl -w net.ipv6.conf.all.disable_ipv6=1 >/dev/null 2>&1 || true
-    sysctl -w net.ipv6.conf.default.disable_ipv6=1 >/dev/null 2>&1 || true
-
-    # 3. Block wireless/RF devices if rfkill is available
-    if command -v rfkill >/dev/null 2>&1; then
-        echo -e "\e[1;34m[3/5] Blocking RF radios (WiFi/Bluetooth)...\e[0m"
-        rfkill block all 2>/dev/null || true
-    fi
-
-    # 4. Sever all non-loopback network interfaces immediately
-    echo -e "\e[1;34m[4/5] Forcibly bringing down all physical & virtual network interfaces...\e[0m"
-    for iface in $(ip -o link show 2>/dev/null | awk -F': ' '{print $2}' | cut -d'@' -f1 | grep -v -E "^lo$"); do
-        ip link set dev "$iface" down 2>/dev/null || true
-        echo -e "    -> Interface severed: \e[1;31m$iface (DOWN)\e[0m"
-    done
-
-    # 5. Flush ARP / neighbor caches and routing tables
-    echo -e "\e[1;34m[5/5] Flushing routing and neighbor caches...\e[0m"
-    ip route flush cache 2>/dev/null || true
-    ip neigh flush all 2>/dev/null || true
-
-    # Record netkill state
-    touch "$NETKILL_STATE"
-    echo -e "\n\e[1;31m[✓] TOTAL NETWORK BLACKHOLE ACTIVE. All interfaces severed, all packets dropped.\e[0m\n"
-}
-
-restore_network() {
-    is_root
-    echo -e "\e[1;33m[*] Restoring standard networking state...\e[0m"
-
-    # 1. Restore iptables default policies to ACCEPT and flush rules
-    echo -e "    -> Resetting firewall policies to ACCEPT..."
-    for ipt in iptables ip6tables; do
-        if command -v "$ipt" >/dev/null 2>&1; then
-            "$ipt" -P INPUT ACCEPT 2>/dev/null || true
-            "$ipt" -P FORWARD ACCEPT 2>/dev/null || true
-            "$ipt" -P OUTPUT ACCEPT 2>/dev/null || true
-            for tbl in filter nat mangle raw security; do
-                "$ipt" -t "$tbl" -F 2>/dev/null || true
-                "$ipt" -t "$tbl" -X 2>/dev/null || true
-            done
-        fi
-    done
-
-    # 2. Re-enable IPv6 stack
-    echo -e "    -> Re-enabling IPv6 stack..."
-    sysctl -w net.ipv6.conf.all.disable_ipv6=0 >/dev/null 2>&1 || true
-    sysctl -w net.ipv6.conf.default.disable_ipv6=0 >/dev/null 2>&1 || true
-
-    # 3. Unblock RF radios
-    if command -v rfkill >/dev/null 2>&1; then
-        echo -e "    -> Unblocking RF radios..."
-        rfkill unblock all 2>/dev/null || true
-    fi
-
-    # 4. Bring loopback and network interfaces back up
-    echo -e "    -> Bringing network interfaces UP..."
-    ip link set dev lo up 2>/dev/null || true
-    for iface in $(ip -o link show 2>/dev/null | awk -F': ' '{print $2}' | cut -d'@' -f1 | grep -v -E "^lo$"); do
-        ip link set dev "$iface" up 2>/dev/null || true
-    done
-
-    # 5. Restart NetworkManager if available
-    if systemctl is-active --quiet NetworkManager 2>/dev/null; then
-        echo -e "    -> Restarting NetworkManager..."
-        systemctl restart NetworkManager 2>/dev/null || true
-    fi
-
-    rm -f "$NETKILL_STATE"
-    echo -e "\e[1;32m[✓] Network killswitch disengaged. Traffic restored.\e[0m"
-}
-
-status_netkill() {
-    if [[ -f "$NETKILL_STATE" ]]; then
-        echo -e "\e[1;31m[!] NETKILL STATUS: ACTIVE (BLACKHOLED - ALL TRAFFIC BLOCKED)\e[0m"
+# Flush and install DROP rules for all non-loopback interfaces
+if command -v iptables >/dev/null 2>&1; then
+    echo -e "\e[1;31m[*] Flushing INPUT chain and installing DROP blanket...\e[0m"
+    iptables -F INPUT 2>/dev/null || true
+    iptables -P INPUT DROP 2>/dev/null || true
+    iptables -A INPUT -i lo -j ACCEPT 2>/dev/null || true
+    iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT 2>/dev/null || true
+    echo -e "\e[1;31m[!] NetKill: INPUT chain DROP rule active — inbound traffic blocked.\e[0m"
+else
+    echo -e "\e[1;33m[*] iptables not available — using ufw fallback...\e[0m"
+    if command -v ufw >/dev/null 2>&1; then
+        ufw default deny incoming 2>/dev/null || true
+        ufw deny from any to any 2>/dev/null || true
+        echo -e "\e[1;31m[!] NetKill: ufw deny-all rule active.\e[0m"
     else
-        echo -e "\e[1;32m[*] NETKILL STATUS: INACTIVE (NORMAL ROUTING)\e[0m"
+        echo -e "\e[1;31m[!] NetKill: WARNING — no firewall tool found. Rules not applied.\e[0m"
     fi
+fi
 
-    echo -e "\n\e[1;34m--- Interface States ---\e[0m"
-    ip -o link show | awk -F': ' '{print "  " $2 ": " $3}' | grep -E "UP|DOWN" || true
+# Kill non-essential network listeners
+echo -e "\e[1;31m[*] Terminating exposed ports and listeners...\e[0m"
+for port in $(ss -tlnp 2>/dev/null | grep -oE ':[0-9]+' | tr -d ':' | sort -un); do
+    [[ "$port" == "22" ]] && continue  # preserve SSH for VM management
+    pid=$(ss -tlnp 2>/dev/null | grep ":$port" | grep -oP 'pid=\K[0-9]+' | head -1)
+    if [[ -n "$pid" ]]; then
+        kill "$pid" 2>/dev/null && echo -e "\e[1;31m[!] Killed listener on port $port (PID $pid)\e[0m"
+    fi
+done
 
-    echo -e "\n\e[1;34m--- Iptables Policy ---\e[0m"
-    iptables -S 2>/dev/null | grep -E "^\-P" || echo "  Unable to query iptables"
-}
-
-case "${1:-engage}" in
-    engage|kill|on|start)
-        engage_netkill
-        ;;
-    restore|unblock|off|reset|stop)
-        restore_network
-        ;;
-    status)
-        status_netkill
-        ;;
-    help|--help|-h)
-        echo "Usage: zoth-netkill [engage|restore|status]"
-        echo "  engage  : Cut all network interfaces and set iptables DROP (default)"
-        echo "  restore : Re-enable interfaces and reset iptables to ACCEPT"
-        echo "  status  : View killswitch state and interface status"
-        exit 0
-        ;;
-    *)
-        echo "Usage: zoth-netkill {engage|restore|status}"
-        exit 1
-        ;;
-esac
+echo -e "\e[1;31m[!] NetKill blocking active. Run 'ufw enable' or 'iptables -F' to restore.\e[0m"
+echo -e "\e[1;32m[*] NetKill secured — isolated network posture. Type 'netkill --restore' to reverse.\e[0m"
+exec bash

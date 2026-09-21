@@ -2,25 +2,18 @@
 # ==============================================================================
 #  LiteLLM - 2026 Universal 100+ LLM Proxy & OpenAI Gateway
 # ==============================================================================
+if ! command -v litellm >/dev/null 2>&1 && [[ ! -f /opt/zothos-ai-env/bin/litellm ]]; then
+    echo -e "\e[1;36m[*] Provisioning LiteLLM Gateway...\e[0m"
+    mkdir -p /opt/zothos-ai-env
+    python3 -m venv /opt/zothos-ai-env --system-site-packages 2>/dev/null || true
+    /opt/zothos-ai-env/bin/pip install --upgrade "litellm[proxy]" 2>/dev/null || pip install litellm
+fi
 
-if [[ -x /opt/zothos-ai-env/bin/litellm ]]; then
+if [[ -f /opt/zothos-ai-env/bin/litellm ]]; then
     exec /opt/zothos-ai-env/bin/litellm "$@"
+elif command -v litellm >/dev/null 2>&1; then
+    exec litellm "$@"
+else
+    echo -e "\e[1;31m[!] Error: LiteLLM initialization failed.\e[0m"
+    exit 1
 fi
-
-if python3 -c "import litellm" >/dev/null 2>&1; then
-    exec python3 -m litellm "$@"
-fi
-
-REAL_BIN=$(type -all litellm 2>/dev/null | grep -v "/usr/local/bin/litellm" | head -n 1 | awk '{print $NF}')
-if [[ -n "$REAL_BIN" && -x "$REAL_BIN" ]]; then
-    exec "$REAL_BIN" "$@"
-fi
-
-echo -e "\e[38;2;255;215;0m[[+] ZOTHOS AI]\e[0m \e[1;37mLiteLLM Gateway proxy not installed.\e[0m"
-echo -e "\e[38;2;0;229;255m[*] To install LiteLLM now, run:\e[0m uv pip install \"litellm[proxy]\""
-read -p "Install litellm now? (y/N): " choice
-if [[ "$choice" =~ ^[Yy]$ ]]; then
-    uv pip install "litellm[proxy]" || pip3 install --break-system-packages "litellm[proxy]"
-    exec python3 -m litellm "$@"
-fi
-exit 1

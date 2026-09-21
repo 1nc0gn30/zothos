@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#  Zoth Ghost Amnesic — Stealth Mode, Tor Routing & Anti-Forensics
+# ==============================================================================
+if ! command -v tor >/dev/null 2>&1 && [[ ! -f /opt/zothos-ai-env/bin/tor ]]; then
+    echo -e "\e[1;31m[*] Provisioning Tor anonymity network...\e[0m"
+    apt-get install -y tor torsocks 2>/dev/null || true
+fi
+
+if [[ -f /opt/zothos-ai-env/bin/tor ]]; then
+    exec torsocks bash -c "echo '\e[1;31m[!] Ghost Amnesic engaged — all traffic via Tor.' && exec bash" 2>/dev/null
+elif command -v tor >/dev/null 2>&1; then
+    echo -e "\e[1;31m[!] Ghost Amnesic: launching with torsocks wrapper...\e[0m"
+    exec torsocks bash -c "echo '\e[1;31m[!] All outbound traffic now routed through Tor.' && exec bash"
+else
+    echo -e "\e[1;31m[!] Ghost Amnesic mode: Tor unavailable — RAM-only stealth active.\e[0m"
+    echo -e "\e[1;31m[*] Clearing shell history and disabling session logging...\e[0m"
+    unset HISTFILE
+    export HISTFILE=/dev/null
+    echo -e "\e[1;35m[*] Amnesic shell active — no traces written to disk.\e[0m"
+    exec bash
+fi
