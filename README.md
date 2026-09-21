@@ -215,3 +215,12 @@ Now try:
 - `zoth-sec`
 - `zoth-fastfetch`
 - `zoth-matrix-rain`
+
+---
+
+## ✦ Agent & Developer Documentation
+
+- 🤖 **[AI Agent Handoff Guide (AGENTS.md)](file:///home/neo/zothos/AGENTS.md)**: Operational guide for AI agents working on ZothOS, including chroot structures, QCOW2 VM injection protocols, verification harnesses, and icon generation.
+- 🛠️ **[Tools Catalog (ZOTHOS_TOOLS_CATALOG.md)](file:///home/neo/zothos/ZOTHOS_TOOLS_CATALOG.md)**: Catalog of the 28 integrated AI, InfoSec, and media tool repositories.
+- 🧪 **[VM Validation Suite (docs/VM_VALIDATION.md)](file:///home/neo/zothos/docs/VM_VALIDATION.md)**: Automated verification protocol and VM testing harnesses.
+
