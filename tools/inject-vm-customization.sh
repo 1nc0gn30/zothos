@@ -33,7 +33,7 @@ virt-customize -a "$VM_DISK" \
     --run-command "useradd -m -s /bin/bash -G sudo,audio,video,dialout neo 2>/dev/null || true" \
     --run-command "echo 'neo:zoth' | chpasswd" \
     --run-command "echo 'neo ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/neo && chmod 0440 /etc/sudoers.d/neo" \
-    --run-command "mkdir -p /usr/share/backgrounds /usr/share/themes /opt /etc/systemd/network /etc/systemd/system/multi-user.target.wants /etc/systemd/system/sockets.target.wants /home/neo/.ssh" \
+    --run-command "mkdir -p /usr/share/backgrounds /usr/share/themes /usr/share/plymouth/themes /etc/xdg/xfce4/xfwm4 /etc/xdg/xfwm4 /opt /etc/systemd/network /etc/systemd/system/multi-user.target.wants /etc/systemd/system/sockets.target.wants /home/neo/.ssh" \
     --network \
     --install openssh-server,qemu-guest-agent,sudo,curl,rsync \
     --copy-in "$ZOTHOS_SRC/usr/local/bin:/usr/local" \
@@ -46,9 +46,8 @@ virt-customize -a "$VM_DISK" \
     --copy-in "$ZOTHOS_SRC/usr/share/sddm:/usr/share" \
     --copy-in "$ZOTHOS_SRC/etc/lightdm:/etc" \
     --copy-in "$ZOTHOS_SRC/etc/sddm.conf.d:/etc/sddm.conf.d" \
-        --copy-in "$ZOTHOS_SRC/usr/share/plymouth/themes:/usr/share/plymouth/themes" \
-        --copy-in "$ZOTHOS_SRC/etc/xdg/xfce4/xfwm4/themes:/etc/xdg/xfce4/xfwm4/themes" \
-        --copy-in "$ZOTHOS_SRC/etc/xdg/xfwm4/themes:/etc/xdg/xfwm4/themes" \
+    --copy-in "$ZOTHOS_SRC/usr/share/plymouth/themes:/usr/share/plymouth" \
+    --copy-in "$ZOTHOS_SRC/etc/xdg/xfce4/xfwm4/themes:/etc/xdg/xfce4/xfwm4" \
     --copy-in "$ZOTHOS_SRC/opt/zoth-studio:/opt" \
     --copy-in "$ZOTHOS_SRC/opt/zoth-desktop-pet:/opt" \
     --copy-in "$ZOTHOS_SRC/opt/zoth-hud:/opt" \
