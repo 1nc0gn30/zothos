@@ -34,11 +34,18 @@ virt-customize -a "$VM_DISK" \
     --copy-in "$ZOTHOS_SRC/usr/share/themes:/usr/share" \
     --copy-in "$ZOTHOS_SRC/usr/share/color-schemes:/usr/share" \
     --copy-in "$ZOTHOS_SRC/usr/share/icons:/usr/share" \
+    --copy-in "$ZOTHOS_SRC/usr/share/pixmaps:/usr/share" \
+    --copy-in "$ZOTHOS_SRC/usr/share/sddm:/usr/share" \
+    --copy-in "$ZOTHOS_SRC/etc/lightdm:/etc" \
+    --copy-in "$ZOTHOS_SRC/etc/sddm.conf.d:/etc" \
     --copy-in "$ZOTHOS_SRC/opt/zoth-studio:/opt" \
     --copy-in "$ZOTHOS_SRC/opt/zoth-desktop-pet:/opt" \
     --copy-in "$ZOTHOS_SRC/opt/zoth-hud:/opt" \
     --copy-in "$ZOTHOS_SRC/etc/xdg/kwinrulesrc:/etc/xdg" \
     --copy-in "$ZOTHOS_SRC/etc/skel/.config:/etc/skel" \
+    --run-command "echo 'exec /usr/bin/startplasma-x11' > /etc/skel/.xsession && chmod +x /etc/skel/.xsession" \
+    --run-command "printf 'export DESKTOP_SESSION=plasma\nexport XDG_CURRENT_DESKTOP=KDE\n' > /etc/skel/.xsessionrc" \
+    --run-command "printf '[Desktop]\nSession=plasma\n' > /etc/skel/.dmrc" \
     --copy-in "$ZOTHOS_SRC/etc/skel/.bashrc:/etc/skel" \
     --copy-in "$ZOTHOS_SRC/etc/skel/.zshrc:/etc/skel" \
     --copy-in "$ZOTHOS_SRC/etc/systemd/system/zoth-ghost-amnesic.service:/etc/systemd/system" \
