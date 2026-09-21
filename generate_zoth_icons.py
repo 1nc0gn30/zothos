@@ -655,6 +655,53 @@ def build_icon_caido():
     fd.polygon([(cx, cy - 80), (cx + 80, cy), (cx, cy + 80), (cx - 80, cy)], fill=(168, 85, 247, 240))
     return Image.alpha_composite(base, fg)
 
+def build_icon_zoth_desktop_pet():
+    """3D Glass All-Seeing Eye AI Mascot Companion"""
+    base = create_glass_squircle_base(
+        bg_top=(12, 38, 28, 255),
+        bg_bot=(2, 10, 8, 255),
+        glow_color=(0, 255, 157, 100),
+        rim_top=(0, 255, 157, 240),
+        rim_bot=(0, 243, 255, 160)
+    )
+    fg = Image.new("RGBA", (CANVAS_SIZE, CANVAS_SIZE), (0, 0, 0, 0))
+    fd = ImageDraw.Draw(fg)
+    cx, cy = CANVAS_SIZE // 2, CANVAS_SIZE // 2
+    
+    # Holographic Outer Rings
+    fd.ellipse([cx - 160, cy - 160, cx + 160, cy + 160], outline=(0, 255, 157, 180), width=4)
+    fd.ellipse([cx - 120, cy - 120, cx + 120, cy + 120], outline=(0, 243, 255, 160), width=3)
+    
+    # Core Eye Socket Orb
+    fd.ellipse([cx - 90, cy - 90, cx + 90, cy + 90], fill=(2, 6, 12, 240), outline=(0, 255, 157, 255), width=6)
+    # Iris
+    fd.ellipse([cx - 55, cy - 55, cx + 55, cy + 55], fill=(0, 255, 157, 230), outline=(255, 255, 255, 240), width=4)
+    # Pupil
+    fd.ellipse([cx - 24, cy - 24, cx + 24, cy + 24], fill=(0, 0, 0, 255))
+    # Catchlight
+    fd.ellipse([cx - 14, cy - 18, cx - 4, cy - 8], fill=(255, 255, 255, 255))
+    
+    return Image.alpha_composite(base, fg)
+
+def build_icon_zoth_sentinel():
+    """3D Sentinel Security Shield Enclave"""
+    base = create_glass_squircle_base(
+        bg_top=(38, 20, 10, 255),
+        bg_bot=(10, 4, 2, 255),
+        glow_color=(245, 158, 11, 95),
+        rim_top=(253, 224, 71, 230),
+        rim_bot=(217, 119, 6, 160)
+    )
+    fg = Image.new("RGBA", (CANVAS_SIZE, CANVAS_SIZE), (0, 0, 0, 0))
+    fd = ImageDraw.Draw(fg)
+    cx, cy = CANVAS_SIZE // 2, CANVAS_SIZE // 2
+    
+    # Security Badge Star
+    fd.ellipse([cx - 150, cy - 150, cx + 150, cy + 150], outline=(245, 158, 11, 200), width=6)
+    fd.ellipse([cx - 70, cy - 70, cx + 70, cy + 70], fill=(245, 158, 11, 230), outline=(255, 255, 255, 240), width=4)
+    
+    return Image.alpha_composite(base, fg)
+
 # Registry of Icon Builders & Aliases
 BUILDERS = {
     "zoth-studio": build_icon_zoth_studio,
@@ -681,6 +728,8 @@ BUILDERS = {
     "web3-solana": build_icon_web3_solana,
     "solana": build_icon_web3_solana,
     "caido": build_icon_caido,
+    "zoth-desktop-pet": build_icon_zoth_desktop_pet,
+    "zoth-sentinel": build_icon_zoth_sentinel,
     
     # Aliases & System icons
     "zothos": build_icon_zoth_studio,

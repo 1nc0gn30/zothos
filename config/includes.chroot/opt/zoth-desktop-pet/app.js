@@ -38,7 +38,7 @@ function playSound(freq = 520, type = 'sine') {
   } catch (e) {}
 }
 
-// 60FPS Global OS Cursor Tracking
+// 60FPS Global OS Cursor Tracking across ENTIRE Screen
 ipcRenderer.on('global-cursor-pos', (event, pos) => {
   if (!eyeIris) return;
   const eyeSocket = eyeIris.parentElement;
@@ -52,13 +52,47 @@ ipcRenderer.on('global-cursor-pos', (event, pos) => {
   const deltaY = pos.cursorY - eyeGlobalY;
 
   const angle = Math.atan2(deltaY, deltaX);
-  const distance = Math.min(11, Math.hypot(deltaX, deltaY) / 40);
+  const distTotal = Math.hypot(deltaX, deltaY);
+
+  // Dynamic pupil movement across max socket radius (16px max offset)
+  const maxRadius = 16;
+  const distance = Math.min(maxRadius, distTotal / 18);
 
   const pupilX = Math.cos(angle) * distance;
   const pupilY = Math.sin(angle) * distance;
 
   eyeIris.style.transform = `translate(${pupilX}px, ${pupilY}px)`;
 });
+
+// Interactive Desktop Dragging Logic (Move All-Seeing Eye Anywhere)
+let isDraggingPet = false;
+let dragStartX = 0;
+let dragStartY = 0;
+
+const mascotWrapper = document.querySelector('.mascot-wrapper');
+if (mascotWrapper) {
+  mascotWrapper.addEventListener('mousedown', (e) => {
+    if (e.button === 0) { // Left click
+      isDraggingPet = true;
+      dragStartX = e.screenX;
+      dragStartY = e.screenY;
+    }
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (isDraggingPet) {
+      const deltaX = e.screenX - dragStartX;
+      const deltaY = e.screenY - dragStartY;
+      dragStartX = e.screenX;
+      dragStartY = e.screenY;
+      ipcRenderer.send('move-pet-window', { deltaX, deltaY });
+    }
+  });
+
+  window.addEventListener('mouseup', () => {
+    isDraggingPet = false;
+  });
+}
 
 // Active Window Reading & Recording Reaction
 ipcRenderer.on('active-window-changed', (event, winTitle) => {

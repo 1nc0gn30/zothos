@@ -152,6 +152,12 @@ function queryOllamaQwen(prompt, contextText, callback) {
 }
 
 // ── IPC Handlers ────────────────────────────────────────────────────────
+ipcMain.on('move-pet-window', (event, { deltaX, deltaY }) => {
+  if (!petWindow || petWindow.isDestroyed()) return;
+  const bounds = petWindow.getBounds();
+  petWindow.setPosition(bounds.x + deltaX, bounds.y + deltaY);
+});
+
 ipcMain.on('launch-app', (event, appName) => {
   const apps = {
     'studio': 'zoth-studio',
