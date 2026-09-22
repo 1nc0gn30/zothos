@@ -32,7 +32,7 @@ WORK_DIR="$PROJECT_DIR/build/live_workspace"
 
 echo -e "${CYAN}[1/6] Verifying host build prerequisites...${RESET}"
 MISSING_PKGS=()
-for pkg in live-build debootstrap xorriso squashfs-tools isolinux syslinux-common grub-pc-bin grub-efi-amd64-bin; do
+for pkg in live-build debootstrap xorriso squashfs-tools isolinux syslinux-common; do
     if ! dpkg -l "$pkg" >/dev/null 2>&1; then
         MISSING_PKGS+=("$pkg")
     fi
@@ -50,17 +50,33 @@ mkdir -p "$WORK_DIR"
 cd "$WORK_DIR"
 
 echo -e "${CYAN}[3/6] Initializing live-build configuration...${RESET}"
+export LIVE_BUILD=/usr/lib/live
 lb config \
     --distribution trixie \
     --architecture amd64 \
     --archive-areas "main contrib non-free non-free-firmware" \
-    --bootloader grub-efi \
+    --bootloader syslinux \
     --binary-images iso-hybrid \
     --iso-application "ZOTHOS Linux 1.0 (Azoth)" \
     --iso-publisher "Zoth Studio & NullAI <https://zoth.nullai.tech>" \
     --iso-volume "ZOTHOS_1.0" \
-    --memtest none \
-    --win32-loader false
+    --initramfs live-boot \
+    --linux-flavours amd64 \
+    --linux-packages linux-image-amd64 \
+    --apt-secure false \
+    --apt-options "--yes --ignore-missing"
+
+# Add Kali and Parrot repositories for security/AI packages
+mkdir -p "$WORK_DIR/config/apt/sources.list.d"
+cat > "$WORK_DIR/config/apt/sources.list.d/kali.list" << 'KALEOF'
+deb [trusted=yes] http://http.kali.org/kali kali-rolling main non-free non-free-firmware
+KALEOF
+cat > "$WORK_DIR/config/apt/sources.list.d/parrot.list" << 'PAROTEOF'
+deb [trusted=yes] http://deb.parrot.sh/parrot parrot main non-free non-free-firmware
+PAROTEOF
+cat > "$WORK_DIR/config/apt/sources.list.d/zothos.list" << 'ZOTHOEOF'
+deb [trusted=yes] file:///opt/zothos/repo /
+ZOTHOEOF
 
 echo -e "${CYAN}[4/6] Staging package lists and chroot inclusions...${RESET}"
 mkdir -p config/package-lists
@@ -75,14 +91,22 @@ chmod +x config/includes.chroot/usr/local/bin/* 2>/dev/null || true
 
 # Add chroot post-install hook to configure default user and services
 mkdir -p config/hooks/normal
+cat <<'EOF' > config/hooks/normal/0000-install-initramfs.hook.chroot
+#!/bin/sh
+set -e
+echo "[ZOTHOS HOOK] Guaranteeing initramfs-tools & linux-image..."
+apt-get update -y || true
+apt-get install -y --no-install-recommends initramfs-tools linux-image-amd64 live-boot || true
+EOF
+chmod +x config/hooks/normal/0000-install-initramfs.hook.chroot
+
 cat <<'EOF' > config/hooks/normal/099-zothos-setup.hook.chroot
 #!/bin/sh
 set -e
 
-echo "[ZOTHOS HOOK] Setting up default user 'neo' and security permissions..."
-# Ensure default user exists with sudo
 if ! id "neo" >/dev/null 2>&1; then
-    useradd -m -s /bin/bash -G sudo,audio,video,dialout,plugdev,docker neo
+    groupadd -f docker || true
+    useradd -m -s /bin/bash -G sudo,audio,video neo 2>/dev/null || true
     echo "neo:zoth" | chpasswd
 fi
 
@@ -121,6 +145,7 @@ cp -a "$PROJECT_DIR/config/includes.chroot/usr/share/plymouth/themes/." config/i
 
 echo -e "${GREEN}[6/6] Starting Live-Build execution (lb build)...${RESET}"
 echo -e "${YELLOW}[*] This will bootstrap the Debian base, fetch security & AI packages, and compile the ISO.${RESET}"
+export LIVE_BUILD=/usr/lib/live
 lb build 2>&1 | tee /tmp/lb-build.log
 
 if [[ -f live-image-amd64.hybrid.iso ]]; then
