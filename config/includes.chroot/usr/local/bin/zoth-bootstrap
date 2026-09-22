@@ -47,10 +47,12 @@ apt-get install -y --no-install-recommends \
 
 echo "[APT] Core packages installed."
 
-# ── 2. Python Virtual Environment ─────────────────────────────────────────
 echo "[VENV] Setting up Python AI environment at $VENV..."
-python3 -m venv "$VENV" --system-site-packages || python3 -m venv "$VENV"
-source "$VENV/bin/activate"
+apt-get install -y python3-venv python3-full 2>/dev/null || true
+python3 -m venv "$VENV" --system-site-packages 2>/dev/null || python3 -m venv "$VENV" 2>/dev/null || true
+if [[ -f "$VENV/bin/activate" ]]; then
+    source "$VENV/bin/activate"
+fi
 
 echo "[PIP] Installing AI/ML Python packages..."
 "$VENV/bin/pip" install --quiet --upgrade pip 2>/dev/null || true
