@@ -1,0 +1,64 @@
+#!/usr/bin/env python3
+"""
+[+] ZOTHOS Cline Autonomous Agent Workstation v1.0
+Cline.bot Open-Source Autonomous Coding Agent & CLI
+"""
+
+import os
+import sys
+import shutil
+import subprocess
+
+GREEN = "\033[38;2;0;255;157m"
+GOLD = "\033[38;2;255;215;0m"
+CYAN = "\033[38;2;0;229;255m"
+GRAY = "\033[38;2;120;140;160m"
+BOLD = "\033[1m"
+RESET = "\033[0m"
+
+def banner():
+    os.system("clear" if os.name == "posix" else "cls")
+    print(f"{CYAN}{BOLD}")
+    print(r"    ██████╗██╗     ██╗███╗   ██╗███████╗")
+    print(r"   ██╔════╝██║     ██║████╗  ██║██╔════╝")
+    print(r"   ██║     ██║     ██║██╔██╗ ██║█████╗  ")
+    print(r"   ██║     ██║     ██║██║╚██╗██║██╔══╝  ")
+    print(r"   ╚██████╗███████╗██║██║ ╚████║███████╗")
+    print(r"    ╚═════╝╚══════╝╚═╝╚═╝  ╚═══╝╚══════╝")
+    print(f"         {GOLD}[+] CLINE AUTONOMOUS AGENT HARNESS [+]{RESET}\n")
+
+def install_cline():
+    banner()
+    print(f"{GOLD}[*] Installing Cline Autonomous Agent via Official Installer...{RESET}\n")
+    cmd = "mkdir -p ~/.local && npm install -g --prefix ~/.local cline"
+    os.system(cmd)
+    input(f"\n{GRAY}Press Enter to return...{RESET}")
+
+def main():
+    cline_bin = shutil.which("cline")
+    if cline_bin and os.path.realpath(cline_bin) != os.path.realpath(sys.argv[0]):
+        try:
+            os.execv(cline_bin, sys.argv)
+        except Exception:
+            pass
+
+    while True:
+        banner()
+        print(f"  {BOLD}{CYAN}[1]{RESET} [>]  {BOLD}Launch Cline Autonomous Agent Session{RESET}")
+        print(f"  {BOLD}{GREEN}[2]{RESET} [PKG]  {BOLD}Install / Update Cline via Official 1-Liner{RESET}")
+        print(f"  {BOLD}{GRAY}[0]{RESET} [X]  {BOLD}Exit Cline{RESET}\n")
+        print(f"{CYAN}{BOLD}══════════════════════════════════════════════════════════════════════{RESET}")
+        
+        try:
+            choice = input(f"Select option [0-2]: ").strip()
+            if choice == "1":
+                os.system("cline || npx cline")
+            elif choice == "2":
+                install_cline()
+            elif choice in ["0", "q", "Q"]:
+                break
+        except (KeyboardInterrupt, EOFError):
+            break
+
+if __name__ == "__main__":
+    main()

@@ -21,6 +21,10 @@ elif [ -f "/usr/lib/node_modules/electron/dist/electron" ]; then
 elif command -v npx >/dev/null 2>&1; then
     exec npx electron --no-sandbox "$HUD_DIR" "$@"
 else
-    echo "[!] Electron not found, falling back to python3 HUD"
-    python3 -c "import sys; print('[*] Launching fallback HUD')"
+    OS_BIN="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)/zoth-os"
+    if [[ -x "$OS_BIN" ]]; then
+        exec "$OS_BIN"
+    fi
+    echo "[!] Electron is not installed, and the Zoth OS desk was not found." >&2
+    exit 1
 fi

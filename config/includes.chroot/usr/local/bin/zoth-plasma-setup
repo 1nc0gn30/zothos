@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#  ZOTHOS KDE PLASMA 6 ENVIRONMENT SETUP
+# ==============================================================================
+set -u
+
+WALLPAPER="/usr/share/backgrounds/zothos/hermetic-matrix.png"
+
+# Wait for plasma shell to be available on DBus
+for i in {1..40}; do
+    if qdbus org.kde.plasmashell /PlasmaShell >/dev/null 2>&1; then
+        break
+    fi
+    sleep 0.5
+done
+
+# Ensure KDE Plasma panel exists
+if qdbus org.kde.plasmashell /PlasmaShell >/dev/null 2>&1; then
+    qdbus org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript '
+        var p = panels();
+        if (p.length === 0) {
+            loadTemplate("org.kde.plasma.desktop.defaultPanel");
+        }
+    ' >/dev/null 2>&1 || true
+fi
+
+# Apply ZOTHOS Hermetic Matrix Cyber-Gold Wallpaper
+if [ -f "$WALLPAPER" ] && command -v plasma-apply-wallpaperimage >/dev/null 2>&1; then
+    plasma-apply-wallpaperimage "$WALLPAPER" >/dev/null 2>&1 || true
+fi
+
+# Ensure KDE dark colorscheme is applied
+if command -v plasma-apply-colorscheme >/dev/null 2>&1; then
+    plasma-apply-colorscheme BreezeDark >/dev/null 2>&1 || true
+fi
+
+# Ensure screen lock is disabled on live session & lockscreen uses hermetic-matrix
+if command -v kwriteconfig6 >/dev/null 2>&1; then
+    kwriteconfig6 --file kscreenlockerrc --group Daemon --key Autolock false 2>/dev/null || true
+    kwriteconfig6 --file kscreenlockerrc --group Daemon --key Timeout 0 2>/dev/null || true
+    kwriteconfig6 --file kscreenlockerrc --group Daemon --key LockOnResume false 2>/dev/null || true
+    kwriteconfig6 --file kscreenlockerrc --group Greeter --group Wallpaper --group org.kde.image --group General --key Image "file:///usr/share/backgrounds/zothos/hermetic-matrix.png" 2>/dev/null || true
+fi
+
+exit 0

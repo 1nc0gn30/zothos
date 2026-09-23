@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+COMFY_DIR="/opt/ComfyUI"
+if [[ ! -d "$COMFY_DIR" ]]; then
+    echo -e "\033[38;2;255;215;0m[ZOTHOS NEXUS]\033[0m Provisioning ComfyUI into /opt/ComfyUI..."
+    git clone --depth 1 https://github.com/comfyanonymous/ComfyUI.git "$COMFY_DIR" 2>/dev/null || true
+    if [[ -f "$COMFY_DIR/requirements.txt" ]]; then
+        /opt/zothos-ai-env/bin/pip install -r "$COMFY_DIR/requirements.txt" 2>/dev/null || true
+    fi
+fi
+if [[ -f "$COMFY_DIR/main.py" ]]; then
+    exec /opt/zothos-ai-env/bin/python3 "$COMFY_DIR/main.py" "$@"
+else
+    echo -e "\033[38;2;255;51;85m[!] ComfyUI source not found. Check network connection.\033[0m"
+fi

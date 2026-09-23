@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#  ZOTH RECOMMENDED TOOLS INSTALLER — Electron GUI
+#  One-click install of curated Kali / Parrot / Zoth extra tool bundles.
+# ==============================================================================
+set -euo pipefail
+
+APP="zoth-tools-installer"
+APP_DIR="/opt/$APP"
+SRC_DIR="/home/neo/zothos/config/includes.chroot/opt/$APP"
+
+find_electron() {
+    for e in /opt/electron/electron /tmp/electron/electron "$(command -v electron 2>/dev/null || true)"; do
+        if [[ -n "$e" && -x "$e" ]]; then echo "$e"; return 0; fi
+    done
+    return 1
+}
+
+resolve_app_dir() {
+    if [[ -d "$APP_DIR" ]]; then echo "$APP_DIR"; return 0; fi
+    if [[ -d "$SRC_DIR" ]]; then echo "$SRC_DIR"; return 0; fi
+    return 1
+}
+
+if [[ -z "${DISPLAY:-}" ]]; then
+    echo "[-] No DISPLAY; the tools installer needs a desktop session." >&2
+    echo "    Run from the terminal instead: ape install <bundle|tool>  or  zoth install <pkg>" >&2
+    exit 1
+fi
+
+eb=$(find_electron) || { echo "[-] Electron binary not found." >&2; exit 1; }
+dir=$(resolve_app_dir) || { echo "[-] $APP not found." >&2; exit 1; }
+
+exec "$eb" --no-sandbox "$dir" "$@"

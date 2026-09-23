@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#  ZOTH GOLD GLOW — Magical cursor-following gold aura (OS-layer overlay)
+#  Usage:
+#    zoth-glow            start the gold aura overlay
+#    zoth-glow off        stop it
+#    zoth-glow toggle     toggle on/off
+#    zoth-glow color #FFAA00   recolor the aura
+#    zoth-glow auto       enable autostart at login
+# ==============================================================================
+set -euo pipefail
+
+APP="zoth-gold-glow"
+APP_DIR="/opt/$APP"
+SRC_DIR="/home/neo/zothos/config/includes.chroot/opt/$APP"
+AUTOSTART="/etc/xdg/autostart/zoth-gold-glow.desktop"
+PIDFILE="/tmp/zoth-glow.pid"
+
+find_electron() {
+    for e in /opt/electron/electron /tmp/electron/electron "$(command -v electron 2>/dev/null || true)"; do
+        if [[ -n "$e" && -x "$e" ]]; then echo "$e"; return 0; fi
+    done
+    return 1
+}
+
+resolve_app_dir() {
+    if [[ -d "$APP_DIR" ]]; then echo "$APP_DIR"; return 0; fi
+    if [[ -d "$SRC_DIR" ]]; then echo "$SRC_DIR"; return 0; fi
+    return 1
+}
+
+run_overlay() {
+    local electron_bin="$1" dir="$2"
+    if [[ -z "${DISPLAY:-}" ]]; then echo "[-] No DISPLAY; gold aura needs a desktop session." >&2; exit 1; fi
+    echo "[✦] Igniting Zoth Gold Aura ($dir)..."
+    nohup "$electron_bin" --no-sandbox "$dir" >/tmp/zoth-glow.log 2>&1 &
+    echo $! > "$PIDFILE"
+}
+
+cmd="${1:-start}"
+
+case "$cmd" in
+    start)
+        eb=$(find_electron) || { echo "[-] Electron not found." >&2; exit 1; }
+        dir=$(resolve_app_dir) || { echo "[-] $APP not found." >&2; exit 1; }
+        if [[ -f "$PIDFILE" ]] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
+            echo "[■] Gold aura already running (pid $(cat "$PIDFILE"))."; exit 0
+        fi
+        run_overlay "$eb" "$dir"
+        ;;
+    toggle)
+        if [[ -f "$PIDFILE" ]] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
+            kill "$(cat "$PIDFILE")" 2>/dev/null; rm -f "$PIDFILE"; echo "[✕] Gold aura dimmed."; exit 0
+        else
+            eb=$(find_electron) || { echo "[-] Electron not found." >&2; exit 1; }
+            dir=$(resolve_app_dir) || { echo "[-] $APP not found." >&2; exit 1; }
+            run_overlay "$eb" "$dir"
+        fi
+        ;;
+    off|stop|stop*)
+        if [[ -f "$PIDFILE" ]] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
+            kill "$(cat "$PIDFILE")" 2>/dev/null; rm -f "$PIDFILE"; fi
+        pkill -f "$APP/main.js" 2>/dev/null || true
+        echo "[✕] Gold aura dimmed."
+        ;;
+    color)
+        color="${2:-#ffd700}"
+        export ZOTH_GLOW_COLOR="$color"
+        echo "[✦] Gold aura colored $color (applies on next start)."
+        ;;
+    auto)
+        mkdir -p "$(dirname "$AUTOSTART")" 2>/dev/null || true
+        cat > "$AUTOSTART" <<EOF
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Zoth Gold Aura
+Comment=Magical cursor-following gold glow on the OS layer
+Exec=/usr/local/bin/zoth-glow
+OnlyShowIn=XFCE;
+Icon=zoth-gold-glow
+Terminal=false
+StartupNotify=false
+Categories=System;Utility;
+X-XFCE-Autostart-Override=true
+EOF
+        echo "[✓] Gold aura autostart enabled at $AUTOSTART"
+        ;;
+    *)
+        echo "Usage: zoth-glow [start|off|toggle|color #HEX|auto]"
+        ;;
+esac

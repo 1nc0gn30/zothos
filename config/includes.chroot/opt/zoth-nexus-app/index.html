@@ -3,61 +3,92 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zoth Tool Nexus // Cyber App Store & Arsenal</title>
+  <title>ZOTH TOOL NEXUS // 175+ CYBER ARSENAL & PACKAGE STORE</title>
   <style>
     :root {
       --bg: #06090e;
-      --panel: rgba(12, 18, 28, 0.8);
-      --card: rgba(16, 24, 38, 0.6);
-      --border: rgba(0, 229, 255, 0.2);
+      --panel: rgba(12, 18, 28, 0.85);
+      --card: rgba(16, 24, 38, 0.65);
+      --card-hover: rgba(0, 229, 255, 0.08);
+      --border: rgba(0, 229, 255, 0.22);
+      --border-gold: rgba(255, 215, 0, 0.35);
       --primary: #00e5ff;
       --secondary: #00ff9d;
       --gold: #ffd700;
       --purple: #a855f7;
-      --red: #ff4757;
+      --red: #ff3355;
+      --yellow: #ffb800;
       --text: #f1f5f9;
       --text-dim: #7d90a0;
+      --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'JetBrains Mono', 'Segoe UI', monospace;
+      font-family: var(--font-mono);
       height: 100vh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
+
     header {
       padding: 14px 20px;
       background: var(--panel);
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid var(--border-gold);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      backdrop-filter: blur(12px);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
     }
+
     .brand {
       display: flex;
       align-items: center;
       gap: 12px;
     }
+
+    .brand-icon {
+      font-size: 26px;
+      color: var(--gold);
+      text-shadow: 0 0 12px rgba(255, 215, 0, 0.5);
+    }
+
     .brand-title {
       font-size: 16px;
       font-weight: 800;
       letter-spacing: 2px;
-      color: var(--primary);
+      color: var(--gold);
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
     }
+
+    .brand-sub {
+      font-size: 9px;
+      color: var(--primary);
+      letter-spacing: 1px;
+    }
+
     .search-bar {
       display: flex;
       align-items: center;
       gap: 8px;
-      background: rgba(0, 0, 0, 0.4);
-      padding: 6px 12px;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 8px 14px;
       border-radius: 6px;
       border: 1px solid var(--border);
-      width: 380px;
+      width: 420px;
+      transition: all 0.2s;
     }
+
+    .search-bar:focus-within {
+      border-color: var(--gold);
+      box-shadow: 0 0 12px rgba(255, 215, 0, 0.25);
+    }
+
     .search-input {
       background: transparent;
       border: none;
@@ -68,6 +99,29 @@
       width: 100%;
       user-select: text;
     }
+
+    .telemetry-bar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 11px;
+    }
+
+    .tele-chip {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 5px 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tele-val {
+      font-weight: 800;
+      color: var(--secondary);
+    }
+
     .tabs-bar {
       display: flex;
       gap: 8px;
@@ -76,6 +130,7 @@
       border-bottom: 1px solid var(--border);
       overflow-x: auto;
     }
+
     .tab-btn {
       background: transparent;
       border: 1px solid transparent;
@@ -88,26 +143,31 @@
       cursor: pointer;
       transition: all 0.2s;
     }
+
     .tab-btn:hover {
       color: var(--text);
       background: rgba(255, 255, 255, 0.05);
     }
+
     .tab-btn.active {
-      background: rgba(0, 229, 255, 0.15);
-      border-color: var(--primary);
-      color: var(--primary);
+      background: rgba(255, 215, 0, 0.15);
+      border-color: var(--gold);
+      color: var(--gold);
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
     }
+
     main {
       flex: 1;
       overflow-y: auto;
       padding: 16px 20px;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
       gap: 14px;
     }
+
     .tool-card {
       background: var(--card);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 6px;
       padding: 14px;
       display: flex;
@@ -115,38 +175,46 @@
       justify-content: space-between;
       gap: 10px;
       transition: all 0.2s;
+      position: relative;
     }
+
     .tool-card:hover {
-      border-color: var(--primary);
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-      background: rgba(0, 229, 255, 0.05);
+      border-color: var(--gold);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      background: var(--card-hover);
     }
+
     .card-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
+      gap: 8px;
     }
+
     .tool-name {
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 800;
       color: var(--text);
     }
+
     .domain-badge {
       font-size: 8px;
-      padding: 2px 6px;
+      padding: 3px 7px;
       border-radius: 3px;
-      font-weight: 700;
+      font-weight: 800;
       letter-spacing: 0.5px;
       background: rgba(168, 85, 247, 0.15);
       color: var(--purple);
       border: 1px solid rgba(168, 85, 247, 0.3);
     }
+
     .tool-desc {
-      font-size: 10px;
+      font-size: 11px;
       color: var(--text-dim);
       line-height: 1.4;
       flex: 1;
     }
+
     .card-footer {
       display: flex;
       justify-content: space-between;
@@ -154,47 +222,104 @@
       padding-top: 8px;
       border-top: 1px solid rgba(255, 255, 255, 0.05);
     }
+
     .status-badge {
-      font-size: 9px;
+      font-size: 10px;
       font-weight: 700;
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
     }
+
     .status-badge.installed { color: var(--secondary); }
     .status-badge.uninstalled { color: var(--text-dim); }
+
     button.action-btn {
-      background: rgba(0, 229, 255, 0.15);
+      background: rgba(0, 229, 255, 0.12);
       border: 1px solid var(--primary);
       color: var(--primary);
-      padding: 4px 12px;
+      padding: 5px 14px;
       border-radius: 4px;
       font-family: inherit;
       font-size: 10px;
-      font-weight: 700;
+      font-weight: 800;
       cursor: pointer;
       transition: all 0.2s;
     }
+
     button.action-btn:hover {
       background: var(--primary);
       color: #000;
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
     }
+
     button.action-btn.install {
       border-color: var(--gold);
       color: var(--gold);
       background: rgba(255, 215, 0, 0.1);
     }
+
     button.action-btn.install:hover {
       background: var(--gold);
       color: #000;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
     }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .modal-overlay.active { display: flex; }
+
+    .modal-box {
+      background: var(--panel);
+      border: 1px solid var(--gold);
+      box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+      border-radius: 8px;
+      width: 600px;
+      max-width: 90vw;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .modal-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--gold);
+      letter-spacing: 1px;
+    }
+
+    .modal-logs {
+      background: #030508;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--secondary);
+      height: 220px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      user-select: text;
+    }
+
     footer {
-      padding: 6px 20px;
+      padding: 8px 20px;
       background: rgba(6, 9, 14, 0.95);
       border-top: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
-      font-size: 9px;
+      font-size: 10px;
       color: var(--text-dim);
     }
   </style>
@@ -202,15 +327,27 @@
 <body>
   <header>
     <div class="brand">
-      <div style="font-size:22px;">📦</div>
+      <div class="brand-icon">📦</div>
       <div>
         <div class="brand-title">ZOTH TOOL NEXUS</div>
-        <div style="font-size:9px; color:var(--text-dim);">175+ CYBER ARSENAL & PACKAGE STORE</div>
+        <div class="brand-sub">SOVEREIGN 175+ CYBER ARSENAL & PACKAGE STORE</div>
       </div>
     </div>
+
     <div class="search-bar">
       <span>🔍</span>
-      <input type="text" id="search-input" class="search-input" placeholder="Search 175+ tools by name, CVE, or domain...">
+      <input type="text" id="search-input" class="search-input" placeholder="Search tools by name, command, or domain...">
+    </div>
+
+    <div class="telemetry-bar">
+      <div class="tele-chip">
+        <span>TOTAL:</span>
+        <span id="tele-total" class="tele-val">0</span>
+      </div>
+      <div class="tele-chip">
+        <span>INSTALLED:</span>
+        <span id="tele-installed" class="tele-val" style="color:var(--gold);">0</span>
+      </div>
     </div>
   </header>
 
@@ -225,12 +362,23 @@
   </div>
 
   <main id="tools-grid">
-    <!-- Injected dynamically -->
+    <!-- Injected dynamically via app.js -->
   </main>
 
+  <!-- Install Log Modal -->
+  <div id="install-modal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-title" id="install-modal-title">INSTALLING PACKAGE...</div>
+      <div id="install-logs" class="modal-logs">Connecting to package manager...</div>
+      <div style="display:flex; justify-content:flex-end;">
+        <button class="action-btn" onclick="closeInstallModal()">CLOSE</button>
+      </div>
+    </div>
+  </div>
+
   <footer>
-    <div>SOURCE REPOSITORIES: KALI ROLLING // PARROT LORY // ZOTHOS CORE</div>
-    <div>ACTIVE DOMAIN: <span id="active-domain-lbl" style="color:var(--primary);">ALL TOOLS</span></div>
+    <div>REPOSITORIES: KALI ROLLING // PARROT LORY // ZOTHOS CORE</div>
+    <div>ACTIVE DOMAIN: <span id="active-domain-lbl" style="color:var(--gold); font-weight:800;">ALL TOOLS</span></div>
   </footer>
 
   <script src="app.js"></script>

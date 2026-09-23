@@ -1,6 +1,6 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
-contextBridge.exposeInMainWorld('electronAPI', {
+const api = {
   isDesktopApp: true,
   checkSystemDeps: () => ipcRenderer.invoke('check-system-deps'),
   downloadYouTubeAudio: (url) => ipcRenderer.invoke('download-youtube-audio', url),
@@ -15,4 +15,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
   exportCapCutDraft: (data) => ipcRenderer.invoke('export-capcut-draft', data),
   generateNeuralTTS: (params) => ipcRenderer.invoke('generate-neural-tts', params),
   listNeuralVoices: () => ipcRenderer.invoke('list-neural-voices'),
-});
+};
+
+if (process.contextIsolated) {
+  try {
+    contextBridge.exposeInMainWorld('electronAPI', api);
+  } catch (_) {
+    window.electronAPI = api;
+  }
+} else {
+  window.electronAPI = api;
+}
+
+module.exports = api;

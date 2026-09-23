@@ -551,12 +551,16 @@ class CockpitTUI:
             {"cat": "sec", "key": "a", "label": "Launch Aircrack-ng Wireless Security", "action": lambda: self.launch_sec("a")},
             # Zoth Studio
             {"cat": "studio", "key": "z", "label": "Launch Zoth Studio Sovereign Deck", "action": self.launch_zoth_studio},
+            {"cat": "studio", "key": "d", "label": "Open Zoth OS Desk", "action": self.launch_azoth_desk},
         ]
 
     def init_colors(self) -> None:
         curses.start_color()
         curses.use_default_colors()
-        # Pair IDs: 1: Emerald/Green, 2: Gold/Yellow, 3: Cyan/Blue, 4: Red, 5: Purple, 6: Dim Gray, 7: Active Badge
+        if curses.can_change_color():
+            curses.init_color(curses.COLOR_GREEN, 239, 863, 592)
+            curses.init_color(curses.COLOR_YELLOW, 843, 710, 427)
+            curses.init_color(curses.COLOR_CYAN, 608, 714, 878)
         curses.init_pair(1, curses.COLOR_GREEN, -1)
         curses.init_pair(2, curses.COLOR_YELLOW, -1)
         curses.init_pair(3, curses.COLOR_CYAN, -1)
@@ -677,6 +681,17 @@ class CockpitTUI:
         else:
             self.run_external_cli(sec["launch_cmd"], sec["name"])
 
+    def launch_azoth_desk(self) -> None:
+        """Open the local graphical desk. No Electron required."""
+        for path in (
+            "/usr/local/bin/zoth-os",
+            "/home/neo/zothos/config/includes.chroot/usr/local/bin/zoth-os",
+        ):
+            if os.path.isfile(path) and os.access(path, os.X_OK):
+                self.run_external_gui([path], "Zoth OS Desk")
+                return
+        self.notify("[!] zoth-os desk is not installed")
+
     def launch_zoth_studio(self) -> None:
         """Launches the Zoth Studio hub or web interface."""
         if os.path.exists("/opt/zoth-studio/launch.sh"):
@@ -719,6 +734,8 @@ class CockpitTUI:
             self.launch_sec(c)
         elif c == "z":
             self.launch_zoth_studio()
+        elif c == "d":
+            self.launch_azoth_desk()
         elif c == "r":
             self.notify("[✓] Live metrics refreshed")
 

@@ -82,7 +82,7 @@ function checkProcesses(event, mcpConfig, models) {
     
     const agents = [
       { id: 'sentinel', name: 'Sentinel AI Supervisor', role: 'Autonomous Kernel & System Health', active: processes.includes('zoth-sentinel') || processes.includes('sentinel'), model: 'llama3.2:latest', ring: 'Ring 1 (Admin)' },
-      { id: 'hermes', name: 'Hermes Agent Swarm', role: 'Full-Stack Autonomous Orchestrator', active: processes.includes('hermes'), model: 'claude-3.7-sonnet', ring: 'Ring 2 (MCP)' },
+      { id: 'hermes', name: 'Mercury Agent Swarm', role: 'Full-Stack Autonomous Orchestrator', active: processes.includes('hermes'), model: 'claude-3.7-sonnet', ring: 'Ring 2 (MCP)' },
       { id: 'hexstrike', name: 'HexStrike Red-Team Agent', role: 'Offensive Security & PenTest Matrix', active: processes.includes('hexstrike_server') || processes.includes('hexstrike'), model: 'llama3.2:latest', ring: 'Ring 1 (Sec)' },
       { id: 'maya', name: 'Maya Linux Studio', role: 'UI/UX & Creator Playbook Automation', active: processes.includes('maya-linux') || processes.includes('maya'), model: 'gpt-4o', ring: 'Ring 2 (MCP)' },
       { id: 'codex', name: 'OpenAI Codex Engine', role: 'Code Generation & Refactoring', active: false, model: 'gpt-4o', ring: 'Ring 3 (Sandbox)' },
@@ -102,12 +102,12 @@ function checkProcesses(event, mcpConfig, models) {
 ipcMain.on('trigger-agent', (event, { agentId, action }) => {
   const launchCommands = {
     'sentinel': 'nohup /usr/local/bin/zoth-sentinel >/tmp/sentinel.log 2>&1 &',
-    'hermes': 'xfce4-terminal -e hermes',
+    'hermes': 'konsole -e hermes',
     'hexstrike': 'nohup /usr/local/bin/hexstrike >/dev/null 2>&1 &',
     'maya': 'nohup /usr/local/bin/maya >/dev/null 2>&1 &',
-    'codex': 'xfce4-terminal -e "codex --help"',
-    'claudecode': 'xfce4-terminal -e "claude --help"',
-    'opencode': 'xfce4-terminal -e "opencode --help"'
+    'codex': 'konsole -e "codex --help"',
+    'claudecode': 'konsole -e "claude --help"',
+    'opencode': 'konsole -e "opencode --help"'
   };
 
   if (action === 'start') {

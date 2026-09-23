@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#  Zoth OS Desk Launcher - Electron Shell & Python Backend
+# ==============================================================================
+set -euo pipefail
+
+export LD_LIBRARY_PATH="/opt/electron:${LD_LIBRARY_PATH:-}"
+
+HERE="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
+ROOT=""
+for candidate in \
+  /opt/zoth-os \
+  "$HERE/../../../opt/zoth-os" \
+  /home/neo/zothos/config/includes.chroot/opt/zoth-os
+do
+  if [[ -f "$candidate/serve.py" ]]; then
+    ROOT="$(cd "$candidate" && pwd)"
+    break
+  fi
+done
+
+if [[ -z "$ROOT" ]]; then
+  echo "Zoth OS desk files were not found." >&2
+  exit 1
+fi
+
+ELECTRON_BIN=""
+for e_cand in \
+  /usr/local/bin/electron \
+  /opt/electron/electron \
+  /tmp/electron/electron \
+  "$(which electron 2>/dev/null || true)"
+do
+  if [[ -n "$e_cand" && -x "$e_cand" ]]; then
+    ELECTRON_BIN="$e_cand"
+    break
+  fi
+done
+
+if [[ -n "$ELECTRON_BIN" && -n "${DISPLAY:-${WAYLAND_DISPLAY:-}}" ]]; then
+  exec "$ELECTRON_BIN" --no-sandbox "$ROOT" "$@"
+else
+  exec python3 "$ROOT/serve.py" "$@"
+fi

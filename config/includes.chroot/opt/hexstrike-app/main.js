@@ -146,10 +146,10 @@ ipcMain.on('launch-external', (event, tool) => {
     caido: 'caido',
     wireshark: 'wireshark',
     ghidra: 'ghidra',
-    msfconsole: 'xfce4-terminal -e msfconsole',
-    nmap: 'xfce4-terminal -e "nmap -h"',
-    john: 'xfce4-terminal -e "john --help"',
-    aircrack: 'xfce4-terminal -e "aircrack-ng --help"'
+    msfconsole: 'konsole -e msfconsole',
+    nmap: 'konsole -e "nmap -h"',
+    john: 'konsole -e "john --help"',
+    aircrack: 'konsole -e "aircrack-ng --help"'
   };
   const cmd = tools[tool] || tool;
   exec(`nohup ${cmd} >/dev/null 2>&1 &`);

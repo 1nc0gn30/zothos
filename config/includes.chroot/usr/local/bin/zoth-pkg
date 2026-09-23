@@ -1,0 +1,275 @@
+#!/usr/bin/env python3
+"""
+ZOTH-PKG — Sovereign Package & Tool Provisioner
+Integrates Debian Trixie + Kali Rolling + Parrot Security + Zoth Native + Nexus Toolchain (186+ Tools)
+"""
+
+import sys
+import os
+import json
+import shutil
+import subprocess
+from pathlib import Path
+
+GOLD = "\033[38;2;255;215;0m"
+CYAN = "\033[38;2;0;229;255m"
+GREEN = "\033[38;2;0;255;157m"
+YELLOW = "\033[38;2;255;204;0m"
+RED = "\033[38;2;255;51;85m"
+GRAY = "\033[38;2;120;140;160m"
+BOLD = "\033[1m"
+DIM = "\033[2m"
+RESET = "\033[0m"
+
+MANIFEST_PATH = "/usr/share/zothos/tool-lists/zoth-verified-tools.json"
+
+def banner():
+    print(f"{GOLD}{BOLD}")
+    print(r"  ███████╗ ██████╗ ████████╗██╗  ██╗   ██████╗ ██╗  ██╗ ██████╗ ")
+    print(r"  ╚══███╔╝██╔═══██╗╚══██╔══╝██║  ██║   ██╔══██╗██║ ██╔╝██╔════╝ ")
+    print(r"    ███╔╝ ██║   ██║   ██║   ███████║   ██████╔╝█████╔╝ ██║  ███╗")
+    print(r"   ███╔╝  ██║   ██║   ██║   ██╔══██║   ██╔═══╝ ██╔═██╗ ██║   ██║")
+    print(r"  ███████╗╚██████╔╝   ██║   ██║  ██║██╗██║     ██║  ██╗╚██████╔╝")
+    print(r"  ╚══════╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝╚═╝╚═╝     ╚═╝  ╚═╝ ╚═════╝ ")
+    print(f"       {CYAN}[+] SOVEREIGN PACKAGE & TOOL NEXUS PROVISIONER [+]{RESET}\n")
+
+def load_manifest():
+    if not os.path.exists(MANIFEST_PATH):
+        print(f"{RED}[!] Manifest file {MANIFEST_PATH} not found.{RESET}")
+        sys.exit(1)
+    with open(MANIFEST_PATH) as f:
+        return json.load(f)
+
+def is_tool_installed(tool_id, pkg_name):
+    # Binary check
+    if shutil.which(tool_id):
+        return True
+    # Alternate known binaries
+    alts = {
+        "imagemagick": ["convert", "magick"],
+        "foundry": ["forge", "cast", "anvil"],
+        "mythril": ["myth"],
+        "theharvester": ["theHarvester"],
+        "bitwarden": ["bw"],
+        "radare2": ["r2"],
+        "metasploit": ["msfconsole"],
+        "john": ["/usr/sbin/john"],
+        "tshark": ["wireshark"],
+        "podman": ["podman"],
+        "docker": ["docker"],
+    }
+    if tool_id in alts:
+        for b in alts[tool_id]:
+            if shutil.which(b) or os.path.exists(b):
+                return True
+
+    # DPKG check
+    res = subprocess.run(["dpkg", "-s", pkg_name], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    if res.returncode == 0:
+        return True
+
+    # Python module check
+    py_check = subprocess.run(
+        ["python3", "-c", f"import {tool_id.replace('-', '_')}"],
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+    )
+    if py_check.returncode == 0:
+        return True
+
+    # Check Zoth AI env
+    ai_env_bin = f"/opt/zothos-ai-env/bin/{tool_id}"
+    if os.path.exists(ai_env_bin):
+        return True
+
+    return False
+
+def cmd_list(args):
+    manifest = load_manifest()
+    query = args[0].lower() if args else ""
+    
+    total = 0
+    installed_count = 0
+    
+    for category_id, cat in manifest.items():
+        matched = []
+        for t in cat["tools"]:
+            if not query or query in t["id"].lower() or query in t["desc"].lower():
+                matched.append(t)
+        if not matched:
+            continue
+            
+        print(f"{GOLD}{BOLD}[ {cat['name'].upper()} ]{RESET} {GRAY}— {cat['description']}{RESET}")
+        for t in matched:
+            total += 1
+            inst = is_tool_installed(t["id"], t["pkg"])
+            if inst:
+                installed_count += 1
+                status = f"{GREEN}[INSTALLED]{RESET}"
+            else:
+                status = f"{DIM}[AVAILABLE]{RESET}"
+            print(f"  {status} {BOLD}{t['id']:<24}{RESET} {GRAY}{t['desc']}{RESET}")
+        print()
+
+    print(f"{GRAY}Summary: {installed_count}/{total} tools active in this view.{RESET}")
+    print(f"{GRAY}Install any tool: {CYAN}sudo zoth-pkg install <tool_id|category|all>{RESET}\n")
+
+def install_single_tool(t):
+    tool_id = t["id"]
+    pkg = t["pkg"]
+    ttype = t.get("type", "apt")
+    desc = t.get("desc", "")
+    
+    print(f"{GOLD}[*] Provisioning {tool_id} ({desc})...{RESET}")
+
+    if is_tool_installed(tool_id, pkg):
+        print(f"{GREEN}[✓] {tool_id} is already installed and verified.{RESET}\n")
+        return True
+
+    if ttype == "apt":
+        cmd = [
+            "apt-get", "install", "-y", "--no-install-recommends",
+            "-o", "Dpkg::Options::=--force-confdef",
+            "-o", "Dpkg::Options::=--force-confold",
+            pkg
+        ]
+        res = subprocess.run(cmd)
+        return res.returncode == 0
+
+    elif ttype == "pip":
+        pip_cmd = f"/opt/zothos-ai-env/bin/pip install --ignore-installed {pkg} || pip3 install --break-system-packages --ignore-installed {pkg}"
+        res = subprocess.run(pip_cmd, shell=True)
+        return res.returncode == 0
+
+    elif ttype == "npm":
+        npm_cmd = f"npm install -g {pkg}"
+        res = subprocess.run(npm_cmd, shell=True)
+        return res.returncode == 0
+
+    elif ttype == "custom":
+        if tool_id == "ollama":
+            res = subprocess.run("curl -fsSL https://ollama.com/install.sh | sh", shell=True)
+            return res.returncode == 0
+        elif tool_id == "solana":
+            res = subprocess.run('sh -c "$(curl -sSfL https://release.anza.xyz/stable/install)" && cp -a /root/.local/share/solana/install/active_release/bin/* /usr/local/bin/', shell=True)
+            return res.returncode == 0
+        elif tool_id == "foundry":
+            res = subprocess.run('curl -L https://foundry.paradigm.xyz | bash && /root/.foundry/bin/foundryup && cp -a /root/.foundry/bin/* /usr/local/bin/', shell=True)
+            return res.returncode == 0
+        elif tool_id == "starship":
+            res = subprocess.run('curl -sS https://starship.rs/install.sh | sh -s -- -y -b /usr/local/bin', shell=True)
+            return res.returncode == 0
+        elif tool_id == "cloudflared":
+            res = subprocess.run('curl -fsSL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o /usr/local/bin/cloudflared && chmod +x /usr/local/bin/cloudflared', shell=True)
+            return res.returncode == 0
+        elif tool_id == "tailscale":
+            res = subprocess.run('curl -fsSL https://tailscale.com/install.sh | sh', shell=True)
+            return res.returncode == 0
+        elif tool_id == "obsidian":
+            res = subprocess.run('curl -fsSL -L -o /tmp/obsidian.deb "https://github.com/obsidianmd/obsidian-releases/releases/download/v1.6.7/obsidian_1.6.7_amd64.deb" && dpkg -i /tmp/obsidian.deb 2>/dev/null || apt-get -f install -y', shell=True)
+            return res.returncode == 0
+        else:
+            res = subprocess.run(f"apt-get install -y {pkg} 2>/dev/null || pip3 install --break-system-packages {pkg}", shell=True)
+            return res.returncode == 0
+
+    return False
+
+def cmd_install(args):
+    if not args:
+        print(f"{RED}Usage: sudo zoth-pkg install <tool_id | category | all>{RESET}")
+        return
+        
+    target = args[0].lower()
+    manifest = load_manifest()
+    tools_to_install = []
+    
+    if target in ["all", "nexus"]:
+        for cat_k, cat in manifest.items():
+            if target == "nexus" and not cat_k.startswith("nexus"):
+                continue
+            tools_to_install.extend(cat["tools"])
+    elif target in manifest:
+        tools_to_install.extend(manifest[target]["tools"])
+    else:
+        for cat in manifest.values():
+            for t in cat["tools"]:
+                if t["id"].lower() == target or t["pkg"].lower() == target:
+                    tools_to_install.append(t)
+                    break
+            if tools_to_install:
+                break
+        if not tools_to_install:
+            print(f"{YELLOW}[*] Tool '{target}' not in curated index. Attempting direct apt install...{RESET}")
+            subprocess.run(["apt-get", "install", "-y", "--no-install-recommends", target])
+            return
+
+    print(f"{CYAN}{BOLD}[+] Preparing deployment of {len(tools_to_install)} tools...{RESET}\n")
+    
+    success = 0
+    skipped = 0
+    
+    for i, t in enumerate(tools_to_install):
+        num = i + 1
+        tot = len(tools_to_install)
+        print(f"{GOLD}[{num}/{tot}]{RESET}")
+        ok = install_single_tool(t)
+        if ok:
+            success += 1
+        else:
+            skipped += 1
+            
+    print(f"\n{GREEN}{BOLD}==== PROVISIONING COMPLETED ===={RESET}")
+    print(f"{GREEN}Installed/Ready: {success}{RESET} | {YELLOW}Skipped: {skipped}{RESET} | Total: {len(tools_to_install)}\n")
+
+def cmd_verify():
+    manifest = load_manifest()
+    total = 0
+    ready = 0
+    
+    for cid, cat in manifest.items():
+        print(f"\n{GOLD}=== Verifying {cat['name']} ==={RESET}")
+        for t in cat["tools"]:
+            total += 1
+            if is_tool_installed(t["id"], t["pkg"]):
+                print(f"  {GREEN}[OK]{RESET} {t['id']}")
+                ready += 1
+            else:
+                # Check candidate
+                r = subprocess.run(["apt-cache", "policy", t["pkg"]], capture_output=True, text=True)
+                if "Candidate: (none)" not in r.stdout and "Unable to locate" not in r.stderr:
+                    print(f"  {YELLOW}[CANDIDATE]{RESET} {t['id']} (apt: {t['pkg']})")
+                else:
+                    print(f"  {RED}[UNRESOLVED]{RESET} {t['id']}")
+
+    print(f"\n{GREEN}{BOLD}Audit Summary:{RESET} {ready}/{total} tools verified operational.")
+
+def main():
+    if len(sys.argv) < 2 or sys.argv[1] in ["-h", "--help"]:
+        banner()
+        print("Usage: zoth-pkg <command> [arguments]\n")
+        print("Commands:")
+        print("  list [query]       List all 186+ verified tools and installation status")
+        print("  install <target>   Install a tool, category (kali, parrot, nexus_ai, etc.), or 'all'")
+        print("  verify             Verify installation and candidate status for all tools")
+        print()
+        sys.exit(0)
+        
+    cmd = sys.argv[1].lower()
+    if cmd == "list":
+        banner()
+        cmd_list(sys.argv[2:])
+    elif cmd == "install":
+        banner()
+        if os.geteuid() != 0:
+            print(f"{RED}[!] Installation requires root privileges. Please re-run with sudo.{RESET}")
+            sys.exit(1)
+        cmd_install(sys.argv[2:])
+    elif cmd == "verify":
+        banner()
+        cmd_verify()
+    else:
+        banner()
+        print(f"{RED}[!] Unknown command: {cmd}{RESET}")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()

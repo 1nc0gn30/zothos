@@ -423,6 +423,15 @@ case "$action" in
     json)
         cat "$(get_config_path)"
         ;;
+    gui|app)
+        if [[ -n "${DISPLAY:-}" ]] && command -v electron >/dev/null 2>&1 && [[ -d "/opt/zoth-mcp-app" ]]; then
+            exec electron /opt/zoth-mcp-app
+        elif [[ -d "/home/neo/zothos/config/includes.chroot/opt/zoth-mcp-app" ]]; then
+            exec /home/neo/zothos/config/includes.chroot/opt/electron/electron /home/neo/zothos/config/includes.chroot/opt/zoth-mcp-app
+        else
+            interactive_menu
+        fi
+        ;;
     interactive)
         interactive_menu
         ;;

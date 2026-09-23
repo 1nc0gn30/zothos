@@ -1,15 +1,402 @@
-#!/usr/bin/env bash
-# ==============================================================================
-#  ZOTH STUDIO CLI Launcher
-# ==============================================================================
-set -euo pipefail
+#!/usr/bin/env python3
+"""
+ZOTH CLI — Sovereign Pentesting, AI Red Teaming & AppImage Suite Manager
+ZOTHOS Linux Distribution (C) 2026 Zoth Studio & NullAI
+"""
 
-if [[ -f "/opt/zoth-studio/launch.sh" ]]; then
-    exec /opt/zoth-studio/launch.sh "$@"
-elif [[ -f "/media/neo/f2fdda77-178b-4603-ae80-c7aa4cd97908/zoth-studio/start-zoth-studio.sh" ]]; then
-    exec /media/neo/f2fdda77-178b-4603-ae80-c7aa4cd97908/zoth-studio/start-zoth-studio.sh "$@"
-else
-    echo -e "\e[1;32m[[+]] Starting local Zoth Studio server...\e[0m"
-    python3 -m http.server 8088 --bind 127.0.0.1 --directory "/opt/zoth-studio/public" 2>/dev/null &
-    xdg-open "http://127.0.0.1:8088" 2>/dev/null || true
-fi
+import sys
+import os
+import subprocess
+import json
+import shutil
+import argparse
+from pathlib import Path
+
+# ── Color Palettes (Zoth Hermetic Gold & Cyan) ─────────────────────────
+GOLD = "\033[38;2;245;158;11m"
+AMBER = "\033[38;2;251;191;36m"
+CYAN = "\033[38;2;56;189;248m"
+GREEN = "\033[38;2;52;211;153m"
+RED = "\033[38;2;248;113;113m"
+GRAY = "\033[38;2;148;163;184m"
+DIM = "\033[2m"
+BOLD = "\033[1m"
+RESET = "\033[0m"
+
+ARSENAL_PATH = Path("/opt/zoth-arsenal")
+APPIMAGES_PATH = Path("/opt/zoth-appimages")
+LOCAL_ARSENAL = Path(os.path.expanduser("~/.zoth-arsenal"))
+LOCAL_APPIMAGES = Path(os.path.expanduser("~/.zoth-appimages"))
+
+ARSENAL_REPO = "https://github.com/1nc0gn30/zoth-arsenal.git"
+APPIMAGES_REPO = "https://github.com/1nc0gn30/zoth-appimages.git"
+
+def get_arsenal_dir() -> Path:
+    if ARSENAL_PATH.exists():
+        return ARSENAL_PATH
+    if LOCAL_ARSENAL.exists():
+        return LOCAL_ARSENAL
+    # Fallback to dev workspace if running in development
+    dev_path = Path("/home/neo/zoth-arsenal")
+    if dev_path.exists():
+        return dev_path
+    return ARSENAL_PATH
+
+def get_appimages_dir() -> Path:
+    if APPIMAGES_PATH.exists():
+        return APPIMAGES_PATH
+    if LOCAL_APPIMAGES.exists():
+        return LOCAL_APPIMAGES
+    dev_path = Path("/home/neo/zoth-appimages")
+    if dev_path.exists():
+        return dev_path
+    return APPIMAGES_PATH
+
+def print_banner():
+    print(f"{GOLD}{BOLD}")
+    print("  ███████╗ ██████╗ ████████╗██╗  ██╗   ██████╗ ███████╗")
+    print("  ╚══███╔╝██╔═══██╗╚══██╔══╝██║  ██║  ██╔═══██╗██╔════╝")
+    print("    ███╔╝ ██║   ██║   ██║   ███████║  ██║   ██║███████╗")
+    print("   ███╔╝  ██║   ██║   ██║   ██╔══██║  ██║   ██║╚════██║")
+    print("  ███████╗╚██████╔╝   ██║   ██║  ██║  ╚██████╔╝███████║")
+    print(f"  ╚══════╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝   ╚═════╝ ╚══════╝{RESET}")
+    print(f"  {AMBER}Sovereign Offensive Security, Frontier AI & AppImage Suite{RESET}")
+    print(f"  {GRAY}Debian Trixie Core • Kali & Parrot Arsenal • Sovereign Desk{RESET}\n")
+
+def load_arsenal_index():
+    adir = get_arsenal_dir()
+    index_file = adir / "manifests" / "index.json"
+    if not index_file.exists():
+        return None
+    try:
+        with open(index_file) as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+def load_appimages_catalog():
+    adir = get_appimages_dir()
+    catalog_file = adir / "catalog.json"
+    if not catalog_file.exists():
+        return None
+    try:
+        with open(catalog_file) as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+def is_tool_installed(tool_id: str, pkg: str = "") -> bool:
+    # Check PATH
+    if shutil.which(tool_id):
+        return True
+    if pkg and shutil.which(pkg):
+        return True
+    # Check /opt/appimages or /usr/local/bin
+    if Path(f"/opt/appimages/{tool_id}").exists() or Path(f"/usr/local/bin/{tool_id}").exists():
+        return True
+    return False
+
+def cmd_list(args):
+    idx = load_arsenal_index()
+    if not idx:
+        print(f"{RED}[!] Zoth Arsenal registry not found at {get_arsenal_dir()}. Run 'zoth update' to initialize.{RESET}")
+        return
+
+    filter_query = (args.category or "").lower()
+    print(f"{CYAN}{BOLD}=== ZOTH ARSENAL TOOL REGISTRY ==={RESET}")
+    print(f"{GRAY}Total: {len(idx['tools'])} tools across {len(idx['categories'])} categories & {len(idx['suites'])} suites{RESET}\n")
+
+    # If asking for suites
+    if filter_query in ["suites", "suite"]:
+        print(f"{GOLD}{BOLD}AVAILABLE SUITES:{RESET}")
+        for s_name, count in idx["suites"].items():
+            print(f"  {GREEN}●{RESET} {BOLD}{s_name:<20}{RESET} {GRAY}({count} tools){RESET}")
+        print(f"\n{DIM}Run: zoth install <suite_name> (e.g. zoth install kali-top10){RESET}")
+        return
+
+    # List categories
+    cats = idx["categories"]
+    tools = idx["tools"]
+
+    matched_tools = 0
+    for cid, cdata in sorted(cats.items()):
+        if filter_query and filter_query not in cid.lower() and filter_query not in cdata["name"].lower():
+            continue
+        print(f"\n{GOLD}{BOLD}[ {cdata['name'].upper()} ]{RESET} {GRAY}- {cdata['description']}{RESET}")
+        cat_tools = [t for t in tools.values() if t.get("category") == cid]
+        for t in sorted(cat_tools, key=lambda x: x["id"]):
+            installed = is_tool_installed(t["id"], t.get("pkg", ""))
+            status = f"{GREEN}[INSTALLED]{RESET}" if installed else f"{DIM}[AVAILABLE]{RESET}"
+            print(f"  {status} {BOLD}{t['id']:<22}{RESET} {GRAY}{t['desc']}{RESET}")
+            matched_tools += 1
+
+    print(f"\n{GRAY}Showing {matched_tools} tools. To install: {CYAN}zoth install <tool_id>{RESET}")
+
+def cmd_search(args):
+    query = args.query.lower()
+    idx = load_arsenal_index()
+    cat = load_appimages_catalog()
+
+    print(f"{CYAN}{BOLD}=== SEARCH RESULTS FOR '{query}' ==={RESET}\n")
+    found = 0
+
+    if idx:
+        for tid, t in idx["tools"].items():
+            if query in tid.lower() or query in t.get("desc", "").lower() or query in t.get("category_name", "").lower():
+                installed = is_tool_installed(tid, t.get("pkg", ""))
+                status = f"{GREEN}[INSTALLED]{RESET}" if installed else f"{DIM}[AVAILABLE]{RESET}"
+                print(f"  {status} {GOLD}{tid:<20}{RESET} {GRAY}{t.get('desc')}{RESET} {DIM}({t.get('category_name')}){RESET}")
+                found += 1
+
+    if cat:
+        for aid, a in cat["apps"].items():
+            if query in aid.lower() or query in a.get("name", "").lower() or query in a.get("comment", "").lower():
+                installed = is_tool_installed(aid)
+                status = f"{GREEN}[INSTALLED]{RESET}" if installed else f"{AMBER}[APPIMAGE]{RESET}"
+                print(f"  {status} {CYAN}{aid:<20}{RESET} {GRAY}{a.get('comment')}{RESET} {DIM}(AppImage - {a.get('category')}){RESET}")
+                found += 1
+
+    if found == 0:
+        print(f"{YELLOW}[*] No exact matches found in Zoth Arsenal or AppImages.{RESET}")
+        print(f"{DIM}You can still attempt direct installation with: zoth install {query}{RESET}")
+    else:
+        print(f"\n{GRAY}Total matches: {found}{RESET}")
+
+def cmd_install(args):
+    target = args.target.strip()
+    idx = load_arsenal_index()
+    adir = get_arsenal_dir()
+
+    # Check if target is a suite
+    suite_file = adir / "suites" / f"{target}.txt"
+    if suite_file.exists():
+        print(f"{CYAN}{BOLD}[+] Installing Suite '{target}' from Zoth Arsenal...{RESET}")
+        with open(suite_file) as f:
+            tools_to_install = [line.strip() for line in f if line.strip() and not line.startswith("#")]
+        print(f"{GRAY}Suite contains {len(tools_to_install)} tools: {', '.join(tools_to_install)}{RESET}\n")
+
+        # Configure repositories first
+        setup_script = adir / "config" / "setup-sources.sh"
+        if setup_script.exists():
+            subprocess.run(["sudo", "bash", str(setup_script)], check=False)
+
+        # Install tools
+        for tid in tools_to_install:
+            print(f"\n{GOLD}---> Installing {tid}...{RESET}")
+            installer = adir / "scripts" / "install-tool.sh"
+            subprocess.run(["bash", str(installer), tid])
+        print(f"\n{GREEN}{BOLD}[✓] Suite '{target}' installation complete!{RESET}")
+        return
+
+    # Check if single tool in arsenal
+    installer = adir / "scripts" / "install-tool.sh"
+    if installer.exists():
+        res = subprocess.run(["bash", str(installer), target])
+        sys.exit(res.returncode)
+    else:
+        print(f"{YELLOW}[*] Running standard apt install for {target}...{RESET}")
+        res = subprocess.run(["sudo", "apt-get", "update", "-y"])
+        res = subprocess.run(["sudo", "apt-get", "install", "-y", target])
+        sys.exit(res.returncode)
+
+def cmd_appimage(args):
+    cat_data = load_appimages_catalog()
+    app_dir = get_appimages_dir()
+
+    if args.app_action == "list":
+        if not cat_data:
+            print(f"{RED}[!] AppImage catalog not found. Run 'zoth update' to initialize.{RESET}")
+            return
+        print(f"{CYAN}{BOLD}=== ZOTH APPIMAGE & STANDALONE TOOLS REGISTRY ==={RESET}")
+        print(f"{GRAY}Repository: {cat_data.get('repository', APPIMAGES_REPO)}{RESET}\n")
+        for aid, a in sorted(cat_data["apps"].items()):
+            installed = is_tool_installed(aid)
+            status = f"{GREEN}[INSTALLED]{RESET}" if installed else f"{DIM}[AVAILABLE]{RESET}"
+            print(f"  {status} {GOLD}{aid:<18}{RESET} {BOLD}{a['name']:<24}{RESET} {GRAY}{a['comment']}{RESET}")
+        print(f"\n{GRAY}Install AppImage: {CYAN}zoth appimage install <app_id>{RESET}")
+        print(f"{GRAY}Remove AppImage:  {CYAN}zoth appimage remove <app_id>{RESET}")
+
+    elif args.app_action == "install":
+        if not args.app_name:
+            print(f"{RED}Error: please specify app to install (e.g. zoth appimage install obsidian){RESET}")
+            return
+        installer = app_dir / "scripts" / "install-appimage.sh"
+        if not installer.exists():
+            print(f"{RED}[!] Installer script not found at {installer}. Run 'zoth update'.{RESET}")
+            return
+        res = subprocess.run(["bash", str(installer), args.app_name])
+        sys.exit(res.returncode)
+
+    elif args.app_action == "remove":
+        if not args.app_name:
+            print(f"{RED}Error: please specify app to remove.{RESET}")
+            return
+        target = args.app_name
+        print(f"{YELLOW}[*] Removing AppImage and desktop shortcut for {target}...{RESET}")
+        desktop_file = Path(f"/home/neo/Desktop/{target}.desktop")
+        app_file = Path(f"/opt/appimages/{target}")
+        if desktop_file.exists():
+            desktop_file.unlink()
+        subprocess.run(["sudo", "rm", "-f", f"/usr/share/applications/{target}.desktop", f"/usr/local/bin/{target}"])
+        print(f"{GREEN}[✓] Removed {target}.{RESET}")
+
+def cmd_update(args):
+    print(f"{CYAN}[+] Updating Zoth Arsenal & AppImage registries from GitHub...{RESET}")
+    # 1. Update Arsenal
+    adir = get_arsenal_dir()
+    if (adir / ".git").exists():
+        print(f"{GRAY}Pulling latest Zoth Arsenal...{RESET}")
+        subprocess.run(["git", "-C", str(adir), "pull"])
+    else:
+        print(f"{YELLOW}[*] Cloning Zoth Arsenal to /opt/zoth-arsenal...{RESET}")
+        subprocess.run(["sudo", "git", "clone", ARSENAL_REPO, "/opt/zoth-arsenal"])
+
+    # 2. Update AppImages
+    app_dir = get_appimages_dir()
+    if (app_dir / ".git").exists():
+        print(f"{GRAY}Pulling latest Zoth AppImages...{RESET}")
+        subprocess.run(["git", "-C", str(app_dir), "pull"])
+    else:
+        print(f"{YELLOW}[*] Cloning Zoth AppImages to /opt/zoth-appimages...{RESET}")
+        subprocess.run(["sudo", "git", "clone", APPIMAGES_REPO, "/opt/zoth-appimages"])
+
+    print(f"{GREEN}[✓] All Zoth registries updated successfully.{RESET}")
+
+def cmd_repo(args):
+    which = args.which.lower()
+    target_dir = Path.home() / f"zoth-{which}"
+    if which == "arsenal":
+        url = ARSENAL_REPO
+    elif which in ["appimages", "appimage"]:
+        url = APPIMAGES_REPO
+    else:
+        print(f"{RED}[!] Unknown repository '{which}'. Choose 'arsenal' or 'appimages'.{RESET}")
+        return
+
+    print(f"{CYAN}[+] Cloning {url} into {target_dir}...{RESET}")
+    subprocess.run(["git", "clone", url, str(target_dir)])
+    print(f"{GREEN}[✓] Repository cloned to {target_dir}{RESET}")
+
+def cmd_doctor(args):
+    print(f"{CYAN}{BOLD}=== ZOTHOS SYSTEM & RUNTIME DOCTOR ==={RESET}\n")
+    checks = [
+        ("Base Architecture", lambda: subprocess.check_output(["uname", "-m"]).decode().strip()),
+        ("Kernel Version", lambda: subprocess.check_output(["uname", "-r"]).decode().strip()),
+        ("Curl Utility", lambda: "Installed (" + subprocess.check_output(["curl", "--version"]).decode().split()[1] + ")" if shutil.which("curl") else None),
+        ("Git Client", lambda: "Installed (" + subprocess.check_output(["git", "--version"]).decode().strip() + ")" if shutil.which("git") else None),
+        ("Python3 Runtime", lambda: "Installed (" + sys.version.split()[0] + ")"),
+        ("Electron Core", lambda: "Available (/opt/electron/electron)" if Path("/opt/electron/electron").exists() else None),
+        ("Display Manager", lambda: "SDDM Active (KDE Plasma 6)" if subprocess.run(["systemctl", "is-active", "sddm"], capture_output=True).returncode == 0 else "Display Active"),
+        ("Zoth Studio", lambda: "Installed (/opt/zoth-studio)" if Path("/opt/zoth-studio").exists() else None),
+        ("Zoth OS Desk", lambda: "Installed (/opt/zoth-os)" if Path("/opt/zoth-os").exists() else None),
+        ("Maya Linux", lambda: "Installed (/opt/maya-linux)" if Path("/opt/maya-linux").exists() else None),
+        ("Zoth Arsenal Registry", lambda: f"Configured ({get_arsenal_dir()})" if get_arsenal_dir().exists() else None),
+        ("Zoth AppImages Catalog", lambda: f"Configured ({get_appimages_dir()})" if get_appimages_dir().exists() else None),
+    ]
+
+    for label, check_fn in checks:
+        try:
+            val = check_fn()
+            if val:
+                print(f"  {GREEN}[✓]{RESET} {BOLD}{label:<26}{RESET} {val}")
+            else:
+                print(f"  {RED}[✗]{RESET} {BOLD}{label:<26}{RESET} Missing / Inactive")
+        except Exception as e:
+            print(f"  {RED}[✗]{RESET} {BOLD}{label:<26}{RESET} Error: {e}")
+
+    print(f"\n{GREEN}{BOLD}[✓] ZOTHOS Diagnostic Scan Finished.{RESET}")
+
+def main():
+    parser = argparse.ArgumentParser(description="Zoth OS Unified Management CLI", add_help=False)
+    subparsers = parser.add_subparsers(dest="subcommand")
+
+    # list
+    p_list = subparsers.add_parser("list", help="List available tools by category or suite")
+    p_list.add_argument("category", nargs="?", default="", help="Category or 'suites'")
+
+    # search
+    p_search = subparsers.add_parser("search", help="Search tools and AppImages")
+    p_search.add_argument("query", help="Search keyword")
+
+    # install
+    p_install = subparsers.add_parser("install", help="Install tool, suite, or package")
+    p_install.add_argument("target", help="Tool ID or Suite Name (e.g. kali-top10)")
+
+    # appimage
+    p_app = subparsers.add_parser("appimage", help="Manage standalone AppImages")
+    p_app.add_argument("app_action", choices=["list", "install", "remove"], help="list, install, or remove")
+    p_app.add_argument("app_name", nargs="?", default="", help="AppImage name")
+
+    # update
+    subparsers.add_parser("update", help="Update tool manifests and registries from GitHub")
+
+    # repo
+    p_repo = subparsers.add_parser("repo", help="Clone sovereign repositories locally")
+    p_repo.add_argument("repo_action", choices=["clone"], help="clone")
+    p_repo.add_argument("which", choices=["arsenal", "appimages"], help="Which repo to clone")
+
+    # doctor
+    subparsers.add_parser("doctor", help="Inspect system runtimes, curl, electron, and environment")
+
+    # studio
+    subparsers.add_parser("studio", help="Launch Zoth Studio")
+
+    # tools / gui installer (recommended Kali/Parrot/Zoth extras)
+    subparsers.add_parser("tools", help="Launch Recommended Tools GUI installer (Kali/Parrot/Zoth)")
+    subparsers.add_parser("gui", help="Launch Recommended Tools GUI installer")
+
+    # desk / os
+    subparsers.add_parser("desk", help="Launch Zoth OS Desktop")
+    subparsers.add_parser("os", help="Launch Zoth OS Desktop")
+
+    # help
+    subparsers.add_parser("help", help="Show help")
+
+    if len(sys.argv) == 1:
+        print_banner()
+        print(f"{BOLD}USAGE:{RESET}")
+        print(f"  {CYAN}zoth list [category|suites]{RESET}    List tools from Kali, Parrot, AI, Web3")
+        print(f"  {CYAN}zoth search <keyword>{RESET}         Search tools and AppImages")
+        print(f"  {CYAN}zoth install <tool|suite>{RESET}     Install any tool or full suite (e.g. kali-top10)")
+        print(f"  {CYAN}zoth appimage list{RESET}            List verified AppImages and desktop tools")
+        print(f"  {CYAN}zoth appimage install <app>{RESET}   Install AppImage & create desktop shortcut")
+        print(f"  {CYAN}zoth update{RESET}                   Sync tool registries from GitHub")
+        print(f"  {CYAN}zoth repo clone <repo>{RESET}        Clone 'arsenal' or 'appimages' locally")
+        print(f"  {CYAN}zoth doctor{RESET}                   Run system diagnostics (curl, electron, etc.)")
+        print(f"  {CYAN}zoth studio{RESET}                   Launch Zoth Studio")
+        print(f"  {CYAN}zoth desk{RESET}                     Launch Zoth OS Desk\n")
+        return
+
+    args, unknown = parser.parse_known_args()
+
+    if args.subcommand in ["help", "-h", "--help"]:
+        parser.print_help()
+        return
+
+    if args.subcommand == "list":
+        cmd_list(args)
+    elif args.subcommand == "search":
+        cmd_search(args)
+    elif args.subcommand == "install":
+        cmd_install(args)
+    elif args.subcommand == "appimage":
+        cmd_appimage(args)
+    elif args.subcommand == "update":
+        cmd_update(args)
+    elif args.subcommand == "repo":
+        cmd_repo(args)
+    elif args.subcommand == "doctor":
+        cmd_doctor(args)
+    elif args.subcommand == "studio":
+        subprocess.run(["/usr/local/bin/zoth-studio"] + unknown)
+    elif args.subcommand in ["tools", "gui"]:
+        subprocess.run(["/usr/local/bin/zoth-tools-installer"] + unknown)
+    elif args.subcommand in ["desk", "os"]:
+        subprocess.run(["/usr/local/bin/zoth-os"] + unknown)
+    else:
+        # If user typed 'zoth nmap' or 'zoth burpsuite' directly, treat as install
+        args.target = args.subcommand
+        cmd_install(args)
+
+if __name__ == "__main__":
+    main()

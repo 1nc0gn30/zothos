@@ -1,0 +1,45 @@
+#!/bin/bash
+set -e
+
+# Ensure neo user exists
+if ! id -u neo >/dev/null 2>&1; then
+    useradd -m -s /bin/bash -u 1000 -U neo
+fi
+
+# Set unambiguous password zoth for neo and root
+echo "neo:zoth" | chpasswd
+echo "root:zoth" | chpasswd
+
+# Crucial: Fix permissions so unix_chkpwd can authenticate
+chown root:shadow /etc/shadow /etc/gshadow
+chmod 640 /etc/shadow /etc/gshadow
+chmod 644 /etc/passwd /etc/group
+
+# Ensure neo is in all essential groups
+usermod -aG sudo,audio,video,netdev,plugdev,dialout neo 2>/dev/null || true
+
+# Passwordless sudo for neo
+cat << "SUDOEOF" > /etc/sudoers.d/zothos
+neo ALL=(ALL:ALL) NOPASSWD: ALL
+SUDOEOF
+chmod 0440 /etc/sudoers.d/zothos
+
+# Ensure AccountsService icon and neo profile
+mkdir -p /var/lib/AccountsService/{icons,users}
+if [ -f /usr/share/icons/hicolor/512x512/apps/zoth-studio.png ]; then
+    cp -f /usr/share/icons/hicolor/512x512/apps/zoth-studio.png /var/lib/AccountsService/icons/neo
+    chmod 644 /var/lib/AccountsService/icons/neo
+fi
+
+cat << "ACCEO" > /var/lib/AccountsService/users/neo
+[User]
+Session=plasma
+Icon=/var/lib/AccountsService/icons/neo
+SystemAccount=false
+ACCEO
+chmod 644 /var/lib/AccountsService/users/neo
+
+# Ensure home directory ownership
+if [ -d /home/neo ]; then
+    chown -R 1000:1000 /home/neo
+fi

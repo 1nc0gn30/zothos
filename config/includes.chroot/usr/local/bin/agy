@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+"""
+[+] ZOTHOS AGY Google Antigravity Agent Harness v1.0
+Google Antigravity SDK & Autonomous Agent Workstation
+"""
+
+import os
+import sys
+import shutil
+import subprocess
+
+GREEN = "\033[38;2;0;255;157m"
+GOLD = "\033[38;2;255;215;0m"
+CYAN = "\033[38;2;0;229;255m"
+GRAY = "\033[38;2;120;140;160m"
+BOLD = "\033[1m"
+RESET = "\033[0m"
+
+def banner():
+    os.system("clear" if os.name == "posix" else "cls")
+    print(f"{CYAN}{BOLD}")
+    print(r"    █████╗  ██████╗ ██╗   ██╗")
+    print(r"   ██╔══██╗██╔════╝ ██║   ██║")
+    print(r"   ███████║██║  ███╗██║   ██║")
+    print(r"   ██╔══██║██║   ██║██║   ██║")
+    print(r"   ██║  ██║╚██████╔╝╚██████╔╝")
+    print(r"   ╚═╝  ╚═╝ ╚═════╝  ╚═════╝ ")
+    print(f"         {GOLD}[+] GOOGLE ANTIGRAVITY AGENT HARNESS [+]{RESET}\n")
+
+def install_agy():
+    banner()
+    print(f"{GOLD}[*] Installing Google Antigravity SDK via Linux 1-liner installer...{RESET}\n")
+    cmd = "mkdir -p ~/.local && (npm install -g --prefix ~/.local @google/antigravity-sdk || pip install --user google-antigravity)"
+    os.system(cmd)
+    input(f"\n{GRAY}Press Enter to return...{RESET}")
+
+def main():
+    # If official agy binary is found, run it directly
+    agy_bin = shutil.which("agy")
+    if agy_bin and os.path.realpath(agy_bin) != os.path.realpath(sys.argv[0]):
+        try:
+            os.execv(agy_bin, sys.argv)
+        except Exception:
+            pass
+
+    while True:
+        banner()
+        print(f"  {BOLD}{CYAN}[1]{RESET} [>]  {BOLD}Launch AGY Antigravity Agent Session{RESET}")
+        print(f"  {BOLD}{GREEN}[2]{RESET} [PKG]  {BOLD}Install / Update Google Antigravity SDK via 1-Liner{RESET}")
+        print(f"  {BOLD}{GRAY}[0]{RESET} [X]  {BOLD}Exit AGY{RESET}\n")
+        print(f"{CYAN}{BOLD}══════════════════════════════════════════════════════════════════════{RESET}")
+        
+        try:
+            choice = input(f"Select option [0-2]: ").strip()
+            if choice == "1":
+                os.system("agy || antigravity")
+            elif choice == "2":
+                install_agy()
+            elif choice in ["0", "q", "Q"]:
+                break
+        except (KeyboardInterrupt, EOFError):
+            break
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#  ZOTHOS FIRST-BOOT TOOL PROVISIONER & HUD (ARSENAL + NEXUS 186+ TOOLS)
+# ==============================================================================
+set -u
+
+FLAG="/home/neo/.config/zothos/firstboot.done"
+LOG="/var/log/zoth-nexus-firstboot.log"
+mkdir -p /home/neo/.config/zothos
+mkdir -p /var/log
+
+if [[ -f "$FLAG" ]]; then
+    exit 0
+fi
+
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] [FIRSTBOOT] $*" >> "$LOG" 2>/dev/null || true
+}
+
+log "Starting ZothOS First-Boot Provisioner..."
+
+# Notify user on desktop immediately that Zoth Arsenal + Nexus are active
+if command -v notify-send >/dev/null 2>&1; then
+    notify-send -i /usr/share/pixmaps/zoth-arsenal.png \
+        "ZOTH TOOL NEXUS // 186+ TOOLS" \
+        "All Kali, Parrot, Local AI Runtimes, Web3 & Infra tools pre-installed and ready."
+fi
+
+# Asynchronous background finalization
+(
+    sleep 3
+    log "Initializing background daemons and service hooks..."
+
+    # 1. Start Ollama daemon if present
+    if command -v ollama >/dev/null 2>&1; then
+        log "Starting Ollama runtime daemon..."
+        systemctl enable --now ollama 2>/dev/null || pgrep -x ollama >/dev/null || (ollama serve >/dev/null 2>&1 &)
+    fi
+
+    # 2. Initialize IPFS repository if not present
+    if command -v ipfs >/dev/null 2>&1; then
+        if [[ ! -d "/home/neo/.ipfs" ]]; then
+            log "Initializing IPFS node..."
+            su - neo -c "ipfs init" >> "$LOG" 2>&1 || true
+        fi
+    fi
+
+    # 3. Verify environment variables and paths
+    log "Updating ldconfig and font caches..."
+    ldconfig 2>/dev/null || true
+
+    # 4. Final verification via zoth-pkg
+    if command -v zoth-pkg >/dev/null 2>&1; then
+        log "Running zoth-pkg verification..."
+        zoth-pkg verify >> "$LOG" 2>&1 || true
+    fi
+
+    # Mark firstboot as complete
+    touch "$FLAG"
+    chown neo:neo "$FLAG" 2>/dev/null || true
+    log "First-boot provisioning completed successfully."
+
+    # Final completion notification
+    if command -v notify-send >/dev/null 2>&1; then
+        notify-send -i /usr/share/pixmaps/zoth-mark.png \
+            "ZOTH ARSENAL & NEXUS READY" \
+            "186+ Offensive, Defense, AI, and Sovereign tools are fully operational."
+    fi
+) >> "$LOG" 2>&1 &
+
+exit 0

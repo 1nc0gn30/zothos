@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+"""
+[+] ZOTHOS Grok CLI Sovereign Agent Workstation v1.0
+xAI Grok Terminal Interface & Agent Harness
+"""
+
+import os
+import sys
+import shutil
+import subprocess
+
+GREEN = "\033[38;2;0;255;157m"
+GOLD = "\033[38;2;255;215;0m"
+CYAN = "\033[38;2;0;229;255m"
+GRAY = "\033[38;2;120;140;160m"
+BOLD = "\033[1m"
+RESET = "\033[0m"
+
+def banner():
+    os.system("clear" if os.name == "posix" else "cls")
+    print(f"{GOLD}{BOLD}")
+    print(r"   ██████╗ ██████╗  ██████╗ ██╗  ██╗")
+    print(r"  ██╔════╝ ██╔══██╗██╔═══██╗██║ ██╔╝")
+    print(r"  ██║  ███╗██████╔╝██║   ██║█████═╝ ")
+    print(r"  ██║   ██║██╔══██╗██║   ██║██  ██╗ ")
+    print(r"  ╚██████╔╝██║  ██║╚██████╔╝██║ ██╗")
+    print(r"   ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝")
+    print(f"         {CYAN}[+] xAI GROK CLI & AGENT HARNESS [+]{RESET}\n")
+
+def install_grok():
+    banner()
+    print(f"{GOLD}[*] Installing Grok CLI via official Linux 1-liner installer...{RESET}\n")
+    cmd = "mkdir -p ~/.local && (npm install -g --prefix ~/.local @xai/grok-cli || pip install --user xai-grok)"
+    os.system(cmd)
+    input(f"\n{GRAY}Press Enter to return...{RESET}")
+
+def main():
+    # If official grok CLI binary is found, run it directly
+    grok_bin = shutil.which("grok")
+    if grok_bin and os.path.realpath(grok_bin) != os.path.realpath(sys.argv[0]):
+        try:
+            os.execv(grok_bin, sys.argv)
+        except Exception:
+            pass
+
+    while True:
+        banner()
+        print(f"  {BOLD}{GOLD}[1]{RESET} [>]  {BOLD}Launch Grok Interactive CLI Session{RESET}")
+        print(f"  {BOLD}{GREEN}[2]{RESET} [PKG]  {BOLD}Install / Update Grok CLI via Linux 1-Liner{RESET}")
+        print(f"  {BOLD}{GRAY}[0]{RESET} [X]  {BOLD}Exit Grok{RESET}\n")
+        print(f"{GOLD}{BOLD}══════════════════════════════════════════════════════════════════════{RESET}")
+        
+        try:
+            choice = input(f"Select option [0-2]: ").strip()
+            if choice == "1":
+                os.system("grok || grok-cli")
+            elif choice == "2":
+                install_grok()
+            elif choice in ["0", "q", "Q"]:
+                break
+        except (KeyboardInterrupt, EOFError):
+            break
+
+if __name__ == "__main__":
+    main()

@@ -4,12 +4,10 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
-Type=oneshot
-RemainAfterExit=yes
-ExecStartPre=/bin/sh -c 'if ! command -v tailscale >/dev/null 2>&1; then echo "[*] Installing tailscale..."; apt-get update -qq && apt-get install -y -qq tailscale; fi'
-ExecStart=/bin/sh -c 'tailscale up --accept-routes --accept-dns --hostname=zothos-$(cat /etc/machine-id 2>/dev/null | head -c 8) 2>/dev/null || tailscale up 2>/dev/null || true'
+Type=simple
+ExecStart=/bin/sh -c 'command -v tailscale >/dev/null 2>&1 && tailscale up --accept-routes --accept-dns --hostname=zothos-$(cat /etc/machine-id 2>/dev/null | head -c 8) 2>/dev/null || true'
 ExecStop=/bin/sh -c 'tailscale down 2>/dev/null || true'
-TimeoutSec=30
+TimeoutSec=10
 
 [Install]
 WantedBy=multi-user.target

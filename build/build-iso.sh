@@ -45,6 +45,10 @@ if [[ ${#MISSING_PKGS[@]} -gt 0 ]]; then
 fi
 
 echo -e "${CYAN}[2/6] Setting up clean workspace at $WORK_DIR ...${RESET}"
+umount -l "$WORK_DIR/chroot/proc" 2>/dev/null || true
+umount -l "$WORK_DIR/chroot/sys" 2>/dev/null || true
+umount -l "$WORK_DIR/chroot/dev/pts" 2>/dev/null || true
+umount -l "$WORK_DIR/chroot/dev" 2>/dev/null || true
 rm -rf "$WORK_DIR"
 mkdir -p "$WORK_DIR"
 cd "$WORK_DIR"
@@ -63,6 +67,7 @@ lb config \
     --initramfs live-boot \
     --linux-flavours amd64 \
     --linux-packages linux-image-amd64 \
+    --bootappend-live "boot=live components username=neo hostname=zothos quiet splash systemd.unit=graphical.target" \
     --apt-secure false \
     --apt-options "--yes --ignore-missing"
 
@@ -81,6 +86,9 @@ ZOTHOEOF
 echo -e "${CYAN}[4/6] Staging package lists and chroot inclusions...${RESET}"
 mkdir -p config/package-lists
 cp "$PROJECT_DIR/package-lists/"*.list.chroot config/package-lists/
+# Also stage the rich native package lists (00-core .. 90-science, aliases) so
+# the full desktop/security/AI/media/web3 arsenal actually gets baked into the ISO.
+cp "$PROJECT_DIR"/config/package-lists/*.list.chroot config/package-lists/ 2>/dev/null || true
 
 mkdir -p config/includes.chroot
 # Copy ALL chroot overlay files recursively preserving permissions and hierarchy
@@ -94,9 +102,9 @@ mkdir -p config/hooks/normal
 cat <<'EOF' > config/hooks/normal/0000-install-initramfs.hook.chroot
 #!/bin/sh
 set -e
-echo "[ZOTHOS HOOK] Guaranteeing initramfs-tools & linux-image..."
+echo "[ZOTHOS HOOK] Guaranteeing desktop, LightDM, initramfs-tools & linux-image..."
 apt-get update -y || true
-apt-get install -y --no-install-recommends initramfs-tools linux-image-amd64 live-boot || true
+apt-get install -y --no-install-recommends initramfs-tools linux-image-amd64 live-boot xfce4 xfce4-terminal xfce4-goodies lightdm lightdm-gtk-greeter xorg x11-xserver-utils desktop-base dbus-x11 at-spi2-core xfce4-settings || true
 EOF
 chmod +x config/hooks/normal/0000-install-initramfs.hook.chroot
 
@@ -114,6 +122,7 @@ fi
 systemctl enable NetworkManager || true
 systemctl enable lightdm || true
 systemctl enable tor || true
+systemctl set-default graphical.target || true
 
 # Configure Plymouth default boot splash
 if command -v plymouth-set-default-theme >/dev/null 2>&1; then

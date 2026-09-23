@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Keep the desk server resident. Super+D shows or hides its window.
+set -euo pipefail
+URL="http://127.0.0.1:8770/"
+if ! curl -sf -o /dev/null --max-time 1 "$URL"; then
+  zoth-os --no-open >/tmp/zoth-os.log 2>&1 &
+  for _ in 1 2 3 4 5 6 7 8 9 10 11 12; do
+    curl -sf -o /dev/null --max-time 1 "$URL" && break
+    sleep 0.25
+  done
+fi
+if command -v wmctrl >/dev/null 2>&1 && wmctrl -l | grep -q 'Zoth OS'; then
+  wmctrl -c 'Zoth OS'
+  exit 0
+fi
+if command -v firefox-esr >/dev/null 2>&1; then
+  firefox-esr --new-window "$URL" >/dev/null 2>&1 &
+elif command -v firefox >/dev/null 2>&1; then
+  firefox --new-window "$URL" >/dev/null 2>&1 &
+fi

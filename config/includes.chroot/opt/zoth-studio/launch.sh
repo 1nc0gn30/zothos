@@ -37,7 +37,7 @@ echo -e "\e[1;32m[⚡] Starting ZOTH STUDIO Powerhouse Hub on port $PORT...\e[0m
 
 # Start background web hub if not already running on this port
 if ! lsof -i :"$PORT" >/dev/null 2>&1 && ! ss -tuln 2>/dev/null | grep -q ":$PORT "; then
-    python3 -m http.server "$PORT" --bind 127.0.0.1 --directory "$ROOT" >/dev/null 2>&1 &
+    python3 -m http.server "$PORT" --bind 127.0.0.1 --directory "$PUBLIC" >/dev/null 2>&1 &
     sleep 0.8
 fi
 

@@ -19,6 +19,6 @@ if [ -d "$HOME/.local/bin" ] ; then
 fi
 
 # Autostart XFCE Graphical Environment on tty1 login
-if [[ -z "$DISPLAY" ]] && [[ "$(tty)" = "/dev/tty1" ]]; then
-    exec startxfce4
+if [ -z "$DISPLAY" ] && [ "$(tty)" = "/dev/tty1" ]; then
+    exec startplasma-x11 2>/dev/null || exec startplasma-wayland 2>/dev/null || exec startxfce4 2>/dev/null || exec startx
 fi

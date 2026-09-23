@@ -72,7 +72,7 @@ ipcMain.on('launch-tool', (event, toolName) => {
     'caido': 'caido',
     'burp': 'burpsuite',
     'bitwarden': 'bitwarden',
-    'terminal': 'xfce4-terminal'
+    'terminal': 'konsole'
   };
 
   const cmd = tools[toolName] || toolName;

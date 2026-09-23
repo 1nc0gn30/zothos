@@ -1,0 +1,52 @@
+/*
+    SPDX-FileCopyrightText: 2016 David Edmundson <davidedmundson@kde.org>
+    SPDX-License-Identifier: LGPL-2.0-or-later
+*/
+
+import QtQuick 2.15
+import QtQuick.Layouts 1.15
+
+import org.kde.plasma.components 3.0 as PlasmaComponents3
+import org.kde.plasma.plasma5support 2.0 as P5Support
+import org.kde.kirigami 2.20 as Kirigami
+
+ColumnLayout {
+    id: root
+
+    readonly property bool softwareRendering: GraphicsInfo.api === GraphicsInfo.Software
+
+    PlasmaComponents3.Label {
+        text: "⚡ ZOTHOS SOVEREIGN OS ⚡"
+        textFormat: Text.PlainText
+        color: "#00ff9d"
+        font.pointSize: Math.round(Kirigami.Theme.defaultFont.pointSize * 1.3)
+        font.bold: true
+        font.letterSpacing: 2
+        Layout.alignment: Qt.AlignHCenter
+    }
+    PlasmaComponents3.Label {
+        text: Qt.formatTime(timeSource.data["Local"]["DateTime"], Qt.locale(), Locale.ShortFormat)
+        textFormat: Text.PlainText
+        style: root.softwareRendering ? Text.Outline : Text.Normal
+        styleColor: root.softwareRendering ? Kirigami.Theme.backgroundColor : "transparent"
+        font.pointSize: Math.round(Kirigami.Theme.defaultFont.pointSize * 4.8)
+        font.bold: true
+        color: "#ffd700"
+        Layout.alignment: Qt.AlignHCenter
+    }
+    PlasmaComponents3.Label {
+        text: Qt.formatDate(timeSource.data["Local"]["DateTime"], Qt.locale(), Locale.LongFormat)
+        textFormat: Text.PlainText
+        style: root.softwareRendering ? Text.Outline : Text.Normal
+        styleColor: root.softwareRendering ? Kirigami.Theme.backgroundColor : "transparent"
+        font.pointSize: Math.round(Kirigami.Theme.defaultFont.pointSize * 1.8)
+        color: "#00e5ff"
+        Layout.alignment: Qt.AlignHCenter
+    }
+    P5Support.DataSource {
+        id: timeSource
+        engine: "time"
+        connectedSources: ["Local"]
+        interval: 1000
+    }
+}

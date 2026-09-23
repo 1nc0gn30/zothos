@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZOTH OS // SOVEREIGN ARSENAL PROVISIONER</title>
+  <style>
+    :root {
+      --bg: #03060a;
+      --panel: rgba(8, 14, 24, 0.94);
+      --card: rgba(13, 20, 34, 0.85);
+      --card-border: rgba(255, 215, 0, 0.25);
+      --gold: #ffd700;
+      --gold-bright: #ffea75;
+      --gold-dark: #b8860b;
+      --cyan: #00f0ff;
+      --matrix: #00ff88;
+      --red: #ff3366;
+      --dim: #8b9bb4;
+      --text: #f0f6fc;
+      --font: 'JetBrains Mono', 'Fira Code', 'Segoe UI', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Ambient Matrix Glow */
+    #matrix-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.12;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    header {
+      position: relative;
+      z-index: 10;
+      padding: 16px 28px;
+      background: linear-gradient(180deg, rgba(14,24,42,0.95) 0%, rgba(8,14,24,0.9) 100%);
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1.5px solid var(--gold);
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      color: var(--gold);
+      background: radial-gradient(circle, rgba(255,215,0,0.2) 0%, rgba(0,0,0,0.8) 100%);
+    }
+
+    .title-block .t-title {
+      font-size: 17px;
+      font-weight: 900;
+      letter-spacing: 2.5px;
+      color: var(--gold);
+      text-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
+    }
+
+    .title-block .t-sub {
+      font-size: 10px;
+      color: var(--cyan);
+      letter-spacing: 1.2px;
+      margin-top: 3px;
+    }
+
+    .header-pills {
+      display: flex;
+      gap: 12px;
+    }
+
+    .pill {
+      font-size: 10px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      color: var(--cyan);
+      background: rgba(0, 240, 255, 0.05);
+      letter-spacing: 1px;
+    }
+
+    main {
+      position: relative;
+      z-index: 10;
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 28px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .bundle-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .bundle-card:hover {
+      border-color: var(--gold);
+      box-shadow: 0 12px 36px rgba(255, 215, 0, 0.15), 0 0 16px rgba(255, 215, 0, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .b-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .b-tag {
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: rgba(255, 215, 0, 0.12);
+      color: var(--gold);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+    }
+
+    .b-count {
+      font-size: 11px;
+      color: var(--cyan);
+      font-weight: 700;
+    }
+
+    .b-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .b-title .icon {
+      color: var(--gold);
+      font-size: 20px;
+    }
+
+    .b-desc {
+      font-size: 12px;
+      color: var(--dim);
+      line-height: 1.55;
+      flex: 1;
+    }
+
+    .b-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      max-height: 90px;
+      overflow-y: hidden;
+      padding: 4px 0;
+    }
+
+    .chip {
+      font-size: 9.5px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+    }
+
+    .b-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .st-text {
+      font-size: 11px;
+      color: var(--matrix);
+      font-weight: 600;
+    }
+
+    .btn-install {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      cursor: pointer;
+      border: 1px solid var(--gold);
+      color: #03060a;
+      background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+      box-shadow: 0 0 14px rgba(255, 215, 0, 0.3);
+      transition: all 0.2s ease;
+    }
+
+    .btn-install:hover {
+      background: linear-gradient(135deg, var(--gold-bright) 0%, var(--gold) 100%);
+      box-shadow: 0 0 22px rgba(255, 215, 0, 0.6);
+      transform: scale(1.02);
+    }
+
+    .btn-install.installing {
+      pointer-events: none;
+      opacity: 0.7;
+      background: #334155;
+      border-color: #64748b;
+      color: #94a3b8;
+      box-shadow: none;
+    }
+
+    /* Modal Log Terminal */
+    .logbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 6, 10, 0.85);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .logbox.active { display: flex; }
+
+    .logcard {
+      background: var(--panel);
+      border: 1px solid var(--gold);
+      width: 720px;
+      max-width: 92vw;
+      border-radius: 12px;
+      padding: 22px;
+      box-shadow: 0 0 40px rgba(255, 215, 0, 0.25);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .lg-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .lg-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--gold);
+      letter-spacing: 1.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Progress Bar */
+    .progress-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 215, 0, 0.2);
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--gold) 0%, var(--matrix) 100%);
+      transition: width 0.25s ease;
+      box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--dim);
+    }
+
+    .lg-body {
+      background: #020408;
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      border-radius: 8px;
+      height: 340px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      font-size: 11.5px;
+      color: var(--matrix);
+      padding: 14px;
+      user-select: text;
+      line-height: 1.45;
+    }
+
+    .lg-foot {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    .btn-secondary {
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: transparent;
+      color: var(--text);
+      transition: 0.2s;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    footer {
+      position: relative;
+      z-index: 10;
+      padding: 12px 28px;
+      border-top: 1px solid var(--card-border);
+      background: rgba(8, 14, 24, 0.8);
+      font-size: 11px;
+      color: var(--dim);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="matrix-canvas"></canvas>
+
+  <header>
+    <div class="brand">
+      <div class="brand-logo">✦</div>
+      <div class="title-block">
+        <div class="t-title">ZOTH ARSENAL PROVISIONER</div>
+        <div class="t-sub">SOVEREIGN KALI & PARROT REPOSITORY INTEGRATION // PINNED FOR DEBIAN</div>
+      </div>
+    </div>
+    <div class="header-pills">
+      <div class="pill">KALI ROLLING</div>
+      <div class="pill">PARROT LORY</div>
+      <div class="pill">APT PINNING: SAFE</div>
+    </div>
+  </header>
+
+  <main id="grid"></main>
+
+  <div class="logbox" id="logbox">
+    <div class="logcard">
+      <div class="lg-header">
+        <div class="lg-title" id="lg-title">✦ PROVISIONING SUITE...</div>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-bar">
+          <div class="progress-fill" id="p-fill"></div>
+        </div>
+        <div class="progress-info">
+          <span id="p-tool">Initializing...</span>
+          <span id="p-num">0%</span>
+        </div>
+      </div>
+
+      <div class="lg-body" id="lg-body">Connecting to package provisioner...</div>
+
+      <div class="lg-foot">
+        <button class="btn-secondary" id="btn-close" onclick="closeLog()">CLOSE</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div>ZOTHOS v1.0 // CYBERNETIC ALCHEMY EST. MMXXIV</div>
+    <div>ACTIVE RUNTIME: PLASMA 6 // LINUX 6.12 AMD64</div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    // Matrix ambient canvas animation
+    const canvas = document.getElementById('matrix-canvas');
+    const ctx = canvas.getContext('2d');
+    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    window.addEventListener('resize', resize);
+    resize();
+    const chars = '0123456789ABCDEF✦☿🜂🜄ZOTHOS';
+    const fontSize = 14;
+    const columns = Math.floor(canvas.width / fontSize);
+    const drops = Array(columns).fill(1);
+    function draw() {
+      ctx.fillStyle = 'rgba(3, 6, 10, 0.08)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#00f0ff';
+      ctx.font = fontSize + 'px monospace';
+      for (let i = 0; i < drops.length; i++) {
+        const text = chars[Math.floor(Math.random() * chars.length)];
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+      }
+    }
+    setInterval(draw, 50);
+  </script>
+</body>
+</html>

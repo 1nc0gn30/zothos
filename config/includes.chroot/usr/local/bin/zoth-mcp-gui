@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#  ZOTH MCP HUB GUI LAUNCHER
+# ==============================================================================
+set -euo pipefail
+
+if [[ -n "${DISPLAY:-}" ]] && command -v electron >/dev/null 2>&1 && [[ -d "/opt/zoth-mcp-app" ]]; then
+    exec electron /opt/zoth-mcp-app
+elif [[ -d "/home/neo/zothos/config/includes.chroot/opt/zoth-mcp-app" ]]; then
+    exec /home/neo/zothos/config/includes.chroot/opt/electron/electron --no-sandbox /home/neo/zothos/config/includes.chroot/opt/zoth-mcp-app "$@"
+else
+    exec konsole --title 'ZOTH MCP Hub' -e '/usr/local/bin/zoth-mcp'
+fi

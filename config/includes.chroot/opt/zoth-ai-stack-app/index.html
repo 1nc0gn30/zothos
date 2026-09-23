@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zoth AI Stack // Neural Compute & Agent Harness Cockpit</title>
+  <style>
+    :root {
+      --bg: #04060c;
+      --panel: rgba(10, 15, 30, 0.85);
+      --card: rgba(16, 24, 45, 0.6);
+      --border: rgba(0, 240, 255, 0.25);
+      --primary: #00f0ff;
+      --secondary: #00ff9d;
+      --gold: #fbbf24;
+      --purple: #a855f7;
+      --red: #f43f5e;
+      --text: #f1f5f9;
+      --text-dim: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'JetBrains Mono', 'Segoe UI', monospace;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    header {
+      padding: 14px 20px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(12px);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-title {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: var(--gold);
+      text-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
+    }
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 6px;
+      width: 380px;
+    }
+    .search-input {
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-family: inherit;
+      font-size: 12px;
+      outline: none;
+      width: 100%;
+    }
+    .stats-bar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 8px 20px;
+      background: rgba(6, 9, 16, 0.9);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 10px;
+    }
+    .stat-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 4px;
+    }
+    .stat-val { font-weight: 700; color: var(--primary); }
+    .tabs-bar {
+      display: flex;
+      gap: 6px;
+      padding: 10px 20px;
+      background: rgba(8, 12, 20, 0.6);
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+    }
+    .tab-btn {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text-dim);
+      padding: 6px 14px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover { background: rgba(0, 240, 255, 0.1); color: #fff; }
+    .tab-btn.active {
+      background: var(--gold);
+      color: #000;
+      border-color: var(--gold);
+      box-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
+    }
+    main {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+      align-content: start;
+    }
+    .tool-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      backdrop-filter: blur(8px);
+      transition: all 0.2s ease;
+    }
+    .tool-card:hover {
+      border-color: var(--gold);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(251, 191, 36, 0.15);
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .tool-name {
+      font-size: 14px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .domain-badge {
+      font-size: 8px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      background: rgba(168, 85, 247, 0.2);
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      color: var(--purple);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .tool-desc {
+      font-size: 10.5px;
+      color: var(--text-dim);
+      line-height: 1.4;
+      margin-bottom: 14px;
+      min-height: 30px;
+    }
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .status-badge {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    .status-badge.installed { color: var(--secondary); }
+    .status-badge.uninstalled { color: var(--text-dim); }
+    .action-btn {
+      padding: 5px 14px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      background: var(--secondary);
+      color: #000;
+    }
+    .action-btn:hover { box-shadow: 0 0 10px rgba(0, 255, 157, 0.4); }
+    .action-btn.install {
+      background: rgba(251, 191, 36, 0.15);
+      border: 1px solid var(--gold);
+      color: var(--gold);
+    }
+    .action-btn.install:hover {
+      background: var(--gold);
+      color: #000;
+      box-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
+    }
+    footer {
+      padding: 8px 20px;
+      background: rgba(4, 6, 12, 0.95);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      font-size: 9px;
+      color: var(--text-dim);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div style="font-size:22px;">⚡</div>
+      <div>
+        <div class="brand-title">ZOTH AI STACK</div>
+        <div style="font-size:9px; color:var(--text-dim);">SOVEREIGN NEURAL COMPUTE & AGENT HARNESS COCKPIT</div>
+      </div>
+    </div>
+    <div class="search-bar">
+      <span>🔍</span>
+      <input type="text" id="search-input" class="search-input" placeholder="Search AI tools by name, framework, or capability...">
+    </div>
+  </header>
+
+  <div class="stats-bar">
+    <div class="stat-pill">TOTAL AI TOOLS: <span id="stat-total" class="stat-val">23</span></div>
+    <div class="stat-pill">INSTALLED & READY: <span id="stat-installed" class="stat-val" style="color:var(--secondary);">0</span></div>
+    <div class="stat-pill">AVAILABLE: <span id="stat-available" class="stat-val" style="color:var(--gold);">0</span></div>
+  </div>
+
+  <div class="tabs-bar">
+    <button class="tab-btn active" onclick="filterDomain('All')">ALL TOOLS</button>
+    <button class="tab-btn" onclick="filterDomain('Flagship Agents')">FLAGSHIP AGENTS</button>
+    <button class="tab-btn" onclick="filterDomain('Local Inference')">LOCAL INFERENCE</button>
+    <button class="tab-btn" onclick="filterDomain('Assistants & Drivers')">ASSISTANTS & DRIVERS</button>
+    <button class="tab-btn" onclick="filterDomain('MCP & Tooling')">MCP & TOOLING</button>
+    <button class="tab-btn" onclick="filterDomain('AI Red Teaming')">AI RED TEAMING</button>
+    <button class="tab-btn" onclick="filterDomain('Interfaces')">INTERFACES</button>
+  </div>
+
+  <main id="tools-grid">
+    <!-- Injected dynamically -->
+  </main>
+
+  <footer>
+    <div>NEURAL BACKENDS: OLLAMA // VLLM // LOCALAI // CLAUDE // OPENAI // GROK // GEMINI</div>
+    <div>ACTIVE FILTER: <span id="active-domain-lbl" style="color:var(--gold);">ALL TOOLS</span></div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

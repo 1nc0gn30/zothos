@@ -1,26 +1,6 @@
 #!/usr/bin/env bash
-# ==============================================================================
-#  ZOTHOS Live Top Bar Telemetry & Swarm Monitor
-# ==============================================================================
-
-# 1. CPU Usage
-CPU_USAGE=$(top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4}' | awk -F. '{print $1}')
-CPU_USAGE=${CPU_USAGE:-0}
-
-# 2. RAM Usage
-RAM_USED=$(free -h | awk '/Mem:/ {print $3}')
-
-# 3. Tor / Ghost Status
-if systemctl is-active --quiet tor; then
-    TOR_TXT="<span color=\"#00ff9d\" weight=\"bold\">[GHOST] GHOST</span>"
-else
-    TOR_TXT="<span color=\"#ffb700\" weight=\"bold\">[+] MATRIX</span>"
-fi
-
-# 4. Agent Swarm Status
-AGENT_TXT="<span color=\"#00e5ff\" weight=\"bold\">[AGENT] L4:SWARM</span>"
-
-# 5. Output formatted Pango markup for XFCE GenMon / Waybar
-echo "<txt>${AGENT_TXT} <span color=\"#334155\">│</span> ${TOR_TXT} <span color=\"#334155\">│</span> <span color=\"#ffd700\">[+] ${CPU_USAGE}%</span> <span color=\"#334155\">│</span> <span color=\"#38bdf8\">💾 ${RAM_USED}</span></txt>"
-echo "<tool>ZOTHOS Real-Time Telemetry Matrix (Click to launch Cockpit)</tool>"
-echo "<click>xfce4-terminal -e zoth-cockpit</click>"
+cpu=$(awk '/^cpu /{u=$2+$4; t=$2+$3+$4+$5+$6+$7+$8; if (t>0) printf "%d", (u/t)*100}' /proc/stat)
+ram=$(awk '/MemAvailable/{a=$2} /MemTotal/{t=$2} END{printf "%.1fG", (t-a)/1024/1024}' /proc/meminfo)
+echo "<txt><span color=\"#d7b56d\">${cpu}%  ·  ${ram}</span></txt>"
+echo "<tool>ZOTHOS</tool>"
+echo "<click>zoth-os</click>"

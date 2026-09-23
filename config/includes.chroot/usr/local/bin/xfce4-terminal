@@ -1,0 +1,38 @@
+#!/usr/bin/env python3
+import sys, os, subprocess
+
+args = sys.argv[1:]
+konsole_cmd = ["konsole"]
+i = 0
+exec_args = []
+
+while i < len(args):
+    arg = args[i]
+    if arg in ["-T", "--title"]:
+        if i + 1 < len(args):
+            konsole_cmd.extend(["--title", args[i+1]])
+            i += 2
+            continue
+    elif arg.startswith("--title="):
+        konsole_cmd.append(arg)
+    elif arg in ["-e", "-x", "--execute", "--command"]:
+        if i + 1 < len(args):
+            exec_args = args[i+1:]
+            break
+    elif arg.startswith("--geometry="):
+        pass # konsole ignores or handles differently
+    elif arg == "--hold":
+        konsole_cmd.append("--hold")
+    else:
+        konsole_cmd.append(arg)
+    i += 1
+
+if exec_args:
+    konsole_cmd.append("-e")
+    # If single string command with quotes or multiple words
+    if len(exec_args) == 1 and (" " in exec_args[0] or ";" in exec_args[0]):
+        konsole_cmd.extend(["bash", "-c", exec_args[0]])
+    else:
+        konsole_cmd.extend(exec_args)
+
+os.execvp("konsole", konsole_cmd)

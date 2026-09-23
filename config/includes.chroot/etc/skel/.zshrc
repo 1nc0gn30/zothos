@@ -35,7 +35,9 @@ alias zoth-mode='/usr/local/bin/zoth-mode'
 alias zoth-ghost='/usr/local/bin/zoth-ghost'
 
 # Convenient Short Handlers
-alias zoth='zoth-ai'
+# `zoth` = the sovereign package-manager CLI (/usr/local/bin/zoth) with
+# subcommands: list, search, install, appimage, update, repo, doctor.
+# The AI stack is launched explicitly via `zoth-ai` / `ai` — never hijacked.
 alias ai='zoth-ai'
 alias sec='zoth-sec'
 alias cockpit='zoth-cockpit'

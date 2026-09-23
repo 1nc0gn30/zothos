@@ -42,22 +42,21 @@ xfconf-query -c xsettings -p /Xft/RGBA            -s "rgb"                  2>/d
 
 # ── 4. Set Custom Sovereign Hotkeys ────────────────────────────────────────
 log "Configuring sovereign hotkeys..."
-xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/<Super>h" -n -t string -s "xfce4-terminal -T 'Hermes Agent Sovereign Workstation' --geometry=110x35 -e hermes" 2>/dev/null || true
-xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/<Super>n" -n -t string -s "xfce4-terminal -T 'ZOTHOS Tool Nexus' --geometry=110x35 -e zoth-tool-nexus" 2>/dev/null || true
-xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/<Super>g" -n -t string -s "xfce4-terminal -T 'NullAI Ghostmode' --geometry=100x30 -e zoth-ghost" 2>/dev/null || true
-xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/<Super>o" -n -t string -s "xfce4-terminal -T 'OpenCode AI' --geometry=100x30 -e opencode" 2>/dev/null || true
-xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/<Super>m" -n -t string -s "xfce4-terminal -T 'Reality Switcher' --geometry=90x25 -e zoth-mode" 2>/dev/null || true
-xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/<Super>s" -n -t string -s "xfce4-terminal -T 'ZOTHOS Security Arsenal' --geometry=100x30 -e zoth-sec" 2>/dev/null || true
+xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/<Super>h" -n -t string -s "konsole --title 'Hermes Agent Sovereign Workstation' --geometry=110x35 -e hermes" 2>/dev/null || true
+xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/<Super>n" -n -t string -s "konsole --title 'ZOTHOS Tool Nexus' --geometry=110x35 -e zoth-tool-nexus" 2>/dev/null || true
+xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/<Super>g" -n -t string -s "konsole --title 'NullAI Ghostmode' --geometry=100x30 -e zoth-ghost" 2>/dev/null || true
+xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/<Super>o" -n -t string -s "konsole --title 'OpenCode AI' --geometry=100x30 -e opencode" 2>/dev/null || true
+xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/<Super>m" -n -t string -s "konsole --title 'Reality Switcher' --geometry=90x25 -e zoth-mode" 2>/dev/null || true
+xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/<Super>s" -n -t string -s "konsole --title 'ZOTHOS Security Arsenal' --geometry=100x30 -e zoth-sec" 2>/dev/null || true
+xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/<Super>d" -n -t string -s "zoth-desk-toggle" 2>/dev/null || true
+xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/<Super>k" -n -t string -s "zoth-keys" 2>/dev/null || true
+xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/<Super>Return" -n -t string -s "konsole" 2>/dev/null || true
+xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/<Super>c" -n -t string -s "konsole --title ZOTHOS --geometry=110x32 -e zoth-cockpit" 2>/dev/null || true
+xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/<Super>y" -n -t string -s "maya" 2>/dev/null || true
 
 # ── 5. Wallpaper across all monitors ──────────────────────────────────────
 log "Setting wallpaper..."
-WALLPAPER="/usr/share/backgrounds/zothos/zoth-studio-hero.jpg"
-if [[ ! -f "$WALLPAPER" ]]; then
-    WALLPAPER="/usr/share/backgrounds/zothos/zoth-studio-banner.jpg"
-fi
-if [[ ! -f "$WALLPAPER" ]]; then
-    WALLPAPER=$(ls /usr/share/backgrounds/zothos/*.jpg /usr/share/backgrounds/zothos/*.png 2>/dev/null | head -1)
-fi
+WALLPAPER="/usr/share/backgrounds/zothos/zothos-field.png"
 
 if [[ -f "$WALLPAPER" ]]; then
     for prop in $(xfconf-query -c xfce4-desktop -l 2>/dev/null | grep "last-image"); do
@@ -123,11 +122,7 @@ if ! pgrep -f "opt/zoth-hud" &>/dev/null; then
     disown
 fi
 
-log "Starting All-Seeing Eye AI Pet..."
-if ! pgrep -f "opt/zoth-desktop-pet" &>/dev/null; then
-    DISPLAY="${DISPLAY:-:0}" XAUTHORITY="${XAUTHORITY:-$HOME/.Xauthority}" electron /opt/zoth-desktop-pet/main.js >/tmp/pet_init.log 2>&1 &
-    disown
-fi
+log "Desktop pet stays off unless Electron is installed."
 
 # ── 9. Reload xfdesktop & panel ────────────────────────────────────────────
 log "Reloading XFCE desktop..."
@@ -136,9 +131,7 @@ xfdesktop --reload 2>/dev/null || true
 sleep 0.5
 
 # ── 10. Live System Notification ────────────────────────────────────────────
-notify-send -i /usr/share/pixmaps/zothos.png -u normal \
-  "[+] ZOTHOS APEX ONLINE" \
-  "Sovereign Operating System Initialized.\n• 175+ Tool Nexus: PRIMED\n• Nous Research Hermes: READY\n• Telemetry Cockpit: LIVE\n• Animated Matrix BG: ACTIVE" 2>/dev/null || true
+notify-send -i zoth-mark -u low "ZOTHOS" "Desk is ready." 2>/dev/null || true
 
 log "ZOTHOS desktop initialization complete ✓"
 exit 0

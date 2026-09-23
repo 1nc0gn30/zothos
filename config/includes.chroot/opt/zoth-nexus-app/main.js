@@ -6,12 +6,14 @@ const fs = require('fs');
 let mainWindow = null;
 
 const TOOLS_DATABASE = [
-  // Flagships
+  // Flagships & Hubs
   { id: 'zoth-studio', name: 'Zoth Studio Pro', domain: 'Flagship', desc: 'Sovereign 3D WebGL Alchemical Cockpit & Workspace', cmd: 'zoth-studio', pkg: 'zothos-core', type: 'system' },
   { id: 'hexstrike', name: 'HexStrike AI Terminal', domain: 'Offensive Sec', desc: 'Autonomous Red Teaming & Offensive PenTest Matrix', cmd: 'hexstrike', pkg: 'hexstrike-ai', type: 'system' },
   { id: 'zoth-agent', name: 'Zoth Agent OS', domain: 'AI & Agents', desc: '21-Agent Swarm Orchestrator & Multi-Ring MCP Hub', cmd: 'zoth-agent-hud', pkg: 'zothos-ai', type: 'system' },
+  { id: 'zoth-mcp', name: 'Zoth MCP Hub', domain: 'AI & Agents', desc: 'Model Context Protocol (MCP) Server Registry & Interactive Cockpit', cmd: 'zoth-mcp', pkg: 'zothos-core', type: 'system' },
   { id: 'zoth-ghost', name: 'NullAI Ghostmode', domain: 'Privacy', desc: '100% Transparent Tor Routing & Anti-Forensics Mode', cmd: 'zoth-ghost-gui', pkg: 'tor', type: 'apt' },
   { id: 'zoth-mode', name: 'Reality Switcher', domain: 'Flagship', desc: 'Transmute Desktop Environment (Matrix / Ghost / Gold / Win11)', cmd: 'zoth-mode', pkg: 'zothos-core', type: 'system' },
+  { id: 'zoth-sentinel', name: 'Zoth Sentinel Engine', domain: 'Offensive Sec', desc: 'Autonomous Threat Detection, Process Isolation & Integrity Guard', cmd: 'zoth-sentinel-hud', pkg: 'zothos-core', type: 'system' },
   
   // AI & Frontier Workstations
   { id: 'ollama', name: 'Ollama LLM Daemon', domain: 'AI & Agents', desc: 'Local LLM Inference Engine for Llama 3.2, DeepSeek & Mistral', cmd: 'ollama', pkg: 'ollama', type: 'system' },
@@ -20,6 +22,7 @@ const TOOLS_DATABASE = [
   { id: 'opencode', name: 'OpenCode AI', domain: 'AI & Agents', desc: 'Open Source Terminal AI Pair Programmer', cmd: 'opencode', pkg: 'opencode-ai', type: 'npm' },
   { id: 'maya', name: 'Maya Linux Studio', domain: 'AI & Agents', desc: 'Creator Playbooks & AI Automation Engine', cmd: 'maya', pkg: 'maya-linux', type: 'system' },
   { id: 'grok', name: 'Grok xAI CLI', domain: 'AI & Agents', desc: 'Direct xAI Grok Frontier Intelligence CLI', cmd: 'grok', pkg: 'xai-grok', type: 'pip' },
+  { id: 'fastmcp', name: 'FastMCP SDK', domain: 'AI & Agents', desc: 'High-performance Python Model Context Protocol Tooling', cmd: 'fastmcp', pkg: 'fastmcp', type: 'pip' },
   
   // Offensive Security & Red Team
   { id: 'burpsuite', name: 'Burp Suite Community', domain: 'Offensive Sec', desc: 'Industry-Standard Web Application Security Scanner & Proxy', cmd: 'burpsuite', pkg: 'burpsuite', type: 'apt' },
@@ -51,16 +54,16 @@ const TOOLS_DATABASE = [
 ];
 
 function createWindow() {
-  const iconPath = fs.existsSync('/opt/zoth-studio/public/assets/brand/zoth-logo.png')
-    ? '/opt/zoth-studio/public/assets/brand/zoth-logo.png'
-    : '/usr/share/icons/hicolor/512x512/apps/zoth-tool-nexus.png';
+  const iconPath = fs.existsSync('/usr/share/icons/hicolor/512x512/apps/zoth-tool-nexus.png')
+    ? '/usr/share/icons/hicolor/512x512/apps/zoth-tool-nexus.png'
+    : '/opt/zoth-studio/public/assets/brand/zoth-logo.png';
 
   mainWindow = new BrowserWindow({
     width: 1380,
     height: 880,
     minWidth: 1000,
     minHeight: 650,
-    backgroundColor: '#070a0f',
+    backgroundColor: '#06090e',
     icon: fs.existsSync(iconPath) ? iconPath : undefined,
     frame: true,
     titleBarStyle: 'default',
@@ -113,11 +116,11 @@ ipcMain.on('get-tools', (event) => {
 
 // ── Launch Tool IPC ───────────────────────────────────────────────────
 ipcMain.on('launch-tool', (event, cmd) => {
-  const isGui = ['zoth-studio', 'zoth-agent-hud', 'zoth-ghost-gui', 'zoth-mode', 'burpsuite', 'caido', 'wireshark', 'ghidra', 'obsidian', 'bitwarden', 'blender'].includes(cmd);
+  const isGui = ['zoth-studio', 'zoth-agent-hud', 'zoth-ghost-gui', 'zoth-mode', 'zoth-mcp', 'burpsuite', 'caido', 'wireshark', 'ghidra', 'obsidian', 'bitwarden', 'blender', 'zoth-sentinel-hud'].includes(cmd);
   if (isGui) {
     exec(`nohup ${cmd} >/dev/null 2>&1 &`);
   } else {
-    exec(`xfce4-terminal -T '${cmd.toUpperCase()}' -e '${cmd}'`);
+    exec(`konsole --title '${cmd.toUpperCase()}' -e '${cmd}'`);
   }
 });
 

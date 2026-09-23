@@ -36,6 +36,7 @@ for r in CANDIDATE_ROOTS:
         break
 
 STUDIO_PUBLIC = os.path.join(STUDIO_ROOT, "public") if os.path.isdir(os.path.join(STUDIO_ROOT, "public")) else STUDIO_ROOT
+SERVE_ROOT = STUDIO_PUBLIC if os.path.exists(os.path.join(STUDIO_PUBLIC, "index.html")) else STUDIO_ROOT
 ICON_PATH = "/usr/share/pixmaps/zoth-studio.png"
 if not os.path.exists(ICON_PATH):
     appdir_icon = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "share/pixmaps/zoth-studio.png")
@@ -48,7 +49,7 @@ PID_FILE = os.path.expanduser("~/.zoth-studio/zoth-studio.pid")
 
 class QuietHTTPHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, directory=STUDIO_ROOT, **kwargs)
+        super().__init__(*args, directory=SERVE_ROOT, **kwargs)
 
     def log_message(self, format, *args):
         pass
@@ -118,10 +119,12 @@ def launch_gui(port):
     # Hardware acceleration & rendering tuning
     os.environ.setdefault("WEBKIT_DISABLE_COMPOSITING_MODE", "0")
     os.environ.setdefault("GDK_BACKEND", "x11")
+    os.environ["LD_LIBRARY_PATH"] = f"/opt/electron:{os.environ.get('LD_LIBRARY_PATH', '')}"
 
     # 1. Try native Electron standalone app first
     electron_candidates = [
         "/usr/local/bin/electron",
+        "/opt/electron/electron",
         "/usr/bin/electron",
         "/opt/maya-linux/node_modules/.bin/electron"
     ]
@@ -133,7 +136,7 @@ def launch_gui(port):
 
     if electron_bin and os.path.exists(os.path.join(STUDIO_ROOT, "main.js")):
         try:
-            proc = subprocess.Popen([electron_bin, STUDIO_ROOT])
+            proc = subprocess.Popen([electron_bin, "--no-sandbox", STUDIO_ROOT])
             proc.wait()
             return
         except Exception:

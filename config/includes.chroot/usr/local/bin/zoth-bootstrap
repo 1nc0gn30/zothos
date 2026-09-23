@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # =============================================================================
 #  ZOTHOS Bootstrap Provisioner — First-Boot Auto-Installer
-#  Installs ALL required packages and configures the full sovereign toolchain.
+#  Installs ALL required packages, enables Kali/Parrot repos, grants passwordless
+#  sudo, pulls git repos, and configures the full sovereign toolchain.
+#  Runs ONCE on first boot (guarded by /var/lib/zothos/.bootstrap-done).
 # =============================================================================
 set -euo pipefail
 
@@ -19,98 +21,140 @@ echo "════════════════════════�
 echo "[+] ZOTHOS Bootstrap Provisioner — $TIMESTAMP"
 echo "══════════════════════════════════════════════════"
 
-# ── 1. APT Configuration ───────────────────────────────────────────────────
+# ── 0. Enable Kali + Parrot repos at runtime ───────────────────────────────
+# The official repos are shipped commented-out (so the image build can finish),
+# then enabled here on first boot so the full arsenal is installable.
+echo "[REPO] Enabling Kali & Parrot repositories..."
+KALI_LIST="/etc/apt/sources.list.d/kali.list"
+PARROT_LIST="/etc/apt/sources.list.d/parrot.list"
+if [[ -f "$KALI_LIST" ]] && ! grep -qE '^deb ' "$KALI_LIST"; then
+    cat > "$KALI_LIST" << 'KALEOF'
+deb [trusted=yes] http://http.kali.org/kali kali-rolling main non-free non-free-firmware
+KALEOF
+    echo "[REPO] Kali enabled"
+fi
+if [[ -f "$PARROT_LIST" ]] && ! grep -qE '^deb ' "$PARROT_LIST"; then
+    cat > "$PARROT_LIST" << 'PARROTEOF'
+deb [trusted=yes] http://deb.parrot.sh/parrot parrot main non-free non-free-firmware
+PARROTEOF
+    echo "[REPO] Parrot enabled"
+fi
+
+# ── 1. Grant passwordless sudo to the autologin user ───────────────────────
+# Needed so the GUI tools-installer and scripted installs can run apt without
+# a TTY/password prompt on the live boot.
+echo "[SUDO] Granting passwordless sudo to 'neo'..."
+mkdir -p /etc/sudoers.d
+cat > /etc/sudoers.d/90-zothos-neo << 'SUDOEOF'
+neo ALL=(ALL) NOPASSWD:ALL
+SUDOEOF
+chmod 440 /etc/sudoers.d/90-zothos-neo
+echo "[SUDO] Passwordless sudo configured for neo"
+
+# ── 2. Check Network Connectivity ──────────────────────────────────────────
 export DEBIAN_FRONTEND=noninteractive
 export APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
 
-echo "[APT] Refreshing package lists..."
-apt-get update -qq || { echo "[WARN] apt update failed, continuing with cached data"; }
-
-echo "[APT] Installing core system packages..."
-apt-get install -y --no-install-recommends \
-    python3 python3-pip python3-venv python3-gi python3-cairo \
-    gir1.2-gtk-3.0 gir1.2-gdk-3.0 gir1.2-pango-1.0 \
-    python3-gi-cairo libgirepository1.0-dev \
-    xfce4-terminal xfce4-notifyd xfce4-power-manager \
-    feh picom compton \
-    tor macchanger iptables \
-    nmap masscan tshark nikto sqlmap radare2 john hashcat binwalk \
-    tesseract-ocr pandoc graphviz flameshot zathura tree \
-    tmux neovim git curl wget jq unzip p7zip-full \
-    golang-go gcc g++ clang make cmake \
-    nodejs npm \
-    sqlite3 rclone \
-    wireguard-tools \
-    libssl-dev libffi-dev build-essential \
-    fonts-jetbrains-mono fonts-firacode \
-    2>/dev/null || true
-
-echo "[APT] Core packages installed."
-
-echo "[VENV] Setting up Python AI environment at $VENV..."
-apt-get install -y python3-venv python3-full 2>/dev/null || true
-python3 -m venv "$VENV" --system-site-packages 2>/dev/null || python3 -m venv "$VENV" 2>/dev/null || true
-if [[ -f "$VENV/bin/activate" ]]; then
-    source "$VENV/bin/activate"
+ONLINE=0
+if ping -c 1 -W 2 8.8.8.8 &>/dev/null || curl -s --connect-timeout 2 -I https://debian.org &>/dev/null; then
+    ONLINE=1
+    echo "[NET] Network connected — online bootstrap mode."
+else
+    echo "[NET] Offline mode detected — skipping network installations."
 fi
 
-echo "[PIP] Installing AI/ML Python packages..."
-"$VENV/bin/pip" install --quiet --upgrade pip 2>/dev/null || true
+# ── 3. Install the full tool arsenal (Kali + Parrot + Zoth bundles) ────────
+if [[ $ONLINE -eq 1 ]]; then
+    echo "[APT] Refreshing package lists (Kali + Parrot + Trixie)..."
+    apt-get update -o Acquire::Http::Timeout=10 -o Acquire::Retries=2 -qq 2>/dev/null \
+        || echo "[WARN] apt update had errors (some repos may be unreachable); continuing"
 
-PYTHON_PKGS=(
-    "aider-chat"
-    "fastmcp"
-    "litellm"
-    "requests"
-    "rich"
-    "psutil"
-    "PyMuPDF"
-    "httpx"
-    "pydantic"
-    "websockets"
-    "fastapi"
-    "uvicorn[standard]"
-    "typer"
-    "click"
-    "python-dotenv"
-)
+    # Merge the shipped recommended-tool lists into one install command.
+    declare -a TOOL_PKGS=()
+    for list in /usr/share/zothos/tool-lists/*.list.chroot; do
+        [[ -f "$list" ]] || continue
+        while IFS= read -r pkg; do
+            pkg="${pkg%%#*}"            # strip inline comments
+            pkg="${pkg//[[:space:]]/}"  # strip whitespace
+            [[ -z "$pkg" ]] && continue
+            TOOL_PKGS+=("$pkg")
+        done < "$list"
+    done
 
-for pkg in "${PYTHON_PKGS[@]}"; do
-    echo "[PIP] Installing $pkg..."
-    "$VENV/bin/pip" install --quiet "$pkg" 2>>"$LOG" && echo "[OK] $pkg" || echo "[SKIP] $pkg failed"
-done
-
-deactivate
-
-# ── 3. Node.js Global Packages ────────────────────────────────────────────
-if command -v npm &>/dev/null; then
-    echo "[NPM] Installing global node tools..."
-    npm install -g --silent @anthropic-ai/claude-code 2>/dev/null || true
-    npm install -g --silent @openai/codex 2>/dev/null || true
-    npm install -g --silent opencode-ai 2>/dev/null || true
+    if [[ ${#TOOL_PKGS[@]} -gt 0 ]]; then
+        echo "[APT] Installing ${#TOOL_PKGS[@]} recommended tools (this may take a while)..."
+        apt-get install -y --no-install-recommends "${TOOL_PKGS[@]}" 2>/dev/null \
+            || echo "[WARN] Some packages failed to install (missing from enabled repos); continuing"
+    else
+        echo "[APT] No tool lists found at /usr/share/zothos/tool-lists — skipping bundle install."
+    fi
+else
+    echo "[APT] Offline — skipping tool bundle installation."
 fi
 
-# ── 4. Rust Toolchain ─────────────────────────────────────────────────────
-if ! command -v rustc &>/dev/null; then
-    echo "[RUST] Installing Rust toolchain..."
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path 2>/dev/null || true
+# ── 4. Local Python AI Environment ─────────────────────────────────────────
+echo "[VENV] Setting up local Python AI environment at $VENV..."
+if [[ ! -d "$VENV" ]]; then
+    python3 -m venv "$VENV" --system-site-packages 2>/dev/null || python3 -m venv "$VENV" 2>/dev/null || true
 fi
 
-# ── 5. Go Tools ───────────────────────────────────────────────────────────
-if command -v go &>/dev/null; then
-    echo "[GO] Installing Go security tools..."
-    export GOPATH=/root/go
-    go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest 2>/dev/null || true
-    go install github.com/ffuf/ffuf/v2@latest 2>/dev/null || true
+if [[ $ONLINE -eq 1 ]]; then
+    echo "[PIP] Installing AI/ML Python packages (online mode)..."
+    "$VENV/bin/pip" install --timeout 5 --retries 1 --quiet --upgrade pip 2>/dev/null || true
+
+    PYTHON_PKGS=(
+        "aider-chat" "fastmcp" "litellm" "requests" "rich" "psutil"
+        "PyMuPDF" "httpx" "pydantic" "websockets" "fastapi" "uvicorn[standard]"
+        "typer" "click" "python-dotenv"
+    )
+
+    for pkg in "${PYTHON_PKGS[@]}"; do
+        echo "[PIP] Installing $pkg..."
+        "$VENV/bin/pip" install --timeout 5 --retries 1 --quiet "$pkg" 2>>"$LOG" && echo "[OK] $pkg" || echo "[SKIP] $pkg"
+    done
+
+    # ── 5. Node.js Global Packages ────────────────────────────────────────────
+    if command -v npm &>/dev/null; then
+        echo "[NPM] Checking node tools..."
+        npm install -g --fetch-timeout 10000 --silent @anthropic-ai/claude-code 2>/dev/null || true
+    fi
+
+    # ── 6. Rust Toolchain ─────────────────────────────────────────────────────
+    if ! command -v rustc &>/dev/null; then
+        echo "[RUST] Installing Rust toolchain..."
+        curl --connect-timeout 5 --max-time 30 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path 2>/dev/null || true
+    fi
+
+    # ── 7. Go Tools ───────────────────────────────────────────────────────────
+    if command -v go &>/dev/null; then
+        echo "[GO] Installing Go security tools..."
+        export GOPATH=/root/go
+        go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest 2>/dev/null || true
+    fi
+
+    # ── 8. Ollama (Local LLM Runtime) ─────────────────────────────────────────
+    if ! command -v ollama &>/dev/null; then
+        echo "[OLLAMA] Installing Ollama local LLM runtime..."
+        curl --connect-timeout 5 --max-time 30 -fsSL https://ollama.ai/install.sh | sh 2>/dev/null || true
+    fi
+
+    # ── 9. Pull git repos (templates, arsenal, appimages) ─────────────────────
+    echo "[GIT] Pulling latest Zoth repos..."
+    if command -v zoth &>/dev/null; then
+        zoth update 2>/dev/null || true
+    fi
+    # Pull the studio's template source submodules (best effort)
+    if [[ -d /opt/zoth-studio ]]; then
+        git -C /opt/zoth-studio pull --ff-only 2>/dev/null || true
+        for d in /opt/zoth-studio/public/templates-source/*/; do
+            [[ -d "$d/.git" ]] && git -C "$d" pull --ff-only 2>/dev/null || true
+        done
+    fi
+else
+    echo "[VENV] Python environment ready at $VENV (offline mode)."
 fi
 
-# ── 6. Ollama (Local LLM Runtime) ─────────────────────────────────────────
-if ! command -v ollama &>/dev/null; then
-    echo "[OLLAMA] Installing Ollama local LLM runtime..."
-    curl -fsSL https://ollama.ai/install.sh | sh 2>/dev/null || true
-fi
-
-# ── 7. Desktop Configuration ──────────────────────────────────────────────
+# ── 10. Desktop Configuration ──────────────────────────────────────────────
 echo "[DESKTOP] Applying ZOTHOS desktop configuration..."
 
 # Trust all desktop launchers
@@ -129,14 +173,13 @@ for home_dir in /root /home/neo /etc/skel; do
     fi
 done
 
-# ── 8. Font Installation ──────────────────────────────────────────────────
+# ── 11. Font Installation ──────────────────────────────────────────────────
 echo "[FONTS] Installing premium fonts..."
 mkdir -p /usr/local/share/fonts/zothos
-# Copy any bundled fonts
 cp /usr/share/fonts/truetype/jetbrains-mono/*.ttf /usr/local/share/fonts/zothos/ 2>/dev/null || true
 fc-cache -f 2>/dev/null || true
 
-# ── 9. Completion Marker ──────────────────────────────────────────────────
+# ── 12. Completion Marker ──────────────────────────────────────────────────
 echo "Bootstrap completed at $TIMESTAMP" > "$MARKER"
 chmod 444 "$MARKER"
 

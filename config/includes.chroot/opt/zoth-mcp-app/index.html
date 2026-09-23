@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZOTH MCP HUB // MODEL CONTEXT PROTOCOL MANAGEMENT</title>
+  <style>
+    :root {
+      --bg: #06090e;
+      --panel: rgba(12, 18, 28, 0.85);
+      --card: rgba(16, 24, 38, 0.65);
+      --card-hover: rgba(0, 229, 255, 0.08);
+      --border: rgba(0, 229, 255, 0.22);
+      --border-gold: rgba(255, 215, 0, 0.35);
+      --primary: #00e5ff;
+      --secondary: #00ff9d;
+      --gold: #ffd700;
+      --purple: #a855f7;
+      --red: #ff3355;
+      --yellow: #ffb800;
+      --text: #f1f5f9;
+      --text-dim: #7d90a0;
+      --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-mono);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Header Bar */
+    header {
+      padding: 12px 20px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(14px);
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      font-size: 24px;
+      color: var(--gold);
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    }
+
+    .brand-title {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: var(--gold);
+      text-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+    }
+
+    .brand-sub {
+      font-size: 9px;
+      color: var(--primary);
+      letter-spacing: 1px;
+    }
+
+    .header-stats {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .stat-chip {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 5px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+    }
+
+    .stat-val {
+      font-weight: 800;
+      color: var(--secondary);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      background: rgba(0, 229, 255, 0.12);
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      padding: 6px 14px;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn:hover {
+      background: var(--primary);
+      color: #000;
+      box-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
+    }
+
+    .btn-gold {
+      background: rgba(255, 215, 0, 0.12);
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    .btn-gold:hover {
+      background: var(--gold);
+      color: #000;
+      box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
+    }
+
+    .btn-red {
+      background: rgba(255, 51, 85, 0.12);
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+    .btn-red:hover {
+      background: var(--red);
+      color: #fff;
+    }
+
+    /* Sub-nav Tabs */
+    .tabs-bar {
+      display: flex;
+      gap: 6px;
+      padding: 8px 20px;
+      background: rgba(6, 9, 14, 0.95);
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-dim);
+      padding: 6px 14px;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .tab-btn.active {
+      background: rgba(255, 215, 0, 0.15);
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .tab-content {
+      display: none;
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+    }
+
+    .tab-content.active {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Grid Layout for Servers */
+    .servers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 14px;
+    }
+
+    .server-card {
+      background: var(--card);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .server-card:hover {
+      border-color: var(--primary);
+      background: var(--card-hover);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .server-card.ring-0 { border-left: 4px solid var(--gold); }
+    .server-card.ring-1 { border-left: 4px solid var(--purple); }
+    .server-card.ring-2 { border-left: 4px solid var(--secondary); }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .server-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .ring-tag {
+      font-size: 8px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 3px;
+      letter-spacing: 0.5px;
+    }
+
+    .ring-tag.ring-0 { background: rgba(255, 215, 0, 0.15); color: var(--gold); border: 1px solid var(--gold); }
+    .ring-tag.ring-1 { background: rgba(168, 85, 247, 0.15); color: var(--purple); border: 1px solid var(--purple); }
+    .ring-tag.ring-2 { background: rgba(0, 255, 157, 0.15); color: var(--secondary); border: 1px solid var(--secondary); }
+
+    .server-desc {
+      font-size: 11px;
+      color: var(--text-dim);
+      line-height: 1.4;
+    }
+
+    .server-cmd {
+      background: rgba(0, 0, 0, 0.4);
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 10px;
+      color: var(--primary);
+      border: 1px solid rgba(0, 229, 255, 0.1);
+      word-break: break-all;
+    }
+
+    .card-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .status-lbl {
+      font-size: 10px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .status-lbl.online { color: var(--secondary); }
+    .status-lbl.standby { color: var(--yellow); }
+
+    /* Sandbox / Tools Table */
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      background: var(--card);
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    table.data-table th {
+      background: rgba(0, 229, 255, 0.08);
+      color: var(--primary);
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: 800;
+      border-bottom: 1px solid var(--border);
+    }
+
+    table.data-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text);
+    }
+
+    table.data-table tr:hover td {
+      background: rgba(0, 229, 255, 0.04);
+    }
+
+    /* Prompt Sandbox Tester */
+    .tester-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 16px;
+      height: 100%;
+    }
+
+    .tester-panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--gold);
+      letter-spacing: 1px;
+    }
+
+    .form-input, .form-select, .form-textarea {
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 8px 10px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 11px;
+      outline: none;
+      user-select: text;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+    }
+
+    .console-out {
+      background: #030508;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 14px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #00ff9d;
+      white-space: pre-wrap;
+      word-break: break-all;
+      overflow-y: auto;
+      flex: 1;
+      user-select: text;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .modal-overlay.active { display: flex; }
+
+    .modal-box {
+      background: var(--panel);
+      border: 1px solid var(--gold);
+      box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+      border-radius: 8px;
+      width: 540px;
+      max-width: 90vw;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .modal-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--gold);
+      letter-spacing: 1px;
+    }
+
+    /* Footer */
+    footer {
+      padding: 8px 20px;
+      background: rgba(6, 9, 14, 0.95);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="brand-section">
+      <div class="brand-icon">⚡</div>
+      <div>
+        <div class="brand-title">ZOTH MCP HUB</div>
+        <div class="brand-sub">SOVEREIGN MODEL CONTEXT PROTOCOL COCKPIT v3.0</div>
+      </div>
+    </div>
+
+    <div class="header-stats">
+      <div class="stat-chip">
+        <span>SERVERS:</span>
+        <span id="stat-servers-count" class="stat-val">0</span>
+      </div>
+      <div class="stat-chip">
+        <span>SECURITY RINGS:</span>
+        <span class="stat-val" style="color:var(--gold);">RING 0 / 1 / 2</span>
+      </div>
+      <div class="stat-chip">
+        <span>ACTIVE CONFIG:</span>
+        <span id="stat-config-path" style="color:var(--primary); font-size:10px;">Loading...</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn btn-gold" onclick="openAddServerModal()">+ ADD SERVER</button>
+      <button class="btn" onclick="syncConfig()">🔄 SYNC AGENTS</button>
+      <button class="btn btn-gold" onclick="startDaemons()">▶ START DAEMONS</button>
+      <button class="btn btn-red" onclick="stopDaemons()">⏹ STOP DAEMONS</button>
+    </div>
+  </header>
+
+  <!-- Sub Navigation -->
+  <div class="tabs-bar">
+    <button class="tab-btn active" onclick="switchTab('registry')">🖥️ SERVERS REGISTRY</button>
+    <button class="tab-btn" onclick="switchTab('tools')">⚡ TOOL MATRIX</button>
+    <button class="tab-btn" onclick="switchTab('tester')">🧪 PROMPT & TOOL TESTER</button>
+    <button class="tab-btn" onclick="switchTab('security')">🛡️ SECURITY & RINGS</button>
+    <button class="tab-btn" onclick="switchTab('sync')">🔄 AGENT SYNC HUB</button>
+  </div>
+
+  <!-- Main View -->
+  <main>
+    <!-- 1. SERVERS REGISTRY -->
+    <div id="tab-registry" class="tab-content active">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <input type="text" id="server-search" class="form-input" style="width:360px;" placeholder="Filter servers by name, command, or ring..." oninput="renderServers()">
+        <button class="btn" onclick="refreshConfig()">🔄 REFRESH REGISTRY</button>
+      </div>
+
+      <div id="servers-grid" class="servers-grid">
+        <!-- Rendered via app.js -->
+      </div>
+    </div>
+
+    <!-- 2. TOOL MATRIX -->
+    <div id="tab-tools" class="tab-content">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="font-weight:800; color:var(--primary);">MASTER EXPOSED MCP TOOL MATRIX</div>
+        <span style="font-size:10px; color:var(--text-dim);">Bound across Claude Code, Hermes, Codex & OpenCode</span>
+      </div>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>SERVER</th>
+            <th>SECURITY RING</th>
+            <th>SANDBOX BOUNDARY</th>
+            <th>MODE</th>
+            <th>CAPABILITY / TOOL SUMMARY</th>
+          </tr>
+        </thead>
+        <tbody id="tools-table-body">
+          <!-- Rendered via app.js -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 3. PROMPT & TOOL TESTER -->
+    <div id="tab-tester" class="tab-content">
+      <div class="tester-layout">
+        <div class="tester-panel">
+          <div style="font-weight:800; color:var(--gold); border-bottom:1px solid var(--border); padding-bottom:6px;">INTERACTIVE TOOL SANDBOX</div>
+          
+          <div class="form-group">
+            <label class="form-label">TARGET MCP SERVER</label>
+            <select id="tester-server-select" class="form-select" onchange="updateTesterTools()"></select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">TARGET TOOL / ACTION</label>
+            <input type="text" id="tester-tool-input" class="form-input" placeholder="e.g. read_file, execute_scan, query">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">INPUT ARGUMENTS (JSON)</label>
+            <textarea id="tester-args-input" class="form-textarea" rows="6" placeholder='{\n  "path": "/home/neo",\n  "query": "select * from memory"\n}'></textarea>
+          </div>
+
+          <button class="btn btn-gold" style="width:100%; justify-content:center; margin-top:8px;" onclick="runToolTest()">⚡ EXECUTE TOOL TEST</button>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div style="font-weight:800; color:var(--secondary); font-size:11px;">EXECUTION STDOUT & AUDIT LOG</div>
+          <div id="console-output" class="console-out">Ready for tool execution testing... Select a server and click 'EXECUTE TOOL TEST'.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. SECURITY & RINGS -->
+    <div id="tab-security" class="tab-content">
+      <div style="background:var(--card); border:1px solid var(--border); border-radius:6px; padding:16px; display:flex; flex-direction:column; gap:12px;">
+        <div style="font-weight:800; color:var(--gold);">ZOTHOS 3-TIER SECURITY RING POLICIES</div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>RING LEVEL</th>
+              <th>NAME</th>
+              <th>ACCESS LEVEL</th>
+              <th>DESCRIPTIVE POLICY</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="ring-tag ring-0">RING 0</span></td>
+              <td style="color:var(--gold); font-weight:800;">SOVEREIGN</td>
+              <td>Root / Unrestricted</td>
+              <td>Full kernel, persistent memory, and agent swarm control capabilities. Highest privilege ring.</td>
+            </tr>
+            <tr>
+              <td><span class="ring-tag ring-1">RING 1</span></td>
+              <td style="color:var(--purple); font-weight:800;">SYSADMIN</td>
+              <td>User Workspace</td>
+              <td>Local filesystem sandboxes, security tool orchestration, and database operations.</td>
+            </tr>
+            <tr>
+              <td><span class="ring-tag ring-2">RING 2</span></td>
+              <td style="color:var(--secondary); font-weight:800;">TOOLMASTER</td>
+              <td>Sandboxed / Isolated</td>
+              <td>Browser automation, external API fetching, web search, and transient utilities.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 5. AGENT SYNC HUB -->
+    <div id="tab-sync" class="tab-content">
+      <div style="background:var(--card); border:1px solid var(--border); border-radius:6px; padding:16px; display:flex; flex-direction:column; gap:14px;">
+        <div style="font-weight:800; color:var(--gold);">AUTOMATIC MCP REGISTRY SYNCHRONIZATION</div>
+        <div style="font-size:11px; color:var(--text-dim); line-height:1.5;">
+          Synchronizes master configuration at <code style="color:var(--primary);">/etc/zothos/mcp-servers.json</code> into all local AI agent environments automatically.
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:12px;">
+          <div class="stat-chip" style="flex-direction:column; align-items:flex-start; gap:4px; padding:10px;">
+            <span style="color:var(--gold); font-weight:800;">Claude Code</span>
+            <span style="font-size:9px; color:var(--text-dim);">~/.config/claude-code/mcp.json</span>
+          </div>
+          <div class="stat-chip" style="flex-direction:column; align-items:flex-start; gap:4px; padding:10px;">
+            <span style="color:var(--gold); font-weight:800;">Hermes Agent</span>
+            <span style="font-size:9px; color:var(--text-dim);">~/.hermes/mcp_servers.json</span>
+          </div>
+          <div class="stat-chip" style="flex-direction:column; align-items:flex-start; gap:4px; padding:10px;">
+            <span style="color:var(--gold); font-weight:800;">OpenAI Codex</span>
+            <span style="font-size:9px; color:var(--text-dim);">~/.config/codex/mcp.json</span>
+          </div>
+          <div class="stat-chip" style="flex-direction:column; align-items:flex-start; gap:4px; padding:10px;">
+            <span style="color:var(--gold); font-weight:800;">OpenCode AI</span>
+            <span style="font-size:9px; color:var(--text-dim);">~/.config/opencode/mcp.json</span>
+          </div>
+        </div>
+
+        <button class="btn btn-gold" style="align-self:flex-start; padding:8px 20px;" onclick="syncConfig()">🔄 PERFORM MASTER SYNC</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Add / Edit Server Modal -->
+  <div id="modal-server" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-title" id="modal-server-title">ADD NEW MCP SERVER</div>
+      
+      <div class="form-group">
+        <label class="form-label">SERVER IDENTIFIER</label>
+        <input type="text" id="modal-id" class="form-input" placeholder="e.g. custom-tools">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">EXECUTABLE COMMAND</label>
+        <input type="text" id="modal-cmd" class="form-input" placeholder="e.g. npx or python3">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">COMMAND ARGUMENTS (COMMA-SEPARATED)</label>
+        <input type="text" id="modal-args" class="form-input" placeholder="e.g. -y, @modelcontextprotocol/server-filesystem, /home/neo">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">SECURITY RING</label>
+        <select id="modal-ring" class="form-select">
+          <option value="RING_0_SOVEREIGN">RING 0 (SOVEREIGN)</option>
+          <option value="RING_1_SYSADMIN">RING 1 (SYSADMIN)</option>
+          <option value="RING_2_TOOLMASTER" selected>RING 2 (TOOLMASTER)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">DESCRIPTION</label>
+        <input type="text" id="modal-desc" class="form-input" placeholder="Detailed description of server capability">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">SANDBOX BOUNDARY</label>
+        <input type="text" id="modal-sandbox" class="form-input" placeholder="/home/neo">
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
+        <button class="btn" onclick="closeModal()">CANCEL</button>
+        <button class="btn btn-gold" onclick="saveModalServer()">SAVE SERVER</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div>ZOTHOS MODEL CONTEXT PROTOCOL (MCP) COCKPIT</div>
+    <div id="footer-status">SYSTEM READY</div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

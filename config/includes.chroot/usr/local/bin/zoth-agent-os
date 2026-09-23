@@ -293,7 +293,7 @@ class OSToolkit:
         if not allowed:
             return {"error": msg}
         display = os.environ.get("DISPLAY", ":0")
-        cmd = f"DISPLAY={display} import -window root {save_path} 2>/dev/null || DISPLAY={display} scrot {save_path} 2>/dev/null || DISPLAY={display} xfce4-screenshooter -f -s {save_path} 2>/dev/null"
+        cmd = f"DISPLAY={display} import -window root {save_path} 2>/dev/null || DISPLAY={display} scrot {save_path} 2>/dev/null || DISPLAY={display} spectacle -b -f -o {save_path} 2>/dev/null"
         res = subprocess.run(cmd, shell=True)
         if os.path.exists(save_path):
             return {"success": True, "path": save_path, "size": os.path.getsize(save_path)}
@@ -447,16 +447,16 @@ def execute_natural_command(instruction: str, engine: str = "ollama") -> str:
     elif lower.startswith("open ") or lower.startswith("launch "):
         app = lower.replace("open ", "").replace("launch ", "").strip()
         app_map = {
-            "terminal": "xfce4-terminal",
+            "terminal": "konsole",
             "browser": "firefox-esr",
             "studio": "zoth",
-            "cockpit": "xfce4-terminal -e zoth-cockpit",
-            "files": "thunar",
-            "ai": "xfce4-terminal -e zoth-ai",
-            "hexstrike": "xfce4-terminal -e hexstrike",
-            "matrix": "xfce4-terminal -e zoth-matrix-rain",
-            "sec": "xfce4-terminal -e zoth-sec",
-            "mcp": "xfce4-terminal -e zoth-mcp",
+            "cockpit": "konsole -e zoth-cockpit",
+            "files": "dolphin",
+            "ai": "konsole -e zoth-ai",
+            "hexstrike": "konsole -e hexstrike",
+            "matrix": "konsole -e zoth-matrix-rain",
+            "sec": "konsole -e zoth-sec",
+            "mcp": "konsole -e zoth-mcp",
         }
         target_app = app_map.get(app, app)
         res = OSToolkit.gui_open_app(target_app)

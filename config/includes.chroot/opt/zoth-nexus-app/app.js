@@ -7,6 +7,11 @@ let searchQuery = '';
 const grid = document.getElementById('tools-grid');
 const searchInput = document.getElementById('search-input');
 const activeDomainLbl = document.getElementById('active-domain-lbl');
+const teleTotal = document.getElementById('tele-total');
+const teleInstalled = document.getElementById('tele-installed');
+const installModal = document.getElementById('install-modal');
+const installModalTitle = document.getElementById('install-modal-title');
+const installLogs = document.getElementById('install-logs');
 
 function refreshTools() {
   ipcRenderer.send('get-tools');
@@ -14,10 +19,17 @@ function refreshTools() {
 
 ipcRenderer.on('tools-list', (event, tools) => {
   allTools = tools;
+  updateTelemetry();
   render();
 });
 
+function updateTelemetry() {
+  if (teleTotal) teleTotal.textContent = allTools.length;
+  if (teleInstalled) teleInstalled.textContent = allTools.filter(t => t.installed).length;
+}
+
 function render() {
+  if (!grid) return;
   grid.innerHTML = '';
 
   const filtered = allTools.filter(t => {
@@ -70,18 +82,32 @@ window.launchTool = function(cmd) {
 window.installTool = function(id) {
   const tool = allTools.find(t => t.id === id);
   if (tool) {
-    alert(`Starting background installation of ${tool.name}...`);
+    installModalTitle.textContent = `INSTALLING ${tool.name.toUpperCase()}...`;
+    installLogs.textContent = `[*] Starting installation for ${tool.name} (${tool.pkg})...\n`;
+    installModal.classList.add('active');
     ipcRenderer.send('install-tool', tool);
   }
 };
 
-ipcRenderer.on('install-complete', () => {
+window.closeInstallModal = function() {
+  installModal.classList.remove('active');
+};
+
+ipcRenderer.on('install-log', (event, data) => {
+  installLogs.textContent += data.text;
+  installLogs.scrollTop = installLogs.scrollHeight;
+});
+
+ipcRenderer.on('install-complete', (event, data) => {
+  installLogs.textContent += `\n[*] Process completed with code: ${data.success ? '0 (SUCCESS)' : 'ERROR'}\n`;
   refreshTools();
 });
 
-searchInput.addEventListener('input', (e) => {
-  searchQuery = e.target.value.trim();
-  render();
-});
+if (searchInput) {
+  searchInput.addEventListener('input', (e) => {
+    searchQuery = e.target.value.trim();
+    render();
+  });
+}
 
 refreshTools();

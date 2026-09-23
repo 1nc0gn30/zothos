@@ -23,7 +23,11 @@ find_hermes_executable() {
         echo "$HERMES_USER_DIR/venv/bin/python $HERMES_USER_DIR/hermes"
         return 0
     fi
-    # 2. System venv
+    # 2. System pre-installed venv
+    if [[ -x "$HERMES_OPT_DIR/venv/bin/hermes" ]]; then
+        echo "$HERMES_OPT_DIR/venv/bin/hermes"
+        return 0
+    fi
     if [[ -x "$HERMES_OPT_DIR/venv/bin/python" ]] && [[ -f "$HERMES_OPT_DIR/hermes" ]]; then
         echo "$HERMES_OPT_DIR/venv/bin/python $HERMES_OPT_DIR/hermes"
         return 0

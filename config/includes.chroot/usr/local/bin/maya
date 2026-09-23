@@ -16,8 +16,14 @@ fi
 
 cd "$MAYA_DIR"
 
+export LD_LIBRARY_PATH="/opt/electron:${LD_LIBRARY_PATH:-}"
+
 # Launch native Electron desktop application window
-if [[ -x "node_modules/.bin/electron" ]]; then
+if [[ -x "/usr/local/bin/electron" ]]; then
+    exec /usr/local/bin/electron . --no-sandbox "$@"
+elif [[ -x "/opt/electron/electron" ]]; then
+    exec /opt/electron/electron . --no-sandbox "$@"
+elif [[ -x "node_modules/.bin/electron" ]]; then
     exec ./node_modules/.bin/electron . --no-sandbox "$@"
 elif command -v electron &>/dev/null; then
     exec electron . --no-sandbox "$@"
