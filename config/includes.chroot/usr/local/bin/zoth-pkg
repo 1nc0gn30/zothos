@@ -69,6 +69,18 @@ def is_tool_installed(tool_id, pkg_name):
         "goose": ["goose"],
         "promptfoo": ["promptfoo"],
         "browser-use": ["browser-use"],
+        "certipy": ["certipy", "certipy-ad", "/usr/bin/certipy-ad"],
+        "httpx": ["httpx", "httpx-toolkit", "/usr/bin/httpx-toolkit"],
+        "peass": ["peass", "linpeas", "winpeas", "/usr/bin/linpeas"],
+        "trippy": ["trip", "trippy", "/usr/bin/trip"],
+        "keepassxc": ["keepassxc", "keepassxc-cli", "/usr/bin/keepassxc"],
+        "veracrypt": ["veracrypt", "/usr/bin/veracrypt"],
+        "onionshare": ["onionshare", "onionshare-cli", "/usr/bin/onionshare"],
+        "kerbrute": ["kerbrute", "/usr/local/bin/kerbrute"],
+        "trufflehog": ["trufflehog", "/usr/local/bin/trufflehog"],
+        "lazydocker": ["lazydocker", "/usr/local/bin/lazydocker"],
+        "yazi": ["yazi", "/usr/local/bin/yazi"],
+        "doggo": ["doggo", "/usr/local/bin/doggo"],
     }
     if tool_id in alts:
         for b in alts[tool_id]:
@@ -178,6 +190,24 @@ def install_single_tool(t):
             return res.returncode == 0
         elif tool_id == "obsidian":
             res = subprocess.run('curl -fsSL -L -o /tmp/obsidian.deb "https://github.com/obsidianmd/obsidian-releases/releases/download/v1.6.7/obsidian_1.6.7_amd64.deb" && dpkg -i /tmp/obsidian.deb 2>/dev/null || apt-get -f install -y', shell=True)
+            return res.returncode == 0
+        elif tool_id == "kerbrute":
+            res = subprocess.run('curl -fsSL -L "https://github.com/ropnop/kerbrute/releases/download/v1.0.3/kerbrute_linux_amd64" -o /usr/local/bin/kerbrute && chmod +x /usr/local/bin/kerbrute', shell=True)
+            return res.returncode == 0
+        elif tool_id == "lazydocker":
+            res = subprocess.run('curl -fsSL -L "https://github.com/jesseduffield/lazydocker/releases/download/v0.25.2/lazydocker_0.25.2_Linux_x86_64.tar.gz" -o /tmp/ld.tar.gz && tar -xzf /tmp/ld.tar.gz -C /usr/local/bin lazydocker && chmod +x /usr/local/bin/lazydocker && rm -f /tmp/ld.tar.gz', shell=True)
+            return res.returncode == 0
+        elif tool_id == "trufflehog":
+            res = subprocess.run('curl -fsSL -L "https://github.com/trufflesecurity/trufflehog/releases/download/v3.97.9/trufflehog_3.97.9_linux_amd64.tar.gz" -o /tmp/th.tar.gz && tar -xzf /tmp/th.tar.gz -C /usr/local/bin trufflehog && chmod +x /usr/local/bin/trufflehog && rm -f /tmp/th.tar.gz', shell=True)
+            return res.returncode == 0
+        elif tool_id == "yazi":
+            res = subprocess.run('curl -fsSL -L "https://github.com/sxyazi/yazi/releases/download/v26.9.1/yazi-x86_64-unknown-linux-gnu.zip" -o /tmp/yazi.zip && unzip -q -o /tmp/yazi.zip -d /tmp/ && cp /tmp/yazi-x86_64-unknown-linux-gnu/yazi /usr/local/bin/ && chmod +x /usr/local/bin/yazi && rm -rf /tmp/yazi*', shell=True)
+            return res.returncode == 0
+        elif tool_id == "doggo":
+            res = subprocess.run('curl -fsSL -L "https://github.com/mr-karan/doggo/releases/download/v1.4.0/doggo-linux-x86_64.tar.gz" -o /tmp/doggo.tar.gz && tar -xzf /tmp/doggo.tar.gz -C /usr/local/bin doggo && chmod +x /usr/local/bin/doggo && rm -f /tmp/doggo.tar.gz', shell=True)
+            return res.returncode == 0
+        elif tool_id == "veracrypt":
+            res = subprocess.run('curl -fsSL -L -o /tmp/veracrypt.deb "https://github.com/veracrypt/VeraCrypt/releases/download/VeraCrypt_1.26.29/veracrypt-1.26.29-Debian-12-amd64.deb" && (dpkg -i /tmp/veracrypt.deb 2>/dev/null || apt-get -f install -y) && rm -f /tmp/veracrypt.deb', shell=True)
             return res.returncode == 0
         else:
             res = subprocess.run(f"apt-get install -y {pkg} 2>/dev/null || pip3 install --break-system-packages {pkg}", shell=True)
