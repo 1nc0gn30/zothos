@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+ELECTRON_BIN=""
+for e_cand in /opt/electron/electron /tmp/electron/electron "$(which electron 2>/dev/null || true)"; do
+    if [[ -n "$e_cand" && -x "$e_cand" ]]; then
+        ELECTRON_BIN="$e_cand"
+        break
+    fi
+done
+
+if [[ -n "$ELECTRON_BIN" && -d "/opt/zoth-mode-app" && -n "${DISPLAY:-${WAYLAND_DISPLAY:-}}" ]]; then
+    exec "$ELECTRON_BIN" --no-sandbox /opt/zoth-mode-app "$@"
+else
+    exec konsole --title "REALITY SWITCHER" -e zoth-mode "$@"
+fi

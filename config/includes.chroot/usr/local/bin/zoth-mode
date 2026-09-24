@@ -57,7 +57,25 @@ set_wallpaper() {
         return 0
     fi
 
-    # 1. XFCE Desktop multi-monitor property sync
+    # 1. KDE Plasma 6 native wallpaper apply
+    if command -v plasma-apply-wallpaperimage >/dev/null 2>&1; then
+        plasma-apply-wallpaperimage "$wp" 2>/dev/null || true
+    fi
+
+    # 2. KDE Plasma DBus Script fallback
+    if command -v qdbus >/dev/null 2>&1; then
+        qdbus org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "
+        var allDesktops = desktops();
+        for (var i=0; i<allDesktops.length; i++) {
+            var d = allDesktops[i];
+            d.wallpaperPlugin = 'org.kde.image';
+            d.currentConfigGroup = ['Wallpaper', 'org.kde.image', 'General'];
+            d.writeConfig('Image', 'file://${wp}');
+        }
+        " 2>/dev/null || true
+    fi
+
+    # 3. XFCE Desktop multi-monitor property sync
     if command -v xfconf-query >/dev/null 2>&1; then
         for prop in $(xfconf-query -c xfce4-desktop -l 2>/dev/null | grep "last-image" || true); do
             xfconf-query -c xfce4-desktop -p "$prop" -s "$wp" 2>/dev/null || true
@@ -67,12 +85,12 @@ set_wallpaper() {
         done
     fi
 
-    # 2. Feh standalone root window setter
+    # 4. Feh standalone root window setter
     if command -v feh >/dev/null 2>&1; then
         feh --bg-fill "$wp" 2>/dev/null || true
     fi
 
-    # 3. Nitrogen fallback
+    # 5. Nitrogen fallback
     if command -v nitrogen >/dev/null 2>&1; then
         nitrogen --set-zoom-fill "$wp" 2>/dev/null || true
     fi
@@ -83,6 +101,17 @@ set_theme() {
     local gtk_theme="$1"
     local icon_theme="${2:-Zoth-Hermetic}"
     local wm_theme="${3:-$gtk_theme}"
+
+    # KDE Plasma Color Scheme & Look-and-Feel sync
+    if command -v plasma-apply-colorscheme >/dev/null 2>&1; then
+        case "$gtk_theme" in
+            "Zoth-Hermetic-Matrix") plasma-apply-colorscheme ZothHermeticMatrix 2>/dev/null || true ;;
+            "Zoth-Ghost-NullAI")    plasma-apply-colorscheme ZothGhostNullAI 2>/dev/null || true ;;
+            "Zoth-Azoth-Gold")      plasma-apply-colorscheme ZothAzothGold 2>/dev/null || true ;;
+            "Zoth-Incognito-Win11") plasma-apply-colorscheme ZothIncognitoWin11 2>/dev/null || true ;;
+            *) plasma-apply-colorscheme ZothAzothGold 2>/dev/null || true ;;
+        esac
+    fi
 
     if command -v xfconf-query >/dev/null 2>&1; then
         xfconf-query -c xsettings -p /Net/ThemeName -s "$gtk_theme" 2>/dev/null || true
@@ -95,16 +124,6 @@ set_theme() {
         gsettings set org.gnome.desktop.interface gtk-theme "$gtk_theme" 2>/dev/null || true
         gsettings set org.gnome.desktop.interface icon-theme "$icon_theme" 2>/dev/null || true
         gsettings set org.gnome.desktop.wm.preferences theme "$wm_theme" 2>/dev/null || true
-    fi
-
-    # KDE Plasma Color Scheme & Look-and-Feel sync
-    if command -v plasma-apply-colorscheme >/dev/null 2>&1; then
-        case "$gtk_theme" in
-            "Zoth-Hermetic-Matrix") plasma-apply-colorscheme ZothHermeticMatrix 2>/dev/null || true ;;
-            "Zoth-Ghost-NullAI")    plasma-apply-colorscheme ZothGhostNullAI 2>/dev/null || true ;;
-            "Zoth-Azoth-Gold")      plasma-apply-colorscheme ZothAzothGold 2>/dev/null || true ;;
-            "Zoth-Incognito-Win11") plasma-apply-colorscheme ZothIncognitoWin11 2>/dev/null || true ;;
-        esac
     fi
 }
 

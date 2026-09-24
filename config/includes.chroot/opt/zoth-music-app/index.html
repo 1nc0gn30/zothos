@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Zoth Hermetic Audio Studio</title>
+  <style>
+    :root {
+      --bg: #04060a;
+      --panel: rgba(12, 17, 26, 0.85);
+      --border: rgba(255, 215, 0, 0.25);
+      --border-bright: #ffd700;
+      --gold: #ffd700;
+      --gold-dim: #b89628;
+      --text: #f1f5f9;
+      --text-muted: #8899aa;
+      --accent: #00f0ff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: radial-gradient(circle at 50% 20%, #101622, var(--bg));
+      color: var(--text);
+      font-family: 'JetBrains Mono', 'Segoe UI', monospace;
+      user-select: none;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    header {
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8, 12, 18, 0.9);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1px solid var(--gold);
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+    }
+    .brand-title {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--gold);
+    }
+    .brand-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+    }
+    .main-body {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      padding: 20px;
+      overflow: hidden;
+    }
+    .player-deck {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.6);
+    }
+    .medallion-container {
+      position: relative;
+      width: 140px;
+      height: 140px;
+      margin-bottom: 18px;
+    }
+    .medallion-container img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      box-shadow: 0 0 25px rgba(255, 215, 0, 0.35);
+      animation: spin 30s linear infinite;
+    }
+    .medallion-container.paused img {
+      animation-play-state: paused;
+    }
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+    .now-playing-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      text-align: center;
+      margin-bottom: 6px;
+      max-width: 300px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .now-playing-sub {
+      font-size: 11px;
+      color: var(--gold);
+      letter-spacing: 1.5px;
+      margin-bottom: 16px;
+    }
+    canvas#visualizer {
+      width: 100%;
+      height: 48px;
+      margin-bottom: 14px;
+      border-radius: 6px;
+    }
+    .scrubber-container {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .time-lbl {
+      font-size: 11px;
+      color: var(--text-muted);
+      width: 40px;
+    }
+    input[type=range] {
+      flex: 1;
+      accent-color: var(--gold);
+      cursor: pointer;
+    }
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .ctrl-btn {
+      background: rgba(255, 215, 0, 0.08);
+      border: 1px solid var(--border);
+      color: var(--gold);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .ctrl-btn:hover {
+      background: var(--gold);
+      color: #000;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+      transform: scale(1.05);
+    }
+    .ctrl-btn.play-btn {
+      width: 52px;
+      height: 52px;
+      font-size: 18px;
+      border-color: var(--gold);
+    }
+    .playlist-deck {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .playlist-header {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 1.5px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 215, 0, 0.15);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .track-list {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .track-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .track-item:hover {
+      background: rgba(255, 215, 0, 0.08);
+      border-color: rgba(255, 215, 0, 0.3);
+    }
+    .track-item.active {
+      background: rgba(255, 215, 0, 0.15);
+      border-color: var(--gold);
+    }
+    .track-num {
+      font-size: 11px;
+      color: var(--gold-dim);
+      font-weight: 700;
+      width: 20px;
+    }
+    .track-title {
+      flex: 1;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .track-item.active .track-title {
+      color: var(--gold);
+    }
+    .track-playing-icon {
+      color: var(--gold);
+      font-size: 10px;
+    }
+    footer {
+      padding: 8px 20px;
+      background: #020306;
+      border-top: 1px solid rgba(255, 215, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <img src="/usr/share/pixmaps/zoth-soundtrack.png" class="brand-icon" alt="Zoth Music">
+      <div>
+        <div class="brand-title">ZOTH AUDIO MATRIX</div>
+        <div class="brand-sub">Hermetic Focus & Alchemical Classical Deck</div>
+      </div>
+    </div>
+    <div style="font-size:11px; color:var(--gold); border:1px solid var(--border); padding:4px 10px; border-radius:12px;">
+      24K SOVEREIGN AUDIO
+    </div>
+  </header>
+
+  <div class="main-body">
+    <div class="player-deck">
+      <div class="medallion-container" id="medallion">
+        <img src="/usr/share/pixmaps/zoth-soundtrack.png" alt="Vinyl">
+      </div>
+      <div class="now-playing-title" id="now-playing-title">Ready for playback</div>
+      <div class="now-playing-sub" id="now-playing-sub">HERMETIC FOCUS SUITE</div>
+
+      <canvas id="visualizer"></canvas>
+
+      <div class="scrubber-container">
+        <span class="time-lbl" id="cur-time">0:00</span>
+        <input type="range" id="seek-bar" value="0" min="0" max="100">
+        <span class="time-lbl" id="dur-time">0:00</span>
+      </div>
+
+      <div class="controls">
+        <button class="ctrl-btn" id="prev-btn" title="Previous Track">⏮</button>
+        <button class="ctrl-btn play-btn" id="play-btn" title="Play / Pause">▶</button>
+        <button class="ctrl-btn" id="next-btn" title="Next Track">⏭</button>
+      </div>
+
+      <div style="width:100%; display:flex; align-items:center; gap:10px; margin-top:16px;">
+        <span style="font-size:11px; color:var(--text-muted);">VOL</span>
+        <input type="range" id="vol-slider" min="0" max="1" step="0.05" value="0.8">
+      </div>
+    </div>
+
+    <div class="playlist-deck">
+      <div class="playlist-header">
+        <span>TRACKS REPOSITORY</span>
+        <span id="track-count">4 TRACKS</span>
+      </div>
+      <div class="track-list" id="track-list">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span>ZothOS Alchemical Sound Engine · Erik Satie, Chopin, Debussy, Bach</span>
+    <span>LOSSLESS PLAYBACK · ZERO TELEMETRY</span>
+  </footer>
+
+  <audio id="audio-player"></audio>
+  <script src="app.js"></script>
+</body>
+</html>
