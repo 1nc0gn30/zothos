@@ -1,0 +1,16 @@
+#!/bin/bash
+# ==============================================================================
+#  ZothOS Container Runtime Dispatcher (Docker / Podman Bridge)
+# ==============================================================================
+if command -v docker.bin >/dev/null 2>&1; then
+    exec docker.bin "$@"
+elif [ -x /usr/bin/docker ] && [ ! -L /usr/bin/docker ]; then
+    exec /usr/bin/docker "$@"
+elif command -v podman >/dev/null 2>&1; then
+    exec podman "$@"
+elif [ -x /usr/bin/podman ]; then
+    exec /usr/bin/podman "$@"
+else
+    echo "[!] No container runtime found. Run 'zoth-pkg install cdocker' or 'sudo apt-get install -y docker.io'" >&2
+    exit 1
+fi

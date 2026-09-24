@@ -801,6 +801,7 @@ def main() -> int:
     global PORT
     parser = argparse.ArgumentParser(description="Zoth OS desk")
     parser.add_argument("--port", type=int, default=PORT)
+    parser.add_argument("--open", action="store_true", help="Open browser on start")
     parser.add_argument("--no-open", action="store_true")
     parser.add_argument("--no-sentinel", action="store_true")
     args = parser.parse_args()
@@ -809,7 +810,7 @@ def main() -> int:
         try:
             with urllib.request.urlopen(f"http://{HOST}:{PORT}/api/pulse", timeout=1) as resp:
                 if b'"counts"' in resp.read(400):
-                    if not args.no_open:
+                    if args.open:
                         open_browser(f"http://{HOST}:{PORT}/")
                     print(f"Zoth OS desk already live at http://{HOST}:{PORT}/")
                     return 0
@@ -821,7 +822,7 @@ def main() -> int:
     httpd = ThreadingHTTPServer((HOST, PORT), Handler)
     url = f"http://{HOST}:{PORT}/"
     print(f"Zoth OS desk at {url}")
-    if not args.no_open:
+    if args.open:
         threading.Timer(0.4, lambda: open_browser(url)).start()
     try:
         httpd.serve_forever()

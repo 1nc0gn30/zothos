@@ -166,16 +166,17 @@ function renderChip() {
         <p class="note">${gpu.ok ? `${gpu.features} features · ${Number(gpu.ms).toFixed(1)} ms` : esc(gpu.note || "")}</p>
       </div>
       <p><button class="text-btn primary" id="probe">Probe WebGPU</button></p>
-      <div class="kv"><span>Sentinel</span><div>${esc(pulse.sentinel.status)} ${esc(pulse.sentinel.model)}</div></div>
+      <div class="kv"><span>Sentinel</span><div>${esc((pulse.sentinel && pulse.sentinel.status) || 'ready')} ${esc((pulse.sentinel && pulse.sentinel.model) || '')}</div></div>
     </aside>
   </div>`;
 }
 
 function renderHub() {
   const rooms = (board.rooms || []).map((r) => `<button class="room" data-act="room" data-id="${esc(r.path)}">${esc(r.name)}</button>`).join("");
+  const studioOk = pulse && pulse.studio && pulse.studio.present;
   return `<div class="panel">
     <h2>Studio</h2>
-    <p class="note">${pulse.studio.present ? "The hub files are on disk. A room opens the real public site, not the old racer page." : "The Studio public folder was not found."}</p>
+    <p class="note">${studioOk ? "The hub files are on disk. A room opens the real public site, not the old racer page." : "The Studio public folder was not found."}</p>
     <div class="actions" style="flex-wrap:wrap;margin-top:14px">${rooms}</div>
   </div>`;
 }

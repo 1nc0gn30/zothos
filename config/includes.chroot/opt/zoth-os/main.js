@@ -132,6 +132,7 @@ function getNativePulse() {
     models: [{ name: "hermes-3-llama-3.2", resident: true, local: true, params: "3B", quant: "Q4_K_M", size_gb: 2.1 }],
     sentinel: { status: "ready", model: "zoth-hermes", error: "" },
     webgpu: { ok: true, name: "Vulkan Hardware / Mesa LLVMpipe", note: "Direct Rendering Active" },
+    studio: { present: true, port: 8770 },
     counts: { ready: 195, mind: 15, missing: 0 },
     gpus: [{ vendor: "System Controller", name: "QEMU VirtIO / KMS Accelerator", driver: "modesetting" }]
   };
