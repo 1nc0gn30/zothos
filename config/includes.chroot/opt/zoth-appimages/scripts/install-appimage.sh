@@ -66,6 +66,8 @@ else
         sudo unzip -q -o "$DEST" -d "$TARGET_DIR/"
     fi
     sudo chmod +x "$DEST" 2>/dev/null || true
+    RUNNER_BIN="${RUNNER%% *}"
+    [[ -f "$RUNNER_BIN" ]] && sudo chmod +x "$RUNNER_BIN" 2>/dev/null || true
 fi
 
 # Setup Desktop Launcher

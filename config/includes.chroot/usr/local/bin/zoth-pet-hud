@@ -2,27 +2,22 @@
 # ==============================================================================
 #  Zoth Pet HUD — All-Seeing Eye Companion Overlay
 # ==============================================================================
-HUD_DIR="/opt/zoth-hud"
-HUD_LAUNCH="$HUD_DIR/launch.sh"
+set -euo pipefail
 
-if [[ ! -f "$HUD_LAUNCH" ]] && [[ ! -d "$HUD_DIR" ]]; then
-    echo -e "\e[1;32m[*] Provisioning All-Seeing Eye companion HUD...\e[0m"
-    mkdir -p "$HUD_DIR"
-    if command -v npm >/dev/null 2>&1; then
-        cd "$HUD_DIR" && npm init -y >/dev/null 2>&1 || true
+ELECTRON_BIN=""
+for e in /usr/local/bin/electron /opt/electron/electron /tmp/electron/electron "$(which electron 2>/dev/null || true)"; do
+    if [[ -x "$e" ]]; then
+        ELECTRON_BIN="$e"
+        break
     fi
-    echo -e "\e[1;32m[*] Pet HUD placeholder initialized in $HUD_DIR\e[0m"
+done
+
+if [[ -n "$ELECTRON_BIN" && -n "${DISPLAY:-}" ]]; then
+    if [[ -d "/opt/zoth-hud" && -f "/opt/zoth-hud/main.js" ]]; then
+        exec "$ELECTRON_BIN" --no-sandbox /opt/zoth-hud "$@"
+    elif [[ -d "/opt/zoth-desktop-pet" && -f "/opt/zoth-desktop-pet/main.js" ]]; then
+        exec "$ELECTRON_BIN" --no-sandbox /opt/zoth-desktop-pet "$@"
+    fi
 fi
 
-if [[ -f "$HUD_LAUNCH" ]] && [[ -x "$HUD_LAUNCH" ]]; then
-    exec "$HUD_LAUNCH" "$@" 2>/dev/null
-elif [[ -f "$HUD_DIR/main.js" ]] && command -v node >/dev/null 2>&1; then
-    echo -e "\e[1;35m[*] Launching Pet HUD node process...\e[0m"
-    exec node "$HUD_DIR/main.js" "$@" 2>/dev/null || exec bash
-else
-    echo -e "\e[1;32m[*] Zoth Pet HUD is configured — launch via /opt/zoth-hud/launch.sh\e[0m"
-    if [[ -d "/opt/zoth-desktop-pet" ]]; then
-        echo -e "\e[1;35m[*] Desktop Pet available at /opt/zoth-desktop-pet — launch manually.\e[0m"
-    fi
-    exec bash
-fi
+konsole --noclose -e bash -c "echo -e '\e[1;33m[*] Zoth Pet HUD Active.\e[0m'; exec bash"

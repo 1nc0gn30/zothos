@@ -30,7 +30,7 @@ bash "$BUILD_DIR/pack-iso.sh"
 echo "[3/5] Resetting VM state & defining libvirt domain..."
 sudo virsh destroy zothos-iso-live 2>/dev/null || true
 sudo rm -f /tmp/zothos-iso-test.qcow2
-sudo qemu-img create -f qcow2 /tmp/zothos-iso-test.qcow2 10G >/dev/null
+sudo qemu-img create -f qcow2 /tmp/zothos-iso-test.qcow2 50G >/dev/null
 
 cat << 'EOF' > /tmp/zothos-iso-live.xml
 <domain type='kvm'>

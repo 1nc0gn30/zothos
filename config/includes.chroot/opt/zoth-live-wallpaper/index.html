@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ZothOS Live Background</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body, html { width: 100%; height: 100%; overflow: hidden; background: #05070a; }
+    canvas { display: block; width: 100%; height: 100%; }
+    .hud {
+      position: absolute;
+      bottom: 24px;
+      right: 28px;
+      font-family: monospace;
+      color: rgba(255, 215, 0, 0.5);
+      font-size: 12px;
+      letter-spacing: 2px;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <div class="hud">ZOTHOS // AMBIENT MATRIX // ACTIVE</div>
+  <script>
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+    let w, h;
+    function resize() {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    const chars = '01ZOTHOS᚛᚜ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛈᛇᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟ▲◆●◈';
+    const fontSize = 16;
+    let cols = Math.floor(w / fontSize);
+    let drops = Array(cols).fill(1);
+
+    function draw() {
+      ctx.fillStyle = 'rgba(5, 7, 10, 0.08)';
+      ctx.fillRect(0, 0, w, h);
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = chars.charAt(Math.floor(Math.random() * chars.length));
+        const x = i * fontSize;
+        const y = drops[i] * fontSize;
+
+        // Glowing gold leader, subtle amber tail
+        if (Math.random() > 0.95) {
+          ctx.fillStyle = '#ffffff';
+          ctx.shadowColor = '#ffd700';
+          ctx.shadowBlur = 8;
+        } else {
+          ctx.fillStyle = '#d4af37';
+          ctx.shadowColor = '#996515';
+          ctx.shadowBlur = 2;
+        }
+
+        ctx.font = fontSize + 'px monospace';
+        ctx.fillText(text, x, y);
+
+        if (y > h && Math.random() > 0.985) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }
+    setInterval(draw, 45);
+  </script>
+</body>
+</html>

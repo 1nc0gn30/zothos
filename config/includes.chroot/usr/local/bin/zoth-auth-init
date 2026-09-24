@@ -18,11 +18,15 @@ chmod 644 /etc/passwd /etc/group
 # Ensure neo is in all essential groups
 usermod -aG sudo,audio,video,netdev,plugdev,dialout neo 2>/dev/null || true
 
-# Passwordless sudo for neo
+# Passwordless sudo for neo with strict root permissions
+mkdir -p /etc/sudoers.d
 cat << "SUDOEOF" > /etc/sudoers.d/zothos
 neo ALL=(ALL:ALL) NOPASSWD: ALL
 SUDOEOF
-chmod 0440 /etc/sudoers.d/zothos
+chown -R root:root /etc/sudoers /etc/sudoers.d 2>/dev/null || true
+chmod 755 /etc/sudoers.d
+chmod 0440 /etc/sudoers.d/* 2>/dev/null || true
+
 
 # Ensure AccountsService icon and neo profile
 mkdir -p /var/lib/AccountsService/{icons,users}

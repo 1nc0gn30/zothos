@@ -114,9 +114,12 @@ function renderDesk() {
   const p = pulse;
   const listeners = (p.listeners || []).map((l) => `<div class="chip"><b>:${l.port}</b><em>${esc(l.name)}</em></div>`).join("") || `<p class="note">No known services are listening.</p>`;
   const resident = (p.models || []).filter((m) => m.resident);
+  const sentinel = p.sentinel || {};
+  const webgpu = p.webgpu || {};
+  const counts = p.counts || { ready: 0, mind: 0, missing: 0 };
   const watch = resident.length
     ? resident.map((m) => `${m.name}`).join(", ")
-    : (p.sentinel.model || "none yet");
+    : (sentinel.model || "none yet");
   const gpus = (p.gpus || []).map((g) => `${g.vendor} ${g.name}${g.driver ? " · " + g.driver : ""}`).join(" / ") || "No display controller reported";
   return `<div class="split">
     <div>
@@ -129,11 +132,11 @@ function renderDesk() {
     <aside class="panel">
       <h2>Watcher</h2>
       <div class="kv"><span>Model</span><div>${esc(watch)}</div></div>
-      <div class="kv"><span>State</span><div>${esc(p.sentinel.status || "idle")}${p.sentinel.error ? " — " + esc(p.sentinel.error) : ""}</div></div>
+      <div class="kv"><span>State</span><div>${esc(sentinel.status || "idle")}${sentinel.error ? " — " + esc(sentinel.error) : ""}</div></div>
       <div class="kv"><span>GPU</span><div>${esc(gpus)}</div></div>
-      <div class="kv"><span>WebGPU</span><div>${esc(p.webgpu.name || p.webgpu.note || "probe on Chip")}</div></div>
+      <div class="kv"><span>WebGPU</span><div>${esc(webgpu.name || webgpu.note || "probe on Chip")}</div></div>
       <div class="kv"><span>Uptime</span><div>${esc(fmtUptime(p.uptime_s || 0))}</div></div>
-      <div class="kv"><span>Ready</span><div>${p.counts.ready} tools · ${p.counts.mind} harnesses</div></div>
+      <div class="kv"><span>Ready</span><div>${counts.ready} tools · ${counts.mind} harnesses</div></div>
       <p><button class="text-btn primary" data-act="arm">Keep the micro model resident</button></p>
     </aside>
   </div>`;
@@ -214,43 +217,54 @@ function render() {
 }
 
 function paintMeters() {
-  if (!pulse) return;
+  if (!pulse || !pulse.cpu || !pulse.mem || !pulse.disk || !pulse.net) return;
   const setBar = (id, pct) => {
     const el = document.getElementById(id);
+    if (!el) return;
     el.style.setProperty("--w", Math.max(0, Math.min(100, pct)) + "%");
     el.classList.toggle("hot", pct >= 90);
     el.classList.toggle("warn", pct >= 75 && pct < 90);
   };
-  document.getElementById("m-cpu").textContent = pulse.cpu.pct.toFixed(0) + "%";
-  document.getElementById("m-ram").textContent = `${pulse.mem.used_gb}/${pulse.mem.total_gb} GB`;
-  document.getElementById("m-disk").textContent = pulse.disk.pct.toFixed(0) + "%";
-  document.getElementById("m-net").textContent = fmtRate(pulse.net.rx_bps);
-  document.getElementById("m-temp").textContent = pulse.temp_c == null ? "n/a" : pulse.temp_c.toFixed(0) + "°";
-  document.getElementById("m-load").textContent = "load " + pulse.cpu.load.map((n) => n.toFixed(2)).join(" ");
-  setBar("b-cpu", pulse.cpu.pct);
-  setBar("b-ram", pulse.mem.pct);
-  setBar("b-disk", pulse.disk.pct);
-  const netPct = Math.min(100, (pulse.net.rx_bps / (5 * 1024 * 1024)) * 100);
+  const setTxt = (id, txt) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = txt;
+  };
+  setTxt("m-cpu", (pulse.cpu.pct || 0).toFixed(0) + "%");
+  setTxt("m-ram", `${pulse.mem.used_gb || 0}/${pulse.mem.total_gb || 0} GB`);
+  setTxt("m-disk", (pulse.disk.pct || 0).toFixed(0) + "%");
+  setTxt("m-net", fmtRate(pulse.net.rx_bps || 0));
+  setTxt("m-temp", pulse.temp_c == null ? "n/a" : pulse.temp_c.toFixed(0) + "°");
+  setTxt("m-load", "load " + (pulse.cpu.load || []).map((n) => n.toFixed(2)).join(" "));
+  setBar("b-cpu", pulse.cpu.pct || 0);
+  setBar("b-ram", pulse.mem.pct || 0);
+  setBar("b-disk", pulse.disk.pct || 0);
+  const netPct = Math.min(100, ((pulse.net.rx_bps || 0) / (5 * 1024 * 1024)) * 100);
   setBar("b-net", netPct || 4);
-  document.getElementById("clock").textContent = pulse.clock;
-  document.getElementById("host").textContent = pulse.host;
-  document.getElementById("rail-mode").textContent = (pulse.mode || "unset").slice(0, 8);
+  setTxt("clock", pulse.clock || "--:--:--");
+  setTxt("host", pulse.host || "—");
+  setTxt("rail-mode", (pulse.mode || "unset").slice(0, 8));
   const netLabel = document.querySelector(".meters article:nth-child(4) span");
   if (netLabel) netLabel.textContent = pulse.net.iface && pulse.net.iface !== "—" ? "Net · " + pulse.net.iface : "Net";
 }
 
 async function refreshJournal() {
   const data = await apiFetch("/api/journal");
-  journal = data.lines || [];
+  if (data && data.lines) journal = data.lines;
 }
 
 async function tick() {
-  const [p, b] = await Promise.all([apiFetch("/api/pulse"), apiFetch("/api/board")]);
-  pulse = p || {};
-  board = b || { items: [], rooms: [] };
-  paintMeters();
-  if (!painted || (view !== "arms" && view !== "mind")) render();
-  painted = true;
+  try {
+    const [p, b] = await Promise.all([apiFetch("/api/pulse"), apiFetch("/api/board")]);
+    if (p && p.cpu && p.mem && p.disk && p.net) {
+      pulse = p;
+      if (b && b.items) board = b;
+      paintMeters();
+      if (!painted || (view !== "arms" && view !== "mind")) render();
+      painted = true;
+    }
+  } catch (err) {
+    console.warn("Telemetry tick error:", err);
+  }
 }
 
 async function probeGpu() {

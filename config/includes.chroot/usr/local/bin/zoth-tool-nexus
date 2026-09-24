@@ -14,6 +14,22 @@ import time
 import itertools
 import threading
 
+# Augment PATH with all sovereign user and system tool directories
+EXTRA_PATHS = [
+    os.path.expanduser("~/.foundry/bin"),
+    os.path.expanduser("~/.cargo/bin"),
+    os.path.expanduser("~/go/bin"),
+    "/usr/local/go/bin",
+    os.path.expanduser("~/.local/bin"),
+    "/opt/zothos-ai-env/bin",
+    "/usr/local/bin",
+    "/usr/bin",
+    "/bin"
+]
+for p in reversed(EXTRA_PATHS):
+    if os.path.exists(p) and p not in os.environ.get("PATH", "").split(os.pathsep):
+        os.environ["PATH"] = p + os.pathsep + os.environ.get("PATH", "")
+
 DOMAINS = {
     "1": {
         "title": "[CORE] Zoth Studio Flagships & Core Workstations",
@@ -187,6 +203,27 @@ def print_header():
 
 def check_tool_ready(cmd):
     first_word = cmd.split()[0] if cmd else ""
+    if not first_word:
+        return False
+    if first_word in ("foundryup", "forge", "cast", "anvil"):
+        return bool(shutil.which("forge") or shutil.which("foundryup") or
+                    os.path.exists(os.path.expanduser("~/.foundry/bin/forge")) or
+                    os.path.exists(os.path.expanduser("~/.foundry/bin/foundryup")) or
+                    os.path.exists("/usr/local/bin/forge") or os.path.exists("/usr/local/bin/foundryup"))
+    if first_word in ("docker", "cdocker"):
+        return bool(shutil.which("docker") or shutil.which("podman") or shutil.which("cdocker"))
+    if first_word == "rustc":
+        return bool(shutil.which("rustc") or os.path.exists(os.path.expanduser("~/.cargo/bin/rustc")) or os.path.exists("/usr/local/bin/rustc"))
+    if first_word == "cargo":
+        return bool(shutil.which("cargo") or os.path.exists(os.path.expanduser("~/.cargo/bin/cargo")) or os.path.exists("/usr/local/bin/cargo"))
+    if first_word == "go":
+        return bool(shutil.which("go") or os.path.exists("/usr/local/go/bin/go") or os.path.exists(os.path.expanduser("~/go/bin/go")) or os.path.exists("/usr/local/bin/go"))
+    if first_word == "solana":
+        return bool(shutil.which("solana") or os.path.exists(os.path.expanduser("~/.local/share/solana/install/active_release/bin/solana")) or os.path.exists("/usr/local/bin/solana"))
+    if first_word == "sqlite3":
+        return bool(shutil.which("sqlite3") or os.path.exists("/usr/bin/sqlite3"))
+    if first_word == "clang":
+        return bool(shutil.which("clang") or shutil.which("clang-19") or shutil.which("clang-16"))
     return shutil.which(first_word) is not None
 
 def execute_single_package_install(pkg):
