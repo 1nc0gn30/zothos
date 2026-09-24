@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#  ZOTHOS ANONYMOUS SOVEREIGN FEEDBACK RUNNER
+# ==============================================================================
+set -euo pipefail
+
+FEEDBACK_DIR="/opt/zoth-feedback"
+
+if command -v electron >/dev/null 2>&1; then
+    exec electron "$FEEDBACK_DIR" --no-sandbox "$@"
+elif [[ -x "/usr/local/bin/electron" ]]; then
+    exec /usr/local/bin/electron "$FEEDBACK_DIR" --no-sandbox "$@"
+elif command -v google-chrome >/dev/null 2>&1; then
+    exec google-chrome --app="file://$FEEDBACK_DIR/index.html" "$@"
+elif command -v firefox >/dev/null 2>&1; then
+    exec firefox "file://$FEEDBACK_DIR/index.html" "$@"
+else
+    xdg-open "file://$FEEDBACK_DIR/index.html"
+fi

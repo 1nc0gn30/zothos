@@ -56,12 +56,57 @@ const TerminalPage = () => {
   const [toolSearch, setToolSearch] = useState('');
   const [favorites, setFavorites] = useState([]);
   const [showToolDetail, setShowToolDetail] = useState(false);
+  // Batch execution
+  const [batchSelected, setBatchSelected] = useState([]);
+  const [batchMode, setBatchMode] = useState(false);
+  const [batchProgress, setBatchProgress] = useState(0);
+  const [batchCurrentTool, setBatchCurrentTool] = useState('');
+  const [batchQueue, setBatchQueue] = useState([]);
+  const [batchRunning, setBatchRunning] = useState(false);
+  // Execution history log — timestamped record of all tool executions
+  const [executionHistory, setExecutionHistory] = useState([]);
+  const [execStartTime, setExecStartTime] = useState(null);
+  // Tool chaining
+  const [chainTools, setChainTools] = useState([]);
+  const [chainInput, setChainInput] = useState('');
+  const [chainRunning, setChainRunning] = useState(false);
+  const [chainStep, setChainStep] = useState(0);
+  const [chainResults, setChainResults] = useState([]);
+  // Keyboard shortcut help modal
+  const [showHelp, setShowHelp] = useState(false);
+  // Visual effects
+  const [crtFlicker, setCrtFlicker] = useState(true);
+  const [density, setDensity] = useState('medium'); // low/medium/high for matrix rain
+  // Auto-completion
+  const [showAutoComplete, setShowAutoComplete] = useState(false);
+  const [autoCompleteResults, setAutoCompleteResults] = useState([]);
+  const [autoCompleteIndex, setAutoCompleteIndex] = useState(0);
+  // Tool comparison
+  const [showCompare, setShowCompare] = useState(false);
+  const [compareToolA, setCompareToolA] = useState('');
+  const [compareToolB, setCompareToolB] = useState('');
+  // Terminal input history
+  const [terminalInput, setTerminalInput] = useState('');
+  const [terminalHistory, setTerminalHistory] = useState([]);
+  const [terminalHistoryIdx, setTerminalHistoryIdx] = useState(-1);
+  // Custom playbooks
+  const [customPlaybooks, setCustomPlaybooks] = useState([]);
+  const [showPlaybookModal, setShowPlaybookModal] = useState(false);
+  const [playbookForm, setPlaybookForm] = useState({ name: '', description: '', tools: [], tags: '' });
+  // Advanced search/filter chips
+  const [filterChips, setFilterChips] = useState({ difficulty: [], usefulness: [], tags: [] });
+  const [showTagDropdown, setShowTagDropdown] = useState(false);
 
   // Load favorites from localStorage
   useEffect(() => {
     try {
       const saved = localStorage.getItem('hexstrike-favorites');
       if (saved) setFavorites(JSON.parse(saved));
+    } catch {}
+    // Load custom playbooks from localStorage
+    try {
+      const savedPlaybooks = localStorage.getItem('hexstrike-playbooks');
+      if (savedPlaybooks) setCustomPlaybooks(JSON.parse(savedPlaybooks));
     } catch {}
   }, []);
 
@@ -75,18 +120,63 @@ const TerminalPage = () => {
 
   const isFavorited = (toolId) => favorites.includes(toolId);
 
-  // Filtered tools by search
-  const filteredTools = toolRegistry.filter(t =>
-    t.name.toLowerCase().includes(toolSearch.toLowerCase()) ||
-    t.id.toLowerCase().includes(toolSearch.toLowerCase()) ||
-    t.tags.some(tag => tag.toLowerCase().includes(toolSearch.toLowerCase()))
-  );
+  // Star rating renderer
+  const renderStars = (rating) => {
+    const full = Math.floor(rating / 2);
+    const half = rating % 2 >= 1;
+    return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(5 - full - (half ? 1 : 0));
+  };
+
+  // Filter chip toggles
+  const toggleDifficulty = (d) => {
+    setFilterChips(prev => ({
+      ...prev,
+      difficulty: prev.difficulty.includes(d) ? prev.difficulty.filter(x => x !== d) : [...prev.difficulty, d]
+    }));
+  };
+  const toggleUsefulness = (u) => {
+    setFilterChips(prev => ({
+      ...prev,
+      usefulness: prev.usefulness.includes(u) ? prev.usefulness.filter(x => x !== u) : [...prev.usefulness, u]
+    }));
+  };
+  const toggleTag = (tag) => {
+    setFilterChips(prev => ({
+      ...prev,
+      tags: prev.tags.includes(tag) ? prev.tags.filter(x => x !== tag) : [...prev.tags, tag]
+    }));
+  };
+  const clearFilters = () => setFilterChips({ difficulty: [], usefulness: [], tags: [] });
+
+  // All available tags across tools
+  const allTags = [...new Set(toolRegistry.flatMap(t => t.tags))].sort();
+
+  // Filtered tools with search + chip filters
+  const filteredTools = toolRegistry.filter(t => {
+    const matchesSearch = t.name.toLowerCase().includes(toolSearch.toLowerCase()) ||
+      t.id.toLowerCase().includes(toolSearch.toLowerCase()) ||
+      t.tags.some(tag => tag.toLowerCase().includes(toolSearch.toLowerCase()));
+    if (!matchesSearch) return false;
+    if (filterChips.difficulty.length > 0 && !filterChips.difficulty.includes(t.difficulty)) return false;
+    if (filterChips.usefulness.length > 0) {
+      const min = Math.min(...filterChips.usefulness);
+      if (t.usefulness < min) return false;
+    }
+    if (filterChips.tags.length > 0 && !filterChips.tags.some(tag => t.tags.includes(tag))) return false;
+    return true;
+  });
 
   // Favorited tools sorted first
   const favoritedTools = filteredTools.filter(t => favorites.includes(t.id));
   const nonFavoritedTools = filteredTools.filter(t => !favorites.includes(t.id));
 
   const handleToolClick = (toolId, category) => {
+    if (batchMode) {
+      setBatchSelected(prev =>
+        prev.includes(toolId) ? prev.filter(id => id !== toolId) : [...prev, toolId]
+      );
+      return;
+    }
     setSelectedToolId(toolId);
     setActiveCategory(category);
     setShowToolDetail(true);
@@ -128,6 +218,10 @@ const TerminalPage = () => {
         e.preventDefault();
         if (sessionName && target) saveSession();
         else addToast('Enter a session name first', 'error');
+      }
+      if (e.ctrlKey && e.key === '/') {
+        e.preventDefault();
+        setShowHelp(prev => !prev);
       }
     };
     const handleFocus = () => setFocusVisible(true);
@@ -175,12 +269,14 @@ const TerminalPage = () => {
       const recent = cmdHistory.slice(0, 8).map(c => ({ type: 'recent', label: c, id: c }));
       const tools = toolRegistry.map(t => ({ type: 'tool', label: `${t.id} — ${t.name}`, id: t.id }));
       const playbooks = playbookRegistry.map(p => ({ type: 'playbook', label: `${p.id} — ${p.name}`, id: p.id }));
-      setCmdResults([...recent, ...tools, ...playbooks]);
+      const custom = customPlaybooks.map(p => ({ type: 'playbook', label: `${p.id} — ${p.name}`, id: p.id }));
+      setCmdResults([...recent, ...tools, ...playbooks, ...custom]);
       setShowRecentOnly(true);
     } else {
       const matched = [
         ...toolRegistry.filter(t => t.id.toLowerCase().includes(q) || t.name.toLowerCase().includes(q)).map(t => ({ type: 'tool', label: `${t.id} — ${t.name}`, id: t.id })),
         ...playbookRegistry.filter(p => p.id.toLowerCase().includes(q) || p.name.toLowerCase().includes(q)).map(p => ({ type: 'playbook', label: `${p.id} — ${p.name}`, id: p.id })),
+        ...customPlaybooks.filter(p => p.id.toLowerCase().includes(q) || p.name.toLowerCase().includes(q)).map(p => ({ type: 'playbook', label: `${p.id} — ${p.name}`, id: p.id })),
         ...cmdHistory.filter(c => c.toLowerCase().includes(q)).slice(0, 5).map(c => ({ type: 'recent', label: c, id: c })),
       ];
       setCmdResults(matched);
@@ -197,7 +293,21 @@ const TerminalPage = () => {
     active?.scrollIntoView({ block: 'nearest' });
   }, [cmdActiveIndex, isCmdPaletteOpen]);
 
-  // Close palette on Escape
+  // Auto-completion: filter tools by partial name/id match
+  useEffect(() => {
+    if (!isCmdPaletteOpen || !cmdInput.trim()) {
+      setShowAutoComplete(false);
+      setAutoCompleteResults([]);
+      return;
+    }
+    const q = cmdInput.toLowerCase().trim();
+    const matches = toolRegistry.filter(t =>
+      t.id.toLowerCase().startsWith(q) || t.name.toLowerCase().includes(q)
+    ).slice(0, 8);
+    setAutoCompleteResults(matches);
+    setAutoCompleteIndex(0);
+    setShowAutoComplete(matches.length > 0);
+  }, [cmdInput, isCmdPaletteOpen]);
   useEffect(() => {
     if (!isCmdPaletteOpen) return;
     const onKey = (e) => {
@@ -321,7 +431,165 @@ const TerminalPage = () => {
     }
   }, [target]);
 
-const addToast = (message, type = 'info') => {
+const executeBatch = async () => {
+    if (batchSelected.length === 0 || !target || batchRunning) return;
+    setBatchRunning(true);
+    setBatchProgress(0);
+    const batchStartTime = Date.now();
+    setExecStartTime(batchStartTime);
+    setToolLogs(prev => [...prev, `\n[SYSTEM] > BATCH MODE: Running ${batchSelected.length} tools on ${target}...`]);
+    setAiLogs(prev => [...prev, '\n[SYSTEM] > BATCH SEQUENCE INITIATED...']);
+    setShowLiveOutput(true);
+
+    const results = [];
+    for (let i = 0; i < batchSelected.length; i++) {
+      const toolId = batchSelected[i];
+      const toolName = toolRegistry.find(t => t.id === toolId)?.name || toolId;
+      setBatchCurrentTool(toolName);
+      setBatchProgress(Math.floor(((i) / batchSelected.length) * 100));
+      setToolLogs(prev => [...prev, `\n[BATCH] > [${i+1}/${batchSelected.length}] Starting ${toolName}...`]);
+      setAiLogs(prev => [...prev, `[BATCH] Executing ${toolName} (${i+1}/${batchSelected.length})`]);
+
+      try {
+        const eventSource = new EventSource(`http://localhost:8000/execute-stream?tool=${toolId}&target=${target}`);
+        let output = '';
+        await new Promise((resolve, reject) => {
+          eventSource.onmessage = (event) => {
+            const rawData = event.data.replace(/\\n/g, '\n');
+            const lines = rawData.split('\n').filter(line => line.trim() !== '');
+            lines.forEach(line => {
+              output += line + '\n';
+              setToolLogs(prev => [...prev, line]);
+              setLiveOutput(prev => [...prev, line]);
+              if (line.startsWith('AI_ANALYSIS:')) {
+                setAiLogs(prev => [...prev, line.replace('AI_ANALYSIS: ', '')]);
+              }
+            });
+          };
+          eventSource.onerror = () => { eventSource.close(); resolve(); };
+          setTimeout(() => { eventSource.close(); resolve(); }, 30000);
+        });
+        results.push({ toolId, toolName, status: 'SUCCESS', output });
+        setToolLogs(prev => [...prev, `[BATCH] ✓ ${toolName} complete`]);
+      } catch (err) {
+        results.push({ toolId, toolName, status: 'FAILED', error: err.message });
+        setToolLogs(prev => [...prev, `[BATCH] ✗ ${toolName} failed: ${err.message}`]);
+      }
+
+      setBatchProgress(Math.floor(((i + 1) / batchSelected.length) * 100));
+    }
+
+    setBatchRunning(false);
+    setBatchCurrentTool('');
+    setScanProgress(100);
+    addToast(`Batch complete: ${results.filter(r => r.status === 'SUCCESS').length}/${results.length} succeeded`, 'success');
+    const batchDuration = execStartTime ? Date.now() - execStartTime : 0;
+    setExecutionHistory(prev => [{
+      id: Date.now(),
+      timestamp: new Date().toLocaleString(),
+      target,
+      tool: 'BATCH',
+      status: 'SUCCESS',
+      duration: `${Math.round(batchDuration / 1000)}s`
+    }, ...prev].slice(0, 50));
+    setExecStartTime(null);
+    setHistory(prev => [{ timestamp: new Date().toLocaleTimeString(), target, tool: 'BATCH', status: 'SUCCESS' }, ...prev].slice(0, 10));
+  };
+
+  const addToChain = (toolId) => {
+    if (chainTools.includes(toolId)) {
+      setChainTools(chainTools.filter(id => id !== toolId));
+      setChainResults(chainResults.filter(r => r.toolId !== toolId));
+    } else {
+      setChainTools([...chainTools, toolId]);
+    }
+  };
+
+  const removeFromChain = (index) => {
+    setChainTools(chainTools.filter((_, i) => i !== index));
+    setChainResults(chainResults.filter((_, i) => i !== index));
+  };
+
+  const clearChain = () => {
+    setChainTools([]);
+    setChainResults([]);
+    setChainStep(0);
+    setChainRunning(false);
+  };
+
+  const executeChain = async () => {
+    if (chainTools.length === 0 || !target || chainRunning) return;
+    setChainRunning(true);
+    setChainStep(0);
+    const chainStartTime = Date.now();
+    setExecStartTime(chainStartTime);
+    setToolLogs(prev => [...prev, `\n[CHAIN] > Starting attack chain: ${chainTools.map(id => toolRegistry.find(t=>t.id===id)?.name || id).join(' → ')}`]);
+    setAiLogs(prev => [...prev, '\n[CHAIN] > Sequential exploitation pipeline initialized...']);
+    setShowLiveOutput(true);
+
+    const results = [];
+    let chainInput = target;
+
+    for (let i = 0; i < chainTools.length; i++) {
+      const toolId = chainTools[i];
+      const toolName = toolRegistry.find(t => t.id === toolId)?.name || toolId;
+      setChainStep(i + 1);
+      setBatchCurrentTool(`${toolName} (${i+1}/${chainTools.length})`);
+      setToolLogs(prev => [...prev, `\n[CHAIN] > Step ${i+1}/${chainTools.length}>: ${toolName} on ${chainInput}`]);
+      setAiLogs(prev => [...prev, `[CHAIN] Step ${i+1}: ${toolName} — input: ${chainInput}`]);
+
+      try {
+        const eventSource = new EventSource(`http://localhost:8000/execute-stream?tool=${toolId}&target=${encodeURIComponent(chainInput)}`);
+        let output = '';
+        await new Promise((resolve, reject) => {
+          eventSource.onmessage = (event) => {
+            const rawData = event.data.replace(/\\n/g, '\n');
+            const lines = rawData.split('\n').filter(line => line.trim() !== '');
+            lines.forEach(line => {
+              output += line + '\n';
+              setToolLogs(prev => [...prev, line]);
+              setLiveOutput(prev => [...prev, line]);
+              if (line.startsWith('AI_ANALYSIS:')) {
+                setAiLogs(prev => [...prev, line.replace('AI_ANALYSIS: ', '')]);
+              }
+              if (line.match(/open\s+\d+/i)) {
+                const portMatch = line.match(/open\s+(\d+)/i);
+                if (portMatch) chainInput = `${chainInput}:${portMatch[1]}`;
+              }
+            });
+          };
+          eventSource.onerror = () => { eventSource.close(); resolve(); };
+          setTimeout(() => { eventSource.close(); resolve(); }, 30000);
+        });
+        results.push({ toolId, toolName, status: 'SUCCESS', output });
+        setChainResults([...results, { toolId, toolName, status: 'SUCCESS', output }]);
+        setToolLogs(prev => [...prev, `[CHAIN] ✓ Step ${i+1}: ${toolName} complete`]);
+      } catch (err) {
+        results.push({ toolId, toolName, status: 'FAILED', error: err.message });
+        setChainResults([...results, { toolId, toolName, status: 'FAILED', error: err.message }]);
+        setToolLogs(prev => [...prev, `[CHAIN] ✗ Step ${i+1}: ${toolName} failed: ${err.message}`]);
+        break;
+      }
+    }
+
+    setChainRunning(false);
+    setBatchCurrentTool('');
+    setScanProgress(100);
+    const successCount = results.filter(r => r.status === 'SUCCESS').length;
+    addToast(`Chain complete: ${successCount}/${chainTools.length} steps succeeded`, successCount === chainTools.length ? 'success' : 'error');
+    const chainDuration = execStartTime ? Date.now() - execStartTime : 0;
+    setExecutionHistory(prev => [{
+      id: Date.now(),
+      timestamp: new Date().toLocaleString(),
+      target,
+      tool: 'CHAIN',
+      status: successCount === chainTools.length ? 'SUCCESS' : 'PARTIAL',
+      duration: `${Math.round(chainDuration / 1000)}s`
+    }, ...prev].slice(0, 50));
+    setExecStartTime(null);
+  };
+
+  const addToast = (message, type = 'info') => {
     const id = Date.now();
     setToasts(prev => [...prev, { id, message, type }]);
     setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 5000);
@@ -336,7 +604,9 @@ const addToast = (message, type = 'info') => {
     setShowLiveOutput(true);
 
     const timestamp = new Date().toLocaleTimeString();
-    const toolName = playbookRegistry.find(p => p.id === toolId)?.name || toolRegistry.find(t => t.id === toolId)?.name || toolId;
+    const startTime = Date.now();
+    setExecStartTime(startTime);
+    const toolName = playbookRegistry.find(p => p.id === toolId)?.name || customPlaybooks.find(p => p.id === toolId)?.name || toolRegistry.find(t => t.id === toolId)?.name || toolId;
     addToast(`Strike started: ${toolName}`, 'info');
     setToolLogs(prev => [...prev, `\n[${timestamp}] > ESTABLISHING STREAM FOR ${toolId.toUpperCase()} ON ${target}...`]);
     setAiLogs(prev => [...prev, `\n[${timestamp}] > NEURAL CORE SYNCING...`]);
@@ -350,7 +620,7 @@ const addToast = (message, type = 'info') => {
     }, 400);
 
     try {
-      const playbook = playbookRegistry.find(p => p.id === toolId);
+      const playbook = playbookRegistry.find(p => p.id === toolId) || customPlaybooks.find(p => p.id === toolId);
       const payload = playbook ? playbook.tools : toolId;
 
       const eventSource = new EventSource(`http://localhost:8000/execute-stream?tool=${payload}&target=${target}`);
@@ -374,6 +644,16 @@ const addToast = (message, type = 'info') => {
             setScanProgress(100);
             eventSource.close();
             setExecuting(false);
+            const duration = execStartTime ? Date.now() - execStartTime : 0;
+            setExecutionHistory(prev => [{
+              id: Date.now(),
+              timestamp: new Date().toLocaleString(),
+              target,
+              tool: playbook ? playbook.name : toolId,
+              status: 'SUCCESS',
+              duration: `${Math.round(duration / 1000)}s`
+            }, ...prev].slice(0, 50));
+            setExecStartTime(null);
             setHistory(prev => [{
               timestamp,
               target,
@@ -403,6 +683,41 @@ const addToast = (message, type = 'info') => {
       setExecuting(false);
       addToast('Strike Failed', 'error');
     }
+  };
+
+  const exportPDF = () => {
+    if (!target) return;
+    const reportContent = toolLogs.join('\n');
+    const aiContent = aiLogs.join('\n');
+    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    if (!printWindow) { addToast('Popup blocked — allow popups for PDF export', 'error'); return; }
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>HexStrike Report — ${target}</title>
+        <style>
+          body { font-family: 'Courier New', monospace; font-size: 11px; color: #00ff41; background: #0a0a0a; padding: 20px; line-height: 1.5; }
+          h1 { color: #ff0000; font-size: 18px; border-bottom: 1px solid #ff0000; padding-bottom: 8px; }
+          h2 { color: #bc13fe; font-size: 14px; margin-top: 20px; }
+          .meta { color: #fbbf24; font-size: 10px; margin-bottom: 15px; }
+          .log-line { white-space: pre-wrap; word-break: break-all; margin-bottom: 2px; }
+          .ai-line { color: #ffaaaa; border-left: 2px solid #ff0000; padding-left: 10px; margin-left: 10px; }
+          .section { margin-bottom: 20px; }
+          @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+        </style>
+      </head>
+      <body>
+        <h1>◆ HexStrike Report</h1>
+        <div class="meta">Target: ${target} | Generated: ${new Date().toLocaleString()} | Status: ${executionHistory[0]?.status || 'IN_PROGRESS'}</div>
+        <div class="section"><h2>■ RAW OUTPUT</h2>${reportContent.split('\n').map(l => `<div class="log-line">${l.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`).join('')}</div>
+        <div class="section"><h2>■ AI ANALYSIS</h2>${aiContent.split('\n').map(l => `<div class="log-line ai-line">${l.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`).join('')}</div>
+        <div class="section"><h2>■ EXECUTION HISTORY</h2>${executionHistory.map(h => `<div class="log-line">[${h.timestamp}] ${h.tool} on ${h.target} — ${h.status} (${h.duration})</div>`).join('')}</div>
+      </body>
+      </html>`);
+    printWindow.document.close();
+    setTimeout(() => { printWindow.print(); }, 300);
+    addToast('PDF report sent to printer — save as PDF from dialog', 'success');
   };
 
   const exportReport = async () => {
@@ -439,17 +754,55 @@ const addToast = (message, type = 'info') => {
   const saveSession = async () => {
     if (!sessionName || !target) return;
     try {
-      await axios.get(`http://localhost:8000/api/session/save?name=${sessionName}&target=${target}`);
+      await axios.post('http://localhost:8000/api/session/save', {
+        name: sessionName,
+        target,
+        tool_logs: toolLogs,
+        ai_logs: aiLogs,
+        settings: { fontSize, scanlineActive, glitchActive, matrixRain, stealthMode, theme },
+        compromise_level: compromiseLevel,
+        tool_history: history,
+      });
       addToast(`Session "${sessionName}" saved`, 'success');
       setSessionName('');
+      // Refresh session list
+      axios.get('http://localhost:8000/api/session/list')
+        .then(res => setSessions(res.data.sessions || {}))
+        .catch(() => {});
     } catch { addToast('Save Failed', 'error'); }
   };
 
   const loadSession = async (name) => {
     try {
       const res = await axios.get(`http://localhost:8000/api/session/load?name=${name}`);
-      if (res.data.target) { setTarget(res.data.target); addToast(`Loaded "${name}"`, 'info'); }
+      const data = res.data;
+      if (data.error) { addToast(data.error, 'error'); return; }
+      if (data.target) setTarget(data.target);
+      if (data.tool_logs) setToolLogs(data.tool_logs);
+      if (data.ai_logs) setAiLogs(data.ai_logs);
+      if (data.settings) {
+        setFontSize(data.settings.fontSize || 14);
+        setScanlineActive(data.settings.scanlineActive !== false);
+        setGlitchActive(data.settings.glitchActive !== false);
+        setMatrixRain(data.settings.matrixRain !== false);
+        setStealthMode(data.settings.stealthMode || false);
+        setTheme(data.settings.theme || 'void-red');
+      }
+      if (data.compromise_level !== undefined) setCompromiseLevel(data.compromise_level);
+      if (data.tool_history) setHistory(data.tool_history);
+      addToast(`Loaded "${name}"`, 'info');
     } catch { addToast('Load Failed', 'error'); }
+  };
+
+  const deleteSession = async (name) => {
+    if (!window.confirm(`Delete session "${name}"?`)) return;
+    try {
+      await axios.delete(`http://localhost:8000/api/session/delete?name=${encodeURIComponent(name)}`);
+      addToast(`Session "${name}" deleted`, 'info');
+      axios.get('http://localhost:8000/api/session/list')
+        .then(res => setSessions(res.data.sessions || {}))
+        .catch(() => {});
+    } catch { addToast('Delete Failed', 'error'); }
   };
 
   const handleCmdSubmit = (e) => {
@@ -500,6 +853,12 @@ const addToast = (message, type = 'info') => {
     if (e.key === 'Enter') {
       e.preventDefault();
       handleCmdSubmit(e);
+    }
+    if (e.key === 'Tab' && autoCompleteResults.length > 0) {
+      e.preventDefault();
+      const next = (autoCompleteIndex + 1) % autoCompleteResults.length;
+      setAutoCompleteIndex(next);
+      setCmdInput(autoCompleteResults[next].id);
     }
   };
 
@@ -556,9 +915,49 @@ const addToast = (message, type = 'info') => {
     } catch { addToast('Delete failed', 'error'); }
   };
 
+  const closeAllDrawers = () => {
+    document.querySelector('.hex-sidebar')?.classList.remove('open');
+    document.querySelector('.hex-intel')?.classList.remove('open');
+    document.querySelector('.exec-history-panel')?.classList.remove('open');
+  };
+
   const insertTemplate = (cmd) => {
     setCmdInput(cmd);
     setShowTemplates(false);
+  };
+
+  // Custom Playbook CRUD
+  const saveCustomPlaybook = () => {
+    if (!playbookForm.name || playbookForm.tools.length === 0) return;
+    const pb = {
+      id: 'pb-' + Date.now(),
+      name: playbookForm.name,
+      description: playbookForm.description,
+      tools: [...playbookForm.tools],
+      difficulty: 'intermediate',
+      usefulness: 7,
+      tags: playbookForm.tags.split(',').map(t => t.trim()).filter(Boolean),
+      isCustom: true,
+      category_order: 0
+    };
+    const next = [...customPlaybooks, pb];
+    setCustomPlaybooks(next);
+    try { localStorage.setItem('hexstrike-playbooks', JSON.stringify(next)); } catch {}
+    setPlaybookForm({ name: '', description: '', tools: [], tags: '' });
+    setShowPlaybookModal(false);
+    addToast('Playbook saved', 'success');
+  };
+  const deleteCustomPlaybook = (id) => {
+    const next = customPlaybooks.filter(p => p.id !== id);
+    setCustomPlaybooks(next);
+    try { localStorage.setItem('hexstrike-playbooks', JSON.stringify(next)); } catch {}
+    addToast('Playbook deleted', 'info');
+  };
+  const toggleToolInForm = (toolId) => {
+    setPlaybookForm(prev => ({
+      ...prev,
+      tools: prev.tools.includes(toolId) ? prev.tools.filter(id => id !== toolId) : [...prev.tools, toolId]
+    }));
   };
 
   // Attack Chain component
@@ -647,10 +1046,10 @@ const addToast = (message, type = 'info') => {
   };
 
   return (
-    <div className={`hex-studio ${stealthMode ? 'stealth-mode' : ''}`}>
-      {matrixRain && <CanvasRain />}
+    <div className={`hex-studio ${stealthMode ? 'stealth-mode' : ''}`} data-theme={theme}>
+      {matrixRain && <CanvasRain density={density} />}
       {scanlineActive && <div className="crt-overlay" />}
-      <div className="crt-flicker" />
+      <div className={`crt-flicker ${crtFlicker ? '' : 'crt-flicker-paused'}`} />
 
       <aside className="hex-sidebar">
         <div className="sidebar-brand">
@@ -674,6 +1073,70 @@ const addToast = (message, type = 'info') => {
           )}
         </div>
 
+        {/* Advanced Filter Chips */}
+        <div className="filter-chips">
+          <div className="filter-chips-header">
+            <span>FILTERS</span>
+            {(filterChips.difficulty.length + filterChips.usefulness.length + filterChips.tags.length) > 0 && (
+              <button className="clear-filters" onClick={clearFilters}>CLEAR</button>
+            )}
+          </div>
+          <div className="chip-group">
+            <span className="chip-label">DIFFICULTY</span>
+            {['beginner','intermediate','advanced'].map(d => (
+              <button
+                key={d}
+                className={`chip ${filterChips.difficulty.includes(d) ? 'chip-active' : ''} chip-${d}`}
+                onClick={() => toggleDifficulty(d)}
+              >{d}</button>
+            ))}
+          </div>
+          <div className="chip-group">
+            <span className="chip-label">USEFULNESS</span>
+            {[8,6,4].map(u => (
+              <button
+                key={u}
+                className={`chip ${filterChips.usefulness.includes(u) ? 'chip-active' : ''}`}
+                onClick={() => toggleUsefulness(u)}
+              >&gt;={u}+</button>
+            ))}
+          </div>
+          <div className="chip-group chip-group-tags">
+            <span className="chip-label" onClick={() => setShowTagDropdown(!showTagDropdown)} style={{cursor:'pointer'}}>TAGS ▲</span>
+            {showTagDropdown && (
+              <div className="tag-dropdown">
+                {allTags.map(tag => (
+                  <label key={tag} className="tag-option">
+                    <input type="checkbox" checked={filterChips.tags.includes(tag)} onChange={() => toggleTag(tag)} />
+                    {tag}
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Batch Selection Toggle */}
+        {batchMode && (
+          <div className="batch-toggle-sidebar">
+            <div className="batch-toggle-sidebar-label">
+              <input
+                type="checkbox"
+                className="batch-toggle-checkbox"
+                checked={batchSelected.length === filteredTools.length && filteredTools.length > 0}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setBatchSelected(filteredTools.map(t => t.id));
+                  } else {
+                    setBatchSelected([]);
+                  }
+                }}
+              />
+              SELECT ALL ({batchSelected.length}/{filteredTools.length})
+            </div>
+          </div>
+        )}
+
         <nav className="category-nav">
           {/* Favorites Section */}
           {favorites.length > 0 && (
@@ -683,15 +1146,18 @@ const addToast = (message, type = 'info') => {
                 {favoritedTools.map(t => (
                   <button
                     key={t.id}
-                    className={`tool-btn ${selectedToolId === t.id ? 'active' : ''}`}
+                    className={`tool-btn ${selectedToolId === t.id ? 'active' : ''} ${batchSelected.includes(t.id) ? 'batch-selected' : ''}`}
                     onClick={() => handleToolClick(t.id, t.category)}
                   >
                     <span className="tool-id">{t.id}</span> {t.name}
+                    <span className="tool-stars" title={`Usefulness: ${t.usefulness}/10`}>{renderStars(t.usefulness)}</span>
+                    <span className={`diff-badge diff-${t.difficulty}`}>{t.difficulty.slice(0,4)}</span>
                     <span
                       className="fav-star"
                       onClick={(e) => { e.stopPropagation(); toggleFavorite(t.id); }}
                       title="Remove from favorites"
                     >★</span>
+                    {batchMode && <span className={`batch-select-indicator ${batchSelected.includes(t.id) ? 'selected' : ''}`}>{batchSelected.includes(t.id) ? '☑' : '☐'}</span>}
                   </button>
                 ))}
               </div>
@@ -717,16 +1183,43 @@ const addToast = (message, type = 'info') => {
               {playbookRegistry.map(p => (
                 <button 
                   key={p.id} 
-                  className={`tool-btn ${selectedToolId === p.id ? 'active' : ''}`}
+                  className={`tool-btn ${selectedToolId === p.id ? 'active' : ''} ${batchSelected.includes(p.id) ? 'batch-selected' : ''}`}
                   onClick={() => {
-                    setSelectedToolId(p.id);
-                    setActiveCategory('playbooks');
+                    handleToolClick(p.id, 'playbooks');
                   }}
                 >
                   <span className="tool-id">{p.id}</span> {p.name}
+                  <span className="tool-stars" title={`Usefulness: ${p.usefulness}/10`}>{renderStars(p.usefulness)}</span>
+                  <span className={`diff-badge diff-${p.difficulty}`}>{p.difficulty.slice(0,4)}</span>
+                  {batchMode && <span className={`batch-select-indicator ${batchSelected.includes(p.id) ? 'selected' : ''}`}>{batchSelected.includes(p.id) ? '☑' : '☐'}</span>}
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Custom Playbooks */}
+          <div className="cat-group">
+            <div className="cat-label" onClick={() => setShowPlaybookModal(true)} style={{cursor:'pointer'}}>
+              + Create Playbook
+            </div>
+            {customPlaybooks.map(pb => (
+              <div key={pb.id} className="tool-list open">
+                <button
+                  className={`tool-btn ${selectedToolId === pb.id ? 'active' : ''}`}
+                  onClick={() => { handleToolClick(pb.id, 'playbooks'); setShowPlaybookModal(false); }}
+                >
+                  <span className="tool-id">{pb.id}</span> {pb.name}
+                  <span className="tool-stars" title={`Usefulness: ${pb.usefulness}/10`}>{renderStars(pb.usefulness)}</span>
+                  <span className={`diff-badge diff-${pb.difficulty}`}>{pb.difficulty.slice(0,4)}</span>
+                  <span
+                    className="fav-star"
+                    onClick={(e) => { e.stopPropagation(); deleteCustomPlaybook(pb.id); }}
+                    title="Delete playbook"
+                    style={{color:'#ff0000'}}
+                  >✕</span>
+                </button>
+              </div>
+            ))}
           </div>
 
           {[...new Set(filteredTools.map(t => t.category))].map(cat => (
@@ -741,15 +1234,18 @@ const addToast = (message, type = 'info') => {
                 {nonFavoritedTools.filter(t => t.category === cat).map(t => (
                   <button
                     key={t.id}
-                    className={`tool-btn ${selectedToolId === t.id ? 'active' : ''}`}
+                    className={`tool-btn ${selectedToolId === t.id ? 'active' : ''} ${batchSelected.includes(t.id) ? 'batch-selected' : ''}`}
                     onClick={() => handleToolClick(t.id, t.category)}
                   >
                     <span className="tool-id">{t.id}</span> {t.name}
+                    <span className="tool-stars" title={`Usefulness: ${t.usefulness}/10`}>{renderStars(t.usefulness)}</span>
+                    <span className={`diff-badge diff-${t.difficulty}`}>{t.difficulty.slice(0,4)}</span>
                     <span
                       className={`fav-star ${isFavorited(t.id) ? 'favorited' : ''}`}
                       onClick={(e) => { e.stopPropagation(); toggleFavorite(t.id); }}
                       title={isFavorited(t.id) ? 'Remove from favorites' : 'Add to favorites'}
                     >{isFavorited(t.id) ? '★' : '☆'}</span>
+                    {batchMode && <span className={`batch-select-indicator ${batchSelected.includes(t.id) ? 'selected' : ''}`}>{batchSelected.includes(t.id) ? '☑' : '☐'}</span>}
                   </button>
                 ))}
               </div>
@@ -770,12 +1266,41 @@ const addToast = (message, type = 'info') => {
         </div>
       </aside>
 
+      {/* Execution History Panel */}
+      <div className="exec-history-panel" id="exec-history-panel">
+        <div className="exec-history-header">
+          <span>EXECUTION LOG</span>
+          <button className="settings-toggle" onClick={() => document.getElementById('exec-history-panel')?.classList.remove('open')} style={{fontSize:'0.5rem',padding:'2px 6px'}}>✕</button>
+        </div>
+        <div className="exec-history-body">
+          {executionHistory.length === 0 && <div className="empty-state">No executions yet.</div>}
+          {executionHistory.map(h => (
+            <div key={h.id} className="history-item exec-history-item">
+              <div className="h-meta">{h.timestamp}</div>
+              <div className="h-tool">{h.tool} → {h.target}</div>
+              <div className="h-status" style={{color: h.status === 'SUCCESS' ? '#00ff41' : h.status === 'FAILED' ? '#ff0000' : '#fbbf24'}}>
+                {h.status} ({h.duration})
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Drawer overlay for mobile */}
+      <div className="drawer-overlay" id="drawer-overlay" onClick={closeAllDrawers} />
+
       <main className="hex-workspace">
         <header className="workspace-header">
           <div className="target-bar">
             <button 
               className="settings-toggle mobile-menu-btn" 
-              onClick={() => document.querySelector('.hex-sidebar')?.classList.toggle('open')}
+              onClick={() => {
+                const sidebar = document.querySelector('.hex-sidebar');
+                sidebar?.classList.toggle('open');
+                // Close intel panel if open
+                document.querySelector('.hex-intel')?.classList.remove('open');
+                document.querySelector('.exec-history-panel')?.classList.remove('open');
+              }}
               aria-label="Toggle navigation menu"
             >☰</button>
             <span className="label">TARGET_VECTOR:</span>
@@ -807,8 +1332,103 @@ const addToast = (message, type = 'info') => {
               <button onClick={() => setShowTemplates(true)} className="settings-toggle">
                 TEMPLATES
               </button>
+              {/* Batch Mode Toggle */}
+              <button 
+                onClick={() => setBatchMode(!batchMode)} 
+                className={`settings-toggle ${batchMode ? 'batch-active' : ''}`}
+              >
+                BATCH {batchMode ? 'ON' : 'OFF'}
+              </button>
+              {/* Run Batch Button */}
+              {batchMode && (
+                <button 
+                  onClick={executeBatch} 
+                  disabled={batchSelected.length === 0 || batchRunning || !target} 
+                  className="batch-run-btn"
+                >
+                  {batchRunning ? `BATCHING ${batchProgress}%` : `RUN BATCH (${batchSelected.length})`}
+                </button>
+              )}
+              {/* Run Chain Button */}
+              <button 
+                onClick={executeChain} 
+                disabled={chainTools.length === 0 || chainRunning || !target} 
+                className="strike-btn chain-btn"
+              >
+                {chainRunning ? 'CHAINING...' : `RUN CHAIN${chainTools.length > 0 ? ` (${chainTools.length})` : ''}`}
+              </button>
+              {/* Theme Toggle */}
+              <button 
+                onClick={() => setTheme(prev => prev === 'void-red' ? 'light' : 'void-red')} 
+                className="theme-toggle-btn"
+                title="Toggle Dark/Light Theme"
+              >
+                {theme === 'void-red' ? '☀ LIGHT' : '☾ DARK'}
+              </button>
+              {/* Tool Compare */}
+              <button 
+                onClick={() => setShowCompare(true)} 
+                className="compare-btn"
+                title="Compare two tools side-by-side"
+              >
+                ⚖ COMPARE
+              </button>
             </div>
           </div>
+          {/* Batch Progress Bar */}
+          {batchMode && batchRunning && (
+            <div className="batch-progress-bar">
+              <div className="batch-progress-fill" style={{width: `${batchProgress}%`}} />
+              <span className="batch-progress-text">{batchCurrentTool} — {batchProgress}%</span>
+            </div>
+          )}
+          {/* Chain Status Bar */}
+          {chainTools.length > 0 && (
+            <div className="chain-status-bar">
+              <span className="chain-status-label">CHAIN:</span>
+              {chainTools.map((id, i) => {
+                const t = toolRegistry.find(t => t.id === id);
+                const result = chainResults[i];
+                const statusColor = result?.status === 'SUCCESS' ? '#00ff41' : result?.status === 'FAILED' ? '#ff0000' : '#666';
+                return (
+                  <React.Fragment key={id}>
+                    {i > 0 && <span className="chain-arrow">→</span>}
+                    <span 
+                      className="chain-step" 
+                      style={{color: i < chainStep ? statusColor : '#888', borderColor: i === chainStep - 1 ? '#fbbf24' : '#333'}}
+                      onClick={() => removeFromChain(i)}
+                      title="Click to remove"
+                    >
+                      {t?.name || id}
+                      {result && <span className="chain-step-status" style={{color: statusColor}}> {result.status === 'SUCCESS' ? '✓' : '✗'}</span>}
+                    </span>
+                  </React.Fragment>
+                );
+              })}
+              <button onClick={clearChain} className="settings-toggle" style={{fontSize:'0.5rem',padding:'2px 6px',marginLeft:'8px'}}>CLEAR</button>
+            </div>
+          )}
+          {/* Chain Builder */}
+          {batchMode && (
+            <div className="chain-builder">
+              <input
+                className="chain-builder-input"
+                placeholder="Add tool to chain..."
+                value={chainInput}
+                onChange={(e) => setChainInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter' && chainInput.trim()) { addToChain(chainInput.trim().toLowerCase()); setChainInput(''); } }}
+                aria-label="Add tool to chain"
+              />
+              <button 
+                onClick={() => { if (chainInput.trim()) { addToChain(chainInput.trim().toLowerCase()); setChainInput(''); } }}
+                className="chain-builder-add"
+                disabled={!chainInput.trim()}
+              >
+                ADD TO CHAIN
+              </button>
+              <span className="chain-builder-hint">Type tool ID or name, press Enter</span>
+            </div>
+          )}
           <div className="header-metrics">
             <div className="metric">TOOL: <span className="highlight">{currentTool.name}</span></div>
             <div className="metric">SENSITIVITY: <span className="highlight">HIGH</span></div>
@@ -974,6 +1594,60 @@ const addToast = (message, type = 'info') => {
           <button onClick={() => setLogFilter(f => ({...f, tool: !f.tool}))} className="settings-toggle" style={{fontSize:'0.5rem',padding:'2px 6px',borderColor: logFilter.tool ? '#fbbf24' : '#333',color: logFilter.tool ? '#fbbf24' : '#666'}}>TOOL</button>
           <span style={{marginLeft:'auto',fontSize:'0.55rem',color:'var(--text-dim)',fontFamily:'Orbitron'}}>PROGRESS: {scanProgress}%</span>
         </div>
+
+        {/* Mobile Bottom Action Bar */}
+        <div className="mobile-bottom-bar">
+          <button className="bottom-bar-btn" onClick={() => executeStrike('portscan')} disabled={executing} title="Port Scan">PORT</button>
+          <button className="bottom-bar-btn strike-btn-mobile" onClick={() => executeStrike('autopilot')} disabled={executing} title="AutoPilot Strike">⚡ STRIKE</button>
+          <button className="bottom-bar-btn" onClick={exportPDF} title="Export PDF">📄 PDF</button>
+          <button className="bottom-bar-btn" onClick={exportReport} title="Export Report">📋 EXPORT</button>
+          <button className="bottom-bar-btn" onClick={() => document.getElementById('exec-history-panel')?.classList.toggle('open')} title="Execution History">📜 LOG</button>
+        </div>
+        {/* Terminal Input with Command History */}
+        <div className="terminal-input-bar">
+          <span className="terminal-input-prefix">▸</span>
+          <input
+            className="terminal-input"
+            placeholder="Type command... (↑↓ history · Enter execute · Esc clear)"
+            value={terminalInput}
+            onChange={(e) => setTerminalInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (terminalHistory.length > 0) {
+                  setTerminalHistoryIdx(prev => {
+                    const next = prev < terminalHistory.length - 1 ? prev + 1 : prev;
+                    setTerminalInput(terminalHistory[next] || '');
+                    return next;
+                  });
+                }
+              }
+              if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setTerminalHistoryIdx(prev => {
+                  const next = prev > 0 ? prev - 1 : -1;
+                  setTerminalInput(terminalHistory[next] || '');
+                  return next;
+                });
+              }
+              if (e.key === 'Enter' && terminalInput.trim()) {
+                const cmd = terminalInput.trim();
+                setTerminalHistory(prev => {
+                  const next = [cmd, ...prev.filter(c => c !== cmd)];
+                  return next.slice(0, 50);
+                });
+                setTerminalHistoryIdx(-1);
+                setTerminalInput('');
+                executeStrike(cmd);
+              }
+              if (e.key === 'Escape') {
+                setTerminalInput('');
+              }
+            }}
+            aria-label="Terminal command input"
+          />
+          <span className="terminal-input-hint">{terminalHistory.length} cmds</span>
+        </div>
       </main>
 
       <aside className="hex-intel">
@@ -1000,15 +1674,22 @@ const addToast = (message, type = 'info') => {
         {/* Threat Intel Panel */}
         <ThreatIntelPanel />
         <div style={{padding:'10px',borderTop:'1px solid var(--dark-red)'}}>
-          <div style={{fontSize:'0.6rem',color:'var(--text-dim)',textTransform:'uppercase',marginBottom:'8px',fontFamily:'Orbitron'}}>SESSIONS</div>
-          <div style={{display:'flex',gap:'5px',marginBottom:'8px'}}>
-            <input className="target-input" placeholder="Session name..." value={sessionName} onChange={(e) => setSessionName(e.target.value)} style={{width:'100%',fontSize:'0.7rem',padding:'4px 8px'}} />
-            <button onClick={saveSession} className="settings-toggle" style={{fontSize:'0.55rem',padding:'4px 8px'}}>SAVE</button>
+          <div style={{fontSize:'0.6rem',color:'var(--blood-red)',textTransform:'uppercase',marginBottom:'8px',fontFamily:'Orbitron',letterSpacing:'1px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+            <span>◆ SESSIONS</span>
+            <span style={{fontSize:'0.5rem',color:'var(--text-dim)',fontWeight:'normal'}}>{Object.keys(sessions).length} saved</span>
           </div>
+          <div style={{display:'flex',gap:'5px',marginBottom:'8px'}}>
+            <input className="target-input" placeholder="Session name..." value={sessionName} onChange={(e) => setSessionName(e.target.value)} style={{width:'100%',fontSize:'0.7rem',padding:'4px 8px'}} onKeyDown={(e) => { if (e.key === 'Enter' && sessionName && target) saveSession(); }} />
+            <button onClick={saveSession} className="settings-toggle" style={{fontSize:'0.55rem',padding:'4px 8px',borderColor:'#00ff41',color:'#00ff41'}}>SAVE</button>
+          </div>
+          {Object.keys(sessions).length === 0 && (
+            <div style={{fontSize:'0.6rem',color:'#555',textAlign:'center',padding:'8px',fontStyle:'italic'}}>No saved sessions</div>
+          )}
           {Object.keys(sessions).map((name, i) => (
-            <div key={i} className="history-item" onClick={() => loadSession(name)} style={{cursor:'pointer',padding:'6px 8px',fontSize:'0.65rem'}}>
-              <span style={{color:'var(--blood-red)'}}>{name}</span>
-              <span style={{opacity:0.4,float:'right',fontSize:'0.55rem'}}>{sessions[name].target}</span>
+            <div key={i} className="history-item session-item" style={{cursor:'pointer',padding:'6px 8px',fontSize:'0.65rem',display:'flex',justifyContent:'space-between',alignItems:'center',gap:'6px'}}>
+              <span style={{color:'var(--blood-red)',flex:'1',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} onClick={() => loadSession(name)} title={`Load session: ${name}`}>{name}</span>
+              <span style={{opacity:0.4,fontSize:'0.55rem',flexShrink:0}}>{sessions[name].target}</span>
+              <button onClick={(e) => { e.stopPropagation(); deleteSession(name); }} style={{background:'transparent',border:'1px solid #333',color:'#666',fontSize:'0.5rem',padding:'1px 4px',cursor:'pointer',fontFamily:'Orbitron',flexShrink:0}} title={`Delete session: ${name}`}>DEL</button>
             </div>
           ))}
         </div>
@@ -1026,8 +1707,27 @@ const addToast = (message, type = 'info') => {
               onChange={(e) => setCmdInput(e.target.value)}
               onKeyDown={handleCmdKeyDown}
             />
-            <div className="palette-hint">↑↓ Navigate · Enter Execute · Esc Close · Ctrl+K Toggle</div>
+            <div className="palette-hint">↑↓ Navigate · Enter Execute · Esc Close · Ctrl+K Toggle · Tab Complete</div>
           </form>
+          {showAutoComplete && (
+            <div className="autocomplete-dropdown">
+              {autoCompleteResults.map((item, i) => (
+                <div
+                  key={item.id}
+                  className={`autocomplete-item ${i === autoCompleteIndex ? 'autocomplete-item-active' : ''}`}
+                  onClick={() => {
+                    setCmdInput(item.id);
+                    setShowAutoComplete(false);
+                    setAutoCompleteResults([]);
+                  }}
+                >
+                  <span className="autocomplete-type">⚙</span>
+                  <span className="autocomplete-label">{item.id}</span>
+                  <span className="autocomplete-name">{item.name}</span>
+                </div>
+              ))}
+            </div>
+          )}
           <div className="palette-results">
             {cmdResults.length === 0 && (
               <div className="palette-empty">No matches found</div>
@@ -1054,6 +1754,24 @@ const addToast = (message, type = 'info') => {
         </div>
       )}
 
+      {showHelp && (
+        <div className="help-overlay" onClick={() => setShowHelp(false)}>
+          <div className="help-modal" onClick={e => e.stopPropagation()}>
+            <div className="help-header">KEYBOARD_SHORTCUTS</div>
+            <div className="help-body">
+              <div className="help-row"><span className="help-key">Ctrl+K</span><span className="help-desc">Command palette</span></div>
+              <div className="help-row"><span className="help-key">Ctrl+F</span><span className="help-desc">Toggle fullscreen</span></div>
+              <div className="help-row"><span className="help-key">Ctrl+S</span><span className="help-desc">Save session</span></div>
+              <div className="help-row"><span className="help-key">Ctrl+/</span><span className="help-desc">This help</span></div>
+              <div className="help-row"><span className="help-key">Tab</span><span className="help-desc">Auto-complete tool name</span></div>
+              <div className="help-row"><span className="help-key">↑↓</span><span className="help-desc">Navigate palette</span></div>
+              <div className="help-row"><span className="help-key">Enter</span><span className="help-desc">Execute selected</span></div>
+              <div className="help-row"><span className="help-key">Esc</span><span className="help-desc">Close modal</span></div>
+            </div>
+            <button className="save-btn" onClick={() => setShowHelp(false)}>CLOSE</button>
+          </div>
+        </div>
+      )}
       {showSettings && (
         <div className="settings-overlay" onClick={() => setShowSettings(false)}>
           <div className="settings-modal" onClick={e => e.stopPropagation()}>
@@ -1069,11 +1787,19 @@ const addToast = (message, type = 'info') => {
               </div>
               <div className="setting-item">
                 <span className="s-label">CRT_FLICKER:</span>
-                <input type="checkbox" defaultChecked />
+                <input type="checkbox" checked={crtFlicker} onChange={() => setCrtFlicker(!crtFlicker)} />
               </div>
               <div className="setting-item">
                 <span className="s-label">MATRIX_RAIN:</span>
                 <input type="checkbox" checked={matrixRain} onChange={() => setMatrixRain(!matrixRain)} />
+              </div>
+              <div className="setting-item">
+                <span className="s-label">MATRIX_DENSITY:</span>
+                <select className="settings-toggle" value={density} onChange={(e) => setDensity(e.target.value)} style={{fontSize:'0.55rem',padding:'2px 4px'}}>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
               </div>
               <div className="setting-item">
                 <span className="s-label">SCANLINES:</span>
@@ -1152,6 +1878,10 @@ const addToast = (message, type = 'info') => {
                   <span className="stat-label">Difficulty</span>
                   <span className={`difficulty-badge ${currentTool.difficulty}`}>{currentTool.difficulty}</span>
                 </div>
+                <div className="modal-stat">
+                  <span className="stat-label">Rating</span>
+                  <span className="modal-stars" title={`${currentTool.usefulness}/10`}>{renderStars(currentTool.usefulness)}</span>
+                </div>
               </div>
               <div className="modal-tags">
                 {currentTool.tags.map((tag, i) => (
@@ -1176,6 +1906,175 @@ const addToast = (message, type = 'info') => {
           </div>
         </div>
       )}
+      {/* Tool Comparison Modal */}
+      {showCompare && (
+        <div className="compare-overlay" onClick={() => setShowCompare(false)}>
+          <div className="compare-modal" onClick={e => e.stopPropagation()}>
+            <div className="compare-header">
+              <h2>⚖ TOOL COMPARISON</h2>
+              <button className="compare-close" onClick={() => setShowCompare(false)}>✕</button>
+            </div>
+            <div className="compare-selectors">
+              <span className="compare-selector-label">TOOL A:</span>
+              <select className="compare-selector" value={compareToolA} onChange={e => setCompareToolA(e.target.value)}>
+                <option value="">-- Select Tool A --</option>
+                {toolRegistry.map(t => (
+                  <option key={t.id} value={t.id}>{t.id} — {t.name}</option>
+                ))}
+              </select>
+              <span className="compare-vs">VS</span>
+              <span className="compare-selector-label">TOOL B:</span>
+              <select className="compare-selector" value={compareToolB} onChange={e => setCompareToolB(e.target.value)}>
+                <option value="">-- Select Tool B --</option>
+                {toolRegistry.map(t => (
+                  <option key={t.id} value={t.id}>{t.id} — {t.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="compare-body">
+              {(!compareToolA || !compareToolB) && (
+                <div className="compare-empty">
+                  Select two tools above to compare them side-by-side.
+                </div>
+              )}
+              {compareToolA && compareToolB && (() => {
+                const toolA = toolRegistry.find(t => t.id === compareToolA);
+                const toolB = toolRegistry.find(t => t.id === compareToolB);
+                if (!toolA || !toolB) return null;
+                return (
+                  <>
+                    <div className="compare-tool-card">
+                      <div className="compare-tool-header">
+                        <span className="compare-tool-category">{toolA.category}</span>
+                        <span className="compare-tool-name">{toolA.name}</span>
+                        <span className="compare-tool-id">{toolA.id}</span>
+                      </div>
+                      <p className="compare-description">{toolA.info}</p>
+                      <div className="compare-stats">
+                        <div className="compare-stat">
+                          <span className="compare-stat-label">Usefulness</span>
+                          <div className="compare-usefulness-bar">
+                            {[1,2,3,4,5,6,7,8,9,10].map(i => (
+                              <span key={i} className={`compare-usefulness-segment ${i <= toolA.usefulness ? 'filled' : ''}`} />
+                            ))}
+                            <span className="compare-usefulness-value">{toolA.usefulness}/10</span>
+                          </div>
+                        </div>
+                        <div className="compare-stat">
+                          <span className="compare-stat-label">Difficulty</span>
+                          <span className={`compare-difficulty ${toolA.difficulty}`}>{toolA.difficulty}</span>
+                        </div>
+                        <div className="compare-tags">
+                          {toolA.tags.map((tag, i) => (
+                            <span key={i} className="compare-tag">{tag}</span>
+                          ))}
+                        </div>
+                      </div>
+                      {toolA.link && (
+                        <a href={toolA.link} target="_blank" rel="noopener noreferrer" className="compare-link">
+                          🔗 {toolA.link}
+                        </a>
+                      )}
+                    </div>
+                    <div className="compare-tool-card">
+                      <div className="compare-tool-header">
+                        <span className="compare-tool-category">{toolB.category}</span>
+                        <span className="compare-tool-name">{toolB.name}</span>
+                        <span className="compare-tool-id">{toolB.id}</span>
+                      </div>
+                      <p className="compare-description">{toolB.info}</p>
+                      <div className="compare-stats">
+                        <div className="compare-stat">
+                          <span className="compare-stat-label">Usefulness</span>
+                          <div className="compare-usefulness-bar">
+                            {[1,2,3,4,5,6,7,8,9,10].map(i => (
+                              <span key={i} className={`compare-usefulness-segment ${i <= toolB.usefulness ? 'filled' : ''}`} />
+                            ))}
+                            <span className="compare-usefulness-value">{toolB.usefulness}/10</span>
+                          </div>
+                        </div>
+                        <div className="compare-stat">
+                          <span className="compare-stat-label">Difficulty</span>
+                          <span className={`compare-difficulty ${toolB.difficulty}`}>{toolB.difficulty}</span>
+                        </div>
+                        <div className="compare-tags">
+                          {toolB.tags.map((tag, i) => (
+                            <span key={i} className="compare-tag">{tag}</span>
+                          ))}
+                        </div>
+                      </div>
+                      {toolB.link && (
+                        <a href={toolB.link} target="_blank" rel="noopener noreferrer" className="compare-link">
+                          🔗 {toolB.link}
+                        </a>
+                      )}
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Create Playbook Modal */}
+      {showPlaybookModal && (
+        <div className="modal-overlay" onClick={() => setShowPlaybookModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{width:'600px'}}>
+            <div className="modal-header">
+              <h2 className="modal-title">CREATE PLAYBOOK</h2>
+              <button className="modal-close" onClick={() => setShowPlaybookModal(false)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <div className="modal-info">
+                <span className="modal-category">CUSTOM</span>
+              </div>
+              <input
+                className="target-input"
+                placeholder="Playbook name..."
+                value={playbookForm.name}
+                onChange={(e) => setPlaybookForm(prev => ({...prev, name: e.target.value}))}
+                style={{width:'100%',marginBottom:'8px'}}
+              />
+              <input
+                className="target-input"
+                placeholder="Description..."
+                value={playbookForm.description}
+                onChange={(e) => setPlaybookForm(prev => ({...prev, description: e.target.value}))}
+                style={{width:'100%',marginBottom:'8px'}}
+              />
+              <input
+                className="target-input"
+                placeholder="Tags (comma-separated)..."
+                value={playbookForm.tags}
+                onChange={(e) => setPlaybookForm(prev => ({...prev, tags: e.target.value}))}
+                style={{width:'100%',marginBottom:'8px'}}
+              />
+              <div style={{maxHeight:'200px',overflowY:'auto',border:'1px solid var(--dark-red)',padding:'8px',marginBottom:'8px'}}>
+                {toolRegistry.map(t => (
+                  <label key={t.id} style={{display:'flex',alignItems:'center',gap:'8px',padding:'4px 0',cursor:'pointer',fontSize:'0.75rem'}}>
+                    <input
+                      type="checkbox"
+                      checked={playbookForm.tools.includes(t.id)}
+                      onChange={() => toggleToolInForm(t.id)}
+                    />
+                    <span className="tool-id">{t.id}</span> {t.name}
+                    <span className="tool-stars">{renderStars(t.usefulness)}</span>
+                    <span className={`diff-badge diff-${t.difficulty}`}>{t.difficulty.slice(0,4)}</span>
+                  </label>
+                ))}
+              </div>
+              <div style={{fontSize:'0.65rem',color:'var(--text-dim)'}}>
+                Selected: {playbookForm.tools.length} tools
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="save-btn" onClick={saveCustomPlaybook} disabled={!playbookForm.name || playbookForm.tools.length === 0}>
+                SAVE PLAYBOOK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="toast-container">
         {toasts.map(toast => (
           <div key={toast.id} className={`toast toast-${toast.type}`}>
@@ -1187,7 +2086,7 @@ const addToast = (message, type = 'info') => {
   );
 };
 
-const CanvasRain = () => {
+const CanvasRain = ({ density = 'medium' }) => {
   const canvasRef = useRef(null);
   
   useEffect(() => {
@@ -1199,8 +2098,14 @@ const CanvasRain = () => {
     
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*';
     const fontSize = 14;
+    const columnSkip = density === 'low' ? 3 : density === 'high' ? 1 : 2;
     const columns = Math.floor(canvas.width / fontSize);
-    const drops = Array(columns).fill(1);
+    const activeColumns = [];
+    for (let i = 0; i < columns; i += columnSkip) {
+      activeColumns.push(i);
+    }
+    const drops = {};
+    activeColumns.forEach(i => { drops[i] = 1; });
     
     let animationId;
     
@@ -1211,7 +2116,7 @@ const CanvasRain = () => {
       ctx.fillStyle = '#00ff41';
       ctx.font = `${fontSize}px monospace`;
       
-      for (let i = 0; i < drops.length; i++) {
+      activeColumns.forEach(i => {
         const text = chars.charAt(Math.floor(Math.random() * chars.length));
         ctx.fillText(text, i * fontSize, drops[i] * fontSize);
         
@@ -1219,7 +2124,7 @@ const CanvasRain = () => {
           drops[i] = 0;
         }
         drops[i]++;
-      }
+      });
       
       animationId = requestAnimationFrame(draw);
     };
@@ -1227,7 +2132,7 @@ const CanvasRain = () => {
     draw();
     
     return () => cancelAnimationFrame(animationId);
-  }, []);
+  }, [density]);
   
   return <canvas ref={canvasRef} className="matrix-rain" style={{ opacity: 0.15 }} />;
 };

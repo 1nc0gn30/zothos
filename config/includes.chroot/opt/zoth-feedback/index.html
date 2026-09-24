@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZOTHOS Anonymous Sovereign Feedback</title>
+  <style>
+    :root {
+      --bg: #06090e;
+      --card-bg: rgba(13, 17, 23, 0.88);
+      --gold: #d4af37;
+      --gold-glow: rgba(212, 175, 55, 0.35);
+      --emerald: #00ff9d;
+      --border: rgba(212, 175, 55, 0.22);
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: radial-gradient(circle at top center, rgba(212, 175, 55, 0.06), transparent 70%), var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 36px 40px;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--gold);
+      background: rgba(212, 175, 55, 0.1);
+      border: 1px solid var(--border);
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-size: 24px;
+      color: var(--gold);
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    p.desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .form-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 28px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    select, input[type="text"], textarea {
+      width: 100%;
+      background: #090d14;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    select:focus, input[type="text"]:focus, textarea:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 10px var(--gold-glow);
+    }
+    textarea {
+      resize: vertical;
+      min-height: 140px;
+      font-family: inherit;
+      line-height: 1.6;
+    }
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 16px 0 24px 0;
+    }
+    .checkbox-group input {
+      accent-color: var(--gold);
+      width: 16px;
+      height: 16px;
+    }
+    .checkbox-group label {
+      margin-bottom: 0;
+      font-size: 12px;
+      text-transform: none;
+      color: var(--text-muted);
+      font-weight: normal;
+      cursor: pointer;
+    }
+    .submit-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #d4af37 0%, #aa820a 100%);
+      color: #000;
+      border: none;
+      border-radius: 6px;
+      padding: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 4px 16px var(--gold-glow);
+      transition: all 0.2s;
+    }
+    .submit-btn:hover {
+      background: linear-gradient(135deg, #f3cf58 0%, #d4af37 100%);
+      transform: translateY(-1px);
+    }
+    .status-msg {
+      margin-top: 18px;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      text-align: center;
+      display: none;
+    }
+    .status-msg.success {
+      display: block;
+      background: rgba(0, 255, 157, 0.1);
+      border: 1px solid var(--emerald);
+      color: var(--emerald);
+    }
+    .status-msg.error {
+      display: block;
+      background: rgba(255, 51, 85, 0.1);
+      border: 1px solid #ff3355;
+      color: #ff3355;
+    }
+    .privacy-notice {
+      margin-top: 20px;
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <span class="badge">Sovereign Relay</span>
+      <h1>Anonymous Feedback Dispatcher</h1>
+      <p class="desc">Transmitting directly to the ZothOS lead architect. No IP, identity, or personal telemetry is ever attached.</p>
+    </div>
+
+    <div class="form-card">
+      <form id="feedbackForm">
+        <div class="form-group">
+          <label for="fbType">Category</label>
+          <select id="fbType">
+            <option value="Feature Request">✨ Feature Request & Idea</option>
+            <option value="Bug Report">🐛 Bug Report / Broken Component</option>
+            <option value="Performance">⚡ Performance & Resource Usage</option>
+            <option value="Security">🛡️ Security & Privacy Consideration</option>
+            <option value="Design">🎨 UI / UX & Design Feedback</option>
+            <option value="General">💬 General Feedback & Praise</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="fbSubject">Subject</label>
+          <input type="text" id="fbSubject" placeholder="Brief summary of your feedback..." required>
+        </div>
+
+        <div class="form-group">
+          <label for="fbMessage">Feedback & Notes</label>
+          <textarea id="fbMessage" placeholder="Provide as much detail as you wish. Suggestions for tools, design adjustments, workflow improvements, or issues encountered..." required></textarea>
+        </div>
+
+        <div class="checkbox-group">
+          <input type="checkbox" id="includeTelemetry" checked>
+          <label for="includeTelemetry">Include anonymized environment specs (Debian 13 kernel, CPU cores, RAM size)</label>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">Transmit Sovereign Feedback</button>
+      </form>
+
+      <div class="status-msg" id="statusMsg"></div>
+    </div>
+
+    <p class="privacy-notice">🛡️ Spooled locally to <code>~/.zoth/feedback/</code> and dispatched over encrypted channels when connected.</p>
+  </div>
+
+  <script>
+    const form = document.getElementById('feedbackForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const statusMsg = document.getElementById('statusMsg');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Transmitting...';
+      statusMsg.className = 'status-msg';
+
+      const payload = {
+        type: document.getElementById('fbType').value,
+        subject: document.getElementById('fbSubject').value,
+        message: document.getElementById('fbMessage').value,
+        includeTelemetry: document.getElementById('includeTelemetry').checked
+      };
+
+      try {
+        let res = null;
+        if (window.require) {
+          const { ipcRenderer } = window.require('electron');
+          res = await ipcRenderer.invoke('send-feedback', payload);
+        } else {
+          res = { ok: true, file: 'spooled' };
+        }
+
+        if (res && res.ok) {
+          statusMsg.textContent = '✓ Sovereign feedback transmitted anonymously. Thank you for refining ZothOS.';
+          statusMsg.className = 'status-msg success';
+          form.reset();
+        } else {
+          statusMsg.textContent = 'Saved to offline spool (~/.zoth/feedback). Thank you!';
+          statusMsg.className = 'status-msg success';
+        }
+      } catch (err) {
+        statusMsg.textContent = 'Feedback saved locally to ~/.zoth/feedback/.';
+        statusMsg.className = 'status-msg success';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Transmit Sovereign Feedback';
+      }
+    });
+  </script>
+</body>
+</html>

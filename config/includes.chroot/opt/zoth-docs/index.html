@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZOTHOS Sovereign Documentation Codex</title>
+  <style>
+    :root {
+      --bg: #05070a;
+      --card-bg: rgba(13, 17, 23, 0.82);
+      --border: rgba(212, 175, 55, 0.22);
+      --gold: #d4af37;
+      --gold-glow: rgba(212, 175, 55, 0.45);
+      --emerald: #00ff9d;
+      --cyan: #00e5ff;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --code-bg: #0a0e14;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    /* Sidebar */
+    .sidebar {
+      width: 290px;
+      background: rgba(8, 11, 16, 0.95);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    .brand {
+      padding: 24px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      background: radial-gradient(circle, var(--gold) 0%, #1a1505 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      color: #000;
+      font-size: 20px;
+      box-shadow: 0 0 16px var(--gold-glow);
+    }
+    .brand-text h1 {
+      font-size: 15px;
+      letter-spacing: 2px;
+      color: var(--gold);
+      text-transform: uppercase;
+      font-weight: 800;
+    }
+    .brand-text p {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+    .search-box {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .search-box input {
+      width: 100%;
+      background: #0d1219;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 12px;
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-box input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 8px var(--gold-glow);
+    }
+    .nav-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 10px;
+      list-style: none;
+    }
+    .nav-item {
+      padding: 10px 14px;
+      margin-bottom: 4px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s;
+    }
+    .nav-item:hover {
+      background: rgba(212, 175, 55, 0.08);
+      color: var(--text);
+    }
+    .nav-item.active {
+      background: rgba(212, 175, 55, 0.15);
+      color: var(--gold);
+      border-left: 3px solid var(--gold);
+      font-weight: 600;
+    }
+    .nav-icon {
+      font-size: 15px;
+    }
+    .sidebar-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+    /* Main Content */
+    .content-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 40px 60px;
+      background: radial-gradient(circle at top right, rgba(212, 175, 55, 0.04), transparent 50%), var(--bg);
+    }
+    .doc-section {
+      display: none;
+      animation: fadeIn 0.3s ease;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .doc-section.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    h2 {
+      font-size: 28px;
+      color: var(--gold);
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+    .section-subtitle {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    h3 {
+      font-size: 18px;
+      color: var(--cyan);
+      margin: 24px 0 12px 0;
+      font-weight: 600;
+    }
+    p {
+      font-size: 14px;
+      line-height: 1.7;
+      color: #c9d1d9;
+      margin-bottom: 16px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 20px 0;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .card:hover {
+      border-color: var(--gold);
+      transform: translateY(-2px);
+    }
+    .card h4 {
+      font-size: 15px;
+      color: var(--gold);
+      margin-bottom: 8px;
+    }
+    .card p {
+      font-size: 13px;
+      margin-bottom: 0;
+      color: var(--text-muted);
+    }
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 14px 18px;
+      font-family: "JetBrains Mono", Consolas, Monaco, monospace;
+      font-size: 13px;
+      color: var(--emerald);
+      margin: 14px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .code-block button {
+      background: rgba(212, 175, 55, 0.15);
+      border: 1px solid var(--border);
+      color: var(--gold);
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      transition: all 0.2s;
+    }
+    .code-block button:hover {
+      background: var(--gold);
+      color: #000;
+    }
+    .alert-do {
+      border-left: 4px solid var(--emerald);
+      background: rgba(0, 255, 157, 0.06);
+      padding: 14px 18px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+    .alert-dont {
+      border-left: 4px solid #ff3355;
+      background: rgba(255, 51, 85, 0.06);
+      padding: 14px 18px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+    .alert-do strong { color: var(--emerald); }
+    .alert-dont strong { color: #ff3355; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 18px 0;
+      font-size: 13px;
+    }
+    th, td {
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    th {
+      color: var(--gold);
+      font-weight: 600;
+      background: rgba(212, 175, 55, 0.05);
+    }
+    td code {
+      background: rgba(255, 255, 255, 0.06);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--cyan);
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">Z</div>
+      <div class="brand-text">
+        <h1>ZothOS Codex</h1>
+        <p>Operational Documentation v1.0</p>
+      </div>
+    </div>
+    <div class="search-box">
+      <input type="text" id="filterInput" placeholder="Filter topics or tools...">
+    </div>
+    <ul class="nav-list" id="navList">
+      <li class="nav-item active" data-target="manifesto"><span class="nav-icon">📜</span> The Sovereign Manifesto</li>
+      <li class="nav-item" data-target="hows"><span class="nav-icon">⚙️</span> Architecture & The Hows</li>
+      <li class="nav-item" data-target="whys"><span class="nav-icon">🧠</span> Philosophy & The Whys</li>
+      <li class="nav-item" data-target="dos-donts"><span class="nav-icon">⚖️</span> The Do's & Don'ts</li>
+      <li class="nav-item" data-target="swarms"><span class="nav-icon">🤖</span> AI Swarms & MCP Matrix</li>
+      <li class="nav-item" data-target="realities"><span class="nav-icon">🔮</span> Realities & Compositor</li>
+      <li class="nav-item" data-target="audio"><span class="nav-icon">🎵</span> Hermetic Sound Matrix</li>
+      <li class="nav-item" data-target="shortcuts"><span class="nav-icon">⌨️</span> Hotkeys & Shortcuts</li>
+    </ul>
+    <div class="sidebar-footer">
+      <span>ZOTH v1.0 // 2026</span>
+      <span>Debian 13 Core</span>
+    </div>
+  </aside>
+
+  <!-- Content Area -->
+  <main class="content-area">
+
+    <!-- 1. The Sovereign Manifesto -->
+    <section class="doc-section active" id="manifesto">
+      <h2>The Sovereign Manifesto</h2>
+      <p class="section-subtitle">Core tenets of alchemical computing and local intelligence sovereignty.</p>
+      <p><strong>ZothOS</strong> is built upon the premise that true digital sovereignty requires autonomy over three fundamental pillars: <strong>Execution</strong>, <strong>Intelligence</strong>, and <strong>Communication</strong>.</p>
+      
+      <div class="grid">
+        <div class="card">
+          <h4>1. Zero Telemetry</h4>
+          <p>No phone-home beacons, no corporate diagnostics, no silent data collection. What executes on your silicon stays on your silicon.</p>
+        </div>
+        <div class="card">
+          <h4>2. Sovereign AI Runtimes</h4>
+          <p>Resident local micro-models (Hermes 3, Llama 3.2, Qwen) provide offline coding, evaluation, and intelligence without relying on cloud API leases.</p>
+        </div>
+        <div class="card">
+          <h4>3. Unified Red Teaming</h4>
+          <p>195+ verified offensive and defensive security tools from Kali Rolling and Parrot OS pinned securely against Debian stable.</p>
+        </div>
+        <div class="card">
+          <h4>4. Ephemeral & Amnesic Privacy</h4>
+          <p>Live session persistence, transparent Tor routing, and NullAI Ghostmode anti-forensics RAM cleansing on demand.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Architecture & The Hows -->
+    <section class="doc-section" id="hows">
+      <h2>Architecture & The Hows</h2>
+      <p class="section-subtitle">How ZothOS is structured under the hood and how key systems interact.</p>
+      
+      <h3>Root Filesystem & Hybrid Squashfs</h3>
+      <p>ZothOS is delivered as a hybrid ISO using a high-density XZ compressed SquashFS root image. When booted live, an overlayfs layer mounts an in-memory copy-on-write workspace that leaves host disks untouched unless explicitly mounted.</p>
+      <div class="code-block">
+        <span>zoth-doctor</span>
+        <button onclick="copy('zoth-doctor')">Copy</button>
+      </div>
+
+      <h3>The Tool Nexus Dispatcher</h3>
+      <p>Tool Nexus orchestrates 10 distinct domains (Core, AI Runtimes, Agents, Compilers, Media, Sec, Web3, Vision, Net, PKM). Rather than broken wrappers, it resolves authentic vendor packages, user binaries, and environment variables dynamically.</p>
+      <div class="code-block">
+        <span>zoth-tool-nexus</span>
+        <button onclick="copy('zoth-tool-nexus')">Copy</button>
+      </div>
+
+      <h3>Zoth Desk & Telemetry Bus</h3>
+      <p>Zoth Desk combines an Electron native frontend with an asynchronous Python backend and direct Node.js system metric fallbacks. It monitors CPU loads, RAM usage, storage, network traffic, listening ports, and resident LLMs with zero cloud dependencies.</p>
+    </section>
+
+    <!-- 3. Philosophy & The Whys -->
+    <section class="doc-section" id="whys">
+      <h2>Philosophy & The Whys</h2>
+      <p class="section-subtitle">The deliberate architectural decisions behind ZothOS.</p>
+
+      <h3>Why Debian Stable as the Foundation?</h3>
+      <p>Rolling distributions (Kali, Arch) suffer from kernel breakage, library deprecations, and compositing crashes during live operations. ZothOS pins Debian 13 Bookworm/Trixie for bulletproof kernel stability, then surgically imports Kali and Parrot repositories through pinned apt policies.</p>
+
+      <h3>Why Local Agents over Cloud Monoliths?</h3>
+      <p>Cloud AI is metered, surveilled, and subject to arbitrary alignment changes. By pairing Nous Research Hermes, OpenAI Codex CLI, and local Ollama daemons directly with native Linux tooling, the developer retains full ownership over reasoning and output.</p>
+    </section>
+
+    <!-- 4. The Do's & Don'ts -->
+    <section class="doc-section" id="dos-donts">
+      <h2>The Do's & Don'ts</h2>
+      <p class="section-subtitle">Operational security guidelines for working in high-stakes environments.</p>
+
+      <div class="alert-do">
+        <strong>DO:</strong> Use <code>Reality Switcher</code> to toggle <strong>NullAI Ghostmode</strong> before running network reconnaissance on untrusted targets.
+      </div>
+      <div class="alert-do">
+        <strong>DO:</strong> Verify your PATH and compiler status using <code>zoth-tool-nexus</code> before attempting complex Web3 or Rust smart contract builds.
+      </div>
+      <div class="alert-do">
+        <strong>DO:</strong> Use <code>zoth-netkill</code> instantly if suspicious outbound telemetry or unexpected socket traffic is observed.
+      </div>
+
+      <div class="alert-dont">
+        <strong>DON'T:</strong> Run arbitrary pipe-to-bash (<code>curl | bash</code>) scripts without inspecting their sources and checksums.
+      </div>
+      <div class="alert-dont">
+        <strong>DON'T:</strong> Store unencrypted private keys, seed phrases, or sensitive API secrets in live root without persistence configured.
+      </div>
+      <div class="alert-dont">
+        <strong>DON'T:</strong> Commit git repositories from live workspaces with sensitive tokens in command history.
+      </div>
+    </section>
+
+    <!-- 5. AI Swarms & MCP Matrix -->
+    <section class="doc-section" id="swarms">
+      <h2>AI Swarms & MCP Matrix</h2>
+      <p class="section-subtitle">Autonomous agent harnesses, Model Context Protocol servers, and local inference.</p>
+
+      <h3>Supported Frontier & Underground Agents</h3>
+      <table>
+        <thead>
+          <tr><th>Agent / Harness</th><th>Command</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Nous Research Hermes</td><td><code>hermes</code></td><td>Autonomous agent runner & skill ecosystem</td></tr>
+          <tr><td>Anthropic Claude Code</td><td><code>claude</code></td><td>Terminal agentic coding environment</td></tr>
+          <tr><td>OpenAI Codex CLI</td><td><code>codex</code></td><td>Terminal coding & diff assistant</td></tr>
+          <tr><td>OpenCode AI</td><td><code>opencode</code></td><td>Open-source terminal autonomous developer</td></tr>
+          <tr><td>NullAI HexStrike AI</td><td><code>hexstrike</code></td><td>Autonomous red team attack orchestration</td></tr>
+          <tr><td>Aider</td><td><code>aider</code></td><td>Git-aware pair programmer</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Model Context Protocol (MCP) Bridge</h3>
+      <p>ZothOS includes a built-in FastMCP bridge registry enabling local agents to query Kali tools, filesystem states, and system metrics through standard JSON-RPC contracts.</p>
+      <div class="code-block">
+        <span>zoth-mcp</span>
+        <button onclick="copy('zoth-mcp')">Copy</button>
+      </div>
+    </section>
+
+    <!-- 6. Realities & Compositor -->
+    <section class="doc-section" id="realities">
+      <h2>Realities & Compositor</h2>
+      <p class="section-subtitle">Transmuting the desktop environment across four operational states.</p>
+
+      <div class="grid">
+        <div class="card">
+          <h4>1. Hermetic Matrix</h4>
+          <p>Phosphor emerald rain, alchemical glyphs, high-contrast matrix monospace typography and dark glass compositor.</p>
+        </div>
+        <div class="card">
+          <h4>2. NullAI Ghostmode</h4>
+          <p>Deep obsidian void, Tor-cloaked outbound routing, anti-forensics RAM scrubbing, and stealth crimson accents.</p>
+        </div>
+        <div class="card">
+          <h4>3. Azoth 24K Gold</h4>
+          <p>Sacred alchemical geometry, 24-karat gold specular reflections, glowing active window titlebars, and regal styling.</p>
+        </div>
+        <div class="card">
+          <h4>4. Windows 11 Incognito</h4>
+          <p>Complete enterprise disguise with corporate start layout and neutral theme for covert physical operations.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. Hermetic Sound Matrix -->
+    <section class="doc-section" id="audio">
+      <h2>Hermetic Sound Matrix</h2>
+      <p class="section-subtitle">Local ambient classical focus soundtrack to maximize flow state.</p>
+      <p>ZothOS ships with offline classical piano and contemplative hermetic audio tracks curated to enhance focus during programming and security audits:</p>
+
+      <table>
+        <thead>
+          <tr><th>Track</th><th>Composer</th><th>Theme</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Gymnopédies 1, 2, 3 (60m)</td><td>Erik Satie</td><td>Hermetic contemplation & deep focus</td></tr>
+          <tr><td>Nocturne in E-flat major, Op. 9 No. 2</td><td>Frédéric Chopin</td><td>Nocturnal clarity</td></tr>
+          <tr><td>Clair de Lune</td><td>Claude Debussy</td><td>Alchemical impressionism</td></tr>
+          <tr><td>Goldberg Variations (Aria)</td><td>J.S. Bach</td><td>Mathematical counterpoint</td></tr>
+        </tbody>
+      </table>
+
+      <div class="code-block">
+        <span>zoth-soundtrack</span>
+        <button onclick="copy('zoth-soundtrack')">Copy</button>
+      </div>
+      <p><small>Running <code>zoth-soundtrack</code> toggles playback on and off with desktop notifications.</small></p>
+    </section>
+
+    <!-- 8. Hotkeys & Shortcuts -->
+    <section class="doc-section" id="shortcuts">
+      <h2>Hotkeys & Shortcuts</h2>
+      <p class="section-subtitle">Global keyboard controls in KDE Plasma 6.</p>
+
+      <table>
+        <thead>
+          <tr><th>Shortcut</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>Ctrl + Alt + T</code></td><td>Open Konsole terminal</td></tr>
+          <tr><td><code>Super</code></td><td>Application launcher menu</td></tr>
+          <tr><td><code>Alt + F4</code></td><td>Close active window</td></tr>
+          <tr><td><code>Alt + F2</code></td><td>KRunner global command prompt</td></tr>
+          <tr><td><code>Super + D</code></td><td>Toggle show desktop</td></tr>
+          <tr><td><code>Super + L</code></td><td>Lock session (QuickLock)</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+  </main>
+
+  <script>
+    function copy(text) {
+      navigator.clipboard.writeText(text);
+      const btn = event.target;
+      const orig = btn.textContent;
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = orig, 1500);
+    }
+
+    const navItems = document.querySelectorAll('.nav-item');
+    const sections = document.querySelectorAll('.doc-section');
+
+    navItems.forEach(item => {
+      item.addEventListener('click', () => {
+        navItems.forEach(n => n.classList.remove('active'));
+        sections.forEach(s => s.classList.remove('active'));
+        item.classList.add('active');
+        const target = item.dataset.target;
+        const targetSection = document.getElementById(target);
+        if (targetSection) targetSection.classList.add('active');
+      });
+    });
+
+    const filterInput = document.getElementById('filterInput');
+    filterInput.addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      navItems.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        item.style.display = text.includes(q) ? 'flex' : 'none';
+      });
+    });
+  </script>
+</body>
+</html>

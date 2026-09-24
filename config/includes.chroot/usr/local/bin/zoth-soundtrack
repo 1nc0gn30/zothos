@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#  ZOTHOS HERMETIC SOUND MATRIX
+#  Autonomous ambient & classical focus audio player (Satie, Chopin, Debussy, Bach)
+# ==============================================================================
+set -euo pipefail
+
+AUDIO_DIR="/usr/share/zothos/audio"
+
+if pgrep -f "mpv.*zothos/audio" >/dev/null 2>&1; then
+    pkill -f "mpv.*zothos/audio" || true
+    notify-send -a "ZothOS Sound Matrix" -i "/usr/share/pixmaps/zothos.png" \
+        "Sound Matrix Paused" "Background contemplation soundtrack stopped" 2>/dev/null || true
+    exit 0
+fi
+
+if [[ ! -d "$AUDIO_DIR" ]] || [[ -z "$(ls -A "$AUDIO_DIR" 2>/dev/null)" ]]; then
+    notify-send -a "ZothOS Sound Matrix" -i "/usr/share/pixmaps/zothos.png" \
+        "Sound Matrix Error" "No audio tracks located in $AUDIO_DIR" 2>/dev/null || true
+    exit 1
+fi
+
+notify-send -a "ZothOS Sound Matrix" -i "/usr/share/pixmaps/zothos.png" \
+    "Sound Matrix Active" "Contemplation Mode: Erik Satie, Chopin, Debussy & Bach" 2>/dev/null || true
+
+nohup mpv --no-video --loop-playlist=inf --shuffle "$AUDIO_DIR" >/dev/null 2>&1 &
